@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>Nginx脆弱性利用一览 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="Nginx">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Nginx脆弱性利用一览</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Nginx脆弱性利用一览</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-07-17T05:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-07-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/漏洞分析/">漏洞分析</a></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/Vulnerable/Web/Nginx脆弱性一览表"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Nginx脆弱性利用一览</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-07-17 13:36:30" datetime="2019-07-17T05:36:30.000Z"  itemprop="datePublished">2019-07-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/漏洞分析/">漏洞分析</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<p><b style="color:red">注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。</b></p>
+<a id="more"></a>
+<h4 id="CVE-2017-7529-溢出漏洞"><a href="#CVE-2017-7529-溢出漏洞" class="headerlink" title="CVE-2017-7529 (溢出漏洞)"></a>CVE-2017-7529 (溢出漏洞)</h4><p>描述: Nginx range 过滤器整形溢出漏洞<br>漏洞信息: 当使用nginx标准模块时，攻击者可以通过发送包含恶意构造 range 域的 header 请求，来获取响应中的缓存文件头部信息。在某些配置中缓存文件头可能包含后端服务器的IP地址或其它敏感信息，从而导致信息泄露。<br>漏洞影响: 当Nginx服务器使用代理缓存的情况下攻击者通过利用该漏洞可以拿到服务器的后端真实IP或其他敏感信息;通过我们的分析判定该漏洞利用难度低可以归属于low-hanging-fruit的漏洞在真实网络攻击中也有一定利用价值。<br>影响版本: Nginx version 0.5.6 - 1.13.2<br>漏洞利用:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#访问缓存文件拿到 Content-Length，以 /proxy/demo.png 为例：</span></span><br><span class="line">$ curl -I http://127.0.0.1:8000/proxy/demo.png</span><br><span class="line">Content-Length: 16585</span><br><span class="line"></span><br><span class="line"><span class="comment">#找个比 Content-Length: 16585 这个数大的值</span></span><br><span class="line"><span class="comment">#例如 17208, 第二个 range 值为 0x8000000000000000-17208, 也就是 9223372036854758600</span></span><br><span class="line">$ curl -i http://127.0.0.1:8000/proxy/demo.png -r -17208,-9223372036854758600</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Nginx脆弱性利用一览 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190909171059.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190909171059.png" alt="WeiyiGeek." title class></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br></p>
+<h4 id="Nginx文件类型错误解析漏洞"><a href="#Nginx文件类型错误解析漏洞" class="headerlink" title="Nginx文件类型错误解析漏洞"></a>Nginx文件类型错误解析漏洞</h4><p>描述:Nginx漏洞分析实例,在2010年的时候国内安全组织80Sec发现了一个Nginx文件类型解析漏洞，但实际上这个并非Nginx本身的漏洞，而是由于配置导致的安全问题。<br>漏洞危害：利用该漏洞，攻击者可以将任意文件类型作为PHP文件解析。<br>漏洞分析：Nginx默认是以CGI的方式支持PHP的解析的，普遍的做法是在Nginx配置文件中通过正则匹配设置SCRIPT_FILENAME。<br>配置文件中会有类似如下内容:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#location ~ \.php$ &#123;</span></span><br><span class="line"><span class="comment">#    root           html;</span></span><br><span class="line"><span class="comment">#    fastcgi_pass   127.0.0.1:9000;</span></span><br><span class="line"><span class="comment">#    fastcgi_index  index.php;</span></span><br><span class="line"><span class="comment">#    fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;</span></span><br><span class="line"><span class="comment">#    include        fastcgi_params;</span></span><br><span class="line"><span class="comment">#    index  index.php</span></span><br><span class="line"><span class="comment">#&#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>问题产生: location对请求进行选择的时候会使用URI环境变量进行选择，其中传递到后端Fastcgi的关键变量 <code>SCRIPT_FILENAME</code> , 然后是由Nginx生成的<code>$fastcgi_script_name</code>来决定的;通过分析可以看到$fastcgi_script_name是直接由URI环境变量控制的这里就是产生问题的点;<br>当访问 <a href="http://192.168.1.103/phpinfo.jpg/1.php这个URL时" target="_blank" rel="noopener">http://192.168.1.103/phpinfo.jpg/1.php这个URL时</a> $fastcgi_script_name会被设置为“phpinfo.jpg/1.php “ ,然后构造成SCRIPT_FILENAME传递给PHP CGI;<br>但是PHP为什么会接受这样的参数，并将phpinfo.jpg作为PHP文件解析呢？<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#由于php.ini文件中的cgi参数</span></span><br><span class="line">cgi.fix_pathinfo=1</span><br><span class="line"></span><br><span class="line"><span class="comment">#如果开启了这个选项, 那么就会触发在PHP中的如下逻辑:</span></span><br></pre></td></tr></table></figure></p>
+<p>到这里PHP会认为SCRIPT_FILENAME是phpinfo.jpg，而1.php是PATH_INFO，所以就会将phpinfo.jpg作为PHP文件来解析了。</p>
+<p>漏洞利用：假设某一服务器存在该漏洞，攻击者可以通过上传一张包含PHP后门代码的图片来获取WebShell，这是一种常见的攻击方式。<br>POC： 访问一个nginx来支持php的站点，在一个任何资源的文件如robots.txt后面加上/80sec.php，这个时候你可以看到如下的区别：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#访问http://www.80sec.com/robots.txt</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/0.6.32</span><br><span class="line">Date: Thu, 20 May 2010 10:05:30 GMT</span><br><span class="line">Content-Type: text/plain  <span class="comment">#关键点</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#访问http://www.80sec.com/robots.txt/80sec.php</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/0.6.32</span><br><span class="line">Date: Thu, 20 May 2010 10:06:49 GMT</span><br><span class="line">Content-Type: text/html   <span class="comment">#关键点</span></span><br><span class="line"><span class="comment">#其中的Content-Type的变化说明了后端负责解析的变化，该站点就可能存在漏洞。</span></span><br></pre></td></tr></table></figure></p>
+<p>解决办法:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#方式1：</span></span><br><span class="line">php.ini文件将 cgi.fix_pathinfo 的值设置为0</span><br><span class="line"></span><br><span class="line"><span class="comment">#方式2:</span></span><br><span class="line"><span class="keyword">if</span> ( <span class="variable">$fastcgi_script_name</span> ~ \..*\/.*php ) &#123;</span><br><span class="line">  <span class="built_in">return</span> 403;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="Nginx配置错误而导致目录遍历漏洞"><a href="#Nginx配置错误而导致目录遍历漏洞" class="headerlink" title="Nginx配置错误而导致目录遍历漏洞"></a>Nginx配置错误而导致目录遍历漏洞</h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#在Nginx的配置文件中如果开启了autoindex选项，并采用类似下面的配置时会造成目录遍历漏洞。</span></span><br><span class="line">location /<span class="built_in">test</span> &#123;</span><br><span class="line">  <span class="built_in">alias</span> html/<span class="built_in">test</span>/;</span><br><span class="line">  autoindex on;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-03-22T05:21:23.731Z" itemprop="dateUpdated">2020-03-22 13:21:23</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/7/nginx脆弱性利用一览.html" target="_blank" rel="external">http://weiyigeek.top/2019/7/nginx脆弱性利用一览.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/">Nginx</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/7/nginx脆弱性利用一览.html&title=《Nginx脆弱性利用一览》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/7/nginx脆弱性利用一览.html&title=《Nginx脆弱性利用一览》 — WeiyiGeek Blog's&source=[TOC]
+注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/7/gitlist代码版本控制脆弱性.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Gitlist代码版本控制脆弱性</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/7/cors攻击原理介绍和使用.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">CORS攻击原理介绍和使用</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#CVE-2017-7529-溢出漏洞"><span class="post-toc-number">1.</span> <span class="post-toc-text">CVE-2017-7529 (溢出漏洞)</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Nginx文件类型错误解析漏洞"><span class="post-toc-number">2.</span> <span class="post-toc-text">Nginx文件类型错误解析漏洞</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Nginx配置错误而导致目录遍历漏洞"><span class="post-toc-number">3.</span> <span class="post-toc-text">Nginx配置错误而导致目录遍历漏洞</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/7/nginx脆弱性利用一览.html&title=《Nginx脆弱性利用一览》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/7/nginx脆弱性利用一览.html&title=《Nginx脆弱性利用一览》 — WeiyiGeek Blog's&source=[TOC]
+注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLklEQVR42u3aW27jMAwF0O5/050NVM4lqRZj6fgrcBxbxwEI8fH1FR/fi6P67er61ZWbDwwMjNcyvh+P5JrnXz0vcfJcDAyM2xirCNa7ZrXc5Ez1uRgYGBjJI/MQnCwXAwMDY86oJp/Pobb6LQYGxs2MSTqahNTkxT0/a1sujoGB8UJGXnX/+8+/0t/AwMB4FWNe7u9Rk+1gYVUYGBhHM/IANy+o7do4Lu+AgYFxKKMX+JKwmxfResnwh/8BAwPjOEa+xOcQ3Cuf9Up+0VIwMDCOY1SXOxmk2NVa+CEXx8DAOI6RZ7qT5VbvnAxqRM0DDAyMIxh54WwvJm8qRP8DBgbGBYzfGKooFMvipy/vg4GBcQEjD7iTSld1y1hoVGBgYBzN2DtsMdloJq/vw/YRAwPjAkZeys9bj3lq2ttKYmBg3MaonknuM2lJ5s0JDAyMsxmTwYhkWXmhP98yLv8HDAyMQxm90Jkf1RfUS24xMDDuYeSJaHUgdZISl180BgbGoYz8x3mUS1LiSZnvwz4XAwPjAkZv8CsZpKimvvlvMTAwbmBUS/zVNmQPNpoZwcDAOILRG/CqbuySYD1qGGBgYBzN2JWmJsvqTYJs63VgYGC8nJEH2V3Ny3nAxcDAuJNRzn2D83mozV/TMuhjYGBgFEv2+Qax+oKiGI+BgXE9ozpmkZzvNUE3bw0xMDD+e0beDOhFvNESk7thYGAczdhVPpt8Wx0v27B9xMDAeAfjH2hl+ggrWCNGAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>Docker容器镜像体积缩小技巧 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="Docker">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Docker容器镜像体积缩小技巧</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Docker容器镜像体积缩小技巧</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-05-03T06:36:30.000Z" itemprop="datePublished" class="page-time">
+  2020-05-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Docker/奇技淫巧/Docker容器镜像体积缩小技巧"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Docker容器镜像体积缩小技巧</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-05-03 14:36:30" datetime="2020-05-03T06:36:30.000Z"  itemprop="datePublished">2020-05-03</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h4><p>描述:前面我们学习并且记录了 Dockerfile 最佳实践的一些规则，但是仅仅停在理论中并不是我的风格，所以出现了本篇文章同时也加深学习;<br>从最佳实践原则我们知道要缩小镜像大小，与选择的基础镜像是非常有关系的，比如<code>buysbox (工具箱)与alpine (操作系统)</code>镜像小的您超出您的想象,需要<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker pull alpine  <span class="comment"># 容器中最小的Linux发行版</span></span><br><span class="line">docker pull busybox <span class="comment"># 嵌入式以及物联网系统中最常用的Linux下的工具箱</span></span><br><span class="line">docker images | grep -E <span class="string">"busybox|alpine"</span></span><br><span class="line">busybox                              latest              c7c37e472d31        3 weeks ago         1.22MB</span><br><span class="line">alpine                               latest              a24bb4013296        8 weeks ago         5.57MB</span><br></pre></td></tr></table></figure></p>
+<p>对于刚接触容器的人来说他们很容易被自己构建的 Docker 镜像体积吓到，我只需要一个几 MB 的可执行文件而已，为何镜像的体积会达到 1 GB 以上？<br>答:相信下面的奇技淫巧会帮助你精简镜像，同时又不牺牲开发人员和运维人员的操作便利性。</p>
+<p><br></p>
+<h4 id="0x01-基础环境"><a href="#0x01-基础环境" class="headerlink" title="0x01 基础环境"></a>0x01 基础环境</h4><p>实验(实践)环境准备:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@k8s-yum-server ~]<span class="comment"># cat /etc/system-release</span></span><br><span class="line">CentOS Linux release 7.8.2003 (Core)</span><br><span class="line"></span><br><span class="line">[root@k8s-yum-server ~]<span class="comment"># uname -r</span></span><br><span class="line">5.7.0-1.el7.elrepo.x86_64</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h4 id="0x02-Docker-最佳实践补充"><a href="#0x02-Docker-最佳实践补充" class="headerlink" title="0x02 Docker 最佳实践补充"></a>0x02 Docker 最佳实践补充</h4><ul>
+<li><p>(1) 建立一个空白目录进行构建上下文准备,<span style="color:red">切记不要在家里录下创建一个 Dockerfile 紧接着 docker build 一把梭</span></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 正确做法是为项目建立一个文件夹，把构建镜像时所需要的资源放在这个文件夹下</span></span><br><span class="line">mkdir /opt/project &amp;&amp; <span class="built_in">cd</span> !$</span><br><span class="line">vi Dockerfile <span class="comment"># 编写 Dockerfile</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Tips:也可以通过 <code>.dockerignore</code> 文件来忽略不需要的文件发送到 docker 守护进程</li>
+</ul>
+</li>
+<li><p>(2) 使用体积较小的基础镜像，比如 alpine 或者 debian:buster-slim，像 openjdk 可以选用openjdk:8-slim；</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$docker</span> pull debian:buster-slim</span><br><span class="line"><span class="variable">$docker</span> pull openjdk:8-slim</span><br><span class="line"><span class="variable">$docker</span> images</span><br><span class="line">REPOSITORY   TAG             SIZE</span><br><span class="line">debian       buster-slim     69.2MB  </span><br><span class="line">busybox      latest          1.22MB  <span class="comment"># 不建议采用构建太过耗时以及调试</span></span><br><span class="line">alpine       latest          5.57MB  <span class="comment"># 推荐</span></span><br><span class="line">centos       latest          220MB   <span class="comment"># 不建议采用基础镜像</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Tips:由于 openjdk 是基于 debian 的基础镜像构建的，所以向 debian 基础镜像一样后面带个 slim 就是基于 debian:xxx-slim 镜像构建的。</li>
+<li>Tips:alpine 的 c 库是<code>musl libc</code> 而不是正统的 glibc 库，另外对于一些依赖 glibc 的大型项目像 <code>openjdk 、tomcat、rabbitmq</code> 等都不建议使用 alpine 基础镜像，因为 musl libc 可能会导致 jvm 一些奇怪的问题,这也是为什么 tomcat 官方没有给出基础镜像是 alpine 的 Dockerfile 的原因。</li>
+</ul>
+</li>
+<li><p>(3) 更改为国内镜像软件源，提升容器构建速度目前国内稳定可靠的镜像站主要有，华为云、阿里云、腾讯云、163等。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># alpine 基础镜像修改软件源</span></span><br><span class="line">RUN <span class="built_in">echo</span> <span class="string">"http://mirrors.huaweicloud.com/alpine/latest-stable/main/"</span> &gt; /etc/apk/repositories ;\</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"http://mirrors.huaweicloud.com/alpine/latest-stable/community/"</span> &gt;&gt; /etc/apk/repositories ;\</span><br><span class="line">apk update ;\</span><br><span class="line"></span><br><span class="line"><span class="comment"># debian 基础镜像修改软件源</span></span><br><span class="line">sed -i <span class="string">'s/deb.debian.org/mirrors.huaweicloud.com/g'</span> /etc/apt/sources.list ;\</span><br><span class="line">sed -i <span class="string">'s|security.debian.org/debian-security|mirrors.huaweicloud.com/debian-security|g'</span> /etc/apt/sources.list ;\</span><br><span class="line">apt update ;\</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ubuntu 基础镜像修改软件源</span></span><br><span class="line">sed -i <span class="string">'s/archive.ubuntu.com/mirrors.huaweicloud.com/g'</span> /etc/apt/sources.list</span><br><span class="line">apt update ;\</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Tips: 建议更新软件源时候RUN指令放在镜像描述后的首条，然后再update软件源以及install相应的软件包;</li>
+</ul>
+</li>
+<li><p>(4) 镜像时区设置由于绝大多数基础镜像都是默认采用UTC的时区与北京时间相差8个小时,将会会导致容器内的时间与北京时间不一致，因而会对一些应用造成一些影响，还会影响容器内日志和监控的数据，可以通过以下操作进行解决;</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 方式1.通过设置环境变量来设定容器内的时区。</span></span><br><span class="line">-e TZ=Asia/Shanghai</span><br><span class="line"></span><br><span class="line"><span class="comment">#  debian设置两种方式</span></span><br><span class="line"><span class="comment"># -启动时设定环境变量指定时区</span></span><br><span class="line">docker run --rm -it -e TZ=Asia/Shanghai debian date</span><br><span class="line"><span class="comment"># -构建镜像的时候复制时区文件设定容器内时区</span></span><br><span class="line">cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime ;\</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Asia/shanghai"</span> &gt; /etc/timezone ;\</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Tips: alpine 基础镜像无法通过 TZ 环境变量的方式设定时区，需要安装 tzdata 来配置时区也可以在 RUN 指令后面追加上时区复制到/etc/localtime命令;<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 方式1</span></span><br><span class="line">docker run --rm -it -e TZ=Asia/Shanghai alpine date</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2</span></span><br><span class="line">apk add --no-cache tzdata ;\</span><br><span class="line">cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime ;\</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Asia/Shanghai"</span> &gt; /etc/timezone ;\</span><br><span class="line">apk del tzdata ;\</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>(5) 使用URL添加源码,如果不采用分阶段构建对于一些需要在容器内进行编译的项目,最好通过 git 或者 wegt 的方式将源码打入到镜像内，而非采用 ADD 或者 COPY ，因为源码编译完成之后源码就不需要可以删掉了，而通过 ADD 或者 COPY 添加进去的源码已经用在下一层镜像中了是删不掉滴啦;</p>
+<ul>
+<li>项目官方的 Dockerfile<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line"><span class="comment"># centos 7</span></span><br><span class="line"><span class="keyword">FROM</span> centos:<span class="number">7</span></span><br><span class="line"><span class="comment"># 添加配置文件</span></span><br><span class="line"><span class="comment"># add profiles</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> conf/client.conf /etc/fdfs/</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> conf/http.conf /etc/fdfs/</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> conf/mime.types /etc/fdfs/</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> conf/storage.conf /etc/fdfs/</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> conf/tracker.conf /etc/fdfs/</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> fastdfs.sh /home</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> conf/nginx.conf /etc/fdfs/</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> conf/mod_fastdfs.conf /etc/fdfs</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源文件</span></span><br><span class="line"><span class="comment"># add source code</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> <span class="built_in">source</span>/libfastcommon.tar.gz /usr/<span class="built_in">local</span>/src/</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> <span class="built_in">source</span>/fastdfs.tar.gz /usr/<span class="built_in">local</span>/src/</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> <span class="built_in">source</span>/fastdfs-nginx-module.tar.gz /usr/<span class="built_in">local</span>/src/</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> <span class="built_in">source</span>/nginx-1.15.4.tar.gz /usr/<span class="built_in">local</span>/src/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Run</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> yum install git gcc gcc-c++ make automake autoconf libtool pcre pcre-devel zlib zlib-devel openssl-devel wget vim -y \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  mkdir /home/dfs   \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/  \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  <span class="built_in">cd</span> libfastcommon/   \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  ./make.sh &amp;&amp; ./make.sh install  \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  <span class="built_in">cd</span> ../  \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  <span class="built_in">cd</span> fastdfs/   \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  ./make.sh &amp;&amp; ./make.sh install  \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  <span class="built_in">cd</span> ../  \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  <span class="built_in">cd</span> nginx-1.15.4/  \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  ./configure --add-module=/usr/<span class="built_in">local</span>/src/fastdfs-nginx-module/src/   \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  make &amp;&amp; make install  \</span></span><br><span class="line"><span class="bash">  &amp;&amp;  chmod +x /home/fastdfs.sh</span></span><br><span class="line"><span class="comment"># export config</span></span><br><span class="line"><span class="keyword">VOLUME</span><span class="bash"> /etc/fdfs</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">22122</span> <span class="number">23000</span> <span class="number">8888</span> <span class="number">80</span></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="bash"> [<span class="string">"/home/fastdfs.sh"</span>]</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>优化后的 Dockerfile</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">FROM alpine:3.10</span><br><span class="line">RUN <span class="built_in">set</span> -x \</span><br><span class="line">    &amp;&amp; <span class="built_in">echo</span> <span class="string">"http://mirrors.huaweicloud.com/alpine/latest-stable/main/"</span> &gt; /etc/apk/repositories \</span><br><span class="line">    &amp;&amp; <span class="built_in">echo</span> <span class="string">"http://mirrors.huaweicloud.com/alpine/latest-stable/community/"</span> &gt;&gt; /etc/apk/repositories \</span><br><span class="line">    &amp;&amp; apk update \</span><br><span class="line">    &amp;&amp; apk add --no-cache --virtual .build-deps gcc libc-dev make perl-dev openssl-dev pcre-dev zlib-dev git \</span><br><span class="line">    &amp;&amp; mkdir -p /usr/<span class="built_in">local</span>/src \</span><br><span class="line">    &amp;&amp; <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src \</span><br><span class="line">    &amp;&amp; git <span class="built_in">clone</span> https://github.com/happyfish100/libfastcommon.git --depth 1 \</span><br><span class="line">    &amp;&amp; git <span class="built_in">clone</span> https://github.com/happyfish100/fastdfs.git --depth 1    \</span><br><span class="line">    &amp;&amp; git <span class="built_in">clone</span> https://github.com/happyfish100/fastdfs-nginx-module.git --depth 1  \</span><br><span class="line">    &amp;&amp; wget http://nginx.org/download/nginx-1.15.4.tar.gz \</span><br><span class="line">    &amp;&amp; tar -xf nginx-1.15.4.tar.gz \</span><br><span class="line">    &amp;&amp; <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/libfastcommon \</span><br><span class="line">    &amp;&amp; ./make.sh \</span><br><span class="line">    &amp;&amp; ./make.sh install \</span><br><span class="line">    &amp;&amp; <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/fastdfs/ \</span><br><span class="line">    &amp;&amp; ./make.sh \</span><br><span class="line">    &amp;&amp; ./make.sh install \</span><br><span class="line">    &amp;&amp; <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/nginx-1.15.4/ \</span><br><span class="line">    &amp;&amp; ./configure --add-module=/usr/<span class="built_in">local</span>/src/fastdfs-nginx-module/src/ \</span><br><span class="line">    &amp;&amp; make &amp;&amp; make install \</span><br><span class="line">    &amp;&amp; apk del .build-deps \</span><br><span class="line">    &amp;&amp; apk add --no-cache pcre-dev bash \</span><br><span class="line">    &amp;&amp; mkdir -p /home/dfs  \</span><br><span class="line">    &amp;&amp; mv /usr/<span class="built_in">local</span>/src/fastdfs/docker/dockerfile_network/fastdfs.sh /home \</span><br><span class="line">    &amp;&amp; mv /usr/<span class="built_in">local</span>/src/fastdfs/docker/dockerfile_network/conf/* /etc/fdfs \</span><br><span class="line">    &amp;&amp; chmod +x /home/fastdfs.sh \</span><br><span class="line">    &amp;&amp; rm -rf /usr/<span class="built_in">local</span>/src*</span><br><span class="line">VOLUME /home/dfs</span><br><span class="line">EXPOSE 22122 23000 8888 8080</span><br><span class="line">CMD [<span class="string">"/home/fastdfs.sh"</span>]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>构建之后的对比使用项目默认的 Dockerfile 进行构建的话，镜像大小接近 500MB 😂，而经过一些的优化，将所有的 RUN 指令合并为一条，最终构建出来的镜像大小为 30MB 😂。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 结论: 建议采用alpine进行构建只不过需要注意其alpine的c库是`musl libc`而不是正统的glibc库</span></span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">fastdfs             alpine              e855bd197dbe        10 seconds ago      29.3MB</span><br><span class="line">fastdfs             debian              e05ca1616604        20 minutes ago      103MB</span><br><span class="line">fastdfs             centos              c1488537c23c        30 minutes ago      483MB</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>(6) 使用虚拟编译环境对于只在编译过程中使用到的依赖，我们可以将这些依赖安装在虚拟环境中，编译完成之后可以一并删除这些依赖</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#比如 alpine 中可以使用 apk add --no-cache --virtual .build-deps ，后面加上需要安装的相关依赖。</span></span><br><span class="line">apk add --no-cache --virtual .build-deps gcc libc-dev make perl-dev openssl-dev pcre-dev zlib-dev git</span><br><span class="line"></span><br><span class="line"><span class="comment">#构建完成之后可以使用 apk del .build-deps 命令，一并将这些编译依赖全部删除。</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>注意的是<code>.build-deps</code> 后面接的是编译时以来的软件包，并不是所有的编译依赖都可以删除，不要把运行时的依赖包接在后面最好单独 add 一下。</li>
+</ul>
+</li>
+<li><p>(7) 最小化层数至docker 在 1.10 以后，只有 RUN、COPY 和 ADD 指令会创建层，其他指令会创建临时的中间镜像但是不会直接增加构建的镜像大小了;</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 如果多个文件需要添加到容器中不同的路径，每个文件使用一条 ADD 指令的话就会增加一层镜像，可以通过以下方式进行精简镜像构建时的大小;</span></span><br><span class="line"><span class="comment"># 此时可以通过将所有的依赖文件打包为一个文件 src.tar.gz 然后通过 ADD 的方式把文件添加到当中去，然后在 RUN 指令后使用 mv 命令把文件移动到指定的位置。</span></span><br><span class="line">COPY src.tar.gz /usr/<span class="built_in">local</span>/src.tar.gz</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Tips: 其他最小化层数无非就是把构建项目的整个步骤弄成一条 RUN 指令不过多条命令合并可以使用 &amp;&amp; 或者 <code>;</code>,在学习官方的DockerFile则发现使用的<code>;</code>的居多;</li>
+</ul>
+</li>
+<li><p>(8) 采用多阶段构建镜像可以减小镜像大小，但是注意为了保证镜像正常构建运行，需要在<code>COPY --from=0</code>指令执行时候将上阶段的成果采用绝对路径复制防止构建出错;</p>
+<ul>
+<li>Tips: 最好的方法是在第一阶段指定 WORKDIR，在第二阶段使用绝对路径拷贝文件，即使基础镜像修改了 WORKDIR 不会影响到镜像的构建<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line"><span class="keyword">FROM</span> golang   <span class="comment"># 默认工作空间为/go</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /src</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> hello.go .</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> go build hello.go</span></span><br><span class="line"><span class="keyword">FROM</span> ubuntu</span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --from=0 /src/hello .</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"./hello"</span>]</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="0x03-镜像体积缩减实战"><a href="#0x03-镜像体积缩减实战" class="headerlink" title="0x03 镜像体积缩减实战"></a>0x03 镜像体积缩减实战</h4><h5 id="1-奇技淫巧构建镜像体积减小-99"><a href="#1-奇技淫巧构建镜像体积减小-99" class="headerlink" title="(1) 奇技淫巧构建镜像体积减小 99%"></a>(1) 奇技淫巧构建镜像体积减小 99%</h5><p>描述:每一个初次使用自己写好的代码指令构建Docker镜像时候都会被镜像的大小所吓倒因为确实太大，当然前提是没有进行 DockerFile 优化中；</p>
+<p>比如: 构建一个镜像采用编译.c的C程序然后并运行容器<br>示例C程序:<br><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">mkdir /opt/hello &amp;&amp; cd $_</span><br><span class="line">cat &gt; hello.c &lt;&lt;EOF</span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="comment">/* hello.c */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span> <span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"Hello, world!"</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>DockerFile<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat &gt; Dockerfile &lt;&lt;EOF</span><br><span class="line">FROM gcc</span><br><span class="line">COPY hello.c .</span><br><span class="line">RUN gcc -o hello hello.c</span><br><span class="line">CMD [<span class="string">"./hello"</span>]</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>基础实践:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$docker</span> build --tag gcc-hello:latest .</span><br><span class="line"><span class="comment"># 表示 docker cli 命令行客户端将我们当前目录（即构建上下文） build context 打包发送 Docker daemon 守护进程 （即 dockerd）的过程。</span></span><br><span class="line"><span class="comment"># KB: 代表当前上下文大小</span></span><br><span class="line">Sending build context to Docker daemon  3.072kB</span><br><span class="line">....</span><br><span class="line">Successfully built eb9ae8b1c49c</span><br><span class="line">Successfully tagged gcc-hello:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 此时您会发现构建成功的镜像体积远远超过了 1 GB, 因为该镜像包含了整个 gcc 镜像的内容;</span></span><br><span class="line"><span class="variable">$docker</span> images gcc-hello </span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">gcc-hello           latest              eb9ae8b1c49c        5 minutes ago       1.19GB</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果使用 Ubuntu 镜像安装 C 编译器，最后编译程序你会得到一个大概 300 MB 大小的镜像比上面的镜像小多了</span></span><br><span class="line"><span class="variable">$docker</span> run -it --rm gcc-hello</span><br><span class="line">Hello, world!</span><br><span class="line"><span class="variable">$docker</span> run -it --rm gcc-hello ls -alh hello</span><br><span class="line">-rwxr-xr-x. 1 root root 16K Jul 27 08:21 hello  <span class="comment">#因为编译好的可执行文件还不到 20 KB</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>示例Go程序:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir /opt/go-hello/ &amp;&amp; <span class="built_in">cd</span> <span class="variable">$_</span></span><br><span class="line">cat &gt; hello.go &lt;&lt;EOF</span><br><span class="line">package main</span><br><span class="line"></span><br><span class="line">import <span class="string">"fmt"</span></span><br><span class="line">func <span class="function"><span class="title">main</span></span>() &#123;</span><br><span class="line">  fmt.Println(<span class="string">"Hello, world!"</span>)</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>Dockerfile:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat &gt; dockerfile &lt;&lt;EOF</span><br><span class="line">FROM golang</span><br><span class="line">COPY hello.go .</span><br><span class="line">RUN go build hello.go </span><br><span class="line">CMD [<span class="string">"./hello"</span>,<span class="string">"ls -alh ./hello"</span>]</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>使用基础镜像 golang 构建的镜像大小是 800 MB，而编译后的可执行文件只有 2 MB 大小：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 镜像构建</span></span><br><span class="line"><span class="variable">$docker</span> build --tag go-hello .</span><br><span class="line">Sending build context to Docker daemon  3.072kB</span><br><span class="line">....</span><br><span class="line">Successfully built d1bb1eb974f4</span><br><span class="line">Successfully tagged go-hello:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 运行镜像</span></span><br><span class="line">[root@k8s-yum-server go-hello]$ docker run -it --rm go-hello</span><br><span class="line">Hello, world!</span><br><span class="line">[root@k8s-yum-server go-hello]$ docker run -it --rm go-hello bash</span><br><span class="line">root@f610b4030f2d:/go<span class="comment"># ls -alh hello</span></span><br><span class="line">-rwxr-xr-x. 1 root root 2.0M Jul 27 08:43 hello  <span class="comment"># 比gcc生成的大多了</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips: 为了更直观地对比不同镜像的大小，所有镜像都使用相同的镜像名不同的标签，当然您需要在构建镜像时候采用<code>--tag</code>参数进行。</p>
+<p><br></p>
+<p><strong>如何缩减镜像大小?</strong><br>答:要想大幅度减少镜像的体积，多阶段构建是必不可少的。<br>多阶段构建的想法很简单: “<code>我不想在最终的镜像中包含一堆 C 或 Go 编译器和整个编译工具链，我只要一个编译好的可执行文件！</code>“</p>
+<p>多阶段构建可以由多个 FROM 指令识别，每一个 FROM 语句表示一个新的构建阶段，阶段名称可以用 AS 参数指定，例如：</p>
+<p>本例使用基础镜像 gcc 来编译程序 hello.c，然后启动一个新的构建阶段，它以 ubuntu 作为基础镜像，将可执行文件 hello 从上一阶段拷贝到最终的镜像中<br><figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">cat &gt; dockerfile &lt;&lt;EOF</span><br><span class="line"><span class="keyword">FROM</span> gcc AS mybuildstage</span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> hello.c .</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> gcc -o hello hello.c</span></span><br><span class="line"><span class="keyword">FROM</span> ubuntu</span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --from=mybuildstage hello .</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"./hello"</span>]</span></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>镜像构建:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$docker</span> build -t go-hello:stage -f Dockerfile .</span><br><span class="line">Sending build context to Docker daemon  3.072kB</span><br><span class="line">Step 1/6 : FROM gcc AS mybuildstage</span><br><span class="line"> ---&gt; 21f378ba43ec</span><br><span class="line">Step 2/6 : COPY hello.c .</span><br><span class="line"> ---&gt; Using cache</span><br><span class="line"> ---&gt; 09252ee7e000</span><br><span class="line">Step 3/6 : RUN gcc -o hello hello.c</span><br><span class="line"> ---&gt; Using cache</span><br><span class="line"> ---&gt; 9615c168cdc0</span><br><span class="line">Step 4/6 : FROM ubuntu</span><br><span class="line">latest: Pulling from library/ubuntu</span><br><span class="line">3ff22d22a855: Pull complete</span><br><span class="line">e7cb79d19722: Pull complete</span><br><span class="line">323d0d660b6a: Pull complete</span><br><span class="line">b7f616834fd0: Pull complete</span><br><span class="line">Digest: sha256:5d1d5407f353843ecf8b16524bc5565aa332e9e6a1297c73a92d3e754b8a636d</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> ubuntu:latest</span><br><span class="line"> ---&gt; 1e4467b07108</span><br><span class="line">Step 5/6 : COPY --from=mybuildstage hello .</span><br><span class="line"> ---&gt; 4659f572446e</span><br><span class="line">Step 6/6 : CMD [<span class="string">"./hello"</span>]</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> be24d1c6b4aa</span><br><span class="line">Removing intermediate container be24d1c6b4aa</span><br><span class="line"> ---&gt; 5934753f8f4f</span><br><span class="line">Successfully built 5934753f8f4f</span><br><span class="line">Successfully tagged go-hello:stage</span><br></pre></td></tr></table></figure></p>
+<p>最终的镜像大小是73.9 MB，比之前的 1.1 GB 减少了 95%<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$docker</span> images go-hello</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">go-hello            stage               5934753f8f4f        9 minutes ago       73.9MB</span><br><span class="line">ubuntu              latest              1e4467b07108        2 days ago          73.9MB</span><br><span class="line">gcc                 latest              21f378ba43ec        3 days ago          1.19GB</span><br><span class="line"></span><br><span class="line"><span class="variable">$docker</span> run -it --rm go-hello:stage</span><br><span class="line">Hello, world!</span><br></pre></td></tr></table></figure></p>
+<p>如果 Dockerfile 内容不是很复杂，构建阶段也不是很多可以直接使用序号表示构建阶段。一旦 Dockerfile 变复杂了，构建阶段增多了，最好还是通过关键词 AS 为每个阶段命名这样也便于后期维护。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 在声明构建阶段时可以不必使用关键词 AS，最终阶段拷贝文件时可以直接使用序号表示之前的构建阶段（从零开始）下面两行是等效的</span></span><br><span class="line">COPY --from=0 hello .              <span class="comment"># 不是很复杂时候使用</span></span><br><span class="line">COPY --from=mybuildstage hello .   <span class="comment"># 复杂时候一定要用阶段名称而不是阶段索引;</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h5 id="2-FROM-scratch-的魔力"><a href="#2-FROM-scratch-的魔力" class="headerlink" title="(2).FROM scratch 的魔力"></a>(2).FROM scratch 的魔力</h5><p>描述:回到我们的 hello world，C 语言版本的程序大小为 16 kB，Go 语言版本的程序大小为 2 MB，那么我们到底能不能将镜像缩减到这么小？能否构建一个只包含我需要的程序，没有任何多余文件的镜像？<br>答案:是肯定的，你只需要将多阶段构建的第二阶段的基础镜像改为 scratch （一个虚拟镜像），不能被 pull，也不能运行，因为它表示空、nothing！这就意味着新镜像的构建是从零开始，不存在其他的镜像层；<br>虽然它可以极大的缩小镜像大小，但是使用它 scratch 作为基础镜像时会带来很多的不便(事物往往都不是那么完美的)。</p>
+<p>使用scratch作为基础镜像缺点:</p>
+<ul>
+<li><p>1) scratch 镜像的第一个不便是没有 shell意味着 CMD/RUN 语句中不能使用字符串</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">FROM scratch</span><br><span class="line">COPY --from=0 /go/hello .</span><br><span class="line"></span><br><span class="line"><span class="comment"># 采用Jons格式</span></span><br><span class="line">CMD [<span class="string">"./hello"</span>]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>2)  scratch 镜像不包含任何调试工具例如<code>ls、ps、ping</code>等命令统统没有，当然了shell 也没有（上文提过了），你无法使用·<code>docker exec</code>进入容器，也无法查看网络堆栈信息等等。</p>
+<ul>
+<li>解决办法:折中一下可以选择 busybox 或 alpine 镜像来替代 scratch;<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$docker</span> run --rm -it go-hello:scratch ls</span><br><span class="line">docker: Error response from daemon: OCI runtime create failed: container_linux.go:349: starting container process caused <span class="string">"exec: \"ls\": executable file not found in <span class="variable">$PATH</span>"</span>: unknown.</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>3) scratch 镜像缺少 lib 链接库这是比较难处理的问题,使用 scratch 作为基础镜像时 Go 语言版本的 hello world 跑得很欢快，C 语言版本就不行了，或者换个更复杂的 Go 程序也是跑不起来的（例如用到了网络相关的工具包），你会遇到类似于下面的错误</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 错误信息:standard_init_linux.go:211: exec user process caused "no such file or directory"</span></span><br><span class="line">报错信息可以看出缺少文件，但没有告诉我们到底缺少哪些文件，其实这些文件就是程序运行所必需的动态库（dynamic library）。</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Tips:回到最初的问题默认情况下<code>C程序/Go 程序使用的是动态链接</code>。上面的 hello world 程序使用了<code>标准库文件 libc.so.6</code>，所以只有镜像中包含该文件，程序才能正常运行。<br>使用 scratch 作为基础镜像肯定是不行的使用 busybox 和 alpine 也不行，因为 busybox 不包含标准库，而 alpine 使用的标准库是 musl libc，与大家常用的标准库 glibc 不兼容</li>
+</ul>
+</li>
+</ul>
+<p><br></p>
+<p>Q:那么该如何解决标准库的问题呢？<br>答:有三种方案。<br>1.使用静态库我们可以让编译器使用静态库编译程序办法有很多，如果使用 gcc 作为编译器，只需加上一个参数 -static(推荐方式:以大小牺牲满足程序的健壮性)：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$gcc</span> -o hello hello.c -static</span><br></pre></td></tr></table></figure></p>
+<p>编译完的可执行文件大小为 760 kB相比于之前的 16kB 是大了好多，这是因为可执行文件中包含了其运行所需要的库文件,编译完的程序就可以跑在 scratch 镜像中了。<br>如果使用 alpine 镜像作为基础镜像来编译得到的可执行文件会更小（&lt; 100kB）。</p>
+<p>2.拷贝库文件到镜像中为了找出程序运行需要哪些库文件可以使用 ldd 工具:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$ldd</span> hello</span><br><span class="line">  linux-vdso.so.1 (0x00007ffdf8acb000)</span><br><span class="line">  libc.so.6 =&gt; /usr/lib/libc.so.6 (0x00007ff897ef6000)</span><br><span class="line">  /lib64/ld-linux-x86-64.so.2 =&gt; /usr/lib64/ld-linux-x86-64.so.2 (0x00007ff8980f7000)</span><br><span class="line"><span class="comment"># 从输出结果可知该程序只需要 libc.so.6 这一个库文件,linux-vdso.so.1 与一种叫做VDSO[3]的机制有关，用来加速某些系统调用可有可无, ld-linux-x86-64.so.2 表示动态链接器本身，包含了所有依赖的库文件的信息。</span></span><br><span class="line">你可以选择将 ldd 列出的所有库文件拷贝到镜像中但这会很难维护，特别是当程序有大量依赖库时(不切实际了不建议使用);</span><br></pre></td></tr></table></figure></p>
+<p>对于 hello world 程序来说，拷贝库文件完全没有问题，但对于更复杂的程序（例如使用到 DNS 的程序）就会遇到令人费解的问题,<code>glibc（GNU C library）通过一种相当复杂的机制来实现 DNS</code>，这种机制叫 NSS（Name Service Switch, 名称服务开关）。<br>它需要一个配置文件 /etc/nsswitch.conf 和额外的函数库，但使用 ldd 时不会显示这些函数库，因为这些库在程序运行后才会加载。<br>如果想让 DNS 解析正确工作，必须要拷贝这些额外的库文件（/lib64/libnss_*）。</p>
+<p>3.使用 busybox:glibc 作为基础镜像<br>有一个镜像可以完美解决所有的这些问题那就是 busybox:glibc, 因为它只有 5 MB 大小并且包含了 glibc 和各种调试工具。<br>如果你想选择一个合适的镜像来运行使用动态链接的程序busybox:glibc是最好的选择。</p>
+<p>注意：如果你的程序使用到了除标准库之外的库，仍然需要将这些库文件拷贝到镜像中。</p>
+<p>实际案例:<br><figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">cat &gt; Dockerfile&lt;&lt;EOF</span><br><span class="line"><span class="keyword">FROM</span> golang</span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /go</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> hello.go .</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> go build hello.go</span></span><br><span class="line"><span class="keyword">FROM</span> scratch</span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --from=0 /go/hello .</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"./hello"</span>]</span></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>镜像构造:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$docker</span> build -f Dockerfile -t go-hello:scratch .</span><br><span class="line">Sending build context to Docker daemon  4.096kB</span><br><span class="line">Step 1/7 : FROM golang</span><br><span class="line">...</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> 8eba3646dcc4</span><br><span class="line">Removing intermediate container 8eba3646dcc4</span><br><span class="line"> ---&gt; b3d1964b4d47</span><br><span class="line">Step 5/7 : FROM scratch</span><br><span class="line">Step 6/7 : COPY --from=0 /go/hello .</span><br><span class="line"> ---&gt; 52e976b8f1f3</span><br><span class="line">Step 7/7 : CMD [<span class="string">"./hello"</span>]</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> 2247a541f3c6</span><br><span class="line">Removing intermediate container 2247a541f3c6</span><br><span class="line"> ---&gt; cb05b87d0012</span><br><span class="line">Successfully built cb05b87d0012</span><br><span class="line">Successfully tagged go-hello:scratch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="variable">$docker</span> run --rm -it go-hello:scratch</span><br><span class="line">Hello, world!</span><br><span class="line"></span><br><span class="line"><span class="comment"># 构建镜像的大小比对</span></span><br><span class="line"><span class="variable">$docker</span> images go-hello</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">go-hello            scratch             cb05b87d0012        3 minutes ago       2.07MB <span class="comment">#构建的镜像大小正好就是 2 MB</span></span><br><span class="line">go-hello            stage               5934753f8f4f        5 hours ago         73.9MB</span><br><span class="line">go-hello            latest              d1bb1eb974f4        6 hours ago         812MB</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>静态库实践:<br><figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">mkdir /opt/gcc-static &amp;&amp; cd $_</span><br><span class="line">cat &gt; Dockerfile-static&lt;&lt;EOF</span><br><span class="line"><span class="keyword">FROM</span> gcc AS mybuildstage</span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /src</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> hello.c .</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> gcc -o hello hello.c -static</span></span><br><span class="line"><span class="keyword">FROM</span> scratch</span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --from=0 /src/hello .</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"./hello"</span>]</span></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>构建实践:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$docker</span> build -f Dockerfile-static -t gcc-static:scratch .</span><br><span class="line">Sending build context to Docker daemon  3.072kB</span><br><span class="line">Step 1/7 : FROM gcc AS mybuildstage</span><br><span class="line"> ---&gt; 21f378ba43ec</span><br><span class="line">Step 2/7 : WORKDIR /src</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> 7055a4f90b2a</span><br><span class="line">Removing intermediate container 7055a4f90b2a</span><br><span class="line"> ---&gt; a02107ce9204</span><br><span class="line">Step 3/7 : COPY hello.c .</span><br><span class="line"> ---&gt; cd278ef2de60</span><br><span class="line">Step 4/7 : RUN gcc -o hello hello.c -static</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> 368cc4437ac4</span><br><span class="line">Removing intermediate container 368cc4437ac4</span><br><span class="line"> ---&gt; 506e744092b2</span><br><span class="line">Step 5/7 : FROM scratch</span><br><span class="line">Step 6/7 : COPY --from=0 /src/hello .</span><br><span class="line"> ---&gt; 1867700fa780</span><br><span class="line">Step 7/7 : CMD [<span class="string">"./hello"</span>]</span><br><span class="line"> ---&gt; Running <span class="keyword">in</span> bb19b78211bd</span><br><span class="line">Removing intermediate container bb19b78211bd</span><br><span class="line"> ---&gt; a6991f9571b3</span><br><span class="line">Successfully built a6991f9571b3</span><br><span class="line">Successfully tagged gcc-static:scratch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 镜像查看以及执行镜像</span></span><br><span class="line"><span class="variable">$docker</span> images gcc-static</span><br><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">gcc-static          scratch             a6991f9571b3        56 seconds ago      945kB  <span class="comment">#此种方式比golang多阶段构建生成的镜像更小</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 但是调试是真的烦</span></span><br><span class="line"><span class="variable">$docker</span> run --rm -it gcc-static:scratch   </span><br><span class="line">Hello, world!</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>总结</strong><br>描述:最后来对比一下不同构建方法构建的镜像大小：</p>
+<ul>
+<li>原始的构建方法：1.14 GB</li>
+<li>使用 ubuntu 镜像的多阶段构建：64.2 MB</li>
+<li>使用 alpine 镜像和静态 <code>glibc</code>：6.5 MB</li>
+<li>使用 alpine 镜像和动态库：5.6 MB</li>
+<li>使用 scratch 镜像和静态 <code>glibc</code>：940 kB</li>
+<li>使用 scratch 镜像和静态 <code>musl libc</code>：94 kB<br>最终我们将镜像的体积减少了 99.99%。</li>
+</ul>
+<hr>
+<h4 id="0x04-补充说明"><a href="#0x04-补充说明" class="headerlink" title="0x04 补充说明"></a>0x04 补充说明</h4><p>描述:记录镜像分析缩减建议工具与学习阶段所遇的一些技巧记录</p>
+<h5 id="openjdk镜像的tag说明-其它镜像可以类比"><a href="#openjdk镜像的tag说明-其它镜像可以类比" class="headerlink" title="openjdk镜像的tag说明(其它镜像可以类比)"></a>openjdk镜像的tag说明(其它镜像可以类比)</h5><p>描述:在进行Docker安装Tomcat前我们先简单聊到openjdk镜像的tag说明,因为Tomcat属于Java应用所以安装JDK环境是必不可少的;</p>
+<p>将java应用作成docker镜像时，需要镜像中带有jdk或者jre环境，通常有三种情况：</p>
+<ul>
+<li>在Dockerfile中加入安装jdk环境的脚本；</li>
+<li>镜像中只有应用jar包，启动容器时通过数据卷映射(-v参数)将宿主机的jdk文件夹映射到容器内；</li>
+<li>使用带有jdk的镜像作为基础镜像；</li>
+</ul>
+<p>三种方式各有优劣</p>
+<ul>
+<li>第一种，完全自己动手，可控性强，但增加了Dockerfile编写的工作量，脚本质量要自己保证；</li>
+<li>第二种，要求宿主机预先部署jdk，增加了宿主机工作量；</li>
+<li>第三种，相对工作量小一些，如果找的基础镜像不合适，会导致做成的镜像体积过大，或者多了些不需要的内容；</li>
+</ul>
+<p>为了更加精简以及程序可以正常运行所以我们必须对其基础镜像选择有一个简单的了解;<br>在hub.docker.com上搜索jdk官方镜像关键字openjdk，点进详情页后寻找我们常用的jdk8的镜像有多个Tags例如:<a href="https://hub.docker.com/_/openjdk?tab=tags" target="_blank" rel="noopener">https://hub.docker.com/_/openjdk?tab=tags</a></p>
+<p>实际上Docker大多数应用都默认采用Debian操作系统进行构建镜像,所以我们需要对debian版本号进行一个简单的了解:<br>|debian发行版本号 | 含义 |<br>|:- | :- |<br>|buster|当前的稳定版|<br>|stretch |旧的稳定版，包含了Debian官方最近一次发行的软件包，优先推荐使用的版本|<br>|testing |测试版本，包含了哪些暂时未被收录进”稳定版“的软件包|<br>|ubstable |不稳定版，开发版本|</p>
+<p>Q:如此多的的tag我们又该如何选择呢?<br>答: 常规的应用其Docker镜像Tag往往是相互组合的<code>版本+操作系统发行版本号+ea/slim</code>等关键字组合<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 版本号 openjdk:&lt;version&gt;</span></span><br><span class="line"><span class="comment"># Tag : openjdk:8</span></span><br><span class="line">基础镜像为Debain上构建的openjdk镜像;</span><br><span class="line"></span><br><span class="line"><span class="comment"># stretch 关键字</span></span><br><span class="line"><span class="comment"># Tag : 8-jdk-stretch / 8-jre-stretch </span></span><br><span class="line">其中的stretch表明这个镜像的操作系统是debian9在此基础上构建了Jdk8或者Jre8环境的docker镜像</span><br><span class="line"></span><br><span class="line"><span class="comment"># ea关键字</span></span><br><span class="line"><span class="comment"># Tag : 16-ea-jdk</span></span><br><span class="line">其中的ea表示的意思是<span class="string">"Early Access"</span>正是发布之前的预览版本，该版本带有新特性并且修复了若干bug,非Release版本不建议生产环境使用;</span><br><span class="line"></span><br><span class="line"><span class="comment"># alpine 关键字 openjdk:&lt;version&gt;-alpine</span></span><br><span class="line"><span class="comment"># Tag : 13-ea-19-jdk-alpine3.9</span></span><br><span class="line">其中以alpine作为基础镜像构建出的openjdk镜像</span><br><span class="line"></span><br><span class="line"><span class="comment"># oraclelinux7关键字 openjdk:&lt;version&gt;-oraclelinux7</span></span><br><span class="line"><span class="comment"># Tag : 13-ea-oraclelinux7</span></span><br><span class="line">其中的oraclelinux7表明镜像的操作系统是Oracle Linux 7，从jdk12开始openjdk官方开始提供基于Oracle Linux 7的jdk镜像；</span><br><span class="line"></span><br><span class="line"><span class="comment"># buster 关键字</span></span><br><span class="line"><span class="comment"># Tag : 15-jdk-buster</span></span><br><span class="line">其中buster表明当前的是稳定的版本</span><br><span class="line"></span><br><span class="line"><span class="comment"># slim 关键字</span></span><br><span class="line"><span class="comment"># Tag : 15-jdk-slim</span></span><br><span class="line">其中slim表明当前的jre并非标准jre版本而是headless版本，该版本的特点是去掉了UI、键盘、鼠标相关的库，因此更加精简适合服务端应用使用</span><br><span class="line"></span><br><span class="line"><span class="comment"># slim-buster 关键字</span></span><br><span class="line"><span class="comment"># Tag : 15-slim-buster</span></span><br><span class="line">其中slim-buster表示当前镜像是精简稳定版本</span><br><span class="line"></span><br><span class="line"><span class="comment"># windowsservercore 关键字 openjdk:&lt;version&gt;-windowsservercore</span></span><br><span class="line"><span class="comment"># Tag : 15-windowsservercore-ltsc2016  #其大小超乎您的想象</span></span><br><span class="line">基于Windows Server Core (microsoft/windowsservercore)。因此它只适用于镜像的位置，比如Windows 10 Professional/Enterprise(周年纪念版)或Windows Server 2016。</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="辅助工具"><a href="#辅助工具" class="headerlink" title="辅助工具"></a>辅助工具</h5><p>描述:以下工具的使用可以在我的另外一篇文章<code>Docker使用辅助工具汇总</code>中找到它:</p>
+<ul>
+<li>1.Docker 镜像分析工具 Dive</li>
+</ul>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-07-31T04:19:01.411Z" itemprop="dateUpdated">2020-07-31 12:19:01</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2020/5/docker容器镜像体积缩小技巧.html" target="_blank" rel="external">http://weiyigeek.top/2020/5/docker容器镜像体积缩小技巧.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/">Docker</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2020/5/docker容器镜像体积缩小技巧.html&title=《Docker容器镜像体积缩小技巧》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2020/5/docker容器镜像体积缩小技巧.html&title=《Docker容器镜像体积缩小技巧》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/5/docker容器镜像仓库存储原理-前世今身-与搬运技巧.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Docker容器镜像仓库存储原理(前世今身)与搬运技巧</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/5/n2-kubernetes操作命令详细一览.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">n2-kubernetes操作命令详细一览</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-基础环境"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 基础环境</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-Docker-最佳实践补充"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 Docker 最佳实践补充</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-镜像体积缩减实战"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 镜像体积缩减实战</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-补充说明"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 补充说明</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2020/5/docker容器镜像体积缩小技巧.html&title=《Docker容器镜像体积缩小技巧》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2020/5/docker容器镜像体积缩小技巧.html&title=《Docker容器镜像体积缩小技巧》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACt0lEQVR42u3a0W7qMBAE0P7/T1PpvtLAzNoOSPfkCZUQfFzJa2b98xNfj39X8vrqen7a87tX9z9/1+YLDw8PbzT018PKB5oP8fV3tZ+9/F48PDy8Y7z8cbvKQ16EZlOAh4eH9w289tErW+R8QvHw8PC+nzcrDMmgZ4EIHh4e3qd4ybDyASVTk0/QTVkLHh4e3momMGyA3fP6Y/09PDy8/573KK92M90GFrMycDlaPDw8vAO8WZNptjLPAt98o1z8YsDDw8Nb4LUfmx26mh3DakPhP/4xeHh4eDfy2gHNttRJKUqm6c0vBjw8PLwDvBly1pSatb7aY1h4eHh453jtBrpdsmettfxAQH1oAA8PD28rL1msZwOdFZu8VRY9GQ8PD+8AL2lQzaLVNm7YW3jw8PDw9vLypn4bB+QhwkpxehN24OHh4R3gFTeN2l1Jgz9vmBVxbT0HeHh4eCmvJSVDX4lf996Ph4eHdw8v/12fL+JtANHGENGZMjw8PLxNvDxiSNpRs9ZUfjCr/TseHh7enbx8oU++eL21lh8jiAoDHh4e3gJvFtTuKiFF0lxOMR4eHt6dvLaXlDe0Tmyd3wQieHh4eId5K3HDLPBtqfU/Aw8PD+8Ab6XttCsCbiOJ4ugAHh4e3i28fMmeHSNYuXO47cbDw8PbysuX3ZXQYdeBqjrkxcPDw7uFlyzEs0+1MUQ+kqIw4OHh4S3z8oAgP4yVlJZ26BsuPDw8vE28R3nlBaBtqs0OV72ZODw8PLwDvHaNXc+M2wg4LzNLSDw8PLySlzfpVxr5K+9GccPV0/Dw8PCO8fIFuq02eaTbRhjRPXh4eHgf5bUb3PZ4wfrkXra+8PDw8L6Gt3IIYOU5RbHBw8PDO8abhRGzNtg6uCgkeHh4eAd46w2wvOnVBh+vX287QICHh4eX8n4BxTor8Aasb1wAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

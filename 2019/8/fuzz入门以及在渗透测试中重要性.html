@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>Fuzz入门以及在渗透测试中重要性 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="Fuzz">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Fuzz入门以及在渗透测试中重要性</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Fuzz入门以及在渗透测试中重要性</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-08-28T09:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-08-28
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/渗透测试/">渗透测试</a></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/FuzzTesting/Fuzz入门以及在渗透测试中重要性"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Fuzz入门以及在渗透测试中重要性</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-08-28 17:34:30" datetime="2019-08-28T09:34:30.000Z"  itemprop="datePublished">2019-08-28</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/渗透测试/">渗透测试</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><b style="color:red">注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。</b></p>
+<p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h4><p>描述:在学习它时候我们有必要学习 Fuzz音标 <code>英/fʌz/</code>;</p>
+<p><em>什么是Fuzz技术?</em><br>答:Fuzz是一种基于黑盒的自动化软件模糊测试技术,简单的说一种懒惰且暴力的技术融合了常见的以及精心构建的数据文本进行网站、软件安全性测试;</p>
+<ul>
+<li><p>实现形式与目的:它可向目标发送随机或精心构造的数据作为计算机输入，来触发非常规反馈以达到检测漏洞的目的。</p>
+</li>
+<li><p>优势:</p>
+<ul>
+<li>节约测试成本和时间;一般的Fuzz工具自带完备的异常检测机制，发送数据后能精准查出哪些Payload导致了非常规反馈，在输出中将这些触发异常的Payload列出，大大降低了人工测试成本，渗透测试人员只需关注感兴趣的部分。</li>
+<li>检测范围、规模大;自动化工具在测试用例的效率和完善上是人工无法比较的，且很多潜在的有效Payload套路固定，这些Payload就无需手工测试，只需有一份精心构造的文<br>件和规则即可完成Fuzz。</li>
+<li>覆盖可能性多，可检测出意想不到的异常;</li>
+</ul>
+</li>
+</ul>
+<p><em>Fuzz的核心思想:</em></p>
+<ul>
+<li>目录Fuzz(漏洞点)</li>
+<li>参数Fuzz(可利用参数)</li>
+<li>PayloadFuzz(bypass)</li>
+</ul>
+<p><br></p>
+<h4 id="0x01-Fuzz应用场景"><a href="#0x01-Fuzz应用场景" class="headerlink" title="0x01 Fuzz应用场景"></a>0x01 Fuzz应用场景</h4><ul>
+<li><p>漏洞挖掘与Fuzz之<code>敏感目录</code>类似的工具,可能您再入门的时候使用过御剑而其内置的字典就是Fuzz的一种;<br><em>那么这种扫描有什么好处呢？</em><br>答:就是针对一部分网站可以扫描的全面，只要你的字典足够强大就可以扫描到绝大多部分的目录和文件，来自<code>Blasting_dictionary</code>(附录1)的爆破字典很好</p>
+</li>
+<li><p>漏洞挖掘与Fuzz之<code>敏感文件可利用参数</code></p>
+<ul>
+<li>fuzz参数来达到Jsonp劫持以及XSS漏洞等等;</li>
+<li>越权验证信息</li>
+</ul>
+</li>
+<li><p>漏洞挖掘与Fuzz之Bypass</p>
+<ul>
+<li>SQL injection Bypass</li>
+<li>Open redirect</li>
+<li>XSS Fuzzer</li>
+</ul>
+</li>
+</ul>
+<p><br></p>
+<h4 id="0x02-Fuzz常用工具"><a href="#0x02-Fuzz常用工具" class="headerlink" title="0x02 Fuzz常用工具"></a>0x02 Fuzz常用工具</h4><p>列出Fuzz常用的工具从我的认知开始:</p>
+<ul>
+<li>御剑: 界面化目录和文件扫描</li>
+<li>Dirsearch : 扫描模式和dirbuster是差不多</li>
+<li><p>Dirb :他的字典和御剑的不一样的就是没有针对目录和准确的定位到每个文件而是一个一个的目录名，那么这种扫描下是有一些有点的就是先发现目录在进行文件爆破，而且dirb的判断很智能他在你输入目标后会进行计算错误的请求，避免内些返回200的not found</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Usage : dirb https://domain.com/</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Nikto : 作用在于目录的爆破</p>
+</li>
+<li>wfuzz : 一款十分万能的工具我最近的目录爆破全都是使用wfuzz用熟练之后真的非常十分方便，排除一些响应码之后直接baseline这是我目前比较喜欢的用法<br>案例就是wfuzz<br>在fuzz过后发现了item参数，这是访问 <code>http://rob-sec-1.com/test/?item=XSSpayload</code>成功弹窗<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ wfuzz -w /usr/share/wordlists/dirb/common.txt --hh 53 <span class="string">'http://rob-sec-1.com/test/?FUZZ=XSSpayload'</span></span><br><span class="line"></span><br><span class="line">Target: HTTP://rob-sec-1.com/<span class="built_in">test</span>/?FUZZ=XSSpayload</span><br><span class="line">Total requests: 4614</span><br><span class="line">ID    Response   Lines      Word         Chars          Payload    </span><br><span class="line">02127:  C=200      9 L           8 W         84 Ch      <span class="string">"item"</span></span><br><span class="line"></span><br><span class="line">Total time: 14.93025</span><br><span class="line">Processed Requests: 4614</span><br><span class="line">Filtered Requests: 4613</span><br><span class="line">Requests/sec.: 309.0369</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=Fuzz入门以及在渗透测试中重要性 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920095433.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920095433.png" alt="WeiyiGeek." title class></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><strong>辅助Fuzz的工具</strong></p>
+<ul>
+<li>Burpsuite的扩展程序CO2: Sqlmapper模块很好对于我这种注入菜的很的来说简直就是福音，而CeWler的功能是参数提取，比如我们在Http history 里找返回包右键发送到CeWler模块就可以进行参数提取了，在实战中的用处很大，可以把参数提取出来保存做参数字典更高效。</li>
+</ul>
+<p><br></p>
+<h4 id="0x03-附录"><a href="#0x03-附录" class="headerlink" title="0x03 附录"></a>0x03 附录</h4><ul>
+<li><a href="https://github.com/rootphantomer/Blasting_dictionary" target="_blank" rel="noopener">https://github.com/rootphantomer/Blasting_dictionary</a></li>
+</ul>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-03-22T05:21:23.698Z" itemprop="dateUpdated">2020-03-22 13:21:23</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/8/fuzz入门以及在渗透测试中重要性.html" target="_blank" rel="external">http://weiyigeek.top/2019/8/fuzz入门以及在渗透测试中重要性.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Fuzz/">Fuzz</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/8/fuzz入门以及在渗透测试中重要性.html&title=《Fuzz入门以及在渗透测试中重要性》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/8/fuzz入门以及在渗透测试中重要性.html&title=《Fuzz入门以及在渗透测试中重要性》 — WeiyiGeek Blog's&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/8/免杀与免检测shell网页后门脚本.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">免杀与免检测shell网页后门脚本</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/8/iis应用容器安装和使用.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">IIS应用容器安装和使用</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-Fuzz应用场景"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 Fuzz应用场景</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-Fuzz常用工具"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 Fuzz常用工具</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-附录"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 附录</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/8/fuzz入门以及在渗透测试中重要性.html&title=《Fuzz入门以及在渗透测试中重要性》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/8/fuzz入门以及在渗透测试中重要性.html&title=《Fuzz入门以及在渗透测试中重要性》 — WeiyiGeek Blog's&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACt0lEQVR42u3a0W7bMAwF0Pz/T2fAMGAD1tiXpNi06NFT4DiyjgpY6qUej7g9f7f8879X/r9+fc/zsj02Gh4eHl5r6NfdvbryCvaq5wR/3Vt5CvDw8PDWeHl3yYKR35NM3PU9NxY8PDy8t/KuX8q9TXP1V3h4eHjfkZdc6QF6gQgeHh7eu3hJGDEPfJPW22ofyFrw8PDwFqpIX+fzm+t7eHh4P5j3LLYEf6qoNhnnn37w8PDwFni9IlMSJfSCiV5MfPMUPDw8vKO8+aGB5KVfXQx6x7M++IyHh4e3wKtubXNYtUiWA6pX8PDw8M7yqkHA2Qg4ASdb/2jdw8PDwzvKy//VzwtR0YoU83rHwvDw8PC2efmL+Ow2elJUu/kWDw8Pb4HX+3FOur5/snjkk4KHh4d3lpdHsQksKWXNC1qFQwl4eHh4y7xJ/DqfuPyewoKEh4eHt8DrDa73gOpRg+oxgnzq8fDw8Ca8SYZRjQzKhf/WwYXyoSs8PDy8Me96Mahuo/NDAGcLb3h4eHifw5uUwU4VtHqhw8sn4uHh4S3weoX86is+XzaqAfHouBUeHh5ei1fd+OYDmkxZ9VfNvTkeHh7egJeQqj0kIUJ+Jed9sDDg4eHhHeVNhpiHvNXAojoRzb8hHh4e3piXtOrCMFkSJlODh4eHt8fLSfmGu7dR7sUfN9fx8PDwlnn5EKtxwGRhGG3K8fDw8BZ41ZpRL9KtvtDn0S0eHh7eHu9ZbDljUtZKFoBoPHh4eHgLvFPnl6qDzo9w5YwmDA8PD6/FyxeDarCbDKJaYCvHvnh4eHhrvF64MA8U8i113kP0NR4eHt6n8KoxRI6v9lYo1OHh4eF9AV41uq3yqocJbkaIh4eHt8brPTIJBaqb494S0qzy4eHh4bV48wJYEtr2NtDVYwcr9T08PDy8v+0XP0SSl+sbwuUAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

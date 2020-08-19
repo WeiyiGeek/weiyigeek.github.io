@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>Redis数据库基础学习 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="Redis">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Redis数据库基础学习</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Redis数据库基础学习</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-04-17T11:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-04-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/数据库/">数据库</a></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-数据存储/Redis/Redis数据库基础学习"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Redis数据库基础学习</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-04-17 19:34:30" datetime="2019-04-17T11:34:30.000Z"  itemprop="datePublished">2019-04-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/数据库/">数据库</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-Redis-介绍"><a href="#0x00-Redis-介绍" class="headerlink" title="0x00 Redis 介绍"></a>0x00 Redis 介绍</h4><p>REmote DIctionary Server(Redis) 是一个由Salvatore Sanfilippo写的key-value存储系统。<br>Redis是一个开源的使用ANSI C语言编写、遵守BSD协议、支持网络、可基于内存亦可持久化的日志型、Key-Value数据库,并提供多种语言的API。</p>
+<p>它通常被称为数据结构服务器它有五种类型值（value）： 字符串(String), 哈希(Hash), 列表(list), 集合(sets) 和有序集合(sorted sets)等类型。</p>
+<p><em>Redis(K-V缓存产品)特点：</em></p>
+<ul>
+<li>非关系型数据库</li>
+<li>支持数据的持久化,可以将内存中的数据保存在磁盘中,重启的时候可以再次加载进行使用。</li>
+<li>不仅仅支持简单的key-value类型的数据,同时还提供list,set,zset,hash等数据结构的存储。</li>
+<li>支持数据的备份即master-slave主从模式的数据备份。 </li>
+</ul>
+<p><em>Redis优势：</em></p>
+<ul>
+<li>是一个开源的 key-value 存储系统,并且性能高体现在IO读写(R&gt;W)</li>
+<li>Redis非常轻量级,一个空Redis实例占用的内在只有1M左右,所以不用担心多个Redis实例会额外占用很多内存。</li>
+<li>丰富得数据类型(String/Hash/List/sets/Sorted sets)</li>
+<li>所有得操作都是原子性得(要么成功要么失败完全不执行),且多个操作支持事务即原子性(通过MULTI和EXEC指令包起来)</li>
+</ul>
+<p><em>Redis与其他K-V存储异同:</em></p>
+<ul>
+<li>R有更为复杂得数据结构并提供事务处理机制(原子性操作)</li>
+<li>R运行在内存中但是可以持久化到磁盘之中,在对数据集进行高速读写时需要权衡内存(数据量不能大于硬件内存)</li>
+<li>在磁盘格式方面他们是紧凑的以追加的方式产生的,因为他们并不需要进行随机访问</li>
+</ul>
+<p><br></p>
+<h4 id="0x01-Redis-数据类型"><a href="#0x01-Redis-数据类型" class="headerlink" title="0x01 Redis 数据类型"></a>0x01 Redis 数据类型</h4><p>Redis支持五种数据类型：string（字符串）,hash（哈希）,list（列表）,set（集合）及zset(Sorted set：有序集合)。 </p>
+<ol start="0">
+<li><strong>Redis键(Key)</strong><br>描述：键命令用于管理 redis 的键<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys p*  <span class="comment">#查找所有符合给定模式 pattern 的 key </span></span><br><span class="line">1) <span class="string">"python"</span></span><br><span class="line">2) <span class="string">"php"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> <span class="built_in">test</span> redis <span class="comment">#设置键</span></span><br><span class="line">127.0.0.1:6379&gt; del <span class="built_in">test</span>  <span class="comment">#删除键</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">type</span> php     <span class="comment">#返回 key 所储存的值的类型</span></span><br><span class="line">string</span><br><span class="line">127.0.0.1:6379&gt; exists <span class="built_in">test</span>  <span class="comment">#检查给定 key 是否存在。</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; dump <span class="built_in">test</span>  <span class="comment">#序列化给定 key,返回序列化之后的值</span></span><br><span class="line"><span class="string">"\x00\x05redis\t\x00\x15\xa2\xf8=\xb6\xa9\xde\x90"</span></span><br><span class="line">127.0.0.1:6379&gt; MOVE <span class="built_in">test</span> 1   <span class="comment">#将 test移动到数据库 1 中(select 1)</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; expire python 600  <span class="comment">#expire test1 60 #设置 key 的过期时间,key 过期后将不再可用。单位以秒计</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; PTTL python  <span class="comment">#以毫秒为单位返回 key 的剩余的过期时间</span></span><br><span class="line">(<span class="built_in">integer</span>) 592072</span><br><span class="line">127.0.0.1:6379&gt; TTL python <span class="comment">#以秒为单位,返回给定 key 的剩余生存时间(TTL, time to live)</span></span><br><span class="line">(<span class="built_in">integer</span>) 583</span><br><span class="line">127.0.0.1:6379&gt; EXPIREAT runoobkey 1293840000  <span class="comment">#以 UNIX 时间戳(unix timestamp)格式设置 key 的过期时间</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; pexpire <span class="built_in">test</span> 6000  <span class="comment">#设置key过期毫秒数</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; PEXPIREAT runoobkey 1555555555005  <span class="comment">#unix类型毫秒数</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; persist <span class="built_in">test</span>   <span class="comment">#移除 key 的生存时间</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; randomkey          <span class="comment">#从当前数据库中随机返回一个 key 。  "php"</span></span><br><span class="line">127.0.0.1:6379&gt; rename key python  <span class="comment">#修改 key 的名称 OK</span></span><br><span class="line">127.0.0.1:6379&gt; renamenx key newksy  <span class="comment">#仅当 newkey 不存在时,将 key 改名为 newkey 。存在则返回0</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><br></p>
+<ol>
+<li><strong>String(字符串)</strong><br>String 是 redis 最基本的类型(是二进制安全的),且字符串类型的值最大能存储 512MB。<br>(1)SET key value    #设置指定 key 的值<br>(2)GET key          #获取指定 key 的值。<br>(3)GETRANGE key start end  #返回 key 中字符串值的子字符<br>(4)GETSET key value     #将给定 key 的值设为 value ,并返回 key 的旧值(old value)。<br>(5)GETBIT key offset    #对 key 所储存的字符串值,获取指定偏移量上的位(bit)。<br>(6)MGET key1 [key2..]   #获取所有(一个或多个)给定 key 的值。<br>(7)SETBIT key offset value  #对 key 所储存的字符串值,设置或清除指定偏移量上的位(bit)。<br>(8)SETEX key seconds value  #将值 value 关联到 key ,并将 key 的过期时间设为 seconds (以秒为单位)。<br>(9)SETNX key value             #只有在 key 不存在时设置 key 的值。<br>(10)SETRANGE key offset value  #用 value 参数覆写给定 key 所储存的字符串值,从偏移量 offset 开始。<br>(11)STRLEN key  #返回 key 所储存的字符串值的长度。<br>(12)MSET key value [key value …] #同时设置一个或多个 key-value 对。<br>(13)MSETNX key value [key value …]  #同时设置一个或多个 key-value 对,当且仅当所有给定 key 都不存在。<br>(14)PSETEX key milliseconds value   #这个命令和 SETEX 命令相似,但它以毫秒为单位设置 key 的生存时间,而不是像 SETEX 命令那样,以秒为单位。<br>(15)INCR key    #将 key 中储存的数字值增一。<br>(16)INCRBY key increment  #将 key 所储存的值加上给定的增量值（increment） 。<br>(17)INCRBYFLOAT key increment  #将 key 所储存的值加上给定的浮点增量值（increment） 。<br>(18)DECR key    #将 key 中储存的数字值减一。<br>(19)DECRBY key decrement  #key 所储存的值减去给定的减量值（decrement） 。<br>(20)APPEND key value  #如果 key 已经存在并且是一个字符串, APPEND 命令将指定的 value 追加到该 key 原来值（value）的末尾。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">redis 127.0.0.1:6379&gt; SET name <span class="string">"runoob"</span></span><br><span class="line">redis 127.0.0.1:6379&gt; GET name  <span class="comment">#"runoob"</span></span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">type</span> name         <span class="comment">#string</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> <span class="built_in">test</span> stringdemo  <span class="comment">#ok</span></span><br><span class="line">127.0.0.1:6379&gt; getrange <span class="built_in">test</span> 0 4   <span class="comment">#"strin" 截取字符串</span></span><br><span class="line">127.0.0.1:6379&gt; strlen <span class="built_in">test</span>          <span class="comment">#该键得value字符串长度(integer) 10</span></span><br><span class="line">127.0.0.1:6379&gt; getset stringdemo stringdemo  <span class="comment">#"test" 获取值然后再设置键值</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; setex demo 15 <span class="string">"value15seconds"</span>     <span class="comment">#OK 设置键值15s后销毁  #"seconds15"</span></span><br><span class="line">127.0.0.1:6379&gt; psetex key4 10000 <span class="string">"value10seconds"</span> <span class="comment">#OK 设置键值10s后销毁  (毫秒)</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; setnx demo1 demo1  <span class="comment"># (integer) 1 只有在 key 不存在时设置 key 的值。</span></span><br><span class="line">127.0.0.1:6379&gt; setrange demo1 2 weiyigeek <span class="comment">#(integer) 11  从0开始偏移插入在2处 "deweiyigeek"</span></span><br><span class="line">127.0.0.1:6379&gt; APPEND key1 valuakey1      <span class="comment">#(integer) 15 在key得value后添加值</span></span><br><span class="line">127.0.0.1:6379&gt; get key1</span><br><span class="line"><span class="string">"value1valuakey1"</span></span><br><span class="line"> </span><br><span class="line">127.0.0.1:6379&gt; mset key1 value1 key2 value2  <span class="comment">#设置多个键值 OK</span></span><br><span class="line">127.0.0.1:6379&gt; mget key1 key2  <span class="comment">#获取多个键值</span></span><br><span class="line">1) <span class="string">"value1"</span></span><br><span class="line">2) <span class="string">"value2"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; msetnx key2 value2 key3 value3  <span class="comment">#设置多个键值当键不存在则返回1,否则存在不建立键值并返回0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">########## 字符串计算 ###########</span></span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> key5 1  <span class="comment">#OK</span></span><br><span class="line">127.0.0.1:6379&gt; incr key5</span><br><span class="line">(<span class="built_in">integer</span>) 2</span><br><span class="line">127.0.0.1:6379&gt; incr key5</span><br><span class="line">(<span class="built_in">integer</span>) 3</span><br><span class="line">127.0.0.1:6379&gt; incrby key5 3</span><br><span class="line">(<span class="built_in">integer</span>) 6</span><br><span class="line">127.0.0.1:6379&gt; incrbyfloat key5 4.5   <span class="comment">#注意浮点类型计算只能在incrbyfloat才行</span></span><br><span class="line"><span class="string">"10.5"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> key6 10 <span class="comment">#OK</span></span><br><span class="line">127.0.0.1:6379&gt; decr key6</span><br><span class="line">(<span class="built_in">integer</span>) 9</span><br><span class="line">127.0.0.1:6379&gt; decrby key6 5</span><br><span class="line">(<span class="built_in">integer</span>) 4</span><br><span class="line">127.0.0.1:6379&gt; strlen key1</span><br><span class="line">(<span class="built_in">integer</span>) 15</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># getbit/setbit 用于对 key 所储存的字符串值,获取指定设置偏移量上的位(bit)。</span></span><br><span class="line"><span class="comment"># 对不存在的 key 或者不存在的 offset 进行 GETBIT, 返回 0</span></span><br><span class="line">redis&gt; EXISTS bit</span><br><span class="line">(<span class="built_in">integer</span>) 0</span><br><span class="line">redis&gt; GETBIT bit 10086</span><br><span class="line">(<span class="built_in">integer</span>) 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 对已存在的 offset 进行 GETBIT</span></span><br><span class="line">redis&gt; SETBIT bit 10086 1</span><br><span class="line">(<span class="built_in">integer</span>) 0</span><br><span class="line">redis&gt; GETBIT bit 10086</span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ol start="2">
+<li><strong>Hash(哈希)</strong><br>描述：hash 是一个键值(key=&gt;value)对集合,是一个string类型的 field 和 value 的映射表,hash 特别适合用于存储对象,每个 hash 可以存储 <code>2^32 -1</code>键值对（40多亿）。</li>
+</ol>
+<p>(1) HDEL key field1 [field2]  #删除一个或多个哈希表字段<br>(2) HEXISTS key field   #查看哈希表 key 中,指定的字段是否存在。<br>(3) HGET key field    #获取存储在哈希表中指定字段的值。<br>(4) HGETALL key   #获取在哈希表中指定 key 的所有字段和值<br>(5) HINCRBY key field increment  #为哈希表 key 中的指定字段的整数值加上增量 increment 。<br>(6) HINCRBYFLOAT key field increment  #为哈希表 key 中的指定字段的浮点数值加上增量 increment 。<br>(7) HKEYS key   #获取所有哈希表中的字段<br>(8) HLEN key  #获取哈希表中字段的数量<br>(9) HMGET key field1 [field2]  #获取所有给定字段的值<br>(10)HMSET key field1 value1 [field2 value2 ]  #同时将多个 field-value (域-值)对设置到哈希表 key 中。<br>(11)HSET key field value  #将哈希表 key 中的字段 field 的值设为 value 。<br>(12)HSETNX key field value  #只有在字段 field 不存在时,设置哈希表字段的值。<br>(14)HVALS key #取哈希表中所有值<br>(15)HSCAN key cursor [MATCH pattern] [COUNT count]迭代哈希表中的键值对。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#Redis HMSET, HGET 命令,HMSET 设置了两个 field=&gt;value 对, HGET 获取对应 field 对应的 value。</span></span><br><span class="line">127.0.0.1:6379&gt; HSET hash1 field1 <span class="string">"hello"</span>  <span class="comment">#(integer) 1</span></span><br><span class="line">127.0.0.1:6379&gt; HMSET hash1 field2 <span class="string">"world"</span>  field3 <span class="string">"redis"</span>  <span class="comment">#OK</span></span><br><span class="line">127.0.0.1:6379&gt; hkeys hash1     <span class="comment">#获取键里面得 field字段</span></span><br><span class="line">1) <span class="string">"field1"</span></span><br><span class="line">2) <span class="string">"field2"</span></span><br><span class="line">3) <span class="string">"field3"</span></span><br><span class="line">127.0.0.1:6379&gt; hlen hash1 <span class="comment">#(integer) 3  键里得字段数量</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; hexists hash1 field1  <span class="comment">#(integer) 1</span></span><br><span class="line">127.0.0.1:6379&gt; hget hash1 field1    <span class="comment">#"hello"  查看键里面得字段值</span></span><br><span class="line">127.0.0.1:6379&gt; hmget hash1 field1 field2  <span class="comment">#获取在哈希表中指定 key与字段得值</span></span><br><span class="line">1) <span class="string">"hello"</span></span><br><span class="line">2) <span class="string">"world"</span></span><br><span class="line">127.0.0.1:6379&gt; HSETNX hash1 field4 <span class="string">"study"</span>  <span class="comment">#(integer) 1 不存在则建立存在则报错</span></span><br><span class="line">127.0.0.1:6379&gt; hvals hash1   <span class="comment">#获取哈希表中所有值</span></span><br><span class="line">1) <span class="string">"hello"</span></span><br><span class="line">2) <span class="string">"world"</span></span><br><span class="line">3) <span class="string">"redis"</span></span><br><span class="line">4) <span class="string">"study"</span></span><br><span class="line">127.0.0.1:6379&gt; hgetall hash1      <span class="comment">#获取在哈希表中指定 key 的所有字段和值</span></span><br><span class="line">1) <span class="string">"field1"</span></span><br><span class="line">2) <span class="string">"hello"</span></span><br><span class="line">3) <span class="string">"field2"</span></span><br><span class="line">4) <span class="string">"world"</span></span><br><span class="line">5) <span class="string">"field3"</span></span><br><span class="line">6) <span class="string">"redis"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; hdel hash1 field4  <span class="comment">#删除hash表键中的字段</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; hdel hash1 field5</span><br><span class="line">(<span class="built_in">integer</span>) 0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">############# 哈希表的计算 #############</span></span><br><span class="line">127.0.0.1:6379&gt; hset hash2 field1 1</span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; hincrby hash2 field1 3</span><br><span class="line">(<span class="built_in">integer</span>) 4</span><br><span class="line">127.0.0.1:6379&gt; hincrbyfloat hash2 field1 3</span><br><span class="line"><span class="string">"7"</span></span><br><span class="line">127.0.0.1:6379&gt; hincrbyfloat hash2 field1 3.5</span><br><span class="line"><span class="string">"10.5"</span></span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li><strong>List(列表)</strong><br>Redis 列表是简单的字符串列表,按照插入顺序排序(类似于栈);你可以添加一个元素到列表的头部（左边）或者尾部（右边）一个列表最多可以包含 232 - 1 个元素 (4294967295, 每个列表超过40亿个元素)。 </li>
+</ol>
+<p>(1) BLPOP key1 [key2 ] timeout  #移出并获取列表的第一个元素, 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。<br>(2) BRPOP key1 [key2 ] timeout  #移出并获取列表的最后一个元素, 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。<br>(3) BRPOPLPUSH source destination timeout  #从列表中弹出一个值,将弹出的元素插入到另外一个列表中并返回它如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。<br>(4) LINDEX key index #通过索引获取列表中的元素<br>(5)    LINSERT key BEFORE|AFTER pivot value  #在列表的元素前或者后插入元素<br>(6) LLEN key #获取列表长度<br>(7)    LPOP key #移出并获取列表的第一个元素<br>(8)    LPUSH key value1 [value2]  #将一个或多个值插入到列表头部 (后进排头)<br>(9) LPUSHX key value  #将一个值插入到已存在的列表头部<br>(10) LRANGE key start stop #获取列表指定范围内的元素<br>(11) LREM key count value  #移除列表元素<br>(12) LSET key index value  #通过索引设置列表元素的值<br>(13) LTRIM key start stop   #对一个列表进行修剪(trim),就是说,让列表只保留指定区间内的元素,不在指定区间之内的元素都将被删除。<br>(14) RPOP key #移除列表的最后一个元素,返回值为移除的元素。<br>(15) RPOPLPUSH source destination  #移除列表的最后一个元素,并将该元素添加到另一个列表并返回<br>(16) RPUSH key value1 [value2] #在列表中添加一个或多个值 (按前后顺序添加)<br>(17) RPUSHX key value  #为已存在的列表添加值</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">127.0.0.1:6379[1]&gt; lpush list1 1 2 3  <span class="comment">#每次从头开始插入元素 向右边移动 头部添加</span></span><br><span class="line">(<span class="built_in">integer</span>) 3</span><br><span class="line">127.0.0.1:6379[1]&gt; lpushx list1 0</span><br><span class="line">(<span class="built_in">integer</span>) 4</span><br><span class="line">127.0.0.1:6379[1]&gt; llen list1   <span class="comment">#列表长度</span></span><br><span class="line">(<span class="built_in">integer</span>) 4</span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[1]&gt; rpush list2 0 1 2 3 4  <span class="comment">#按顺序插入</span></span><br><span class="line">(<span class="built_in">integer</span>) 5</span><br><span class="line">127.0.0.1:6379[1]&gt; rpushx list2 5  <span class="comment">#在尾部添加</span></span><br><span class="line">(<span class="built_in">integer</span>) 6</span><br><span class="line">127.0.0.1:6379[1]&gt; lset list2 5 7  <span class="comment">#将第六的一个元素值改成7 (注意这里索引修改必须是存在)</span></span><br><span class="line">OK</span><br><span class="line"></span><br><span class="line"><span class="comment">#下标 0 表示列表的第一个元素,以 1 表示列表的第二个元素,</span></span><br><span class="line"><span class="comment">#使用负数下标,以 -1 表示列表的最后一个元素, -2 表示列表的倒数第二个元素,以此类推。 </span></span><br><span class="line">127.0.0.1:6379[1]&gt; lrange list1 0  4</span><br><span class="line">1) <span class="string">"0"</span></span><br><span class="line">2) <span class="string">"3"</span></span><br><span class="line">3) <span class="string">"2"</span></span><br><span class="line">4) <span class="string">"1"</span></span><br><span class="line">127.0.0.1:6379[1]&gt; lrange list2 0  5</span><br><span class="line">1) <span class="string">"0"</span></span><br><span class="line">2) <span class="string">"1"</span></span><br><span class="line">3) <span class="string">"2"</span></span><br><span class="line">4) <span class="string">"3"</span></span><br><span class="line">5) <span class="string">"4"</span></span><br><span class="line">6) <span class="string">"7"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[1]&gt; lpop list1  <span class="comment">#弹出头部元素</span></span><br><span class="line"><span class="string">"0"</span></span><br><span class="line">127.0.0.1:6379[1]&gt; rpop list1   <span class="comment">#弹出尾部元素</span></span><br><span class="line"><span class="string">"1"</span></span><br><span class="line">127.0.0.1:6379[1]&gt; blpop list1 10  <span class="comment">#移出并获取列表的第一个元素</span></span><br><span class="line">1) <span class="string">"list1"</span></span><br><span class="line">2) <span class="string">"3"</span></span><br><span class="line">127.0.0.1:6379[1]&gt; brpop list1 10 <span class="comment">#移出并获取列表的最后一个元素</span></span><br><span class="line">1) <span class="string">"list1"</span></span><br><span class="line">2) <span class="string">"2"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#通过索引获取列表中的元素</span></span><br><span class="line">127.0.0.1:6379[1]&gt; lindex list2 0</span><br><span class="line"><span class="string">"0"</span></span><br><span class="line">127.0.0.1:6379[1]&gt; lindex list2 5</span><br><span class="line"><span class="string">"5"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#从列表中取出最后一个元素,并插入到另外一个列表的头部</span></span><br><span class="line">redis&gt; BRPOPLPUSH list1 list2 500   <span class="comment"># msg非空列表</span></span><br><span class="line"><span class="string">"hello moto"</span>                        <span class="comment"># 弹出元素的值</span></span><br><span class="line">(3.38s)                             <span class="comment"># 等待时长</span></span><br><span class="line">redis&gt; LLEN list2</span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">redis&gt; LRANGE list2 0 0</span><br><span class="line">1) <span class="string">"hello moto"</span></span><br><span class="line">redis&gt; BRPOPLPUSH msg list2 1 <span class="comment">#msg为空列表</span></span><br><span class="line">(nil)</span><br><span class="line">(1.34s)</span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[1]&gt; rpoplpush list2 list3  <span class="comment">#移除列表的最后一个元素,并将该元素添加到另一个列表并返回</span></span><br><span class="line"><span class="string">"4"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#【重点】在列表的元素前或者后插入元素</span></span><br><span class="line">redis&gt; RPUSH mylist <span class="string">"Hello"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">redis&gt; RPUSH mylist <span class="string">"World"</span></span><br><span class="line">(<span class="built_in">integer</span>) 2</span><br><span class="line">redis&gt; LINSERT mylist BEFORE <span class="string">"World"</span> <span class="string">"There"</span></span><br><span class="line">(<span class="built_in">integer</span>) 3</span><br><span class="line">redis&gt; LRANGE mylist 0 -1</span><br><span class="line">1) <span class="string">"Hello"</span></span><br><span class="line">2) <span class="string">"There"</span></span><br><span class="line">3) <span class="string">"World"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#[重点]让列表只保留指定区间内的元素,不在指定区间之内的元素都将被删除 。</span></span><br><span class="line">redis 127.0.0.1:6379&gt; RPUSH mylist <span class="string">"hello"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">redis 127.0.0.1:6379&gt; RPUSH mylist <span class="string">"hello"</span></span><br><span class="line">(<span class="built_in">integer</span>) 2</span><br><span class="line">redis 127.0.0.1:6379&gt; RPUSH mylist <span class="string">"foo"</span></span><br><span class="line">(<span class="built_in">integer</span>) 3</span><br><span class="line">redis 127.0.0.1:6379&gt; RPUSH mylist <span class="string">"bar"</span></span><br><span class="line">(<span class="built_in">integer</span>) 4</span><br><span class="line">redis 127.0.0.1:6379&gt; LTRIM mylist 1 -1</span><br><span class="line">OK</span><br><span class="line">redis 127.0.0.1:6379&gt; LRANGE mylist 0 -1</span><br><span class="line">1) <span class="string">"hello"</span></span><br><span class="line">2) <span class="string">"foo"</span></span><br><span class="line">3) <span class="string">"bar"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#[重点]移除列表元素 返回被移除元素的数量。列表不存在时返回 0 。</span></span><br><span class="line">  <span class="comment"># COUNT 的值可以是以下几种：</span></span><br><span class="line">  <span class="comment"># count &gt; 0 : 从表头开始向表尾搜索,移除与 VALUE 相等的元素,数量为 COUNT 。</span></span><br><span class="line">  <span class="comment"># count &lt; 0 : 从表尾开始向表头搜索,移除与 VALUE 相等的元素,数量为 COUNT 的绝对值。</span></span><br><span class="line">  <span class="comment"># count = 0 : 移除表中所有与 VALUE 相等的值。</span></span><br><span class="line">redis&gt; RPUSH mylist <span class="string">"hello"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">redis&gt; RPUSH mylist <span class="string">"hello"</span></span><br><span class="line">(<span class="built_in">integer</span>) 2</span><br><span class="line">redis&gt; RPUSH mylist <span class="string">"foo"</span></span><br><span class="line">(<span class="built_in">integer</span>) 3</span><br><span class="line">redis&gt; RPUSH mylist <span class="string">"hello"</span></span><br><span class="line">(<span class="built_in">integer</span>) 4</span><br><span class="line">redis&gt; LREM mylist -2 <span class="string">"hello"</span></span><br><span class="line">(<span class="built_in">integer</span>) 2</span><br><span class="line">redis&gt; LRANGE mylist 0 -1</span><br><span class="line">1) <span class="string">"hello"</span></span><br><span class="line">2) <span class="string">"foo"</span></span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li><strong>Set(集合)</strong><br>Set是string类型的无序集合,集合是通过哈希表实现的,所以添加,删除,查找的复杂度都是O(1),集合成员是唯一的所以集合中不能出现重复的数据; 集合中最大的成员数为 232 - 1 (4294967295, 每个集合可存储40多亿个成员)。 </li>
+</ol>
+<p>(1) SADD key member1 [member2] #向集合添加一个或多个成员<br>(2) SCARD key   #获取集合的成员数(类似于llen)<br>(3) SDIFF key1 [key2]  #返回给定所有集合的差集<br>(4) SDIFFSTORE destination key1 [key2]  #返回给定所有集合的差集并存储在 destination 中<br>(5) SINTER key1 [key2]  #返回给定所有集合的交集<br>(6) SINTERSTORE destination key1 [key2]  #返回给定所有集合的交集并存储在 destination 中<br>(7) SISMEMBER key member  #判断 member 元素是否是集合 key 的成员<br>(8) SMEMBERS key  #返回集合中的所有成员<br>(9) SMOVE source destination member  #将 member 元素从 source 集合移动到 destination 集合<br>(10) SPOP key #移除并返回集合中的一个随机元素<br>(11) SRANDMEMBER key [count]  #返回集合中一个或多个随机数<br>(12) SREM key member1 [member2] #移除集合中一个或多个成员<br>(13) SUNION key1 [key2]   #返回所有给定集合的并集<br>(14) SUNIONSTORE destination key1 [key2]  #所有给定集合的并集存储在 destination 集合中<br>(15) SSCAN key cursor [MATCH pattern] [COUNT count]  #迭代集合中的元素</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#sadd key member #添加一个 string 元素到 key 对应的 set 集合中成功返回1,如果元素已经在集合中返回 0,如果 </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[2]&gt; sadd set1 1 2 3 4 5 6  <span class="comment">#(integer) 添加 6 个元素</span></span><br><span class="line">127.0.0.1:6379[2]&gt; sadd set2 1 3 5 7 9   <span class="comment">#(integer) 添加 5 个元素</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[2]&gt; scard set1   <span class="comment">#集合中元素的个数</span></span><br><span class="line">(<span class="built_in">integer</span>) 6</span><br><span class="line">127.0.0.1:6379[2]&gt; sismember set1 1  <span class="comment">#判断元素是不是在该集合中</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379[2]&gt; sismember set1 0</span><br><span class="line">(<span class="built_in">integer</span>) 0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[2]&gt; sdiff set1 set2  <span class="comment">#差集</span></span><br><span class="line">1) <span class="string">"2"</span></span><br><span class="line">2) <span class="string">"4"</span></span><br><span class="line">3) <span class="string">"6"</span></span><br><span class="line">127.0.0.1:6379[2]&gt; sdiffstore set3 set1 set2  <span class="comment"># 将set1与set2差集存入set3中 (integer) 3</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[2]&gt; sinter set1 set2  <span class="comment">#交集</span></span><br><span class="line">1) <span class="string">"1"</span></span><br><span class="line">2) <span class="string">"3"</span></span><br><span class="line">3) <span class="string">"5"</span></span><br><span class="line">127.0.0.1:6379[2]&gt; sinterstore set4 set1 set2 <span class="comment"># 将set1与set2交集存入set4中 (integer) 3</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[2]&gt; smove set1 set4 2  <span class="comment">#将集合set1中的元素为2的移动到set4集合中 (integer) 1</span></span><br><span class="line">127.0.0.1:6379[2]&gt; smembers set4  <span class="comment">#显示集合中的元素</span></span><br><span class="line">1) <span class="string">"1"</span></span><br><span class="line">2) <span class="string">"2"</span></span><br><span class="line">3) <span class="string">"3"</span></span><br><span class="line">4) <span class="string">"5"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[2]&gt; spop set1  <span class="comment">#移除并返回集合中的一个随机元素  "4"</span></span><br><span class="line">127.0.0.1:6379[2]&gt; srandmember set1 10  <span class="comment">#显示集合中指定的个数的元素值</span></span><br><span class="line">1) <span class="string">"1"</span></span><br><span class="line">2) <span class="string">"3"</span></span><br><span class="line">3) <span class="string">"5"</span></span><br><span class="line">4) <span class="string">"6"</span></span><br><span class="line">127.0.0.1:6379[2]&gt; srandmember set1 1</span><br><span class="line">1) <span class="string">"6"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[2]&gt; srem set1 1 3  <span class="comment">#删除set1集合中的1和3两个元素  (integer) 2</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[2]&gt; sunion set1 set2  <span class="comment">#并集</span></span><br><span class="line">1) <span class="string">"1"</span></span><br><span class="line">2) <span class="string">"3"</span></span><br><span class="line">3) <span class="string">"5"</span></span><br><span class="line">4) <span class="string">"6"</span></span><br><span class="line">5) <span class="string">"7"</span></span><br><span class="line">6) <span class="string">"9"</span></span><br><span class="line">127.0.0.1:6379[2]&gt; sunionstore set5 set1 set2  <span class="comment">#(integer) 6 并集 同上</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[2]&gt; sscan set5 1 match *   <span class="comment">#迭代集合中的元素</span></span><br><span class="line">1) <span class="string">"0"</span></span><br><span class="line">2) 1) <span class="string">"1"</span></span><br><span class="line">   2) <span class="string">"3"</span></span><br><span class="line">   3) <span class="string">"5"</span></span><br><span class="line">   4) <span class="string">"6"</span></span><br><span class="line">   5) <span class="string">"7"</span></span><br><span class="line">   6) <span class="string">"9"</span></span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ol start="5">
+<li><strong>zset(sorted set：有序集合)</strong><br>Redis zset 和 set 一样也是string类型元素的集合,且不允许重复的成员,集合是通过哈希表实现的;</li>
+</ol>
+<ul>
+<li>不同的是每个元素都会关联一个double类型的分数</li>
+<li>redis正是通过分数来为集合中的成员进行从小到大的排序</li>
+<li>zset的成员是唯一的,但分数(score)却可以重复</li>
+<li>集合中最大的成员数为 232 - 1 (4294967295, 每个集合可存储40多亿个成员)。</li>
+</ul>
+<p>其实在redis sorted sets里面当items内容大于64的时候同时使用了hash和skiplist两种设计实现。这也会为了排序和查找性能做的优化,所以如上可知： </p>
+<ul>
+<li>添加和删除都需要修改skiplist,所以复杂度为O(log(n))。 </li>
+<li>但是如果仅仅是查找元素的话可以直接使用hash,其复杂度为O(1) </li>
+<li>其他的range操作复杂度一般为O(log(n))</li>
+<li>当然如果是小于64的时候,因为是采用了ziplist的设计,其时间复杂度为O(n)</li>
+</ul>
+<p>(1) ZADD key score1 member1 [score2 member2]  #向有序集合添加一个或多个成员,或者更新已存在成员的分数<br>(2) ZCARD key #获取有序集合的成员数<br>(3) ZCOUNT key min max  #计算在有序集合中指定区间分数的成员数<br>(4) ZINCRBY key increment member  #有序集合中对指定成员的分数加上增量 increment<br>(5) ZINTERSTORE destination numkeys key [key …]  #计算给定的一个或多个有序集的交集并将结果集存储在新的有序集合 key 中<br>(6) ZLEXCOUNT key min max  #在有序集合中计算指定字典区间内成员数量<br>(7) ZRANGE key start stop [WITHSCORES]  #通过索引区间返回有序集合成指定区间内的成员,[分数从低到高]<br>(8) ZRANGEBYLEX key min max [LIMIT offset count]  #通过字典区间返回有序集合的成员<br>(9) ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT]  #通过分数返回有序集合指定区间内的成员<br>(10)ZRANK key member  #返回有序集合中指定成员的索引<br>(11)ZREM key member [member …]  #移除有序集合中的一个或多个成员<br>(12)ZREMRANGEBYLEX key min max  #移除有序集合中给定的字典区间的所有成员<br>(13)ZREMRANGEBYRANK key start stop #移除有序集合中给定的排名区间的所有成员<br>(14)ZREMRANGEBYSCORE key min max  #移除有序集合中给定的分数区间的所有成员<br>(15)ZREVRANGE key start stop [WITHSCORES]  #返回有序集中指定区间内的成员,通过索引,[分数从高到底]<br>(16)ZREVRANGEBYSCORE key max min [WITHSCORES]  #返回有序集中指定分数区间内的成员,分数从高到低排序<br>(17)ZREVRANK key member #返回有序集合中指定成员的排名,有序集成员按分数值递减(从大到小)排序<br>(18)ZSCORE key member  #返回有序集中,成员的分数值<br>(19)ZUNIONSTORE destination numkeys key [key …]  #计算给定的一个或多个有序集的并集,并存储在新的 key 中<br>(20)ZSCAN key cursor [MATCH pattern] [COUNT count]  #迭代有序集合中的元素（包括元素成员和元素分值）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#有序集合(重点)</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zadd zset 1 redis 1 python 1 php  <span class="comment"># (integer) 3 建立有序集合</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zadd zset 2 java 2 javascript 2 node.js  <span class="comment">#继续添加有序集合</span></span><br><span class="line">(<span class="built_in">integer</span>) 3</span><br><span class="line">127.0.0.1:6379[3]&gt; zcard zset    <span class="comment">#获取有序集合的成员数  (integer) 6</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zcount zset 0 2  <span class="comment">#计算在有序集合中指定区间分数的成员数 (integer) 6</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[3]&gt; zincrby zset 1 redis  <span class="comment"># increment "2" 有序集合中对指定成员的分数加上增量</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zrank zset redis      <span class="comment">#(integer) 5  返回有序集合中指定成员的索引</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[3]&gt; zincrby zset 7 redis  <span class="comment">#redis元素分数继续+7  "9"</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zlexcount zset 0 6   <span class="comment">#这时有序集合分数区间只有 (integer) 5</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[3]&gt; zrange zset 0 -1 withscores <span class="comment">#显示有序列表中的所有元素 withscores(显示分数)</span></span><br><span class="line"> 1) <span class="string">"php"</span></span><br><span class="line"> 2) <span class="string">"1"</span></span><br><span class="line"> 3) <span class="string">"python"</span></span><br><span class="line"> 4) <span class="string">"1"</span></span><br><span class="line"> 5) <span class="string">"java"</span></span><br><span class="line"> 6) <span class="string">"2"</span></span><br><span class="line"> 7) <span class="string">"javascript"</span></span><br><span class="line"> 8) <span class="string">"2"</span></span><br><span class="line"> 9) <span class="string">"node.js"</span></span><br><span class="line">10) <span class="string">"2"</span></span><br><span class="line">11) <span class="string">"redis"</span></span><br><span class="line">12) <span class="string">"9"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[3]&gt; zrangebyscore zset 0 2  <span class="comment">#通过分数返回有序集合指定区间内的成员</span></span><br><span class="line">1) <span class="string">"php"</span></span><br><span class="line">2) <span class="string">"python"</span></span><br><span class="line">3) <span class="string">"java"</span></span><br><span class="line">4) <span class="string">"javascript"</span></span><br><span class="line">5) <span class="string">"node.js"</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zrangebyscore zset 9 9</span><br><span class="line">1) <span class="string">"redis"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[3]&gt; zadd zset 0 php 1 php2 2 php3 3 php4  <span class="comment">#添加有序集合元素(integer) 4</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zrevrange zset 0 5 withscores  <span class="comment">##返回有序集中指定区间内的成员,通过索引,分数从高到底 </span></span><br><span class="line"> 1) <span class="string">"php4"</span></span><br><span class="line"> 2) <span class="string">"3"</span></span><br><span class="line"> 3) <span class="string">"php3"</span></span><br><span class="line"> 4) <span class="string">"2"</span></span><br><span class="line"> 5) <span class="string">"node.js"</span></span><br><span class="line"> 6) <span class="string">"2"</span></span><br><span class="line"> 7) <span class="string">"php2"</span></span><br><span class="line"> 8) <span class="string">"1"</span></span><br><span class="line"> 9) <span class="string">"php"</span></span><br><span class="line">10) <span class="string">"0"</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zrevrangebyscore zset 0 -1 <span class="comment">#返回有序集中指定分数区间内的成员,分数从高到低排序</span></span><br><span class="line">1) <span class="string">"php"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[3]&gt; zrevrank zset php  <span class="comment">#返回有序集合中指定成员的排名,有序集成员按分数值递减(从大到小)排序</span></span><br><span class="line">(<span class="built_in">integer</span>) 4</span><br><span class="line">127.0.0.1:6379[4]&gt; zscore zset node.js <span class="comment">#返回有序集中,成员的分数值</span></span><br><span class="line"><span class="string">"2"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[3]&gt; zrem zset redis  <span class="comment">#删除有序列表中指定元素 返回1  (integer) 1</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zrem zset redis  <span class="comment">#不存在列表中返回0 (integer) 0</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379[3]&gt; zremrangebyrank zset 0 1  <span class="comment">#移除有序集合中给定的字典区间的所有成员 (integer) 2</span></span><br><span class="line">127.0.0.1:6379[3]&gt; zremrangebyrank zset 0 1  <span class="comment">#(integer) 2 后面的成员回向前面补齐</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">""</span><span class="string">""</span></span><br><span class="line">Zlexcount 命令在计算有序集合中指定字典区间内成员数量</span><br><span class="line"><span class="string">""</span><span class="string">""</span></span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD myzset 0 a 0 b 0 c 0 d 0 e</span><br><span class="line">(<span class="built_in">integer</span>) 5</span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD myzset 0 f 0 g</span><br><span class="line">(<span class="built_in">integer</span>) 2</span><br><span class="line">redis 127.0.0.1:6379&gt; ZLEXCOUNT myzset - +</span><br><span class="line">(<span class="built_in">integer</span>) 7</span><br><span class="line">redis 127.0.0.1:6379&gt; ZLEXCOUNT myzset [b [f</span><br><span class="line">(<span class="built_in">integer</span>) 5</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">""</span><span class="string">""</span></span><br><span class="line">[重点]:通过字典区间返回有序集合的成员。 </span><br><span class="line"><span class="string">""</span><span class="string">""</span></span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD myzset 0 a 0 b 0 c 0 d 0 e 0 f 0 g</span><br><span class="line">(<span class="built_in">integer</span>) 7</span><br><span class="line">redis 127.0.0.1:6379&gt; ZRANGEBYLEX myzset - [c</span><br><span class="line">1) <span class="string">"a"</span></span><br><span class="line">2) <span class="string">"b"</span></span><br><span class="line">3) <span class="string">"c"</span></span><br><span class="line">redis 127.0.0.1:6379&gt; ZRANGEBYLEX myzset - (c</span><br><span class="line">1) <span class="string">"a"</span></span><br><span class="line">2) <span class="string">"b"</span></span><br><span class="line">redis 127.0.0.1:6379&gt; ZRANGEBYLEX myzset [aaa (g</span><br><span class="line">1) <span class="string">"b"</span></span><br><span class="line">2) <span class="string">"c"</span></span><br><span class="line">3) <span class="string">"d"</span></span><br><span class="line">4) <span class="string">"e"</span></span><br><span class="line">5) <span class="string">"f"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">""</span><span class="string">"</span></span><br><span class="line"><span class="string">[重点]:给定的一个或多个有序集的交集,其中给定 key 的数量必须以 numkeys 参数指定,并将该交集(结果集)储存到 destination 。 </span></span><br><span class="line"><span class="string">"</span><span class="string">""</span></span><br><span class="line"><span class="comment"># 有序集 mid_test</span></span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD mid_test 70 <span class="string">"Li Lei"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD mid_test 70 <span class="string">"Han Meimei"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD mid_test 99.5 <span class="string">"Tom"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 另一个有序集 fin_test</span></span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD fin_test 88 <span class="string">"Li Lei"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD fin_test 75 <span class="string">"Han Meimei"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">redis 127.0.0.1:6379&gt; ZADD fin_test 99.5 <span class="string">"Tom"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line"></span><br><span class="line">redis 127.0.0.1:6379&gt; ZINTERSTORE sum_point 2 mid_test fin_test <span class="comment"># 交集 (integer) 3</span></span><br><span class="line"><span class="comment"># 显示有序集内所有成员及其分数值</span></span><br><span class="line">redis 127.0.0.1:6379&gt; ZRANGE sum_point 0 -1 WITHSCORES     </span><br><span class="line">1) <span class="string">"Han Meimei"</span></span><br><span class="line">2) <span class="string">"145"</span></span><br><span class="line">3) <span class="string">"Li Lei"</span></span><br><span class="line">4) <span class="string">"158"</span></span><br><span class="line">5) <span class="string">"Tom"</span></span><br><span class="line">6) <span class="string">"199"</span></span><br></pre></td></tr></table></figure>
+<p><strong>总结应用场景：</strong><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 列表可以用来存储用户UID</span></span><br><span class="line"><span class="comment"># hash用来存储用户的信息</span></span><br><span class="line"><span class="comment"># set集合用来查看共同好友(唯一性)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 字符串 #</span></span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> Weiyi Geek  <span class="comment">#OK</span></span><br><span class="line">127.0.0.1:6379&gt; get Weiyi       <span class="comment">#"Geek"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># HASH #</span></span><br><span class="line">127.0.0.1:6379&gt; hmset <span class="built_in">hash</span> love1 <span class="string">"Python"</span> love2 <span class="string">"C++"</span>   <span class="comment">#注意键不能同名 OK</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 列表 #</span></span><br><span class="line">27.0.0.1:6379&gt; lpush list redis</span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; lpush list python</span><br><span class="line">(<span class="built_in">integer</span>) 2</span><br><span class="line">127.0.0.1:6379&gt; lrange list 0 10</span><br><span class="line">1) <span class="string">"python"</span></span><br><span class="line">2) <span class="string">"redis"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 集合 #</span></span><br><span class="line">127.0.0.1:6379&gt; sadd run redis</span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; sadd run redis1</span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; sadd run redis2</span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; smembers run</span><br><span class="line">1) <span class="string">"redis2"</span></span><br><span class="line">2) <span class="string">"redis1"</span></span><br><span class="line">3) <span class="string">"redis"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 有序集合 #</span></span><br><span class="line">127.0.0.1:6379&gt; zadd <span class="built_in">test</span> 0 redis</span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; zadd <span class="built_in">test</span> 0 python</span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379&gt; zrangebyscore runoob 0 1000  <span class="comment">#当请求没有键不会报错(注意)</span></span><br><span class="line">(empty list or <span class="built_in">set</span>)</span><br><span class="line">127.0.0.1:6379&gt; zrangebyscore <span class="built_in">test</span> 0 1000</span><br><span class="line">1) <span class="string">"python"</span></span><br><span class="line">2) <span class="string">"redis"</span></span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Redis数据库基础学习 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190417212047.png" title="WeiyiGeek.数据类型应用场景" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190417212047.png" alt="WeiyiGeek.数据类型应用场景" title class></a>
+                <p>WeiyiGeek.数据类型应用场景</p>
+            </figure>
+<h4 id="0x02-Redis-基础学习"><a href="#0x02-Redis-基础学习" class="headerlink" title="0x02 Redis 基础学习"></a>0x02 Redis 基础学习</h4><p>Redis支持多个数据库,并且每个数据库的数据是隔离的不能共享,并且基于单机才有,如果是集群就没有数据库的概念。</p>
+<p>Redis是一个字典结构的存储服务器,而实际上一个Redis实例提供了多个用来存储数据的字典,客户端可以指定将数据存储在哪个字典中。<br>这与我们熟知的在一个关系数据库实例中可以创建多个数据库类似,所以可以将其中的每个字典都理解成一个独立的数据库。</p>
+<ul>
+<li>每个数据库对外都是一个从0开始的递增数字命名,</li>
+<li>Redis默认支持16个数据库（可以通过配置文件支持更多,无上限）,可以通过配置databases来修改这一数字。</li>
+<li>客户端与Redis建立连接后会自动选择0号数据库,</li>
+<li>可以随时使用SELECT命令更换数据库,</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">redis&gt; SELECT 1  <span class="comment">#选择1号数据库</span></span><br><span class="line">OK</span><br><span class="line">redis [1] &gt; GET foo</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+<p>然而这些以数字命名的数据库又与我们理解的数据库有所区别：</p>
+<ul>
+<li>首先Redis不支持自定义数据库的名字,每个数据库都以编号命名,开发者必须自己记录哪些数据库存储了哪些数据。</li>
+<li>另外Redis也不支持为每个数据库设置不同的访问密码,所以一个客户端要么可以访问全部数据库,要么连一个数据库也没有权限访问。</li>
+<li>最重要的一点是多个数据库之间并不是完全隔离的,比如FLUSHALL命令可以清空一个Redis实例中所有数据库中的数据。</li>
+</ul>
+<p>综上所述redis数据库更像是一种命名空间,而不适宜存储不同应用程序的数据。<br>比如：可以使用0号数据库存储某个应用生产环境中的数据,使用1号数据库存储测试环境中的数据,但不适宜使用0号数据库存储A应用的数据而使用1号数据库B应用的数据,<em>不同的应用应该使用不同的Redis实例存储数据</em>。</p>
+<p><br></p>
+<p><strong>(0) 基础操作</strong><br>描述：即链接上redis后在<code>127.0.0.1:6379&gt;</code>中执行的内置命令，首先我们需要使用redis-cli连接redis数据库,如果有认证则需要auth命令进行认证;<br>PS:</p>
+<ul>
+<li>内置命令不区分大小写</li>
+<li>默认至多16号仓库即(db0~db15)</li>
+</ul>
+<p>内置命令基础使用:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#1.连接Redis数据库</span></span><br><span class="line">redis-cli -h 127.0.0.1</span><br><span class="line">127.0.0.1:6379&gt; keys *</span><br><span class="line">(error) NOAUTH Authentication required.</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.Redis 登陆验证</span></span><br><span class="line">127.0.0.1:6379&gt; auth weiyigeek.top</span><br><span class="line">OK</span><br><span class="line"></span><br><span class="line"><span class="comment">#3.ping 测试链接是否存活</span></span><br><span class="line">127.0.0.1:6379&gt; ping</span><br><span class="line">PONG</span><br><span class="line"></span><br><span class="line"><span class="comment">#4.select 选择redis数据库号(db0~15),可以选择任意一个仓库进行数据库存取</span></span><br><span class="line">127.0.0.1:6379&gt; select 1</span><br><span class="line">127.0.0.1:6379&gt; select 16  </span><br><span class="line">(error) ERR DB index is out of range  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#5.dbsize 返回当前数据库中的Key数目</span></span><br><span class="line">127.0.0.1:6379&gt; select 1</span><br><span class="line">127.0.0.1:6379[1]&gt; DBSIZE</span><br><span class="line">(<span class="built_in">integer</span>) 2</span><br><span class="line">127.0.0.1:6379[1]&gt; dbsize</span><br><span class="line">(<span class="built_in">integer</span>) 2</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#4.info 获取服务器统计信息</span></span><br><span class="line">127.0.0.1:6379[1]&gt; info</span><br><span class="line"><span class="comment"># Server</span></span><br><span class="line">redis_version:5.0.8</span><br><span class="line">redis_git_sha1:00000000</span><br><span class="line">redis_git_dirty:0</span><br><span class="line">redis_build_id:ce75a617c591114f</span><br><span class="line">redis_mode:standalone</span><br><span class="line">os:Linux 4.18.0-147.5.1.el8_1.x86_64 x86_64</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#5.flushdb 删除当前选择数据库中的所有key</span></span><br><span class="line">127.0.0.1:6379[1]&gt; FLUSHDB</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379[1]&gt; DBSIZE</span><br><span class="line">(<span class="built_in">integer</span>) 0</span><br><span class="line"></span><br><span class="line"><span class="comment">#6.flushall 删除所有仓库中所有key</span></span><br><span class="line">127.0.0.1:6379[1]&gt; FLUSHALL</span><br><span class="line">OK</span><br><span class="line"></span><br><span class="line"><span class="comment">#7.echo 指定字符串输出</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"WeiyigGeek"</span></span><br><span class="line"><span class="string">"WeiyigGeek"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#8.move 将Redis键移植到其它库中</span></span><br><span class="line"><span class="comment"># 将db0中的mykey键移动到1号仓库，然后进入db1进行查看键</span></span><br><span class="line">&gt; move mykey 1</span><br><span class="line">&gt; select 1</span><br><span class="line">&gt; keys *</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>(1) HyperLogLog</strong><br>在2.8.9版本添加了HyperLogLog结构是是用来做基数统计的算法;</p>
+<p><em>Q:什么是基数?</em><br>答:比如数据集 {1, 3, 5, 7, 5, 7, 8}, 那么这个数据集的基数集为 {1, 3, 5 ,7, 8}, 基数(不重复元素)为5;基数估计就是在误差可接受的范围内,快速计算基数。 </p>
+<p><em>HyperLogLog 的优点:</em></p>
+<ul>
+<li>输入元素的数量或者体积非常非常大时,计算基数所需的空间总是固定的、并且是很小的。</li>
+<li>每个 HyperLogLog 键只需要花费 12 KB 内存,就可以计算接近 2^64 个不同元素的基数</li>
+<li>根据输入元素来计算基数,而不会储存输入元素本身,所以 HyperLogLog 不能像集合那样,返回输入的各个元素</li>
+</ul>
+<p>1)PFADD key element [element …]  #添加指定元素到 HyperLogLog 中。<br>2)PFCOUNT key [key …]  #返回给定 HyperLogLog 的基数估算值。<br>3)PFMERGE destkey sourcekey [sourcekey …]  #将多个 HyperLogLog 合并为一个 HyperLogLog </p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">127.0.0.1:6379[5]&gt; pfadd hyper <span class="string">"redis"</span> <span class="string">"mongodb"</span> <span class="string">"mysql"</span> <span class="string">"python"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379[5]&gt; pfadd <span class="built_in">log</span> <span class="string">"java"</span> <span class="string">"javascript"</span> <span class="string">"web"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">127.0.0.1:6379[5]&gt; pfcount hyper <span class="built_in">log</span>  <span class="comment">#基数估算值 </span></span><br><span class="line">(<span class="built_in">integer</span>) 7</span><br><span class="line">127.0.0.1:6379[5]&gt; pfcount hyper   <span class="comment">#基数估算值 </span></span><br><span class="line">(<span class="built_in">integer</span>) 4 </span><br><span class="line">127.0.0.1:6379[5]&gt; pfmerge descLog hyper <span class="built_in">log</span>   <span class="comment">#将两个keys进行合并到descLog</span></span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379[5]&gt; pfcount descLog</span><br><span class="line">(<span class="built_in">integer</span>) 7</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<p><strong>(2) Redis发布订阅</strong><br><em>什么是pub/sub?</em><br>答:Pub/Sub功能（means Publish, Subscribe）即发布及订阅功能,基于事件的系统中，Pub/Sub是目前广泛使用的通信模型，它采用事件作为基本的通信机制，提供大规模系统所要求的松散耦合的交互模式;<br>同样Redis的pub/sub是一种消息通信模式，主要的目的是解除消息发布者和消息订阅者之间的耦合,Redis作为一个pub/sub的server,在订阅者和发布者之间起到了消息路由的功能。</p>
+<p>描述:类似于MQTT协议一样,Redis也支持发布订阅(pub/sub)消息通信模式(发送者(pub)发送消息,订阅者(sub)接收消息),Redis客户端可以订阅任意数量的频道<br><figure class="image-box">
+                <a rel=Redis数据库基础学习 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190418232047.png" title="WeiyiGeek.redis发布订阅" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190418232047.png" alt="WeiyiGeek.redis发布订阅" title class></a>
+                <p>WeiyiGeek.redis发布订阅</p>
+            </figure></p>
+<p>基础命令:</p>
+<ul>
+<li>(1) PSUBSCRIBE pattern [pattern …]  #订阅一个或多个符合给定模式的频道。<code>(可以采用通配符)</code></li>
+<li><p>(5) SUBSCRIBE channel [channel …]   #订阅给定的一个或多个频道的信息。</p>
+</li>
+<li><p>(2) PUBSUB subcommand [argument [argument …]]  #查看订阅与发布系统状态。</p>
+</li>
+<li><p>(3) PUBLISH channel message  #将信息发送到指定的频道。</p>
+</li>
+<li><p>(6) UNSUBSCRIBE [channel [channel …]]  #指退订给定的频道。</p>
+</li>
+<li>(4) PUNSUBSCRIBE [pattern [pattern …]]  #退订所有给定模式的频道。</li>
+</ul>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 终端1 (订阅频道)</span></span><br><span class="line">127.0.0.1:6379[6]&gt; subscribe redisChat</span><br><span class="line">Reading messages... (press Ctrl-C to quit)</span><br><span class="line">1) <span class="string">"subscribe"</span></span><br><span class="line">2) <span class="string">"redisChat"</span></span><br><span class="line">3) (<span class="built_in">integer</span>) 1</span><br><span class="line">1) <span class="string">"message"</span></span><br><span class="line">2) <span class="string">"redisChat"</span></span><br><span class="line">3) <span class="string">"Redis pub/sub"</span></span><br><span class="line">1) <span class="string">"message"</span></span><br><span class="line">2) <span class="string">"redisChat"</span></span><br><span class="line">3) <span class="string">"Hello World!MQTT"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 终端2 (发布频道)</span></span><br><span class="line">192.168.1.100:6379&gt; publish redisChat <span class="string">"Redis pub/sub"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">192.168.1.100:6379&gt; publish redisChat <span class="string">"Hello World!MQTT"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line">192.168.1.100:6379&gt; publish redisChat <span class="string">"Hello World!Redis Channel"</span></span><br><span class="line">(<span class="built_in">integer</span>) 1</span><br><span class="line"></span><br><span class="line">192.168.1.100:6379&gt; pubsub CHANNELS redis* <span class="comment">#命令用于查看订阅与发布系统状态</span></span><br><span class="line">1) <span class="string">"redisChat"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 终端3 (订阅频道)</span></span><br><span class="line">127.0.0.1:6379[6]&gt; psubscribe redis*  <span class="comment">#通配符(匹配redis以及redis字符串拼接的发布频道)</span></span><br><span class="line">Reading messages... (press Ctrl-C to quit)</span><br><span class="line">1) <span class="string">"subscribe"</span></span><br><span class="line">2) <span class="string">"redis*"</span></span><br><span class="line">3) (<span class="built_in">integer</span>) 1</span><br><span class="line"><span class="string">"Hello World!Redis  Channel"</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>(3) Redis事务</strong><br>描述:事务可以一次执行多个命令, 并且带有以下两个重要的保证：</p>
+<ul>
+<li>批量操作在发送 EXEC 命令前被放入队列缓存。</li>
+<li>收到 EXEC 命令后进入事务执行,事务中任意命令执行失败,其余的命令依然被执行。</li>
+<li>在事务执行过程,其他客户端提交的命令请求不会插入到事务执行命令序列中。</li>
+</ul>
+<p>一个事务从开始到执行会经历以下三个阶段：</p>
+<ul>
+<li>开始事务</li>
+<li>命令入队</li>
+<li>执行事务</li>
+</ul>
+<p>以下命令是实现事务的基石<br>(1)MULTI   标记一个事务块的开始 == <code>BEGIN TRANSACTION</code><br>(2)EXEC    提交执行所有事务块内的命令 == <code>COMMIT</code><br>(3)DISCARD 取消事务,放弃执行事务块内的所有命令 == <code>ROLLBACK</code><br>(4)WATCH key [key …] 监视一个(或多个) key,如果在事务执行之前这个(或这些) key 被其他命令所改动,那么事务将被打断<br>(5)UNWATCH 取消 WATCH 命令对所有 key 的监视。</p>
+<p><br></p>
+<p>Redis事务特征：</p>
+<ul>
+<li>1.在事务执行中所有命令都将会被串行化的顺序执行(<code>效率低但是由于操作的是内存所以忽略不计</code>)，并且在该事务执行期间Redis不会再为其它客户端的请求提供任何服务(<code>保证了事务中的所有命令被原子执行</code>);</li>
+<li>2.在事务执行失败后其后面的命令任然会继续执行，此点与关系型数据库事务相比有些许不同</li>
+<li>3.在事务执行中命令MULTI可以看做关系型数据库中<code>BEGIN TRANSACTION</code>,而EXEC与DISCARD命令来提交/回滚事务内的所有操作等同于<code>COMMIT 与 ROLLBACK</code> 语句;</li>
+<li>4.在事务执行过程中如果Client与Server出现通讯故障并导致网络断开，其后所执行的语句将不会被服务器指向，但是如果网络中断事件发生在EXEC命令之后则任然执行;</li>
+<li>5.在事务执行中使用Append-Only模式此时Redis会调用系统函数write将该事务内的所有写操作在本次调用中全部写入硬盘;但是如果在写入过程中出现系统崩溃导致数据写不完整，此时在Redis重启后会进行一致性检测如果发现问题将会提示;</li>
+</ul>
+<p>PSTips:</p>
+<ul>
+<li>当Redis进行错误提示我们可以利用Redis-check-aof工具帮助我们定位到数据不一致的错误，并将已经写入部分数据进行回滚，之后重启数据库即可;</li>
+</ul>
+<p><br></p>
+<p>示例1.它先以 MULTI 开始一个事务, 然后将多个命令入队到事务中, 最后由 EXEC 命令触发事务, 一并执行事务中的所有命令<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">192.168.1.100:6379[7]&gt; multi  <span class="comment">#开启事务</span></span><br><span class="line">192.168.1.100:6379[7]&gt; <span class="built_in">set</span> book-name <span class="string">"redis 入门到放弃"</span></span><br><span class="line">QUEUED</span><br><span class="line">192.168.1.100:6379[7]&gt; get book-name</span><br><span class="line">QUEUED</span><br><span class="line">192.168.1.100:6379[7]&gt; sadd tag <span class="string">"redis"</span> <span class="string">"数据库"</span> <span class="string">"基础入门"</span></span><br><span class="line">QUEUED</span><br><span class="line">192.168.1.100:6379[7]&gt; smembers tag</span><br><span class="line">QUEUED</span><br><span class="line">192.168.1.100:6379[7]&gt; <span class="built_in">exec</span>  <span class="comment">#触发事务(将建立的k-v写入)</span></span><br><span class="line">1) OK</span><br><span class="line">2) <span class="string">"redis \xe5\x85\xa5\xe9\x97\xa8\xe5\x88\xb0\xe6\x94\xbe\xe5\xbc\x83"</span></span><br><span class="line">3) (<span class="built_in">integer</span>) 3</span><br><span class="line">4) 1) <span class="string">"\xe6\x95\xb0\xe6\x8d\xae\xe5\xba\x93"</span></span><br><span class="line">   2) <span class="string">"redis"</span></span><br><span class="line">   3) <span class="string">"\xe5\x9f\xba\xe7\xa1\x80\xe5\x85\xa5\xe9\x97\xa8\xef\xbc\xe2\x80"</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>示例2.事务回滚<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">127.0.0.1:6379&gt; SELECT 1</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379[1]&gt; <span class="built_in">set</span> name WeiyiGeek</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379[1]&gt; get name</span><br><span class="line"><span class="string">"WeiyiGeek"</span></span><br><span class="line">127.0.0.1:6379[1]&gt; MULTI</span><br><span class="line">OK </span><br><span class="line">127.0.0.1:6379[1]&gt; <span class="built_in">set</span> name Redis  <span class="comment">#在事务中重新设置name键值</span></span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379[1]&gt; get name</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379[1]&gt; DISCARD  <span class="comment">#不提交事务即回滚</span></span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379[1]&gt; get name  <span class="comment">#显示事务开启前的name键值</span></span><br><span class="line"><span class="string">"WeiyiGeek"</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>示例3.失败命令自动剔除执行案例<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> num 10</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; get num</span><br><span class="line"><span class="string">"10"</span></span><br><span class="line">127.0.0.1:6379&gt; MULTI</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; INCRBY num 5</span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; INCRBY num x  <span class="comment">#异常加值</span></span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; INCRBY num 5  <span class="comment"># 15 + 5</span></span><br><span class="line">QUEUED</span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">exec</span></span><br><span class="line">1) (<span class="built_in">integer</span>) 15</span><br><span class="line">2) (error) ERR value is not an <span class="built_in">integer</span> or out of range  <span class="comment">#当事务提交后执行所有操作当操作异常时候将被忽略;</span></span><br><span class="line">3) (<span class="built_in">integer</span>) 20</span><br><span class="line">127.0.0.1:6379&gt; get num</span><br><span class="line"><span class="string">"20"</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h4 id="0x03-后端语言连接Redis"><a href="#0x03-后端语言连接Redis" class="headerlink" title="0x03 后端语言连接Redis"></a>0x03 后端语言连接Redis</h4><h5 id="0-Redis-脚本"><a href="#0-Redis-脚本" class="headerlink" title="(0) Redis 脚本"></a>(0) Redis 脚本</h5><p>Redis 脚本使用 Lua 解释器来执行脚本,通过内嵌支持 Lua 环境,执行脚本的常用命令为 EVAL。 </p>
+<ol>
+<li>EVAL script numkeys key [key …] arg [arg …]  #执行 Lua 脚本。</li>
+</ol>
+<ul>
+<li>script：Lua 脚本程序</li>
+<li>numkeys：用于指定键名参数的个数。</li>
+<li>key [key …]：从 EVAL 的第三个参数开始算起,表示在脚本中所用到的那些 Redis 键(key),这些键名参数可以在 Lua 中通过全局变量 KEYS 数组,用 1 为基址的形式访问( KEYS[1] , KEYS[2] ,以此类推)。</li>
+<li>arg [arg …]： 附加参数</li>
+</ul>
+<ol start="2">
+<li>EVALSHA sha1 numkeys key [key …] arg [arg …] #根据给定的 sha1 校验码，执行缓存在服务器中的脚本</li>
+</ol>
+<ul>
+<li>sha1:通过 SCRIPT LOAD 生成的 sha1 校验码。</li>
+</ul>
+<ol start="3">
+<li>SCRIPT EXISTS script [script …] 查看指定的脚本是否已经被保存在缓存当中。</li>
+<li>SCRIPT FLUSH 从脚本缓存中移除所有脚本。</li>
+<li>SCRIPT KILL 杀死运行的Lua脚本,主要用于终止运行时间过长的脚本，比如一个因为 BUG 而发生无限循环的脚本</li>
+<li>SCRIPT LOAD script 将脚本 script 添加到脚本缓存中,但并不立即执行这个脚本。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">192.168.1.100:6379[7]&gt;  EVAL <span class="string">"return &#123;KEYS[1],KEYS[2],ARGV[1],ARGV[2]&#125;"</span> 2 key1 key2 first second</span><br><span class="line">1) <span class="string">"key1"</span></span><br><span class="line">2) <span class="string">"key2"</span></span><br><span class="line">3) <span class="string">"first"</span></span><br><span class="line">4) <span class="string">"second"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; SCRIPT LOAD <span class="string">"return 'hello moto'"</span> <span class="comment">#将脚本 script 添加到脚本缓存中，但并不立即执行这个脚本</span></span><br><span class="line"><span class="string">"232fd51614574cf0867b83d384a5e898cfd24e5a"</span>  <span class="comment">#给定脚本的 SHA1 校验和 </span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; SCRIPT EXISTS 232fd51614574cf0867b83d384a5e898cfd24e5a <span class="comment">#校验指定的脚本是否已经被保存在缓存当</span></span><br><span class="line">1) (<span class="built_in">integer</span>) 1</span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; EVALSHA <span class="string">"232fd51614574cf0867b83d384a5e898cfd24e5a"</span> 0</span><br><span class="line"><span class="string">"hello moto"</span></span><br><span class="line"></span><br><span class="line">127.0.0.1:6379&gt; SCRIPT FLUSH     <span class="comment"># 清空缓存OK</span></span><br><span class="line">127.0.0.1:6379&gt; SCRIPT Kill     <span class="comment"># 杀死当前正在运行的 Lua 脚本</span></span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h5 id="1-php连接使用redis"><a href="#1-php连接使用redis" class="headerlink" title="(1) php连接使用redis"></a>(1) php连接使用redis</h5><p>扩展官网：<a href="https://pecl.php.net/package/redis" target="_blank" rel="noopener">https://pecl.php.net/package/redis</a>  //下载与php对应得版本(非常注意操作系统得位数)<br>环境：WINDOW7/XMAPP/PHP7.2<br>安装扩展：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#Step1.下载TS版本且32位系统</span><br><span class="line">PHP 7.2 Thread Safe (TS) x86</span><br><span class="line">#Step2.解压php_redis.dll到php根目录中ext目录中</span><br><span class="line">#Step3.在php.ini配置启用redis扩展;extension = php_redis</span><br><span class="line">#Step4.执行php -m 查看是否有该模块</span><br><span class="line"></span><br><span class="line">@Linux下安装redis(百度即可)</span><br><span class="line">PHP redis 驱动：下载地址为:https://github.com/phpredis/phpredis/releases</span><br><span class="line">pipize/php-config</span><br></pre></td></tr></table></figure></p>
+<p>php连接使用redis案例：<br><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/***</span></span><br><span class="line"><span class="comment"> * 功能：实现redis连接以及5种数据类型元素建立</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"> <span class="comment">//Step1.实例化redis对象设置连接参数</span></span><br><span class="line">$redis = <span class="keyword">new</span> \Redis();</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    $link = $redis-&gt;pconnect(<span class="string">'127.0.0.1'</span>,<span class="number">6379</span>,<span class="number">1</span>,<span class="keyword">NULL</span>,<span class="number">100</span>); <span class="comment">#设置超时时间并且重试（返回Boolean）</span></span><br><span class="line">    <span class="keyword">if</span>(!$link)&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="keyword">Exception</span>(<span class="string">"!Redis服务器连接失败"</span>); <span class="comment">//抛出异常</span></span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"Redis连接成功!&lt;br&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">catch</span>(<span class="keyword">Exception</span> $e)&#123;</span><br><span class="line">    print_r($e);</span><br><span class="line">    <span class="keyword">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Step2.进行redis认证</span></span><br><span class="line"><span class="keyword">if</span>($redis-&gt;auth(<span class="string">'weiyigeek'</span>))</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"Redis AUTH 认证成功!&lt;br&gt;"</span>;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"Redis AUTH 认证失败!"</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Step3.String 类型</span></span><br><span class="line">$redis-&gt;set(<span class="string">'name'</span>,<span class="string">'Weiyigeek'</span>);        <span class="comment">//设置String类型键值</span></span><br><span class="line">$redis-&gt;mSet([<span class="string">'id'</span>=&gt;<span class="string">'Weiyi'</span>,<span class="string">'age'</span>=&gt;<span class="number">22</span>]); </span><br><span class="line">$redis-&gt;setEx(<span class="string">'key'</span>,<span class="number">120</span>,<span class="string">'value'</span>);  <span class="comment">//存活2分钟</span></span><br><span class="line"></span><br><span class="line">$strLen = $redis-&gt;strlen(<span class="string">'name'</span>);  <span class="comment">//获取字符串长度</span></span><br><span class="line">$type = $redis-&gt;type(<span class="string">'age'</span>);     <span class="comment">//返回其类型</span></span><br><span class="line">$redis-&gt;incrBy(<span class="string">'age'</span>,<span class="number">8</span>);    <span class="comment">//String类型进行计算</span></span><br><span class="line">$getValue = $redis-&gt;mGet([<span class="string">'name'</span>,<span class="string">'id'</span>,<span class="string">'age'</span>]); <span class="comment">//获取String</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"name键的字符串长度："</span>.$strLen.<span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($type);</span><br><span class="line">var_dump($getValue);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt; &lt;br&gt;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">######### 执行结果 ###########</span></span><br><span class="line"><span class="comment">// Redis连接成功!</span></span><br><span class="line"><span class="comment">// Redis AUTH 认证成功!</span></span><br><span class="line"><span class="comment">// name键的字符串长度：9</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// int(1)</span></span><br><span class="line"><span class="comment">// array(3) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(9) "Weiyigeek"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(5) "Weiyi"</span></span><br><span class="line"><span class="comment">//   [2]=&gt;</span></span><br><span class="line"><span class="comment">//   string(2) "30"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//Step2.List 类型</span></span><br><span class="line">$redis-&gt;delete(<span class="string">'list1'</span>); </span><br><span class="line">$redis-&gt;lpush(<span class="string">'list1'</span>,<span class="string">'A'</span>,<span class="string">'C'</span>); <span class="comment">//直接插入多个元素 从左边开始插入 -&gt;</span></span><br><span class="line">$redis-&gt;rpush(<span class="string">'list1'</span>,<span class="string">'B'</span>);</span><br><span class="line"></span><br><span class="line">$redis-&gt;delete(<span class="string">'key1'</span>);</span><br><span class="line">$redis-&gt;rPush(<span class="string">'key1'</span>, <span class="string">'A'</span>,<span class="string">'B'</span>,<span class="string">'C'</span>,<span class="string">'D'</span>); <span class="comment">// returns 3 从右边开始插&lt;-</span></span><br><span class="line"></span><br><span class="line">$lcount = $redis-&gt;lLen(<span class="string">'key1'</span>); <span class="comment">//元素个数</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"key1元素个数:"</span>.$lcount.<span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($redis-&gt;lRange(<span class="string">'list1'</span>, <span class="number">0</span>, <span class="number">-1</span>));</span><br><span class="line">var_dump($redis-&gt;lRange(<span class="string">'key1'</span>, <span class="number">0</span>, <span class="number">-1</span>));</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt; &lt;br&gt;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">######### 执行结果 ###########</span></span><br><span class="line"><span class="comment">// key1元素个数:4</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// array(3) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "C"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "A"</span></span><br><span class="line"><span class="comment">//   [2]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "B"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"><span class="comment">// array(4) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "A"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "B"</span></span><br><span class="line"><span class="comment">//   [2]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "C"</span></span><br><span class="line"><span class="comment">//   [3]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "D"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//Step3.Hash 类型</span></span><br><span class="line">$redis-&gt;delete(<span class="string">'driver1'</span>);</span><br><span class="line">$redis-&gt;hSet(<span class="string">'driver1'</span>,<span class="string">'name'</span>,<span class="string">'张伟'</span>);</span><br><span class="line">$redis-&gt;hSet(<span class="string">'driver1'</span>,<span class="string">'age'</span>,<span class="string">'22'</span>);</span><br><span class="line">$redis-&gt;hSet(<span class="string">'driver1'</span>,<span class="string">'gender'</span>,<span class="number">0</span>);</span><br><span class="line">$redis-&gt;hSet(<span class="string">'driver1'</span>,<span class="string">'love'</span>,<span class="string">'Play Computer!'</span>);</span><br><span class="line"></span><br><span class="line">$hcount = $redis-&gt;hLen(<span class="string">'driver1'</span>);  <span class="comment">//散列个数</span></span><br><span class="line">$hlen = $redis-&gt;hStrLen(<span class="string">'driver1'</span>,<span class="string">'love'</span>); <span class="comment">//散列种键值的长度</span></span><br><span class="line">$var = $redis-&gt;hGet(<span class="string">'driver1'</span>,<span class="string">'name'</span>);  <span class="comment">//获取HASH种的键值</span></span><br><span class="line">$var1 = $redis-&gt;hMGet(<span class="string">'driver1'</span>,<span class="keyword">array</span>(<span class="string">'age'</span>,<span class="string">'gender'</span>,<span class="string">'love'</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"散列driver1的长度为："</span>.$hcount.<span class="string">", Love字段值的长度："</span>.$hlen.<span class="string">"&lt;br&gt;&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($var);</span><br><span class="line">var_dump($var1);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt;&lt;br&gt;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">######### 执行结果 ###########</span></span><br><span class="line"><span class="comment">// 散列driver1的长度为：4, Love字段值的长度：14</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// string(6) "张伟"</span></span><br><span class="line"><span class="comment">// array(3) &#123;</span></span><br><span class="line"><span class="comment">//   ["age"]=&gt;</span></span><br><span class="line"><span class="comment">//   string(2) "22"</span></span><br><span class="line"><span class="comment">//   ["gender"]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "0"</span></span><br><span class="line"><span class="comment">//   ["love"]=&gt;</span></span><br><span class="line"><span class="comment">//   string(14) "Play Computer!"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//Step4.set类型</span></span><br><span class="line">$redis-&gt;sRem(<span class="string">'set1'</span>,<span class="string">'A'</span>,<span class="string">'B'</span>,<span class="string">'C'</span>,<span class="string">'D'</span>);  <span class="comment">//删除集合种的元素</span></span><br><span class="line">$redis-&gt;sAdd(<span class="string">'set1'</span>,<span class="string">'B'</span>,<span class="string">'A'</span>,<span class="string">'C'</span>,<span class="string">'D'</span>);  <span class="comment">//添加集合元素</span></span><br><span class="line">$redis-&gt;sAdd(<span class="string">'set2'</span>,<span class="string">'B'</span>,<span class="string">'D'</span>,<span class="string">'E'</span>,<span class="string">'F'</span>);</span><br><span class="line"></span><br><span class="line">$sCount = $redis-&gt;sCard(<span class="string">'set1'</span>);  <span class="comment">//获取集合种的值</span></span><br><span class="line">$sinter = $redis-&gt;sInter(<span class="string">'set1'</span>,<span class="string">'set2'</span>); <span class="comment">//集合set1与set2的交集</span></span><br><span class="line"></span><br><span class="line">$diffCount = $redis-&gt;sDiffStore(<span class="string">'set3'</span>, <span class="string">'set1'</span>, <span class="string">'set2'</span>); <span class="comment">//将集合set1 - set2的差集存(A,C)入set3种</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"集合set1的长度为："</span>.$sCount.<span class="string">", set1与set2差集元素的个数为："</span>.$diffCount.<span class="string">"&lt;br&gt;&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($sinter);  <span class="comment">//交</span></span><br><span class="line">var_dump($redis-&gt;sMembers(<span class="string">'set3'</span>)); <span class="comment">//差集</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt;&lt;br&gt;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">######### 执行结果 ###########</span></span><br><span class="line"><span class="comment">// 集合set1的长度为：4, set1与set2差集元素的个数为：2</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// array(2) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "B"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "D"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"><span class="comment">// array(2) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "C"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "A"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//Step5.sort set 有序集合类型</span></span><br><span class="line">$redis-&gt;delete(<span class="string">'zset1'</span>);</span><br><span class="line">$redis-&gt;zAdd(<span class="string">'zset1'</span>,<span class="number">1.0</span>,<span class="string">'zhanghai'</span>);</span><br><span class="line">$redis-&gt;zAdd(<span class="string">'zset1'</span>,<span class="number">3.0</span>,<span class="string">'Weiyigeek'</span>);</span><br><span class="line">$redis-&gt;zAdd(<span class="string">'zset1'</span>,<span class="number">7.5</span>,<span class="string">'Chenghuiming'</span>);</span><br><span class="line">$redis-&gt;zAdd(<span class="string">'zset1'</span>,<span class="number">8.6</span>,<span class="string">'Kangkang'</span>);</span><br><span class="line"></span><br><span class="line">$zCount = $redis-&gt;zCard(<span class="string">'zset1'</span>); <span class="comment">//有序集合键里有多个元素</span></span><br><span class="line">$zCount1 = $redis-&gt;zCount(<span class="string">'zset1'</span>,<span class="number">0</span>,<span class="number">5.0</span>);  <span class="comment">//score在0~5之间的个数</span></span><br><span class="line">$desc = $redis-&gt;zRange(<span class="string">'zset1'</span>,<span class="number">0</span>,<span class="number">-1</span>,<span class="keyword">true</span>); <span class="comment">//分数从小到大排列 （最后一个参数是显示分数）</span></span><br><span class="line">$asc = $redis-&gt;zRevRange(<span class="string">'zset1'</span>,<span class="number">0</span>,<span class="number">-1</span>,<span class="keyword">true</span>); <span class="comment">//分数从大到小排列</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"有序集合zset1有 "</span>.$zCount.<span class="string">"个元素,且score分数在0~5之间的个数："</span>.$zCount1.<span class="string">"&lt;br&gt;&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($desc);</span><br><span class="line">var_dump($asc);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt;"</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">######### 执行结果 ###########</span></span><br><span class="line"><span class="comment">// 有序集合zset1有 4个元素,且score分数在0~5之间的个数：2</span></span><br><span class="line"><span class="comment">// array(4) &#123;</span></span><br><span class="line"><span class="comment">//   ["zhanghai"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(1)</span></span><br><span class="line"><span class="comment">//   ["Weiyigeek"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(3)</span></span><br><span class="line"><span class="comment">//   ["Chenghuiming"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(7.5)</span></span><br><span class="line"><span class="comment">//   ["Kangkang"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(8.6)</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"><span class="comment">// array(4) &#123;</span></span><br><span class="line"><span class="comment">//   ["Kangkang"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(8.6)</span></span><br><span class="line"><span class="comment">//   ["Chenghuiming"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(7.5)</span></span><br><span class="line"><span class="comment">//   ["Weiyigeek"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(3)</span></span><br><span class="line"><span class="comment">//   ["zhanghai"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(1)</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="2-C-连接使用redis"><a href="#2-C-连接使用redis" class="headerlink" title="(2) C#连接使用redis"></a>(2) C#连接使用redis</h5><p>高性能Redis协议封装，支持.Net Core，经过一年多日均80亿调用量验证<br>项目地址：<a href="http://git.newlifex.com/NewLife/NewLife.Redis" target="_blank" rel="noopener">http://git.newlifex.com/NewLife/NewLife.Redis</a></p>
+<p><strong>1)基础 Redis</strong><br>Redis实现标准协议以及基础字符串操作，完整实现由独立开源项目NewLife.Redis提供;采取连接池加同步阻塞架构，具有超低延迟（200~600us）以及超高吞吐量的特点。<br>在物流行业大数据实时计算中广泛应有，经过日均100亿次调用量验证。 </p>
+<p>NewLife.Redis 一个完整的Redis协议的功能的实现，但是redis的核心功能并没有在这里面，Redis的核心功能的实现是在NewLife.Core里面,Redis的核心功能就是有这两个类实现：</p>
+<ul>
+<li>有一个NewLife.Caching的命名空间，里面有一个Redis类里面实现了Redis的基本功能</li>
+<li>另一个类是RedisClient是Redis的客户端(代表对服务器的一个连接)</li>
+</ul>
+<p>Redis的封装有两层:</p>
+<ul>
+<li>一层是NewLife.Core里面的Redis以及RedisClient</li>
+<li>另一层就是NewLife.Redis，这里面的FullRedis是对Redis的实现了Redis的所有的高级功能(是Redis的一个扩展)</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">// 实例化Redis，默认端口6379可以省略，密码有两种写法</span><br><span class="line">//var rds = Redis.Create(&quot;127.0.0.1&quot;, 7);</span><br><span class="line">var rds = Redis.Create(&quot;pass@127.0.0.1:6379&quot;, 7);</span><br><span class="line">//var rds = Redis.Create(&quot;server=127.0.0.1:6379;password=pass&quot;, 7);</span><br><span class="line">rds.Log = XTrace.Log; // 调试日志。正式使用时注释</span><br></pre></td></tr></table></figure>
+<p><strong>2)C#案例</strong><br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/**打开Program.css**/</span><br><span class="line">using NewLife.Threading;</span><br><span class="line">namespace Test</span><br><span class="line">&#123;</span><br><span class="line">  class Program</span><br><span class="line">  &#123;</span><br><span class="line">    static void Main(String[] args)</span><br><span class="line">    &#123;</span><br><span class="line">      Xtrace.UseConsole(); //向控制台输出日志，方便调试使用查看结果</span><br><span class="line">      FullRedis.Register(); //集合FULLREDIS，否则Redis.create会得到默认的redis对象</span><br><span class="line">      Test1(); //调用静态方法</span><br><span class="line">      Console.ReadKey()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static void Test1()</span><br><span class="line">&#123;</span><br><span class="line">    var ic = Redis.Create(&quot;pass@127.0.0.1:6379&quot;, 7);//创建Redis实例，得到FullRedis对象</span><br><span class="line">    //var ic = new FullRedis();//另一种实例化的方式</span><br><span class="line">    //ic.Server = &quot;127.0.0.1:6379&quot;;</span><br><span class="line">    //ic.Db = 3;      //Redis中数据库</span><br><span class="line">    ic.Log = XTrace.Log;//显示日志，进行Redis操作把日志输出，生产环境不用输出日志</span><br><span class="line"></span><br><span class="line">    // 简单操作</span><br><span class="line">    Console.WriteLine(&quot;共有缓存对象 &#123;0&#125; 个&quot;, ic.Count);//缓存对象数量</span><br><span class="line"></span><br><span class="line">    ic.Set(&quot;name&quot;, &quot;大石头&quot;);//Set K-V结构，Set第二个参数可以是任何类型</span><br><span class="line">    Console.WriteLine(ic.Get&lt;String&gt;(&quot;name&quot;));//Get泛型，指定获取的类型</span><br><span class="line"></span><br><span class="line">    ic.Set(&quot;time&quot;, DateTime.Now, 1);//过期时间秒</span><br><span class="line">    Console.WriteLine(ic.Get&lt;DateTime&gt;(&quot;time&quot;).ToFullString());</span><br><span class="line">    Thread.Sleep(1100);</span><br><span class="line">    Console.WriteLine(ic.Get&lt;DateTime&gt;(&quot;time&quot;).ToFullString());</span><br><span class="line"></span><br><span class="line">    // 列表</span><br><span class="line">    var list = ic.GetList&lt;DateTime&gt;(&quot;list&quot;);</span><br><span class="line">    list.Add(DateTime.Now);</span><br><span class="line">    list.Add(DateTime.Now.Date);</span><br><span class="line">    list.RemoveAt(1);</span><br><span class="line">    Console.WriteLine(list[list.Count - 1].ToFullString());</span><br><span class="line"></span><br><span class="line">    // 字典</span><br><span class="line">    var dic = ic.GetDictionary&lt;DateTime&gt;(&quot;dic&quot;);</span><br><span class="line">    dic.Add(&quot;xxx&quot;, DateTime.Now);</span><br><span class="line">    Console.WriteLine(dic[&quot;xxx&quot;].ToFullString());</span><br><span class="line"></span><br><span class="line">    // 队列</span><br><span class="line">    var mq = ic.GetQueue&lt;String&gt;(&quot;queue&quot;);</span><br><span class="line">    mq.Add(new[] &#123; &quot;abc&quot;, &quot;g&quot;, &quot;e&quot;, &quot;m&quot; &#125;);</span><br><span class="line">    var arr = mq.Take(3);</span><br><span class="line">    Console.WriteLine(arr.Join(&quot;,&quot;));</span><br><span class="line"></span><br><span class="line">    // 集合</span><br><span class="line">    var set = ic.GetSet&lt;String&gt;(&quot;181110_1234&quot;);</span><br><span class="line">    set.Add(&quot;xx1&quot;);</span><br><span class="line">    set.Add(&quot;xx2&quot;);</span><br><span class="line">    set.Add(&quot;xx3&quot;);</span><br><span class="line">    Console.WriteLine(set.Count);</span><br><span class="line">    Console.WriteLine(set.Contains(&quot;xx2&quot;));</span><br><span class="line"></span><br><span class="line">    Console.WriteLine(&quot;共有缓存对象 &#123;0&#125; 个&quot;, ic.Count);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Redis数据库基础学习 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190419082712.png" title="WeiyiGeek.C#案例" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190419082712.png" alt="WeiyiGeek.C#案例" title class></a>
+                <p>WeiyiGeek.C#案例</p>
+            </figure>
+<p><em>总结：</em></p>
+<ul>
+<li>数据库中不合法的时间处理,习惯大于小于号不习惯用等于号，这样可以处理很多意外的数据</li>
+<li>Set的时候最好指定过期时间防止有些需要删除的数据</li>
+<li>Redis异步尽量不用，因为Redis延迟本身很小，大概在100us-200us，再一个就是Redis本身是单线程的，异步任务切换的耗时比网络耗时还要大</li>
+</ul>
+<p><br></p>
+<p><strong>3) Redis简单案例</strong><br>网站搜索的热搜词,用.NET Core和StackExchange.Redis以及Jquery-ui    主要是用了里面的autocomplete;</p>
+<p>搜索关键字的时候不存在则添加,存在则将利用有序集合中的zincrby进行分数排序;</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#AutoController</span><br><span class="line">using AutoCompleteDemo.Common;</span><br><span class="line">using Microsoft.AspNetCore.Mvc;</span><br><span class="line">using System;</span><br><span class="line">using System.Collections.Generic;</span><br><span class="line">using System.Linq;</span><br><span class="line"></span><br><span class="line">namespace AutoCompleteDemo.Controllers</span><br><span class="line">&#123;</span><br><span class="line">    public class AutoController : Controller</span><br><span class="line">    &#123;</span><br><span class="line">        private readonly IRedis _redis;</span><br><span class="line">        private readonly string _searchKey = &quot;search&quot;;        </span><br><span class="line">        public AutoController(IRedis redis)</span><br><span class="line">        &#123;</span><br><span class="line">            _redis = redis;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public IActionResult Index()</span><br><span class="line">        &#123;</span><br><span class="line">            //keys</span><br><span class="line">            IList&lt;string&gt; keys = new List&lt;string&gt;()</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;kobe&quot;,&quot;johnson&quot;,&quot;jabbar&quot;,&quot;west&quot;,&quot;o&apos;neal&quot;,&quot;baylor&quot;,&quot;mccann&quot;,&quot;worthy&quot;,&quot;gasol&quot;,&quot;chamberlain&quot;,</span><br><span class="line">                &quot;fisher&quot;,&quot;odom&quot;,&quot;bynum&quot;,&quot;horry&quot;,&quot;rambis&quot;,&quot;riley&quot;,&quot;clarkson&quot;,&quot;Williams&quot;,&quot;young&quot;,&quot;Russell&quot;,</span><br><span class="line">                &quot;ingram&quot;,&quot;randle&quot;,&quot;nance&quot;,&quot;brown&quot;,&quot;deng&quot;,&quot;yi&quot;,&quot;ariza&quot;,&quot;artest&quot;,&quot;walton&quot;,&quot;vujacic&quot;,</span><br><span class="line">                &quot;james&quot;,&quot;paul&quot;,&quot;curry&quot;,&quot;park&quot;,&quot;yao&quot;,&quot;kevin&quot;,&quot;wade&quot;,&quot;rose&quot;,&quot;popovich&quot;,&quot;leonard&quot;,</span><br><span class="line">                &quot;aldridge&quot;,&quot;ginobili&quot;,&quot;duncan&quot;,&quot;lavine&quot;,&quot;rubio&quot;,&quot;garnett&quot;,&quot;wiggins&quot;,&quot;westbrook&quot;,&quot;durant&quot;,&quot;ibaka&quot;,</span><br><span class="line">                &quot;nowitzki&quot;,&quot;pierce&quot;,&quot;crawford&quot;,&quot;love&quot;,&quot;smith&quot;,&quot;iguodala&quot;,&quot;barnes&quot;,&quot;green&quot;,&quot;thompson&quot;,&quot;harden&quot;,</span><br><span class="line">                &quot;lillard&quot;,&quot;mccollum&quot;,&quot;lin&quot;,&quot;jackson&quot;,&quot;nash&quot;,&quot;stoudemire&quot;,&quot;whiteside&quot;,&quot;dragic&quot;,&quot;Howard&quot;,&quot;batum&quot;</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line">            //init</span><br><span class="line">            Random random = new Random();</span><br><span class="line">            var tran = _redis.GetTransaction();</span><br><span class="line">            for (int i = 0; i &lt; 2000000; i++)</span><br><span class="line">            &#123;</span><br><span class="line">                tran.SortedSetIncrementAsync(_searchKey, keys[random.Next(0, 70)], 1);</span><br><span class="line">            &#125;</span><br><span class="line">            tran.ExecuteAsync();</span><br><span class="line"></span><br><span class="line">            return View();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public IActionResult GetHotKey(string key=&quot;&quot;)</span><br><span class="line">        &#123;</span><br><span class="line">            if (string.IsNullOrEmpty(key))</span><br><span class="line">            &#123;//default</span><br><span class="line">                var res = _redis.ZRevRange(_searchKey, 0, 9);   //将分数从高到低排序 desc</span><br><span class="line">                var list = (from i in res select i.ToString());</span><br><span class="line">                return Json(list);</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;//by user input</span><br><span class="line">                var res = _redis.ZRevRange(_searchKey, 0, -1);</span><br><span class="line">                var list = (from i in res select i.ToString()).Where(x =&gt; x.Contains(key)).Take(10).ToList();</span><br><span class="line">                return Json(list);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        [HttpPost]</span><br><span class="line">        public IActionResult SetHotKey(string key)</span><br><span class="line">        &#123;</span><br><span class="line">            if (!string.IsNullOrWhiteSpace(key))</span><br><span class="line">            &#123;</span><br><span class="line">                _redis.ZIncrby(_searchKey,key);</span><br><span class="line">                //other </span><br><span class="line">                //...</span><br><span class="line">                return Json(new &#123; code = &quot;000&quot;, msg = &quot;OK&quot; &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;</span><br><span class="line">                return Json(new &#123; code = &quot;999&quot;, msg = &quot;keyword can not be empty!&quot; &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#Index.cshtml</span><br><span class="line">@&#123;</span><br><span class="line">    ViewData[&quot;Title&quot;] = &quot;Auto Complete&quot;;</span><br><span class="line">&#125;</span><br><span class="line">&lt;div class=&quot;row&quot;&gt;</span><br><span class="line">    &lt;div class=&quot;col-md-6 col-md-offset-4&quot; style=&quot;padding-top:50px;&quot;&gt;</span><br><span class="line">        &lt;input id=&quot;key&quot; name=&quot;key&quot; placeholder=&quot;search&quot; class=&quot;form-control col-md-4&quot;&gt;</span><br><span class="line">        &lt;button class=&quot;btn btn-primary&quot; type=&quot;button&quot; id=&quot;searchSubmit&quot;&gt;Search&lt;/button&gt;</span><br><span class="line">        &lt;div id=&quot;result&quot;&gt;&lt;/div&gt;</span><br><span class="line">    &lt;/div&gt;</span><br><span class="line">&lt;/div&gt;</span><br><span class="line">@section scripts&#123;</span><br><span class="line">    &lt;script type=&quot;text/javascript&quot;&gt;</span><br><span class="line">        $(function () &#123;</span><br><span class="line">            //show hot keyword</span><br><span class="line">            $(&quot;#key&quot;).autocomplete(&#123;                </span><br><span class="line">                source: function (request, response) &#123;                    </span><br><span class="line">                    $.ajax(&#123;</span><br><span class="line">                        url: &quot;@Url.Action(&quot;GetHotKey&quot;, &quot;Auto&quot;)&quot;,  //关联上面的方法</span><br><span class="line">                        dataType: &quot;json&quot;,</span><br><span class="line">                        data: &#123;</span><br><span class="line">                            key: request.term</span><br><span class="line">                        &#125;,</span><br><span class="line">                        success: function (data) &#123;</span><br><span class="line">                            response(data);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line">                &#125;,</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            //search</span><br><span class="line">            $(&quot;#searchSubmit&quot;).click(function () &#123;</span><br><span class="line">                $.ajax(&#123;</span><br><span class="line">                    url: &quot;@Url.Action(&quot;SetHotKey&quot;, &quot;Auto&quot;)&quot;,</span><br><span class="line">                    dataType: &quot;json&quot;,</span><br><span class="line">                    type: &quot;POST&quot;,</span><br><span class="line">                    data: &#123; key: $(&quot;#key&quot;).val() &#125;,</span><br><span class="line">                    success: function (data) &#123;</span><br><span class="line">                        if (data.code == &quot;000&quot;) &#123;</span><br><span class="line">                            $(&quot;&lt;p&gt;search successful!&lt;/p&gt;&quot;).appendTo(&quot;#result&quot;);</span><br><span class="line">                        &#125; else &#123;</span><br><span class="line">                            $(&quot;&lt;p&gt;&quot;+data.msg+&quot;&lt;/p&gt;&quot;).appendTo(&quot;#result&quot;);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &lt;/script&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=Redis数据库基础学习 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190419083237.png" title="WeiyiGeek.搜索热词" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190419083237.png" alt="WeiyiGeek.搜索热词" title class></a>
+                <p>WeiyiGeek.搜索热词</p>
+            </figure>
+<p><br></p>
+<h5 id="3-java操作redis"><a href="#3-java操作redis" class="headerlink" title="(3) java操作redis"></a>(3) java操作redis</h5><p>描述：采用Jedis jar包进行利用java操作Redis，所以必须将其导入工程的lib中，下面简单演示一下使用;</p>
+<p>config.properties<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Connection Redis Configure</span></span><br><span class="line">RedisUrl=10.20.10.248:6379</span><br><span class="line">RedisAuth=weiyigeek.top</span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> redis.clients.jedis.Jedis;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 采用 Java 进行 Redis 连接使用测试</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> WeiyiGeek</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisDemo1</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String[] RedisUrl=<span class="keyword">null</span>;</span><br><span class="line">        String RedisAuth=<span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//1.创建一个属性配置对象并打开配置文件</span></span><br><span class="line">            Properties prop = <span class="keyword">new</span> Properties();</span><br><span class="line">            InputStream ins = RedisDemo1.class.getClassLoader().getResourceAsStream(<span class="string">"config.properties"</span>);</span><br><span class="line">            prop.load(ins);</span><br><span class="line">            RedisUrl=prop.getProperty(<span class="string">"RedisUrl"</span>).split(<span class="string">":"</span>);</span><br><span class="line">            RedisAuth=prop.getProperty(<span class="string">"RedisAuth"</span>);</span><br><span class="line">            System.out.println(<span class="string">"RedisServer:"</span>+ prop.getProperty(<span class="string">"RedisUrl"</span>) + <span class="string">"\nPassword:"</span> + RedisAuth );</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//2.连接到 redis 服务</span></span><br><span class="line">            Jedis jedis = <span class="keyword">new</span> Jedis(RedisUrl[<span class="number">0</span>],Integer.parseInt(RedisUrl[<span class="number">1</span>]));</span><br><span class="line">            System.out.println(<span class="string">"正在Redis认证连接..."</span>);</span><br><span class="line">            jedis.auth(RedisAuth);</span><br><span class="line">   </span><br><span class="line">            <span class="comment">//3.查看链接是否成功并且服务是否运行</span></span><br><span class="line">            System.out.println(<span class="string">"服务正在运行: "</span>+jedis.ping()+<span class="string">"\n"</span>);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//4.选择一号库</span></span><br><span class="line">            jedis.select(<span class="number">1</span>);</span><br><span class="line">             </span><br><span class="line">            <span class="comment">//5.设置 redis 字符串数据与 获取存储的数据并输出</span></span><br><span class="line">            String key = <span class="string">"WeiyiGeek"</span>;</span><br><span class="line">            jedis.set(key, <span class="string">"www.weiyigeek.top"</span>);</span><br><span class="line">            jedis.set(<span class="string">"count"</span>, <span class="string">"1"</span>);</span><br><span class="line">            jedis.setex(<span class="string">"Key"</span>, <span class="number">60</span>, <span class="string">"60 Sec"</span>);</span><br><span class="line">            System.out.println(<span class="string">"当前数据库总键数:"</span>+jedis.dbSize());</span><br><span class="line">            <span class="keyword">if</span>(jedis.exists(key)) &#123;</span><br><span class="line">                System.out.println(<span class="string">"Redis中WeyiGeek键存储的字符串为:"</span>+ jedis.get(key));</span><br><span class="line">                System.out.println(<span class="string">"其类型为 : "</span> + jedis.type(key));</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//value + 1 并返回其其值</span></span><br><span class="line">            System.out.println(<span class="string">"incr key = "</span> + jedis.incr(<span class="string">"count"</span>));</span><br><span class="line">            System.out.println(<span class="string">"incrby key 5 = "</span> + jedis.incrBy(<span class="string">"count"</span>, <span class="number">5</span>));</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//6.采用迭代器进行遍历所有键值</span></span><br><span class="line">            Set&lt;String&gt; keys = jedis.keys(<span class="string">"*"</span>); </span><br><span class="line">            <span class="keyword">for</span> (Iterator iterator = keys.iterator(); iterator.hasNext();) &#123;</span><br><span class="line">                String k = (String) iterator.next();</span><br><span class="line">                <span class="keyword">if</span> (jedis.type(k).equalsIgnoreCase(<span class="string">"string"</span>)) &#123;</span><br><span class="line">                    System.out.println(k + <span class="string">" - "</span> + jedis.get(k));</span><br><span class="line">                &#125;</span><br><span class="line">                    </span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">""</span>);  </span><br><span class="line">            <span class="comment">//清空所有的key</span></span><br><span class="line">            jedis.flushAll();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//关闭释放jedis连接资源</span></span><br><span class="line">            jedis.disconnect();</span><br><span class="line">            </span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="comment">// TODO Auto-generated catch block</span></span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">RedisServer:10.20.10.248:6379</span><br><span class="line">Password:weiyigeek.top</span><br><span class="line">正在Redis认证连接...</span><br><span class="line">服务正在运行: PONG</span><br><span class="line"></span><br><span class="line">当前数据库总键数:3</span><br><span class="line">Redis中WeyiGeek键存储的字符串为:www.weiyigeek.top</span><br><span class="line">其类型为 : string</span><br><span class="line">incr key = 2</span><br><span class="line">incrby key 5 = 7</span><br><span class="line">count - 7</span><br><span class="line">WeiyiGeek - www.weiyigeek.top</span><br><span class="line">Key - 60 Sec</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="容灾备份"><a href="#容灾备份" class="headerlink" title="容灾备份"></a>容灾备份</h4><p><strong>1.Redis配置数据恢复</strong><br>描述：在系统删除了配置文件后以及用户账号后恢复方法</p>
+<ul>
+<li>Step1.Redis账户数据恢复<br>首先确定系统中是否还有redis用户。（如果拷贝过来的系统也安装了redis，那么肯定是会有redis账户）</li>
+<li><p>Step2.如果发现有redis用户，以下步骤可以跳过</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">"redis:x:996:994:Redis Database Server:/var/lib/redis:/sbin/nologin"</span> &gt;&gt; /etc/passwd</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"redis:!!:17416::::::"</span> &gt;&gt; /etc/shadow</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"redis:x:994:"</span> &gt;&gt; /etc/group</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"redis:!::"</span> &gt;&gt; /etc/gshadow</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step3.Redis配置文件恢复<br>Redis的配置文件恢复相对简单一些，官方提供了CONFIG REWRITE命令重写redis.conf配置文件。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">redis-cli</span><br><span class="line">127.0.0.1:6379&gt; CONFIG REWRITE</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step4.修改配置文件权限</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">touch /etc/redis.conf</span><br><span class="line">chown redis:redis /etc/redis.conf</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h4><ul>
+<li><a href="https://github.com/qishibo/AnotherRedisDesktopManager" target="_blank" rel="noopener">Redis-Client 连接软件</a></li>
+</ul>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-06-01T03:02:05.618Z" itemprop="dateUpdated">2020-06-01 11:02:05</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/4/redis数据库基础学习.html" target="_blank" rel="external">http://weiyigeek.top/2019/4/redis数据库基础学习.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/4/redis数据库基础学习.html&title=《Redis数据库基础学习》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/4/redis数据库基础学习.html&title=《Redis数据库基础学习》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/4/模糊测试之攻击回显.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">模糊测试之攻击回显</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/4/android设备调试工具一览表.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Android设备调试工具一览表</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-Redis-介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Redis 介绍</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-Redis-数据类型"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 Redis 数据类型</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-Redis-基础学习"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 Redis 基础学习</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-后端语言连接Redis"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 后端语言连接Redis</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#容灾备份"><span class="post-toc-number">5.</span> <span class="post-toc-text">容灾备份</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#附录"><span class="post-toc-number">6.</span> <span class="post-toc-text">附录</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/4/redis数据库基础学习.html&title=《Redis数据库基础学习》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/4/redis数据库基础学习.html&title=《Redis数据库基础学习》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACH0lEQVR42u3aSW7DMBAEwPz/08rVh1joHsoBTBZPhiLZLAUYzMKfn3hdLyu58nr99a/3d7579rGFgYHxtYzrdt3f024r+c72HgwMjHMY7yJY8rkFtEH8fm8YGBgY9/ck27q/P3kdGBgYGM8ykutJIMbAwMCYFbErSV4O/ngtjoGB8YWMvOv+/58/Mt/AwMD4KsZVrlnC15a19a4wMDC2Zqy30nJk8tTKfjAwMHZl5IPGthHWHrnIy+M/7sTAwNiaMStWk5+ZjSpnQwIMDIy9GUl69+zRrnbwEP0HMDAwtmYsHW5YCKDtIbDo1WNgYGzKmCVkeestTxwfG2FiYGBsx0iCYNsIW2mWtQfC3vYOMTAwNmJ8IiDWTfwy9BepIQYGxhaMlQA6O07RDi/zl4WBgXEao23Zt+OBJKS2IRsDA2NXRt4am4W/2aigHaBiYGDszcgb/SsRPUfOUlUMDIwTGCutsVmZ2pav7VgUAwPjBEaSruUt+zYdzEtuDAyMcxht6rY+1Ey+p046MTAwjmEkwbFtzCVP5aE/KlwxMDCOYeRhdHZUYp2HgYFxAuMq10p4ffYbMDAwzmHka9ZomxXATx1yxcDA2ImRBNlZ8te27dqAi4GBcRpjNhjIE8r2NdXFMwYGBsbo8FaSILbFbX2MBAMDA2OU/LWw+/CNgYFxDqNN7JKN5ltcGX9iYGCcwFgpHdtBY14YJ8csMDAwDmD8AoujnTsYKrumAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

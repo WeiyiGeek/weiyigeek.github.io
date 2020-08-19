@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>基于Quartz的定时任务及crond表达式入门学习 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="Quartz,Crond">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>基于Quartz的定时任务及crond表达式入门学习</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">基于Quartz的定时任务及crond表达式入门学习</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-05-01T00:34:30.000Z" itemprop="datePublished" class="page-time">
+  2020-05-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Java/">Java</a></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-编程世界/JavaWeb/5.Advanced/基于Quartz的定时任务及crond表达式入门学习"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">基于Quartz的定时任务及crond表达式入门学习</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-05-01 08:34:30" datetime="2020-05-01T00:34:30.000Z"  itemprop="datePublished">2020-05-01</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Java/">Java</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h4><h4 id="0x01-基础语法"><a href="#0x01-基础语法" class="headerlink" title="0x01 基础语法"></a>0x01 基础语法</h4><p>Java中Quartz Cron表达式(<code>Cron Expressions—Cron 表达式</code>)被用来配置CronTrigger实例,需要注意一点它不同于Linux中Cron表达式，我们从下面的格式可以看出区别;</p>
+<p>Cron表达式是一个由7个子表达式组成的字符串, 每个子表达式都描述了一个单独的日程细节并且采用空格分隔;<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#Linux crond</span></span><br><span class="line">分钟 小时 天 月 周 Command</span><br><span class="line">*    *    *  *  * 命令执行</span><br><span class="line"></span><br><span class="line"><span class="comment">#Quartz Cron</span></span><br><span class="line">* * * * * * ? </span><br><span class="line">秒（0~59）</span><br><span class="line">分钟（0~59）</span><br><span class="line">小时（0~23）</span><br><span class="line">天（月）（0~31，但是你需要考虑你月的天数）</span><br><span class="line">月（0~11）</span><br><span class="line">天（星期）（1~7 1=SUN 或 SUN，MON，TUE，WED，THU，FRI，SAT）</span><br><span class="line">年份（1970－2099）</span><br></pre></td></tr></table></figure></p>
+<p>PS:从上面的比对中可以看出Quartz的Cron表达式比Linux中的Cron表达式更为强大和精细;</p>
+<p><strong>特殊字符含义:</strong><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">, : 其表示一个列表如(9,10,11,12)</span><br><span class="line">- : 其表示一个连续的区间如(9-12) , 例如：子表达式（天（星期））可以为 “MON-FRI”，“MON，WED，FRI”，“MON-WED,SAT” ;</span><br><span class="line">* : 其表示一个通配符即 “*”字符代表所有可能的值 </span><br><span class="line">/ : 其表示一个指定数值的增量,如一个间隔时间(8-18/4)(/表示每隔4小时),在子表达式（分钟）里的“0/15”表示从第0分钟开始，每15分钟 ;</span><br><span class="line">? : 其字符仅被用于天（月）和天（星期）两个子表达式，表示不指定值, 当2个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为“？” </span><br><span class="line">L : 字符仅被用于天（月-最后一天）和天（星期-最后一周）两个子表达式，它是单词“last”的缩写, 但是它在两个子表达式里的含义是不同的。  例如：“6L”表示这个月的倒数第6天，FRIL表示这个月的最一个星期五;</span><br></pre></td></tr></table></figure></p>
+<p><strong>基础示例:</strong><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#示例1.每天上午10点，下午14点，16点触发执行</span></span><br><span class="line">0 0 10,14,16 * * ?</span><br><span class="line"></span><br><span class="line"><span class="comment">#示例2.朝九晚五工作时间内每半小时</span></span><br><span class="line">0 0/30 9-17 * * ?</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例3.由于"月份中的日期 天(月)"和"星期中的日期-天(星期)"这两个元素互斥的,必须要对其中一个设置?. </span></span><br><span class="line">0 0 12 ? * WED  <span class="comment">#表示每个星期三中午12点</span></span><br></pre></td></tr></table></figure></p>
+<p><em>注意事项:</em></p>
+<ul>
+<li>1.在使用“L”参数时，不要指定列表或范围，因为这会导致问题</li>
+<li>2.</li>
+</ul>
+<h4 id="0x0n-附录"><a href="#0x0n-附录" class="headerlink" title="0x0n 附录"></a>0x0n 附录</h4>
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-05-25T13:00:46.382Z" itemprop="dateUpdated">2020-05-25 21:00:46</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2020/5/基于quartz的定时任务及crond表达式入门学习.html" target="_blank" rel="external">http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Crond/">Crond</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Quartz/">Quartz</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/5/linux之pam系统模块详解说明.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Linux之PAM系统模块详解说明</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/4/gentoo发行版系统基础使用记录.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Gentoo发行版系统基础使用记录</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-基础语法"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 基础语法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x0n-附录"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x0n 附录</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPYAAAD2CAAAAADAeSUUAAADRElEQVR42u3a227bQAwE0Pz/T6dAn1rAlxlSLazN0ZMR2yudNRCCw/36iq/v39ez13/+5fXfk9XydZ5967ILGxsb+ybs75dXsnT77ut75dvx+md4vT42Njb2eeykzORlKSl1SfFLniH5ebCxsbGxZ4Bky/KV2+fExsbGxp7dPuElOU8eb2FjY2Nj56FSW37yBmMTXf3zLA0bGxv749n7Qe/nvP6v821sbGzsD2B/l1cb4iSlZdZg5EXrwR2xsbGxD2IniyaYtgTOmpl2c988ITY2NvbR7NnSs5KT9AizluPN57GxsbGPYLdHZNqjkLM122EDNjY29k9m5/l58qBtUczXzEOoPMbCxsbGPo+dNxKzkXA7uM2P/iQ8bGxs7FPZsxFvO+i9ircZCT8Y8WJjY2Mfx56lLkl/k9fSNuQabhA2Njb2cezZqDU/gnPVqGB2qKjItLCxsbFvyE4KTNtCtIPkPAyaFbA3KRo2Njb2zdmbkepVhTAPmNqtfIrHxsbGPoi9LxL7kW0eXc2Cp6fbjY2NjX0QOy8Y+aA3D4Py4peD2yAMGxsb+77s9l9/G9/nV1sI22HwqhpjY2NjfzC7PVKzaQbyhqSotIuRMDY2NvYZ7FnLkY9p25ZjHypFYwxsbGzs49izuD8pM7PGI9+a9nDPBWeUsLGxsT+M3Qb3bdyzGTy0zUYNxsbGxj6IvYnd89Dn4l8pvnsRLWFjY2PfnL0/XnNVvcgHw/n44cFnsLGxsY9gt8doNmPdNpzalNI338XGxsY+iL0vM0njsR825IPk4qQSNjY29hHs/CHaliM/QLNpP/L7Pui9sLGxsY9gtwPdZNDblrTZCCHflKj9wMbGxr4texa+z2KmdqOToD+Prv56FxsbG/s4dv6FzSGeCyrt6JjO8IwSNjY29q3Ys1gnXycfSOTlqm1Lnp5RwsbGxr45O7/aFiV/lHYuPSt+Qzw2Njb2TdhJ+dlERW0UlRetdhSNjY2NfTY7GfTOQqX9+KENni4+soONjY19EHsT2V+7Ql50nyqwsbGxfzA7b0vaBmbGaI9mYmNjY5/KXhWDkpq3De34ufh5sLGxsQ9izwa9s3lyHvpvRgj5kAMbGxv75uxfS/YHStpbFmwAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

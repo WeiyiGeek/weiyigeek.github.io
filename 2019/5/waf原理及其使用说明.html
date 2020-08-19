@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>WAF原理及其使用说明 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="WAF">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>WAF原理及其使用说明</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">WAF原理及其使用说明</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-05-10T06:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-05-10
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/SecurityManager/">SecurityManager</a></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安防御/应用服务安全和防御/WAF原理及其使用说明"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">WAF原理及其使用说明</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-05-10 14:34:30" datetime="2019-05-10T06:34:30.000Z"  itemprop="datePublished">2019-05-10</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/SecurityManager/">SecurityManager</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<p><b style="color:red">注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。</b><br><a id="more"></a></p>
+<hr>
+
+<h4 id="WAF与正则表达式"><a href="#WAF与正则表达式" class="headerlink" title="WAF与正则表达式"></a>WAF与正则表达式</h4><p>正则表达式不适合构建WAF由于正则表达式计算复杂度直接影响WAF防御能力;</p>
+<ul>
+<li>误报率高</li>
+<li>漏报难以平衡</li>
+<li>容易绕过</li>
+</ul>
+<p>正则表达式DDOS攻击:正则表达式的最坏时间复杂度大于等于𝑶(𝑛2)，该正则表达式可被DDOS攻击</p>
+<ul>
+<li><p>Regex DDOS与Regex DOS不同<br>• 𝑶(𝑛2)，𝑶(2𝑛)<br>• Regex DDOS目前普遍存在<br>• Regex DOS很难找到了</p>
+<figure class="image-box">
+                <a rel=WAF原理及其使用说明 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830094906.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830094906.png" alt="WeiyiGeek." title class></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>(1)利用正则表达式匹配的回溯之正则表达式匹配原理：NFA<br>正则表达式：<code>(a|b)*abb</code>对应的NFA,匹配算法需要尝试每一条路径，直到找到一条匹配路径。尝试所有路径失败则匹配失败。<br>• 尝试所有匹配路径<br>• 路径尝试失败，需要回溯</p>
+<figure class="image-box">
+                <a rel=WAF原理及其使用说明 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830095022.png" title="WeiyiGeek.正则表达式匹配原理" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830095022.png" alt="WeiyiGeek.正则表达式匹配原理" title class></a>
+                <p>WeiyiGeek.正则表达式匹配原理</p>
+            </figure>
+</li>
+</ul>
+<p>(2)利用正则表达式匹配的回溯之可被DDOS的一种正则表达式模式<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">𝑷𝒂𝒕𝒕𝒆𝒓𝒏 = (𝑺𝒖𝒃𝑨)(𝑺𝒖𝒃𝑩)∗(SubC)，其中𝑺𝒖𝒃𝑨 ∈ 𝑺𝒖𝒃</span><br></pre></td></tr></table></figure></p>
+<p>影响范围:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#owasp-modsecurity-crs</span></span><br><span class="line">(?i:(?:(union(.*?)select(.*?)from)))</span><br><span class="line">(?i:&lt;META[\s/+].*?charset[\s/+]*=)</span><br><span class="line"></span><br><span class="line"><span class="comment">#wordpress-4.7.1</span></span><br><span class="line">class-wp-text-diff-renderertable.php: Line 266:</span><br><span class="line">(&lt;ins&gt;.*?&lt;/ins&gt;|&lt;del&gt;.*?&lt;/del&gt;)</span><br><span class="line"></span><br><span class="line"><span class="comment">#Discuz_X3.3_SC_UTF8</span></span><br><span class="line">admincp_announce.php</span><br><span class="line">• Line 136: <span class="string">'/&lt;b&gt;(.*?)&lt;\/b&gt;/i'</span>,</span><br><span class="line">•Line 139: <span class="string">'/&lt;i&gt;(.*?)&lt;\/i&gt;/i'</span>,</span><br><span class="line">•Line 142: <span class="string">'/&lt;u&gt;(.*?)&lt;\/u&gt;/i'</span>,</span><br><span class="line"></span><br><span class="line"><span class="comment">#某云WAF/360_safe3.php</span></span><br><span class="line">360_safe3.php某云WAF: union\s+select.*from </span><br><span class="line">• \/\*.+?\*\/</span><br><span class="line">• &lt;\s*script\b</span><br><span class="line">• UNION.+?SELECT</span><br></pre></td></tr></table></figure></p>
+<p>维护几十条到几百条正则表达式规则，保证拦截率，误报率前提下，所有规则最坏时间复杂度小于𝑶(𝒏𝟐)是一件很难事情,正则表达式不适合用于构建WAF;<br><figure class="image-box">
+                <a rel=WAF原理及其使用说明 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830100426.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830100426.png" alt="WeiyiGeek." title class></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>所以我们需要通过基于语义监测的WAF进行更好的管控和减少误报;<br>比如：<code>文本：What’s problem about ‘Select id,name from’, give me a hand。</code></p>
+<ul>
+<li>正则：select.*from ：正则只关注‘Select id,namefrom’， 忽略了上下文的信息。在做注入判断时，对输入进行片面的理解，导致误报</li>
+<li>Improved ： 整个输入作为一个整体，尝试理解意图。How?</li>
+</ul>
+<p>基于语义检测的WAF(抽象攻击语义):</p>
+<ul>
+<li>输入是否有效代码</li>
+<li>执行了什么动作</li>
+<li>动作是否有危害</li>
+</ul>
+<p>基于语义检测的WAF—实现:</p>
+<ul>
+<li>用户输入-&gt;词法分析-&gt;语法分析-&gt;攻击语义检测-&gt;攻击语义抽象</li>
+</ul>
+<p>基于语义检测的WAF—优缺点</p>
+<ul>
+<li>优点: 运营成本低,高准确率,低漏报</li>
+<li>缺点: 应急响应慢,语义抽象依赖人,开发成本很高算法优化;</li>
+</ul>
+<p>基于统计的机器学习WAF—异常模型<br>思路: 1.正常的请求总是相似;2.异常却各有各的不同<br>优点：识别未知的攻击、及攻击变形<br>面临问题: 准确率 应用变更<br><figure class="image-box">
+                <a rel=WAF原理及其使用说明 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830101713.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830101713.png" alt="WeiyiGeek." title class></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>基于统计的机器学习WAF—异常模型&amp;威胁模型<br>思路：在异常数据的基础上，注入一些领域知识，从而构成一个分类器，从异常中剥离出攻击<br>优点：准确率相对单独异常模型，提升了许多。<br>问题：模型滞后性：领域知识注入导致。修复响应：出现漏报，在线上如何修复。<br><figure class="image-box">
+                <a rel=WAF原理及其使用说明 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830101615.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830101615.png" alt="WeiyiGeek." title class></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>基于统计的机器学习WAF(个人总结)<br>线上化困难：•准确率 •应用变更<br>WAF运营手段：•WAF安全水位 •WAF瓶颈 •payload的变化</p>
+<p>基于深度学习构建WAF<br>思路：用深度学习的模型代替语义检测中的词法分析、语法分析。<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">       攻击语义的深度学习网络</span><br><span class="line">用户输入 -&gt; 深度学习的攻击语义检测模型</span><br></pre></td></tr></table></figure></p>
+<p>攻击语义的深度学习网络? 为什么深度学习、RNN：<br>• 深度学习可通过学习一种深层非线性网络结构，实现攻击语义的逼近。<br>• RNN能够使信息持续保存，根据已有知识进行思考，更容易学习到攻击语义<br><figure class="image-box">
+                <a rel=WAF原理及其使用说明 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830102044.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190830102044.png" alt="WeiyiGeek." title class></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<h4 id="Web-WAF"><a href="#Web-WAF" class="headerlink" title="Web WAF"></a>Web WAF</h4><ul>
+<li>360WebScan</li>
+</ul>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-03-22T05:21:23.748Z" itemprop="dateUpdated">2020-03-22 13:21:23</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/5/waf原理及其使用说明.html" target="_blank" rel="external">http://weiyigeek.top/2019/5/waf原理及其使用说明.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/WAF/">WAF</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/5/waf原理及其使用说明.html&title=《WAF原理及其使用说明》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/5/waf原理及其使用说明.html&title=《WAF原理及其使用说明》 — WeiyiGeek Blog's&source=[TOC]
+注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/5/centos7-firewall防火墙基础讲解.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Centos7-Firewall防火墙基础讲解</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/5/3-mysql优化学习基础.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">3-MYSQL优化学习基础</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#WAF与正则表达式"><span class="post-toc-number">1.</span> <span class="post-toc-text">WAF与正则表达式</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Web-WAF"><span class="post-toc-number">2.</span> <span class="post-toc-text">Web WAF</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/5/waf原理及其使用说明.html&title=《WAF原理及其使用说明》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/5/waf原理及其使用说明.html&title=《WAF原理及其使用说明》 — WeiyiGeek Blog's&source=[TOC]
+注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLElEQVR42u3awa7iMAwF0Pf/P81sR0LQe52waHqyQhDSnC6sOPbfXzxeH8b/v77PTL75PnPzwMDAuC3j9XUkD0genKyQgD+ug4GB8QDG983lQTAPmu9zvofyiz1jYGBgjOZ8Ir2CgYGBgbHOaJPSNmRjYGBgzJLYGaNNen+ei2NgYNyQsRIEf/35J/UNDAyMWzFe5ciLmrOj3mxgYGCczZgVIGeX/vkhclgQxcDAOJTRtji0Ced60hs9HQMD42jG7AqsbbNoSwht8oyBgXE2o22DmD2yPRq25VUMDIznMJJD2N42r3zrF//CwMB4ACPZ+q4yZzJzmLhiYGAcyshLkrNvVnpAhiEbAwPjOEa+9bYVY8ZICgNFzwgGBsYRjLaRYr2QmaemSao87AfBwMC4ISM/ILZJbHu5lh8uL/aGgYFxKKNNNWctXO1F2+aeEQwMjBsy2ubR9jDXhtrirb9ft2FgYDyA0SaQu9op8k1fFAYwMDAOZcySzyTRbUN5/t+LGiwGBsbRjGQrRUExWHlvsMbAwHgOY6WpK9/0rKniYh0MDIzHMIpLruWiwqxQWrxFDAyMIxizFtW85WuWjtYHRwwMjKMZK0E5OVauzNy2dQwMjCMYs8JkHo6TdTYEXAwMjAcwdgW+9tKtTWKjZgsMDAyM4Lotb/Bqk9vIh4GBgRGTVgqW+XwMDIznMPLU9Ds7b5hIqEXhEwMD42jGLHWcpbL5mrsOoBgYGDdn/AN/NVWDDOr3XgAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

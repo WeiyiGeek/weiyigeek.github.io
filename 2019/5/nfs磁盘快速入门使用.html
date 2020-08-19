@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>NFS磁盘快速入门使用 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="NFS">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>NFS磁盘快速入门使用</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">NFS磁盘快速入门使用</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-05-16T05:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-05-16
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/OperationTools/">OperationTools</a></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/Sync/NFS磁盘快速入门使用"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">NFS磁盘快速入门使用</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-05-16 13:34:30" datetime="2019-05-16T05:34:30.000Z"  itemprop="datePublished">2019-05-16</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/OperationTools/">OperationTools</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x01-NFS环境安装"><a href="#0x01-NFS环境安装" class="headerlink" title="0x01 NFS环境安装"></a>0x01 NFS环境安装</h4><p><strong>(1)Ubuntu下安装NFS</strong><br>适用系统：Debian/Ubuntu<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#Step1、Install Required Packages（Server）</span></span><br><span class="line">apt-get update</span><br><span class="line">apt-get install nfs-kernel-server rpcbind nfs-common</span><br><span class="line"><span class="comment"># Client Side SetUp （Client端）</span></span><br><span class="line">apt-get install nfs-common rpcbind</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#Step2、Make Configuration</span></span><br><span class="line">​配置文件 修改：</span><br><span class="line">nano /etc/default/rpcbind</span><br><span class="line">OPTIONS=<span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置允许连接的ip</span></span><br><span class="line">nano /etc/hosts.allow</span><br><span class="line">portmap: 192.168.1.    <span class="comment">#Example Allow 192.168.1.0/24 to be Accessed on Network</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Configure idmapd</span></span><br><span class="line">nano /etc/default/nfs-common</span><br><span class="line">    NEED_IDMAPD=YES  <span class="comment">#插入</span></span><br><span class="line">-----------------------------------------------------</span><br><span class="line">nano /etc/idmapd.conf</span><br><span class="line">          [General]</span><br><span class="line">          Verbosity = 0</span><br><span class="line">          Pipefs-Directory = /var/lib/nfs/rpc_pipefs</span><br><span class="line">          Domain = localdomain</span><br><span class="line">     </span><br><span class="line">          [Mapping]</span><br><span class="line">          Nobody-User = nobody</span><br><span class="line">          Nobody-Group = nogroup</span><br><span class="line"></span><br><span class="line"><span class="comment"># Configure NFS</span></span><br><span class="line">nano /etc/exports</span><br><span class="line">/exports 192.168.1.0/255.255.255.0(rw,no_root_squash,no_subtree_check,crossmnt,fsid=0)</span><br><span class="line"></span><br><span class="line"><span class="comment">#Step3、配置共享目录</span></span><br><span class="line">mkdir -p /exports/home</span><br><span class="line"><span class="comment">#进行绑定共享目录</span></span><br><span class="line"><span class="built_in">cd</span> /exports</span><br><span class="line">mount --<span class="built_in">bind</span> /home ./home</span><br><span class="line"></span><br><span class="line"><span class="comment">#配置的共享目录</span></span><br><span class="line">nano /etc/fstab</span><br><span class="line">/home /exports/home none <span class="built_in">bind</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Step4、启动RPC服务于nfs共享服务；</span></span><br><span class="line">/etc/init.d/nfs-kernel-server start</span><br><span class="line">/etc/init.d/rpcbind star</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>(2)Centos下安装NFS</strong><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#安装nfs</span></span><br><span class="line">yum –y install rpcbind nfs-utils dos2unix</span><br><span class="line">chkconfig rpcbind on</span><br><span class="line">chkconfig nfs off  <span class="comment">#nfs不需要设置开机自动启动，因为nfs的启动由heartbeat管理</span></span><br><span class="line">service rpcbind start</span><br><span class="line"><span class="comment">#确认NFS服务器启动成功：</span></span><br><span class="line">rpcinfo -p</span><br><span class="line"></span><br><span class="line"><span class="comment">#设置共享目录以及读写权限（可以添加多台主机）</span></span><br><span class="line">vi /etc/exports</span><br><span class="line">/data/ 192.168.1.0/255.255.255.0(rw,sync,root_squash,anonuid=500,anongid=500,insecure)</span><br><span class="line">/home/share  192.168.8.0/24(rw,no_root_squash)</span><br><span class="line">/home/zhidata  192.168.8.7(rw)</span><br><span class="line">/home/upload   192.168.8.0/24(rw,all_squash,anonuid=1001,anongid=1001)  </span><br><span class="line">/home/nfs     192.168.8.0/24(ro)  *(ro,all_squash)</span><br><span class="line"></span><br><span class="line"><span class="comment">#参数说明</span></span><br><span class="line">1. async / sync 异步或者通步写入磁盘()</span><br><span class="line">2. fsid=0 表示将/data找个目录包装成根目录</span><br><span class="line">3. ro 只读权限 /rw读写权限</span><br><span class="line">4. no_root_squash 访问共享目录时用户如果是root权限，对共享目录也具有root权限（即使共享目录没有写入的权限也能写入）</span><br><span class="line">5. root_squash 如果访问共享目录是root的权限用户对共享目录的权限会被压缩为nfsnobody用户的权</span><br><span class="line">6. all_squash 不管你访问共享目录的用户是谁都必须压缩为nfsnobody用户的权限</span><br><span class="line">7. anonuid与anongid设置组</span><br><span class="line"></span><br><span class="line">exportfs -av  <span class="comment">#导入生效</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#注：nfs其实还依赖nfs-lock、nfs-idmap两个服务，但是无需我们去做相关配置。</span></span><br><span class="line"><span class="comment">#防火墙配置</span></span><br><span class="line">firewall-cmd --permanent --zone=public --add-service=nfs</span><br><span class="line">firewall-cmd --permanent --zone=public --add-service=mountd</span><br><span class="line">firewall-cmd --permanent --zone=public --add-service=rpc-bind</span><br><span class="line">firewall-cmd --reload</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#建立一个共享目录(注意权限貌似windwos上必须要x权限)</span></span><br><span class="line">$ chmod 777 /data/  <span class="comment">#方式1</span></span><br><span class="line">$ chmod o+w /data/  <span class="comment">#方式2</span></span><br></pre></td></tr></table></figure></p>
+<p>使用windows连接linux上面的NFS服务进行共享数据：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">telnet nsf_ip 111  <span class="comment">#查看是否本分ping通</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#安装完成后会有mount命令</span></span><br><span class="line">mount  <span class="comment">#查看挂载情况</span></span><br><span class="line">mount -h <span class="comment">#挂载帮助</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看nfs挂载的目录(windows与linux相同)</span></span><br><span class="line">showmount -e 10.10.107.221  <span class="comment">#显示指定NFS服务器上的共享目录列表（或者叫输出列表） </span></span><br><span class="line">导出列表在 10.10.107.221:</span><br><span class="line">/data                              10.10.107.0/255.255.255.0</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看已被挂载的客户端信息</span></span><br><span class="line">[root@Security-221 data]<span class="comment"># showmount -a</span></span><br><span class="line">All mount points on Security-221:</span><br><span class="line">10.10.107.112:/data</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#挂载命令</span></span><br><span class="line"><span class="comment">#mount \\NFS的IP地址或者主机名\nfs目录名 挂载点</span></span><br><span class="line">mount \\10.10.107.221\data x:</span><br><span class="line">x: 现已成功连接到 \\10.10.107.221\data</span><br><span class="line">命令已成功完成。</span><br><span class="line"></span><br><span class="line"><span class="comment">#取消挂载</span></span><br><span class="line">umount x:</span><br><span class="line">正在断开                x:      \\10.10.107.221\data</span><br><span class="line">命令已成功完成。</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=NFS磁盘快速入门使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517101939.png" title="WeiyiGeek.windows安装NFS客户端" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517101939.png" alt="WeiyiGeek.windows安装NFS客户端" title class></a>
+                <p>WeiyiGeek.windows安装NFS客户端</p>
+            </figure>
+<p><em>实现文件上传的nfs中：</em><br>方式1:就是将共享文件的权限设置为777,但是这样是极不安全的<br><figure class="image-box">
+                <a rel=NFS磁盘快速入门使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517104210.png" title="WeiyiGeek.Windwos连接NFS客户端" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517104210.png" alt="WeiyiGeek.Windwos连接NFS客户端" title class></a>
+                <p>WeiyiGeek.Windwos连接NFS客户端</p>
+            </figure></p>
+<p>方式2：修改win7对nfs分区只读属性<br>Win7 NFS客户端使用mount命令挂载NFS服务之后，文件系统对Win7只读，无法写入文件，无法新建文件夹，此时使用mount命令可以查看到如下状态：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">本地    远程                                 属性</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">x:       \\10.10.107.221\data                   UID=-2, GID=-2</span><br><span class="line">                                                rsize=32768, wsize=32768</span><br><span class="line">                                                mount=soft, timeout=1.6</span><br><span class="line">                                                retry=1, locking=no</span><br><span class="line">                                                fileaccess=755, lang=GB2312-80</span><br><span class="line">                                                casesensitive=no</span><br><span class="line">                                                sec=sys</span><br><span class="line"><span class="comment">#UID=-2由于在存储设备上共享出来的NFS文件系统归属于root权限，并且无法修改该所属用户，而Windows通过UID=-2的用户去写，肯定写不进去。</span></span><br><span class="line">解决办法: 让Win7在挂载NFS的时候将UID和GID改成0即可</span><br><span class="line">打开注册表：HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ClientForNFS\CurrentVersion\Default</span><br><span class="line">增加两项：AnonymousUid，AnonymousGid</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=NFS磁盘快速入门使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517105922.png" title="WeiyiGeek.register" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517105922.png" alt="WeiyiGeek.register" title class></a>
+                <p>WeiyiGeek.register</p>
+            </figure>
+<p><br><br>使用linux连接到nfs服务器：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#NFS客户端安装：</span></span><br><span class="line">yum install nfs-utils -y</span><br><span class="line"></span><br><span class="line"><span class="comment">#使用mount命令挂载</span></span><br><span class="line">mount –t nfs X.X.X.X:/data /mnt</span><br><span class="line"><span class="comment">#对于不同的网络情况，有针对地选择 UDP 或 TCP 传输协议。传输协议可以自动选择，也可以手动设置。</span></span><br><span class="line"><span class="comment">#一般情况下，使用 TCP 的 NFS 比较稳定，使用 UDP 的 NFS 速度较快。</span></span><br><span class="line"><span class="comment">#在机器较少，网络状况较好的情况下，使用 UDP 协议能带来较好的性能。</span></span><br><span class="line"><span class="comment"># 当机器较多，网络情况复杂时，推荐使用 TCP 协议（V2 只支持 UDP 协议）。</span></span><br><span class="line"><span class="comment"># 在局域网中使用 UDP 协议较好，因为局域网有比较稳定的网络保证，使用 UDP 可以带来更好的性能。</span></span><br><span class="line"><span class="comment"># 在广域网中推荐使用 TCP 协议，TCP 协议能让 NFS 在复杂的网络环境中保持最好的传输稳定性。</span></span><br><span class="line"></span><br><span class="line">mount -t nfs -o sync,tcp,noatime,rsize=1024,wsize=1024 EXPORT_MACHINE:/EXPORTED_DIR /DIR</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看客户端挂载信息</span></span><br><span class="line">df -h</span><br><span class="line"></span><br><span class="line"><span class="comment">#与windows相同取消挂载使用</span></span><br><span class="line">umount /mnt</span><br></pre></td></tr></table></figure></p>
+<h4 id="0x02-NFS安全配置"><a href="#0x02-NFS安全配置" class="headerlink" title="0x02 NFS安全配置"></a>0x02 NFS安全配置</h4><p>NFS安全配置：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#限制客户机数量</span></span><br><span class="line"><span class="comment">## 1. 修改 /etc/hosts.allow 和 /etc /hosts.deny 来限制客户机数量。</span></span><br><span class="line">/etc/hosts.allow</span><br><span class="line">portmap: 192.168.0.0/255.255.255.0 : allow</span><br><span class="line">portmap: 140.116.44.125 : allow</span><br><span class="line">/etc/hosts.deny</span><br><span class="line">portmap: ALL : deny</span><br><span class="line"></span><br><span class="line"><span class="comment">## 2. 配置 nosuid 和 noexec</span></span><br><span class="line"><span class="comment">#SUID (Set User ID) 或 SGID (Set Group ID) 程序可以让普通用户以超过自己权限来执行。很多 SUID/SGID 可执行程序是必须的，但也可能被一些恶意的本地用户利用，获取本不应有的权限。</span></span><br><span class="line"><span class="comment">#尽量减少所有者是 root，或是在 root 组中却拥有 SUID/SGID 属性的文件。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#如禁止 set-UID 程序与直接执行其中的二进制文件在 NFS 服务器上运行，可以在 /etc/exports 加入一行</span></span><br><span class="line">/www www.abc.com(rw, root_squash, nosuid,noexec)</span><br><span class="line"></span><br><span class="line"><span class="comment">## 3. 密码验证（建立一个认证用户）</span></span><br><span class="line">useradd nfs -s /sbin/nologin</span><br><span class="line">passwd nfs</span><br><span class="line"></span><br><span class="line"><span class="variable">$cat</span> /etc/passwd|grep nfs  <span class="comment">#查看uid与guid</span></span><br><span class="line">nfs:x:1001:1001::/home/nfs:/sbin/nologin</span><br><span class="line"></span><br><span class="line"><span class="comment">#设置NFS配置文件(建立的文件就是用户权限)</span></span><br><span class="line">/home/upload   192.168.8.0/24(rw,all_squash,anonuid=1001,anongid=1001)</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-03-22T05:21:23.486Z" itemprop="dateUpdated">2020-03-22 13:21:23</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/5/nfs磁盘快速入门使用.html" target="_blank" rel="external">http://weiyigeek.top/2019/5/nfs磁盘快速入门使用.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NFS/">NFS</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/5/nfs磁盘快速入门使用.html&title=《NFS磁盘快速入门使用》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/5/nfs磁盘快速入门使用.html&title=《NFS磁盘快速入门使用》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/5/iis服务配置及优化.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">IIS服务配置及优化</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/5/zabbix分布式及高可用.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">zabbix分布式及高可用</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-NFS环境安装"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x01 NFS环境安装</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-NFS安全配置"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x02 NFS安全配置</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/5/nfs磁盘快速入门使用.html&title=《NFS磁盘快速入门使用》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/5/nfs磁盘快速入门使用.html&title=《NFS磁盘快速入门使用》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACK0lEQVR42u3awW6EMAyEYd7/pem11YowM05WjfPntEIU8nFwHdvXJa/7Y31ed688/f59ZfKCAQPGtox7uJStjJ+sbFF579M9MGDAOIehbGL8yvF29SvKx4IBAwaMLIHLqHriCAMGDBizGDrGPeLCgAEDRhYEx0dZt3D2pbM4DBgwNmToL/j+7yX9DRgwYGzFuM3lFsvcFkK2YMCA0ZuRvabSHqgcXF+eDwMGjKaM8R8rB1p9W1lSKH0mGDBgHMNwmwHZKysjGo9vhwEDRmtGlg66nyAL4tMqiDBgwGjHcIdWK0U6d8hDH+CAAQNGJ4a+UbfoloVmpUgnfXsYMGAcxshKb1l6p+/nz/0wYMA4gFEpkM063Loth8eZERgwYDRl6EnYywnYvLNCkqZFYMCA0YKxbtOVEY0w3YQBA0ZTxuqyWlbotwfIYMCAcQxDL3vpYbHCM0p1MGDAOIChbNRtIeibmHA/DBgwWjMmtA8LrQI7BZw7eAEDBoytGO5gltuSzGZpJ5zIYcCA0ZThwvRksRK+lcIcDBgwTmC4oVNvQOqVsauyYMCA0ZRxm0sfidCTSD1AvySFMGDAaMpYEZTdqJgdX5f/b4EBA8Y/Y2QtTDf4ukV/t7QHAwaMExjuWENWPqsfYo2qIQwYMI5nVIpu9Q8xLeDCgAGjKWO8dT1xrAzFTgi4MGDA2JDhNgOU9K7yZLtgBwMGjNYM/eiYtQGUZ9rFtazjAQMGjP0YP5Ls5PNQVcxEAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

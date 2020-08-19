@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>Shell脚本管道符与重定向 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="shell">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Shell脚本管道符与重定向</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Shell脚本管道符与重定向</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-06-11T10:37:30.000Z" itemprop="datePublished" class="page-time">
+  2019-06-11
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux命令/">Linux命令</a></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Linux/常用命令/脚本常用类命令/Shell脚本管道符与重定向"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Shell脚本管道符与重定向</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-06-11 18:37:30" datetime="2019-06-11T10:37:30.000Z"  itemprop="datePublished">2019-06-11</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux命令/">Linux命令</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-快速入门"><a href="#0x00-快速入门" class="headerlink" title="0x00 快速入门"></a>0x00 快速入门</h4><p>主要介绍管道符与输出重定向的基础知识</p>
+<h5 id="1-多命令执行"><a href="#1-多命令执行" class="headerlink" title="1. 多命令执行"></a>1. 多命令执行</h5><p><em>多命令顺序执行符列表</em>：</p>
+<table>
+<thead>
+<tr>
+<th>多命令执行符</th>
+<th>格式</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>;</td>
+<td>命令1 ; 命令2</td>
+<td>多个命令顺序执行，命令之间没有任何逻辑联系</td>
+</tr>
+<tr>
+<td>&amp;&amp;</td>
+<td>命令1 &amp;&amp; 命令2</td>
+<td>逻辑与，命令1正确执行才会执行命令2，命令1不正确执行，则命令2不会执行</td>
+</tr>
+<tr>
+<td>shift+\shift+\ =ll</td>
+<td>命令1 ll 命令2</td>
+<td>逻辑或，当命令1执行不正确，则命令2才会执行，当命令1正确执行，则命令2不会执行。注释：其中shift+\意味着</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>例如：date ; tar -zcvf etc.tar.gz /etc ; date可以计算中间打包压缩命令执行的耗时<br>再如：ls &amp;&amp; echo yes || echo no，第一个命令正确执行，输出yes，错误执行输出no</p>
+</blockquote>
+<p><br></p>
+<h5 id="2-管道符"><a href="#2-管道符" class="headerlink" title="2. 管道符"></a>2. 管道符</h5><p>命令格式：<br>命令1 | 命令2，有一定的编程思想在里面 命令1的正确输出作为命令2的操作对象，和逻辑与不一样</p>
+<p>实际案例：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ls -l /etc | more   <span class="comment">#代表将ls -l /etc的输出分屏显示</span></span><br><span class="line">netstat -an | grep ESTABLISHED   <span class="comment">#代表搜索netstat -an输出中带有ESTABLISHED的行</span></span><br><span class="line">netstat -an | grep ESTABLISHED | wc -l   <span class="comment">#此为多管道符命令，代表到最后统计带有ESTABLISHED的行的数目，即可看出服务器上连接了多少人</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="3-标准输入输出"><a href="#3-标准输入输出" class="headerlink" title="3. 标准输入输出"></a>3. 标准输入输出</h5><p>linux启动后会默认打开3个文件描述符：</p>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>设备文件名</th>
+<th>类型</th>
+<th>文件描述符</th>
+<th>内存文件名</th>
+<th>使用符号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>键盘</td>
+<td>/dev/stdin</td>
+<td>标准输入/读取数据</td>
+<td>0</td>
+<td>/proc/self/fd/0</td>
+<td>使用 &lt; 或 &lt;&lt;</td>
+</tr>
+<tr>
+<td>显示器</td>
+<td>/dev/stdout</td>
+<td>标准输出数据</td>
+<td>1</td>
+<td>/proc/self/fd/1</td>
+<td>使用 &gt; 或 &gt;&gt;</td>
+</tr>
+<tr>
+<td>显示器</td>
+<td>/dev/stderr</td>
+<td>标准错误输出</td>
+<td>2</td>
+<td>/proc/self/fd/2</td>
+<td>使用 2&gt; 或 2&gt;&gt;</td>
+</tr>
+</tbody>
+</table>
+<p>一条shell命令执行，都会继承父进程的文件描述符因此,所有运行的shell命令，都会有默认3个文件描述符。<br>即对于任何一条linux 命令执行它会是这样一个过程：</p>
+<blockquote>
+<p>先有一个输入：输入可以从键盘，也可以从文件得到<br>命令执行完成：成功了就会把成功结果输出到屏幕：standard output默认是屏幕<br>命令执行有错误：会把错误也输出到屏幕上面：standard error默认也是指的屏幕</p>
+</blockquote>
+<figure class="image-box">
+                <a rel=Shell脚本管道符与重定向 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190611141854.png" title="WeiyiGeek.标准输入输出" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190611141854.png" alt="WeiyiGeek.标准输入输出" title class></a>
+                <p>WeiyiGeek.标准输入输出</p>
+            </figure>
+<p><br></p>
+<p><em>（1）输出重定向</em></p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>符号</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标准输出重定向</td>
+<td>命令 &gt; 文件</td>
+<td>以覆盖的方式,把命令的正确的输出,输出到指定文件或者设备中</td>
+</tr>
+<tr>
+<td>标准输出重定向</td>
+<td>命令 &gt;&gt; 文件</td>
+<td>以追加的方式,把命令的正确输出,输出到指定文件或者设备之中</td>
+</tr>
+<tr>
+<td>标准错误输出重定向</td>
+<td>错误命令 2 &gt; 文件</td>
+<td>以覆盖的方式,把命令的错误的输出,输出到指定文件或者设备中</td>
+</tr>
+<tr>
+<td>标准错误输出重定向</td>
+<td>错误命令 2 &gt;&gt; 文件</td>
+<td>以追加的方式,把命令的错误输出,输出到指定文件或者设备之中</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p><em>（2）正确和错误输出同时保存</em></p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>符号</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正确输出和错误输入同时保持</td>
+<td>命令 &gt; 文件 2&gt;&amp;1  或者 命令 &amp;&gt; 文件</td>
+<td>以覆盖方式,把suc与err输出都保存到同一个文件中</td>
+</tr>
+<tr>
+<td></td>
+<td>命令 &gt;&gt; 文件 2&gt;&amp;1  或者 命令 &amp;&gt;&gt; 文件</td>
+<td>以追加方式,把suc与err输出都保存到同一个文件中+</td>
+</tr>
+<tr>
+<td></td>
+<td>命令 &gt;&gt; suc文件 2&gt;&gt;err文件</td>
+<td>把正确的输出追加到文件1中,把错误的输出追加到文件2中</td>
+</tr>
+</tbody>
+</table>
+<p>实际示例：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#语法案例</span></span><br><span class="line"><span class="built_in">command</span>-line1 [0-2] &gt; file   <span class="comment">#0,1,2文件描述符或&amp;设备/dev/null</span></span><br><span class="line">&amp;[n] 代表是已经存在的文件描述符，&amp;1 代表输出 &amp;2代表错误输出 &amp;-代表关闭与它绑定的描述符</span><br><span class="line"></span><br><span class="line"><span class="comment">#示例1.这个例子是讲，我们执行了任意命令，并输出到/dev/sda。</span></span><br><span class="line"><span class="comment">#这样的话/dev/sda 里面的文件会被命令输出的内容全部替换掉，最后丢失掉其中原有的数据。</span></span><br><span class="line">$任意命令 &gt; /dev/sda</span><br><span class="line">ifconfig &gt; ~/desktop/test.log     <span class="comment">##将内容保存在日志文件中</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例2.正确输出与错误输出都显示在屏幕了，现在需要把正确输出写入suc.txt</span></span><br><span class="line"><span class="comment"># 1&gt;可以省略不写，默认所至标准输出</span></span><br><span class="line"><span class="variable">$ls</span> test.sh test1.sh</span><br><span class="line">ls: test1.sh: 没有这个文件和目录</span><br><span class="line">test.sh</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例3.把错误输出到err.txt,正确输出到suc.txt中</span></span><br><span class="line"><span class="variable">$ls</span> test.sh test1.sh 1&gt;suc.txt 2&gt; err.txt <span class="comment"># 2&gt;是将错误输出到文件</span></span><br><span class="line"><span class="variable">$cat</span> suc.txt err.txt</span><br><span class="line">test.sh</span><br><span class="line">ls: 无法访问test1.sh: 没有那个文件或目录</span><br><span class="line"><span class="comment"># 继续追加把输出写入suc.txt err.txt  “&gt;&gt;”追加操作符</span></span><br><span class="line"><span class="variable">$ls</span> test.sh test1.sh 1&gt;&gt;suc.txt 2&gt;&gt;err.txt </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例4.#&amp;代表标准输出错误输出，将所有标准输出与错误输出 输入到/dev/null文件或者file.txt文件中.</span></span><br><span class="line"><span class="variable">$ls</span> test.sh test1.sh &amp;&gt;/dev/null  <span class="comment">#及屏蔽stdout与stderr</span></span><br><span class="line"><span class="variable">$ls</span> test.sh test1.sh &gt;/dev/null 2&gt;&amp;1  <span class="comment">#将错误输出2绑定给正确输出1，然后将正确输出发送给/dev/null设备这种常用</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$ls</span> test.sh test1.sh &amp;&gt;file.txt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例5.将错误输出信息关闭掉</span></span><br><span class="line"><span class="variable">$ls</span> test.sh test1.sh 2&gt;&amp;-</span><br><span class="line">test.sh</span><br><span class="line"><span class="variable">$ls</span> test.sh test1.sh 2&gt;/dev/null</span><br><span class="line">test.sh</span><br><span class="line"><span class="comment"># 关闭所有输出</span></span><br><span class="line"><span class="variable">$ls</span> test.sh test1.sh  1&gt;&amp;- 2&gt;&amp;-  <span class="comment">#关闭 1 ，2 文件描述符</span></span><br></pre></td></tr></table></figure></p>
+<p><em>注意事项：</em></p>
+<ul>
+<li>特别注意错误输出大于号和文件之间不能有空格！！！</li>
+<li>1、shell遇到”&gt;”操作符，会判断右边文件是否存在，如果存在就先删除，并且创建新文件,不存在直接创建, 无论左边命令执行是否成功,右边文件都会变为空</li>
+<li>2、“&gt;&gt;”操作符，判断右边文件，如果不存在就先创建。以添加方式打开文件，会分配一个文件描述符[不特别指定，默认为[1,2]然后，与左边的标准输出（1）或错误输出（2） 绑定</li>
+<li>3、当命令：执行完，绑定文件的描述符也自动失效0,1,2又会空闲</li>
+<li>4、一条命令启动，命令的输入，正确输出，错误输出，默认分别绑定0,1,2文件描述符</li>
+<li>5、一条命令在执行前，先会检查输出是否正确，如果输出设备错误，将不会进行命令执行</li>
+</ul>
+<p><br></p>
+<p><em>（3）输入重定向</em><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#基础语法</span></span><br><span class="line"><span class="built_in">command</span>-line [n] &lt;file   <span class="comment">##0,1,2文件描述符或&amp;设备/dev/null</span></span><br><span class="line"></span><br><span class="line">n &gt;&amp; m	将输出文件 m 和 n 合并</span><br><span class="line">n &lt;&amp; m	将输入文件 m 和 n 合并</span><br></pre></td></tr></table></figure></p>
+<p>实际案例：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#示例1. 和输出重定向一样，Unix 命令也可以从文件获取输入，语法为： </span></span><br><span class="line"><span class="variable">$cat</span> &lt; catfile   <span class="comment">#按下 [ctrl]+d 离开 </span></span><br><span class="line">testing </span><br><span class="line"></span><br><span class="line"><span class="comment">#示例2.从标准输入【键盘】获得数据，然后输出给catfile文件</span></span><br><span class="line"><span class="variable">$cat</span> &gt; file</span><br><span class="line"></span><br><span class="line"><span class="comment">#示例3.cat 从test.sh 获得输入数据，然后输出给文件catfile</span></span><br><span class="line">cat &gt;catfile &lt;test.sh</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Shell脚本管道符与重定向 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190611153008.png" title="WeiyiGeek.示例2/3" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190611153008.png" alt="WeiyiGeek.示例2/3" title class></a>
+                <p>WeiyiGeek.示例2/3</p>
+            </figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#示例4.用的最多输入重定向到文件</span></span><br><span class="line"><span class="variable">$cat</span> &gt;catfile &lt;&lt;eof</span><br><span class="line"><span class="built_in">test</span> a file</span><br><span class="line"><span class="built_in">test</span>!</span><br><span class="line">eof</span><br><span class="line"><span class="comment">##&lt;&lt; 这个连续两个小符号， 他代表的是『结束的输入字符』的意思。这样当空行输入eof字符，&gt;输入多行数据后按ctrl+D结束写入</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例5.输入重定向描述符的妙用</span></span><br><span class="line"><span class="variable">$wc</span> &lt; test.log  <span class="comment">#wc命令原本的输入是键盘，现在重新定向为文件，当然，其实不需要&lt;</span></span><br><span class="line">1  3 54 <span class="comment">#行数 单词数 字节数</span></span><br><span class="line"><span class="comment">#下面它会要求你不断输入，知道再遇到ddy，就会停止并做相关统计，实际工作中基本不会用到.</span></span><br><span class="line"><span class="variable">$wc</span> &lt;&lt;ddy &gt;test.log</span><br><span class="line">  This is a input content;</span><br><span class="line">ddy</span><br><span class="line"></span><br><span class="line"><span class="variable">$cat</span> test.log</span><br><span class="line">1  5 27</span><br><span class="line"><span class="comment">#还能将将字符统计的输入到Test.log中（可以无先）</span></span><br></pre></td></tr></table></figure>
+<p>补充知识点：</p>
+<ul>
+<li>EOF字符前面可以采用一个-,后面连接的EOF结束字符不用一定在首行(但是需要采用Tab键功能进行缩进)</li>
+</ul>
+<p><br></p>
+<h5 id="4-exec-命令"><a href="#4-exec-命令" class="headerlink" title="4. exec 命令"></a>4. exec 命令</h5><p>描述：在上面讲的输入输出重定向，是将输入输出绑定文件或设备后。只对当前那条指令是有效的。如果需要在绑定之后，接下来的所有命令都支持的话,就需要用exec命令来绑定重定向;<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#基础语法</span></span><br><span class="line"><span class="built_in">exec</span> 文件描述符[n] &lt;或&gt; file或文件描述符或设备</span><br></pre></td></tr></table></figure></p>
+<p>实际案例：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#示例1.将标准输出与fd 6绑定</span></span><br><span class="line"><span class="variable">$exec</span> 6&gt;&amp;1</span><br><span class="line"><span class="variable">$ls</span> /proc/self/fd/  </span><br><span class="line">0  1  2  3  6  <span class="comment">#出现文件描述符6</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例2.将命令标准输出绑定到suc.txt文件中(输出到该文件)</span></span><br><span class="line"><span class="variable">$exec</span> 1&gt;suc.txt</span><br><span class="line">ls -al  <span class="comment">##执行命令，发现什么都不返回了，因为标准输出已经输出到suc.txt文件了</span></span><br><span class="line"><span class="variable">$exec</span> 1&gt;&amp;6  <span class="comment">##恢复标准输出</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例3.关闭fd 6描述符</span></span><br><span class="line"><span class="comment">#说明：使用前先将标准输入保存到文件描述符6，文件描述符默认会打开0,1,2 还可以使用自定义描述符 。</span></span><br><span class="line"><span class="comment">#然后对标准输出绑定到文件，接下来所有输出都会发生到文件使用完后，恢复标准的输出，关闭打开文件描述符6。</span></span><br><span class="line"><span class="variable">$exec</span> 6&gt;&amp;-</span><br><span class="line"><span class="variable">$ls</span> /proc/self/fd/</span><br><span class="line">0  1  2  3</span><br><span class="line"></span><br><span class="line"><span class="comment">#示例4.exec执行如果命令是执行一次后就退出，如果命令是一直在前台执行的情况下会持续执行;</span></span><br><span class="line"><span class="variable">$exec</span> ps aux</span><br><span class="line">root      84387  0.0  0.0 155372  1868 pts/0    Rs+  09:22   0:00 ps aux</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Shell脚本管道符与重定向 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190611154512.png" title="WeiyiGeek.删除文件描述符" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190611154512.png" alt="WeiyiGeek.删除文件描述符" title class></a>
+                <p>WeiyiGeek.删除文件描述符</p>
+            </figure>
+<p>补充知识点：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#故障案例1</span></span><br><span class="line">可能有朋友会这样用：<span class="built_in">exec</span> 1&gt;suc.txt ，接下来所有输出都绑定到suc.txt 文件</span><br><span class="line"><span class="built_in">exec</span> 1&gt;&amp;2 <span class="comment">#恢复采用错误输出 ,1 &gt;&amp; 2 意思是将标准输出重定向到句柄2错误输出</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#故障案例2</span></span><br><span class="line"><span class="comment">#打开test.sh可读写操作与文件描述符3绑定</span></span><br><span class="line"><span class="built_in">exec</span> 3&lt;&gt;test.sh</span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line&lt;&amp;3</span><br><span class="line"> <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="variable">$line</span>; <span class="comment">#循环读取文件描述符3（读取的是test.sh内容）</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#关闭文件的输入、输出绑定</span></span><br><span class="line"><span class="built_in">exec</span> 3&gt;&amp;-</span><br><span class="line"><span class="built_in">exec</span> 3&lt;&amp;-</span><br><span class="line">&gt;&amp; 将一个句柄的输出写入到另一个句柄的输入中</span><br><span class="line">&lt;&amp; 从一个句柄读取输入并将其写入到另一个句柄输出中</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#故障案例3: 直接采用exec来进行绑定</span></span><br><span class="line"><span class="built_in">exec</span>&lt;a.log</span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  <span class="built_in">echo</span> <span class="variable">$line</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
+<p>总结重定向应用通常就以下两点：</p>
+<ul>
+<li>1、重新设置命令的默认输入、输出，指向到自己文件（文件，文件描述符，设备其实都是文件，因为linux就是基于设备也是文件，描述符也指向是文件）</li>
+<li>2、扩展自己新的描述符，对文件进行读写操作</li>
+</ul>
+<hr>
+
+<h4 id="0x02-高级管道命令"><a href="#0x02-高级管道命令" class="headerlink" title="0x02 高级管道命令"></a>0x02 高级管道命令</h4><h5 id="lt-lt-EOF"><a href="#lt-lt-EOF" class="headerlink" title="&lt;&lt;EOF"></a>&lt;&lt;EOF</h5><p>描述：Here Document(”嵌入文档“)是 Shell 中的一种特殊的重定向方式，它的基本的形式如下：<br><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">&lt;&lt; delimiter	将开始标记 delimiter 和结束标记 delimiter 之间的内容作为输入，当遇到 delimiter则结束输入</span><br><span class="line"></span><br><span class="line">#它的作用是将两个 delimiter（分隔符号）之间的内容(document) 作为输入传递给 command.</span><br><span class="line">command &lt;&lt; delimiter</span><br><span class="line">     document</span><br><span class="line">delimiter</span><br></pre></td></tr></table></figure></p>
+<p>实际案例:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#示例1.下面的例子，通过 wc -l 命令计算 document 的行数：</span></span><br><span class="line"><span class="variable">$wc</span> -l &lt;&lt; EOF</span><br><span class="line">    This is a simple lookup program</span><br><span class="line">    <span class="keyword">for</span> good (and bad) restaurants 餐厅</span><br><span class="line">    <span class="keyword">in</span> Cape Town.</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例2.在shell脚本中进行使用</span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">cat &lt;&lt; EOF</span><br><span class="line">This is a simple lookup program</span><br><span class="line"><span class="keyword">for</span> good (and bad) restaurants</span><br><span class="line"><span class="keyword">in</span> Cape Town.</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#实例3.通过管道与应用交交互</span></span><br><span class="line">FTP_SERVER=ftp.n1.dabian.org</span><br><span class="line">FTP_PATH=/debian/dists/lenny/main/installer-i386/current/images/cdrom</span><br><span class="line">REMOTE_FILE=debian-cd_info.tar.gz</span><br><span class="line"><span class="comment"># -n: inhibit auto-login</span></span><br><span class="line">ftp -n &lt;&lt; EOF</span><br><span class="line">open <span class="variable">$FTP_SERVER</span></span><br><span class="line">user anonymous me@linuxbox</span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$FTP_PATH</span></span><br><span class="line"><span class="built_in">hash</span></span><br><span class="line">get <span class="variable">$REMOTE_FILE</span></span><br><span class="line"><span class="built_in">bye</span></span><br><span class="line">EOF</span><br><span class="line">ls -l <span class="variable">$REMOTE_FILE</span></span><br></pre></td></tr></table></figure></p>
+<p><em>注意：</em></p>
+<ul>
+<li>开始的delimiter前后的空格会被忽略掉\</li>
+<li>结尾的delimiter 一定要顶格写，前面不能有任何字符，后面也不能有任何字符，包括空格和 tab 缩进</li>
+</ul>
+<p><br></p>
+<h5 id="mkfifo-模块"><a href="#mkfifo-模块" class="headerlink" title="mkfifo 模块"></a>mkfifo 模块</h5><p>mkfifo 使用指定的文件名创建FIFO(也称为”命名管道”)，它是一种特殊的文件类型，它允许独立的进程通讯（反弹Shell你懂的）<br>一个进程打开FIFO文件进行写操作,而另一个进程对之进行读操作, 然后数据便可以如同在shell或者其它地方常见的的匿名管道一样流线执行.<br>默认情况下,创建的FIFO的模式为0666(‘a+rw’)减去umask中设置的位<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#基础语法</span></span><br><span class="line">mkfifo [options] file</span><br><span class="line"></span><br><span class="line"><span class="comment">#选项</span></span><br><span class="line">-m mode, --mode=mode：设置创建的FIFO的模式为 mode, 这可以是 chmod(1) 中的符号模式,并使用默认模式作为起始点,其实就是rwx权限</span><br><span class="line">GNU STANDARD OPTIONS(GNU标准选项)</span><br><span class="line">--<span class="built_in">help</span>：在标准输出上打印一条用法信息,并以成功状态退出.</span><br><span class="line">--version：在标准输出上打印版本信息,然后以成功状态退出.</span><br><span class="line">--：终止选项列表.</span><br></pre></td></tr></table></figure></p>
+<p>实际案例：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#示例1.mkfifo -m 使用案例</span></span><br><span class="line">mkfifo -m 777  myfifo</span><br><span class="line">cat /etc/passwd &gt; myfifo &amp;  <span class="comment">#将cat命令的输出作为此myfifo的输入，并放在后太运行、</span></span><br><span class="line">[10] 6285</span><br><span class="line"><span class="comment">#再用cut命令从该myfifo中读出数据进行处理</span></span><br><span class="line">cut -d: -f1-3 &lt; myfifo</span><br><span class="line">root:x:0</span><br><span class="line">bin:x:1</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-06-19T03:12:57.409Z" itemprop="dateUpdated">2020-06-19 11:12:57</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/6/shell脚本管道符与重定向.html" target="_blank" rel="external">http://weiyigeek.top/2019/6/shell脚本管道符与重定向.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shell/">shell</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/6/shell脚本管道符与重定向.html&title=《Shell脚本管道符与重定向》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/6/shell脚本管道符与重定向.html&title=《Shell脚本管道符与重定向》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/6/tcpdump快速入门与基础.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">tcpdump快速入门与基础</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/6/keepalived高可用服务解决方案.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Keepalived高可用服务解决方案</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-快速入门"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 快速入门</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-高级管道命令"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x02 高级管道命令</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/6/shell脚本管道符与重定向.html&title=《Shell脚本管道符与重定向》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/6/shell脚本管道符与重定向.html&title=《Shell脚本管道符与重定向》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACuklEQVR42u3a0WrDMAwF0P7/T2+wp8GIcyVbaQcnT2XzUp8MLEXS6xVfXz/X78+/r79rrn6SrPxaXq+JCw8PD6+19fXtcsx65Q6j+bd4eHh4Y7z8dtUv6G16fYc85ODh4eG9l9dLiHNGNe3Gw8PD+y+89ft+gszvjIeHh/fJvKQYUU2vq9vKg8FIrQUPDw9voIv0OZ/H+3t4eHh4ra56UpxNQkWeFvfCwOVu8fDw8AZ41SGq3tBAb2ArL/jerMTDw8M7ysuLs3kpNg8SOyMIUfkDDw8Pb4DXa+pXD/18yGBnKOEmpcbDw8M7xKu+8O8f9Ptp9zpgXMY9PDw8vEO86oFebdXnawZLFXh4eHhHeXnDKU++q02shJ38Gy7r03h4eHhjvGqhIcFXix3VwFCYFMPDw8Mb4FXbTs/Mhe6MJuDh4eE9w6sWEU5tbj+oREMDeHh4eAO8nbZTryicJ/fVwgceHh7eHO9UC6o3BJCkyL0BBTw8PLxneNWjPymzRvMLG2NbhcCAh4eHd4iXvPbvBIzqqEHyLVFowcPDwxvg9VpfyTGdI9fg3lhDOb7h4eHhFXl5wXSwzb9RzH318nQ8PDy8DV6vqJoHkrxl1Qs/N0EODw8Pb4xXLdRWN5fffyeVx8PDw3uGl6Szvc0lDbBqml7dGx4eHt5Z3qm0dX2f/EHsjC/g4eHhPc/LW1+9QdXqWEBeib1cg4eHhzfAq3aRkt9Wj/5qITj/djw8PLwJXq9g2nta+dbzYHPzQPHw8PAGePuBYboA0RtcOBb38PDw8Jatr53SQ3UMK2+YVcsNl5MReHh4eAO8XokhSa9zWK8ge7MHPDw8vLfyqisLx3fwQJs7xMPDw/sAXrX00BulqpYeLh8rHh4e3hjv1BBVjultPbk/Hh4e3jRvvwHWS5p35sKqBQs8PDy8Q7xv954EiMNYU7IAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

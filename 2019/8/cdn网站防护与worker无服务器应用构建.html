@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    
+    
+    <title>CDN网站防护与Worker无服务器应用构建 | WeiyiGeek Blog&#39;s</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="CDN">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	false,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>CDN网站防护与Worker无服务器应用构建</span>
+            
+        </div>
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">CDN网站防护与Worker无服务器应用构建</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-08-01T05:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-08-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/WebsiteOperation/">WebsiteOperation</a></li></ul>
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/Web/CDN/CDN网站防护和IP隐藏"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">CDN网站防护与Worker无服务器应用构建</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-08-01 13:36:30" datetime="2019-08-01T05:36:30.000Z"  itemprop="datePublished">2019-08-01</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/WebsiteOperation/">WebsiteOperation</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-cloudflare"><a href="#0x00-cloudflare" class="headerlink" title="0x00 cloudflare"></a>0x00 cloudflare</h4><p><strong>前言</strong><br>描述：cloudflare是一家国外的 CDN 加速服务商还是很有名气的,提供免费和付费的加速和网站保护服务。<br>Cloudflare是用的比较多的一个国外的NS服务商，同时还提供15年的SSL证书以及免费CDN，同时也可以防护DDoS攻击。<br>以前的百度云加速的国外节点就是和 cloudflare 合作使用的 cloudflare 的节点。</p>
+<p>特点事项：</p>
+<ul>
+<li>cloudflare 提供了不同类型的套餐,即使是免费用户cloudflare 提供的功能也是很全面的。</li>
+<li>对于访客来自于国外的网站很不错；</li>
+<li>对于访客来自于国内的网站加速效果有限，有些甚至会变慢，不过其安全防护功能也很不错。</li>
+</ul>
+<p>cloudflare官网地址：<a href="https://dash.cloudflare.com/" target="_blank" rel="noopener">https://dash.cloudflare.com/</a></p>
+<p><br></p>
+<p><strong>使用步骤</strong><br>邮箱注册：注册完后自动进入添加网站界面,首次登录添加网站分为四步：<code>选择方案、添加网站域名、添加DNS记录、更新域名服务器</code><br><figure class="image-box">
+                <a rel=CDN网站防护与Worker无服务器应用构建 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814094859.png" title="WeiyiGeek.CloudflareCDN" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814094859.png" alt="WeiyiGeek.CloudflareCDN" title class></a>
+                <p>WeiyiGeek.CloudflareCDN</p>
+            </figure></p>
+<ol>
+<li>添加网站 :填入自己的主域名（不带 www 的）然后Cloudflare会扫描该域名当前的DNS记录，你可以保留/添加/删除等等<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#管理您的域名系统(DNS)设置（自动扫描 DNS 记录）</span></span><br><span class="line">CNAME weiyigeek.github.io	is an <span class="built_in">alias</span> of weiyigeek.github.io	Automatic		</span><br><span class="line">CNAME www	is an <span class="built_in">alias</span> of weiyigeek.github.io	Automatic</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<figure class="image-box">
+                <a rel=CDN网站防护与Worker无服务器应用构建 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814111427.png" title="WeiyiGeek.DNS解析记录" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814111427.png" alt="WeiyiGeek.DNS解析记录" title class></a>
+                <p>WeiyiGeek.DNS解析记录</p>
+            </figure>
+<ol start="2">
+<li>域名注册商修改NS记录即可等待生效完成即可;<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Log in to your registrar account （登录您的域名注册商,将DNS改成以下）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Remove these nameservers:</span></span><br><span class="line">f1g1ns2.dnspod.net</span><br><span class="line">f1g1ns1.dnspod.net</span><br><span class="line"></span><br><span class="line"><span class="comment">#Replace with Cloudflare's nameservers:</span></span><br><span class="line">bayan.ns.cloudflare.com</span><br><span class="line">vita.ns.cloudflare.com</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>以腾讯云的为例:<br><figure class="image-box">
+                <a rel=CDN网站防护与Worker无服务器应用构建 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814095658.png" title="WeiyiGeek.设置DNS服务器" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814095658.png" alt="WeiyiGeek.设置DNS服务器" title class></a>
+                <p>WeiyiGeek.设置DNS服务器</p>
+            </figure></p>
+<ol start="3">
+<li>验证修改配置与DNS<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#方式1：在cloudflare中checknow进行验证并且发送邮件给您</span></span><br><span class="line">Great news! Cloudflare is now protecting your site</span><br><span class="line">Here are some commonly used options to review.</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<figure class="image-box">
+                <a rel=CDN网站防护与Worker无服务器应用构建 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814104913.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814104913.png" alt="WeiyiGeek." title class></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#方式2：dig与nslookup检测</span></span><br><span class="line">dig www.weiyigeek.github.io</span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;www.weiyigeek.github.io.		IN	A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.weiyigeek.github.io.	5	IN	A	104.18.51.99  <span class="comment">#指向cloudflare的IP地址</span></span><br><span class="line">www.weiyigeek.github.io.	5	IN	A	104.18.50.99</span><br><span class="line"></span><br><span class="line">;; AUTHORITY SECTION:</span><br><span class="line">weiyigeek.github.io.		5	IN	NS	bayan.ns.cloudflare.com.</span><br><span class="line">weiyigeek.github.io.		5	IN	NS	vita.ns.cloudflare.com.</span><br><span class="line"></span><br><span class="line">;; ADDITIONAL SECTION:</span><br><span class="line">vita.ns.cloudflare.com.	5	IN	A	173.245.58.238</span><br><span class="line">bayan.ns.cloudflare.com. 5	IN	A	173.245.59.72</span><br><span class="line">bayan.ns.cloudflare.com. 5	IN	AAAA	2400:cb00:2049:1::adf5:3b48</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#nslookup命令</span></span><br><span class="line">nslookup -qt=<span class="string">"A"</span> www.weiyigeek.github.io</span><br><span class="line">非权威应答:</span><br><span class="line">名称:    www.weiyigeek.github.io</span><br><span class="line">Addresses:  2606:4700:30::6812:3263</span><br><span class="line">          2606:4700:30::6812:3363</span><br><span class="line">          104.18.50.99  <span class="comment">#指向cloudflare的IP地址</span></span><br><span class="line">          104.18.51.99 </span><br><span class="line">nslookup -qt=<span class="string">"CNAME"</span> www.weiyigeek.github.io</span><br><span class="line">weiyigeek.github.io</span><br><span class="line">        primary name server = bayan.ns.cloudflare.com</span><br><span class="line">        responsible mail addr = dns.cloudflare.com</span><br><span class="line">        serial  = 2031741885</span><br><span class="line">        refresh = 10000 (2 hours 46 mins 40 secs)</span><br><span class="line">        retry   = 2400 (40 mins)</span><br><span class="line">        expire  = 604800 (7 days)</span><br><span class="line">        default TTL = 3600 (1 hour)</span><br><span class="line"></span><br><span class="line"><span class="comment">#方式3：腾讯监测</span></span><br><span class="line">https://domaintool.cloud.tencent.com/result?domain=weiyigeek.github.io</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=CDN网站防护与Worker无服务器应用构建 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814110709.png" title="WeiyiGeek.CDN缓存配置" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814110709.png" alt="WeiyiGeek.CDN缓存配置" title class></a>
+                <p>WeiyiGeek.CDN缓存配置</p>
+            </figure>
+<p><br></p>
+<p><strong>常用配置项</strong></p>
+<ol>
+<li><p>加速访问</p>
+<ul>
+<li><p>Speed 选项</p>
+<ul>
+<li>Auto Minify：选择压缩 JavaScript、CSS、HTML；</li>
+<li>Rocket Loader：Automatic（自动）；</li>
+</ul>
+</li>
+<li><p>Caching 选项</p>
+<ul>
+<li>Caching Level：Standard（标准）；</li>
+<li>Browser Cache Expiration：1day；</li>
+<li>Always Online：on；</li>
+</ul>
+</li>
+<li><p>调试模式不使用缓存长关，在调试网站如果需要实时预览变化可以打开。<br>-Development Mode : off</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>2.安全防护</p>
+<ul>
+<li><p>Firewall 选项</p>
+<ul>
+<li>Security Level：High；</li>
+<li>Challenge Passage：30 min；</li>
+<li>Browser Integrity Check：on；</li>
+</ul>
+</li>
+<li><p>Scrape Shield 选项<br>Email Address Obfuscation：on<br>Server-side Excludes：on<br>Hotlink Protection：on</p>
+</li>
+<li><p>Caching 选项<br>当网站内容更新后，如果缓存期限还未到，那么更新内容并不会立即生效，就需要进入 cloudflare 后台手动刷新缓存。可以输入更新的页面只刷新该页面的缓存，也可以刷新全站的缓存。</p>
+</li>
+</ul>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-04-25T13:00:19.435Z" itemprop="dateUpdated">2020-04-25 21:00:19</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/8/cdn网站防护与worker无服务器应用构建.html" target="_blank" rel="external">http://weiyigeek.top/2019/8/cdn网站防护与worker无服务器应用构建.html</a>
+        
+    </div>
+    <footer>
+        <a href="http://weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CDN/">CDN</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/8/cdn网站防护与worker无服务器应用构建.html&title=《CDN网站防护与Worker无服务器应用构建》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/8/cdn网站防护与worker无服务器应用构建.html&title=《CDN网站防护与Worker无服务器应用构建》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/8/应用服务连接命令一览表.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">应用服务连接命令一览表</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/8/rsyslog服务日志审计留存.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Rsyslog服务日志审计留存</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-cloudflare"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 cloudflare</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+      
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/8/cdn网站防护与worker无服务器应用构建.html&title=《CDN网站防护与Worker无服务器应用构建》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/8/cdn网站防护与worker无服务器应用构建.html&title=《CDN网站防护与Worker无服务器应用构建》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACv0lEQVR42u3aQU4DMQwFUO5/6SKxAsF0/neSAtLLqqraaV4WsWv77S1ej4/1+fXnd75/5vn7j28r+ZWr529YeHh4eKOtX63nP5ywn2/36mn5Ed88AQ8PD+8Yrw0Gs4u72FYcQm4seHh4eL/Kyy/6WWKdhw08PDy8/8JLEus2TW+DBB4eHt7f4bVbya/4PDy0KfXmWgseHh5ed+vWDbDffX28v4eHh4c3KqomwWBWvNiVxN/sFg8PD+8AL9no+vhUG2CSBlvRfsPDw8Pbymsv6LbQMNv6epL9Je7h4eHhHeO1QwBt8XcFPCwi4+Hh4R3gJddu8jOzRHlGWipG4OHh4S3z2nR5dhBJf6odLIgKKHh4eHgHeHkhIA8G+cENq87xYeHh4eG9hpf/7c8v6PXkuE3E8fDw8E7z2pJEe63n5eBZqTf5S4CHh4d3greylbbZn6fOs0MvChN4eHh4I965YkRRMhgFmzqZxsPDw9vEmxVed612WGG4Bzw8PLxNvFnRNvl8W7qdpfU3gQoPDw/vAK8tRuThoU1/Z0MJRZUFDw8PbxOvvbjb9v/svNtRrctv4eHh4R3grVz6bXhInjMr3d6UKvDw8PC28h6jtdL0asE5+4dP4uHh4R3jta2m9irfNXqVH3Q0AYGHh4e3idduqx3byp+5MrCFh4eH93pe0nzKt9i2/AvAcwseHh7eAd56IyopW7Rbnx30TWKNh4eHt4m3spVZeTe/9FfabJeTEXh4eHhbebOLPk98Zy20ZKxq2+gAHh4eXsDLV9IqWx9EmLXTZuEEDw8Pb4XXjlidGJ86V0TGw8PDO8dbGcnKx6dy0myk4GaAAA8PD+/lvLa3NivOtmHj5gjw8PDw/gwvP4KV8u56sRgPDw/vHC8vs660o9o0vS094OHh4b2Gt9IAmw1atYl1Pl4wXHh4eHgp7x3BW4i9XFnpRAAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

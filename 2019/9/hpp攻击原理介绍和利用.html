@@ -4,10 +4,12 @@
     <meta charset="utf-8">
     
     
-    <title>HPP攻击原理介绍和利用 | WeiyiGeek Blog&#39;s</title>
+    <title>HPP攻击原理介绍和利用 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="keywords" content="HPP">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
     <link rel="shortcut icon" href="/img/favicon.ico">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
     <link rel="stylesheet" href="/css/style.css?v=1.4.4">
@@ -18,7 +20,7 @@
             reward:	false,
             lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
             v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
-            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
             d: JSON.parse('{"app_id":"6537ff7a"}')
         };
     </script>
@@ -219,6 +221,7 @@
 
 	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/前端漏洞/">前端漏洞</a></li></ul>
 
+
             
         </h5>
         
@@ -269,11 +272,11 @@
 <h4 id="0x00-前言介绍"><a href="#0x00-前言介绍" class="headerlink" title="0x00 前言介绍"></a>0x00 前言介绍</h4><p>描述:HPP参数污染的定义:<code>HTTP Parameter Pollution</code>简称HPP也称之为<code>“HPP参数污染”</code>，HPP是一种注入型的漏洞攻击者通过在HTTP请求中插入特定的参数来发起攻击,如果Web应用中存在这样的漏洞，可以被攻击者利用来进行客户端或者服务器端的攻击还能绕过WAF。</p>
 <hr>
 
-<h4 id="0x01-HPP原理"><a href="#0x01-HPP原理" class="headerlink" title="0x01 HPP原理"></a>0x01 HPP原理</h4><p>描述:简单的说就是使用相同的名称提供多个HTTP参数可能会导致应用程序以意想不到的方式解释值。<br>由于HTTP参数污染(简言之HPP)影响所有web技术的构建块，所以存在服务器端和客户端攻击;通过利用这些效果攻击者可以绕过输入验证、触发应用程序错误或修改内部变量值。<br>通过上面OWASP的截取WIKI我们知道实际这个漏洞就是采用多个同名参数,比如：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#E.G:</span></span><br><span class="line">https://weiyigeek.com/test.php?color=red&amp;color=blue</span><br></pre></td></tr></table></figure></p>
+<h4 id="0x01-HPP原理"><a href="#0x01-HPP原理" class="headerlink" title="0x01 HPP原理"></a>0x01 HPP原理</h4><p>描述:简单的说就是使用相同的名称提供多个HTTP参数可能会导致应用程序以意想不到的方式解释值。<br>由于HTTP参数污染(简言之HPP)影响所有web技术的构建块，所以存在服务器端和客户端攻击;通过利用这些效果攻击者可以绕过输入验证、触发应用程序错误或修改内部变量值。<br>通过上面OWASP的截取WIKI我们知道实际这个漏洞就是采用多个同名参数,比如：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#E.G:</span></span><br><span class="line">https://weiyigeek.com/test.php?color=red&amp;color=blue</span><br></pre></td></tr></table></figure></p>
 <p>不同的后端对其解析是不同的备忘清单如下：<br><figure class="image-box">
                 <a rel=HPP攻击原理介绍和利用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923225456.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923225456.png" alt="WeiyiGeek." title class></a>
                 <p>WeiyiGeek.</p>
-            </figure><br>补充:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Web服务器 参数获取函数</span><br><span class="line">PHP/Apache <span class="variable">$_GET</span>(<span class="string">"par"</span>)</span><br><span class="line">JSP/Tomcat Request.getParameter(<span class="string">"par"</span>)</span><br><span class="line">Perl(CGI)/Apache Param(<span class="string">"par"</span>)</span><br><span class="line">Python/Apache getvalue(<span class="string">"par"</span>)</span><br><span class="line">ASP/IIS Request.QueryString(<span class="string">"par"</span>)</span><br><span class="line">All (comma-delimited string)</span><br></pre></td></tr></table></figure></p>
+            </figure><br>补充:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Web服务器 参数获取函数</span><br><span class="line">PHP/Apache <span class="variable">$_GET</span>(<span class="string">"par"</span>)</span><br><span class="line">JSP/Tomcat Request.getParameter(<span class="string">"par"</span>)</span><br><span class="line">Perl(CGI)/Apache Param(<span class="string">"par"</span>)</span><br><span class="line">Python/Apache getvalue(<span class="string">"par"</span>)</span><br><span class="line">ASP/IIS Request.QueryString(<span class="string">"par"</span>)</span><br><span class="line">All (comma-delimited string)</span><br></pre></td></tr></table></figure></p>
 <p>又比如搜索引擎对于HPP解析理解是不同的:<br>假如这个URL:<code>https://www.baidu.com/s?wd=whoami&amp;wd=WeiyiGeek</code></p>
 <ul>
 <li>百度会理解成让百度搜索：whoami     #选择了第一个参数,放弃了第二个参数。</li>
@@ -289,32 +292,32 @@
 
 
 <h4 id="0x02-HPP利用"><a href="#0x02-HPP利用" class="headerlink" title="0x02 HPP利用"></a>0x02 HPP利用</h4><p>描述:HPP参数污染攻击方式在网站接受用户输入，将其用于生成发往其它系统的HTTP请求，并且不校验用户输出的时候发生。<br>它以两种方式产生通过<code>服务器（后端）</code>或者<code>通过客户端</code></p>
-<p><strong>(1)HPP客户端攻击</strong><br>描述:比如有这样一个网站，用来给其他人在2个候选人之间投票，这个网站的URL和代码是这样的：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Url : http://host/election.jsp?poll_id=4568  </span><br><span class="line">Link1: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=zhang"</span>&gt;为张三投票&lt;/a&gt;  </span><br><span class="line">Link2: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=li"</span>&gt;为李四投票&lt;/a&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#我们根据HPP原理以及后端语言解析可知,JSP来说在有2个相同的名称的参数的时候会取第一个值,所以不管投票人选择的是谁始终都是张三得票。</span></span><br><span class="line">Url : http://host/election.jsp?poll_id=4568&amp;candidate=zhang  </span><br><span class="line">Link1: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=zhang&amp;candidate=zhang"</span>&gt;为张三投票&lt;/a&gt;  </span><br><span class="line">Link2: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=zhang&amp;candidate=li"</span>&gt;为李四投票&lt;/a&gt;  <span class="comment">#其实还是为张三投票</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>(1)HPP客户端攻击</strong><br>描述:比如有这样一个网站，用来给其他人在2个候选人之间投票，这个网站的URL和代码是这样的：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Url : http://host/election.jsp?poll_id=4568  </span><br><span class="line">Link1: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=zhang"</span>&gt;为张三投票&lt;/a&gt;  </span><br><span class="line">Link2: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=li"</span>&gt;为李四投票&lt;/a&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#我们根据HPP原理以及后端语言解析可知,JSP来说在有2个相同的名称的参数的时候会取第一个值,所以不管投票人选择的是谁始终都是张三得票。</span></span><br><span class="line">Url : http://host/election.jsp?poll_id=4568&amp;candidate=zhang  </span><br><span class="line">Link1: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=zhang&amp;candidate=zhang"</span>&gt;为张三投票&lt;/a&gt;  </span><br><span class="line">Link2: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=zhang&amp;candidate=li"</span>&gt;为李四投票&lt;/a&gt;  <span class="comment">#其实还是为张三投票</span></span><br></pre></td></tr></table></figure></p>
 <p>客户端的攻击一般会是如下流程:</p>
 <ul>
 <li>存在HPP漏洞网站-&gt;攻击者生成精心设计的恶意URL-&gt;将其分发给普通用户-&gt;请求服务器端(写入数据库)-&gt;攻击成功</li>
 </ul>
 <p><br></p>
-<p><strong>(2)HPP服务端攻击</strong><br>描述:它有个独立的集中认证服务器用来做用户权限方面的认证，另外的业务服务器专门用来处理业务，对外的门户实际上紧紧只是用来做请求的转发。<br>那么看看一个本来紧紧只是具有<code>只读权限的用户</code>，如果发送如下请求给服务器：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//比如某网站的实现如下：</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="keyword">private</span> <span class="title">executeBackendRequest</span><span class="params">(HTTPRequest request)</span></span>&#123;  </span><br><span class="line">String action=request.getParameter(<span class="string">"action"</span>);  </span><br><span class="line">String user=request.getParameter(<span class="string">"userid"</span>);  </span><br><span class="line">String target=request.getParameter(<span class="string">"target"</span>);  </span><br><span class="line">HttpRequest(<span class="string">"http://centralauthencationserver/checkpriviledge.jsp"</span>, <span class="string">"POST"</span>,<span class="string">"action="</span>+action+<span class="string">"&amp;user="</span>+user+<span class="string">"&amp;target="</span>+target);&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">/* get feedback of whether this user has privilege to perform specified action. If no such privilege, return error, otherwise continue perform the action*/</span>  </span><br><span class="line">HttpRequest(<span class="string">"http://businessserver/performaction.php"</span>, <span class="string">"POST"</span>,<span class="string">"action="</span>+action+<span class="string">"&amp;user="</span>+user+<span class="string">"&amp;target="</span>+target);&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>(2)HPP服务端攻击</strong><br>描述:它有个独立的集中认证服务器用来做用户权限方面的认证，另外的业务服务器专门用来处理业务，对外的门户实际上紧紧只是用来做请求的转发。<br>那么看看一个本来紧紧只是具有<code>只读权限的用户</code>，如果发送如下请求给服务器：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//比如某网站的实现如下：</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="keyword">private</span> <span class="title">executeBackendRequest</span><span class="params">(HTTPRequest request)</span></span>&#123;  </span><br><span class="line">String action=request.getParameter(<span class="string">"action"</span>);  </span><br><span class="line">String user=request.getParameter(<span class="string">"userid"</span>);  </span><br><span class="line">String target=request.getParameter(<span class="string">"target"</span>);  </span><br><span class="line">HttpRequest(<span class="string">"http://centralauthencationserver/checkpriviledge.jsp"</span>, <span class="string">"POST"</span>,<span class="string">"action="</span>+action+<span class="string">"&amp;user="</span>+user+<span class="string">"&amp;target="</span>+target);&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">/* get feedback of whether this user has privilege to perform specified action. If no such privilege, return error, otherwise continue perform the action*/</span>  </span><br><span class="line">HttpRequest(<span class="string">"http://businessserver/performaction.php"</span>, <span class="string">"POST"</span>,<span class="string">"action="</span>+action+<span class="string">"&amp;user="</span>+user+<span class="string">"&amp;target="</span>+target);&#125;</span><br></pre></td></tr></table></figure></p>
 <p>根据我们知道的Web服务器参数处理的方式这个用户可以通过认证做一些本来没有权限做的事情。</p>
 <blockquote>
 <p><a href="http://www.weiyigeek.org/page?action=view&amp;userid=zhangsan&amp;target=bizreport&amp;action=edit" target="_blank" rel="noopener">http://www.weiyigeek.org/page?action=view&amp;userid=zhangsan&amp;target=bizreport&amp;action=edit</a></p>
 </blockquote>
 <p><br></p>
-<p><strong>(3)HPP参数污染安全设备绕过</strong><br>描述:HPP还可以被攻击者用来绕过一些Web应用防火墙(WAF, WebApp Firewall)，HTTP参数污染注入<code>源于网站对于提交的相同的参数的不同处理方式导致</code>。<br>假设输入:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#示例服务端有可能会将key处理为select 1,2,3,4 from table，从而导致SQL注入</span></span><br><span class="line">www.backlion.org/a?key=select&amp;key=1,2,3,4 from table  <span class="comment">#因为在参数id里面存在明显的SQL注入的模板：select…from…而会被WAF成功拦截。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#但是如果换成HPP的方式：</span></span><br><span class="line">show_user.aspx?id=5;select+1&amp;id=2&amp;id=3+from+users+<span class="built_in">where</span>+id=1--  <span class="comment">#没有任何参数具备select…from…的特征，可能就可以绕过WAF的拦截了。</span></span><br><span class="line">http://www.xishaonian.com/hello.php?id=select 1&amp;id=2,3,4 from admin <span class="comment">#还可以与XSS结合使用</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>(3)HPP参数污染安全设备绕过</strong><br>描述:HPP还可以被攻击者用来绕过一些Web应用防火墙(WAF, WebApp Firewall)，HTTP参数污染注入<code>源于网站对于提交的相同的参数的不同处理方式导致</code>。<br>假设输入:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#示例服务端有可能会将key处理为select 1,2,3,4 from table，从而导致SQL注入</span></span><br><span class="line">www.backlion.org/a?key=select&amp;key=1,2,3,4 from table  <span class="comment">#因为在参数id里面存在明显的SQL注入的模板：select…from…而会被WAF成功拦截。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#但是如果换成HPP的方式：</span></span><br><span class="line">show_user.aspx?id=5;select+1&amp;id=2&amp;id=3+from+users+<span class="built_in">where</span>+id=1--  <span class="comment">#没有任何参数具备select…from…的特征，可能就可以绕过WAF的拦截了。</span></span><br><span class="line">http://www.xishaonian.com/hello.php?id=select 1&amp;id=2,3,4 from admin <span class="comment">#还可以与XSS结合使用</span></span><br></pre></td></tr></table></figure></p>
 <p><br></p>
-<h4 id="0x03-HPP案例"><a href="#0x03-HPP案例" class="headerlink" title="0x03 HPP案例"></a>0x03 HPP案例</h4><p><strong>1.HPP与XSS组合</strong><br>描述:案例是关于Apple Cups的，它是被许多UNIX系统利用的打印系统实际是绕过系统的验证机制;<br>利用如下的方式触发一个XSS攻击：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#第一个kerberos直到被用于构建动态HTML内容前都没有被验证。</span></span><br><span class="line">http://127.0.0.1:631/admin/?kerberos=onmouseover=alert(1)&amp;kerberos  <span class="comment">#原因是这个验证系统只采纳了第二个kerberos的值，这个值为空因此不会触发。</span></span><br><span class="line"><span class="comment">#最终在web站点的上下文中javascript语句被执行</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="0x03-HPP案例"><a href="#0x03-HPP案例" class="headerlink" title="0x03 HPP案例"></a>0x03 HPP案例</h4><p><strong>1.HPP与XSS组合</strong><br>描述:案例是关于Apple Cups的，它是被许多UNIX系统利用的打印系统实际是绕过系统的验证机制;<br>利用如下的方式触发一个XSS攻击：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#第一个kerberos直到被用于构建动态HTML内容前都没有被验证。</span></span><br><span class="line">http://127.0.0.1:631/admin/?kerberos=onmouseover=alert(1)&amp;kerberos  <span class="comment">#原因是这个验证系统只采纳了第二个kerberos的值，这个值为空因此不会触发。</span></span><br><span class="line"><span class="comment">#最终在web站点的上下文中javascript语句被执行</span></span><br></pre></td></tr></table></figure></p>
 <p><br></p>
-<p><strong>2.HPP与HTML注入</strong><br>HPP 客户端涉及到向链接和其它src属性注入额外的参数。在 OWASP 的一个例子中，假设我们拥有下列代码：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&lt;? <span class="variable">$val</span>=htmlspecialchars(<span class="variable">$_GET</span>[<span class="string">'par'</span>],ENT_QUOTES); ?&gt; &lt;a href=<span class="string">"/page.php?action=view&amp;par='.&lt;?=<span class="variable">$val</span>?&gt;.'"</span>&gt;View Me!&lt;/a&gt;</span><br></pre></td></tr></table></figure></p>
+<p><strong>2.HPP与HTML注入</strong><br>HPP 客户端涉及到向链接和其它src属性注入额外的参数。在 OWASP 的一个例子中，假设我们拥有下列代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;? <span class="variable">$val</span>=htmlspecialchars(<span class="variable">$_GET</span>[<span class="string">'par'</span>],ENT_QUOTES); ?&gt; &lt;a href=<span class="string">"/page.php?action=view&amp;par='.&lt;?=<span class="variable">$val</span>?&gt;.'"</span>&gt;View Me!&lt;/a&gt;</span><br></pre></td></tr></table></figure></p>
 <p>它从 URL 接受par的值，确保它是安全的，并从中创建链接。现在如果攻击者提交了： <code>http://host/page.php?par=123&amp;action=edit</code></p>
-<p>产生的链接可能为：导致应用接受编辑操作而不是查看操作:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&lt;a href=<span class="string">"/page.php?action=view&amp;par=123&amp;action=edit"</span>&gt;View Me!&lt;/a&gt;</span><br></pre></td></tr></table></figure></p>
+<p>产生的链接可能为：导致应用接受编辑操作而不是查看操作:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a href=<span class="string">"/page.php?action=view&amp;par=123&amp;action=edit"</span>&gt;View Me!&lt;/a&gt;</span><br></pre></td></tr></table></figure></p>
 <p><br></p>
-<p><strong>3.HPP付款签名验证(有利于价值)</strong><br>描述:比如付款链接一般会有重要的参数构建的签名是由某些重要的字段组成的加了同名的字段以后；<br>有可能在签名的时候验证了第一个付款金额参数,但是在实际付款的时候用了后面的一个付款金额参数,导致签名被绕了过去。<br>模拟案例:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#Reuqest</span></span><br><span class="line">POST https://www.example.com/transferMoney.php</span><br><span class="line"><span class="comment">#Params</span></span><br><span class="line">amount=1000&amp;fromAccount=12345</span><br></pre></td></tr></table></figure></p>
-<p>当应用处理请求时，它生成自己的发往其它后端系统的 POST 请求，这实际上会使用固定的toAccount参数来处理事务。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">分离后端 URL：https://backend.example/doTransfer.php</span><br><span class="line">分离后端参数：toAccount=9876&amp;amount=1000&amp;fromAccount=12345</span><br><span class="line"></span><br><span class="line"><span class="comment">#假设攻击者修改了发往网站的 POST 请求来提交toAccount参数像这样：</span></span><br><span class="line">amount=1000&amp;fromAccount=12345&amp;toAccount=99999</span><br><span class="line"></span><br><span class="line"><span class="comment">#存在 HPP 漏洞的站点就会将请求转发给另一个后端系统（然而在PHP处理最后1个参数值则触发漏洞攻击）</span></span><br><span class="line">toAccount=9876&amp;amount=1000&amp;fromAccount=12345&amp;toAccount=9999 <span class="comment">#将钱转账给恶意用户调教得账户（99999）而不是由系统设置的预期账户（9876）。</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>3.HPP付款签名验证(有利于价值)</strong><br>描述:比如付款链接一般会有重要的参数构建的签名是由某些重要的字段组成的加了同名的字段以后；<br>有可能在签名的时候验证了第一个付款金额参数,但是在实际付款的时候用了后面的一个付款金额参数,导致签名被绕了过去。<br>模拟案例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Reuqest</span></span><br><span class="line">POST https://www.example.com/transferMoney.php</span><br><span class="line"><span class="comment">#Params</span></span><br><span class="line">amount=1000&amp;fromAccount=12345</span><br></pre></td></tr></table></figure></p>
+<p>当应用处理请求时，它生成自己的发往其它后端系统的 POST 请求，这实际上会使用固定的toAccount参数来处理事务。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">分离后端 URL：https://backend.example/doTransfer.php</span><br><span class="line">分离后端参数：toAccount=9876&amp;amount=1000&amp;fromAccount=12345</span><br><span class="line"></span><br><span class="line"><span class="comment">#假设攻击者修改了发往网站的 POST 请求来提交toAccount参数像这样：</span></span><br><span class="line">amount=1000&amp;fromAccount=12345&amp;toAccount=99999</span><br><span class="line"></span><br><span class="line"><span class="comment">#存在 HPP 漏洞的站点就会将请求转发给另一个后端系统（然而在PHP处理最后1个参数值则触发漏洞攻击）</span></span><br><span class="line">toAccount=9876&amp;amount=1000&amp;fromAccount=12345&amp;toAccount=9999 <span class="comment">#将钱转账给恶意用户调教得账户（99999）而不是由系统设置的预期账户（9876）。</span></span><br></pre></td></tr></table></figure></p>
 <p><br></p>
-<p><strong>4.HPP参数污染实例</strong><br><em>HackerOne 社交分享按钮</em><br>描述:HackerOne 包含的链接用于在知名社交媒体站点上分享内容，例如 Twitter，Fackbook以及其他。这些社交媒体的链接包含用于社交媒体链接的特定参数。<br>攻击者可以将另一个 URL 参数追加到链接中，并诱惑受害者点击<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#U参数的值诱惑受害者点击，尝试通过社交媒体链接分享内容，恶意链接就会变为：</span></span><br><span class="line">https://www.facebook.com/sharer.php?u=https://hackerone.com/blog/introducing-signal?&amp;u=https://vk.com/durov</span><br><span class="line"></span><br><span class="line"><span class="comment">#参数u就会拥有比第一个参数更高的优先级，之后会用于 Fackbook 的发布。在 Twitter 上发布时建议的默认文本也会改变：</span></span><br><span class="line">https://hackerone.com/blog/introducing-signal?&amp;u=https://vk.com/durov&amp;text=another_site:https://vk.com/durov</span><br></pre></td></tr></table></figure></p>
+<p><strong>4.HPP参数污染实例</strong><br><em>HackerOne 社交分享按钮</em><br>描述:HackerOne 包含的链接用于在知名社交媒体站点上分享内容，例如 Twitter，Fackbook以及其他。这些社交媒体的链接包含用于社交媒体链接的特定参数。<br>攻击者可以将另一个 URL 参数追加到链接中，并诱惑受害者点击<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#U参数的值诱惑受害者点击，尝试通过社交媒体链接分享内容，恶意链接就会变为：</span></span><br><span class="line">https://www.facebook.com/sharer.php?u=https://hackerone.com/blog/introducing-signal?&amp;u=https://vk.com/durov</span><br><span class="line"></span><br><span class="line"><span class="comment">#参数u就会拥有比第一个参数更高的优先级，之后会用于 Fackbook 的发布。在 Twitter 上发布时建议的默认文本也会改变：</span></span><br><span class="line">https://hackerone.com/blog/introducing-signal?&amp;u=https://vk.com/durov&amp;text=another_site:https://vk.com/durov</span><br></pre></td></tr></table></figure></p>
 <p><br></p>
-<p><em>Twitter 取消订阅</em><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#Poc:默认取最后一个人参数</span></span><br><span class="line">https://twitter.com/i/u?t=1&amp;cn=bWV&amp;sig=657&amp;iid=F6542&amp;uid=1134885524&amp;uid=1134885524&amp;nid=22+26 <span class="comment">#成功取消订阅了其它用户的邮件提醒</span></span><br></pre></td></tr></table></figure></p>
+<p><em>Twitter 取消订阅</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Poc:默认取最后一个人参数</span></span><br><span class="line">https://twitter.com/i/u?t=1&amp;cn=bWV&amp;sig=657&amp;iid=F6542&amp;uid=1134885524&amp;uid=1134885524&amp;nid=22+26 <span class="comment">#成功取消订阅了其它用户的邮件提醒</span></span><br></pre></td></tr></table></figure></p>
 <hr>
 
 <h4 id="0x04-安全防御"><a href="#0x04-安全防御" class="headerlink" title="0x04 安全防御"></a>0x04 安全防御</h4><ul>
@@ -339,22 +342,109 @@
 <blockquote class="post-copyright">
     <div class="content">
         
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
 <span class="post-time">
-    最后更新时间：<time datetime="2020-03-22T05:21:23.703Z" itemprop="dateUpdated">2020-03-22 13:21:23</time>
+    最后更新时间：<time datetime="2020-08-19T13:16:50.108Z" itemprop="dateUpdated">2020-08-19 21:16:50</time>
 </span><br>
 
 
         
-        转载注明出处，原文地址：<a href="/2019/9/hpp攻击原理介绍和利用.html" target="_blank" rel="external">http://weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html</a>
+        转载注明出处，原文地址：<a href="/2019/9/hpp攻击原理介绍和利用.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html</a>
+        <br>本站文章内容遵循 <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
         
     </div>
     <footer>
-        <a href="http://weiyigeek.top">
+        <a href="https://blog.weiyigeek.top">
             <img src="/img/avatar.png" alt="WeiyiGeek">
             WeiyiGeek
         </a>
     </footer>
 </blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
 
         
         <div class="post-footer">
@@ -368,7 +458,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -380,7 +470,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog's&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。
 [TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
@@ -401,6 +491,8 @@
             
 
 
+
+
         
     </div>
     
@@ -416,9 +508,9 @@
 
   
     <div class="next">
-      <a href="/2019/9/doubbo架构入门学习和使用.html" id="post-next" class="post-nav-link">
+      <a href="/2019/9/subdomain-takeover子域名接管原理和利用案例.html" id="post-next" class="post-nav-link">
         <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">Doubbo架构入门学习和使用</h4>
+        <h4 class="title">Subdomain-Takeover子域名接管原理和利用案例</h4>
       </a>
     </div>
   
@@ -488,7 +580,6 @@
 
             
         </p>
-      
     </div>
 </footer>
 
@@ -501,7 +592,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -513,7 +604,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog's&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/9/hpp攻击原理介绍和利用.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。
 [TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
@@ -526,7 +617,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACwElEQVR42u3aS07DQBAFwNz/0rAFgZ3XnyFBKq9QIjuuWcw0r/vxiK+PL1fy+f1z7v/++eTqr5QvPDw8vMGrXz3u/vMr6tULbT05WgI8PDy8Y7zqJn5/19VGXz0wJguHh4eH9z68XqldLZqTb/Hw8PD+F2/yk0nEkBTZeHh4eK/lVTfi+096S1Mtu5ezFjw8PLyYt9W4+su/j/T38PDw8MZd9SQmyMvfalMtDy8u3xYPDw/vAC/fcKtDVwvxa2u0Cw8PD+80L9/Ktxr/veMnX6Zv3+Lh4eEd4CUh6WnA5EAqhBR4eHh4S7xeBNA7SKrjAr0i+/J/BTw8PLxV3rx0zg+S/K58TKE8boWHh4e3yps08vNRrXwIIG+8/fK7eHh4eAd4u4Dk3upL562yaHQADw8Pb8yrBqnVFv4jvvJYpPBueHh4eAd41ZZS0uavLtBk4QoFOh4eHt4SL29K5UXtvAQfHQBJ1oKHh4c35k2Oit4OnI8dTGILPDw8vHO8yZhpMmjVW8re6FU0dIWHh4c34E2C1+q2nu/Yk3e7fA4eHh7eEm8S1/Y2+mSle4dNYXQADw8Pb8DrBQrVgGAS706GD/Dw8PBO8JI4dRecPLk6TBCde3h4eHirvMnA06ShVW3FVZ+Jh4eHd4JXLVWjPLj4iknw0QuF8fDw8M7x7qPS+8/zAale6DAausLDw8M7zMtvnke31cOmWjQ/mSzDw8PDW+XlZXG1w5YvQRX25C48PDy8Vd5H8ept9L2woxc6Pznx8PDw8Ma8apE6OUKSwj0fxtoKl/Hw8PB6vLwdVcX0ivJ8KCF6Mh4eHt4x3iRcqL7W2shUUlLj4eHhvQEvb331SuQ8Cik0wPDw8PBeysujgckS5EfRkzfBw8PDO8ZLbus1yfJ4ohk3JCU1Hh4e3iqv+k9+NWjotflHZTQeHh7eKd4nfKxek1PrYggAAAAASUVORK5CYII=" alt="微信分享二维码">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACu0lEQVR42u3aQU7EMAwFUO5/aZBYgZiW/52EsnhdjapOJq9IsbH99hZf75/X189f7/y8//O6evLqu/f3N194eHh4o63fb+ued//8/Uu5er59HZfr4+Hh4R3jJcFg9q08SNyveb+fy/t4eHh4j/LyJDg/+u/Z+evGw8PD+5+8/HOeKK+k9Xh4eHjP8pKlZ2n0rBzclnc31Frw8PDwYt6sAfbs5+P9PTw8PLxRV32W4OZBZZZSF/vEw8PDO8BL0uX87E2aVXl7bL0ZhoeHh3eCt9K2XxmTysu+bfj59hkPDw/vGC9v87ep8P2IVU7K9/kimcbDw8P7c97saL6/0256GKjw8PDwDvBaZFtmbdPrfOygKEzg4eHhHeDtCgCzsa02gc6TdTw8PLxzvPVy6t6GVrvyL6vh4eHhHeO1/+TPBq1yUvtyo+kGPDw8vGVe/rVZMMi3nvwd6nEEPDw8vGO8vAyxN5zM2lrJ/RczZXh4eHhbeXn23b6OlaJt2xj7pcqCh4eHt4mXl19XxgWS++3LKgIPHh4e3mFeUoDI77RH/GzlKPrh4eHhbeLlCeusfbVS3m1D14u94eHh4R3j5Z339uhvn5ndj8q4eHh4eJt4M9hK66sdt2q3joeHh3eal7Ssdh367eDUSjDAw8PDO8fbW37dNT41q0ZH8xF4eHh4m3iztn2+6aSAuz7IteG/BDw8PLyYt2vp/Pn8d/Hw8PD+P6+t/uaBIblmCXeRTOPh4eEt897Lqz3i23CShIR66AoPDw9vK68tnubLtal5m0zP1sfDw8PbxcsP5VlJoi0czwIDHh4e3t/zZsEg+Zm2vNvGrmEZFw8PD+9R3iz9XRk+yF8cHh4e3rO89YQ7OdbzxDr6FTw8PLxjvNmis5ZYO3aQv45osgAPDw9vmdc2wHYBVkLFegkDDw8Pb8T7ANymiL0LH6SJAAAAAElFTkSuQmCC" alt="微信分享二维码">
 </div>
 
 
@@ -603,7 +694,7 @@
         var OriginTitile = document.title, titleTime;
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
                 clearTimeout(titleTime);
             } else {
                 document.title = '(つェ⊂)咦!又好了!';

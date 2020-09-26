@@ -4,10 +4,12 @@
     <meta charset="utf-8">
     
     
-    <title>Git服务器端搭建 | WeiyiGeek Blog&#39;s</title>
+    <title>Git服务器端搭建 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="keywords" content="git">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
     <link rel="shortcut icon" href="/img/favicon.ico">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
     <link rel="stylesheet" href="/css/style.css?v=1.4.4">
@@ -18,7 +20,7 @@
             reward:	false,
             lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
             v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
-            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
             d: JSON.parse('{"app_id":"6537ff7a"}')
         };
     </script>
@@ -219,6 +221,7 @@
 
 	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/应用安装/">应用安装</a></li></ul>
 
+
             
         </h5>
         
@@ -275,21 +278,21 @@
 <hr>
 
 <h4 id="0x01-git的简单C-S"><a href="#0x01-git的简单C-S" class="headerlink" title="0x01 git的简单C/S"></a>0x01 git的简单C/S</h4><p>搭建Git服务器（简约类型）：远程仓库实际上和本地仓库没啥不同，纯粹为了7x24小时开机并交换大家的修改。<br>搭建Git服务器需要准备一台运行Linux的机器，强烈推荐用Ubuntu或Debian，这样通过几条简单的apt命令就可以完成安装。</p>
-<p>我们有一个远程服务器和一台本地服务器，现在我们需要使用这两台机器来工作。为了简单起见我们就分别叫它们为远程服务器R和本地服务器L。<br>实验环境：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#假设你已经有sudo权限的用户账号，下面正式开始安装。</span></span><br><span class="line">R-Server: CentOS Linux release 7.6.1810 (Core) 3.10.0-957.12.2.el7.x86_64</span><br><span class="line">L-Client:Linux WeiyiGeek 4.4.0-18362-Microsoft <span class="comment">#1-Microsoft Mon Mar 18 12:02:00 PST 2019 x86_64 x86_64 x86_64 GNU/Linux （Ubuntu）</span></span><br></pre></td></tr></table></figure></p>
-<p><em>安装流程</em><br>Step1.R端与L端Centos7安装git<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo yum install git -y</span><br><span class="line"><span class="comment">#sudo apt-get install git-core  #ubuntu上可以指向</span></span><br></pre></td></tr></table></figure></p>
-<p>Step2.R端-创建一个git用户用来运行git服务并设置密码<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$sudo useradd git</span><br><span class="line">$passwd git</span><br><span class="line">Changing password for user git.</span><br><span class="line">New password:</span><br><span class="line">Retype new password:</span><br><span class="line">passwd: all authentication tokens updated successfully.</span><br></pre></td></tr></table></figure></p>
-<p>Step3.为了容易的访问服务器，我们设置一个免密 ssh 登录;首先在你本地电脑上创建一个 ssh 密钥(L端)：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#收集所有需要登录的用户的公钥，就是他们自己的id_rsa.pub文件，把所有公钥导入到/home/git/.ssh/authorized_keys文件里，一行一个。</span></span><br><span class="line">ssh-keygen -t rsa -p <span class="string">"passowrd"</span>  <span class="comment">#可以指定密匙登录的密码</span></span><br><span class="line">cat ~/.ssh/id_rsa.pub | ssh git@remote-server <span class="string">"mkdir -p ~/.ssh &amp;&amp; cat &gt;&gt; ~/.ssh/authorized_keys"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#也可采用这样的方式：(推荐简单)</span></span><br><span class="line"><span class="variable">$ssh</span>-copy-id git@10.10.107.222</span><br><span class="line"><span class="variable">$ssh</span> <span class="string">'git@10.10.107.222'</span></span><br><span class="line">Last login: Wed Jul 17 15:07:32 2019  <span class="comment">#密匙登录成功</span></span><br><span class="line">[git@master ~]$</span><br></pre></td></tr></table></figure></p>
-<p>Step4.R端初始化Git就会创建一个裸仓库，裸仓库没有工作区，因为服务器上的Git仓库纯粹是为了共享，所以不让用户直接登录到服务器上去改工作区，并且服务器上的Git仓库通常都以.git结尾。<br>假定是/opt/dev/sample.git/，在/srv目录下输入命令：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">su - git</span><br><span class="line">mkdir ~/dev;<span class="built_in">cd</span> ~/dev/</span><br><span class="line">git init --bare sample.git  <span class="comment">#初始化git仓库</span></span><br><span class="line"><span class="comment"># Initialized empty Git repository in /home/git/dev/sample.git/</span></span><br><span class="line"><span class="comment">#把owner改为git：</span></span><br><span class="line">sudo chown -R git:git sample.git</span><br></pre></td></tr></table></figure></p>
-<p>Step5.禁用shell登录：出于安全考虑，第二步创建的git用户不允许登录shell，这可以通过编辑/etc/passwd文件完成。<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">git:x:1001:1001:,,,:/home/git:/bin/bash</span><br><span class="line"><span class="comment">#改为 git:x:1001:1001:,,,:/home/git:/usr/bin/git-shell</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#或者采用命令进行指定</span></span><br><span class="line"><span class="variable">$usermod</span> -s /usr/bin/git-shell git</span><br><span class="line"><span class="variable">$grep</span> <span class="string">"git"</span> /etc/passwd</span><br><span class="line">git:x:1003:1003::/home/git:/usr/bin/git-shell</span><br></pre></td></tr></table></figure></p>
+<p>我们有一个远程服务器和一台本地服务器，现在我们需要使用这两台机器来工作。为了简单起见我们就分别叫它们为远程服务器R和本地服务器L。<br>实验环境：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#假设你已经有sudo权限的用户账号，下面正式开始安装。</span></span><br><span class="line">R-Server: CentOS Linux release 7.6.1810 (Core) 3.10.0-957.12.2.el7.x86_64</span><br><span class="line">L-Client:Linux WeiyiGeek 4.4.0-18362-Microsoft <span class="comment">#1-Microsoft Mon Mar 18 12:02:00 PST 2019 x86_64 x86_64 x86_64 GNU/Linux （Ubuntu）</span></span><br></pre></td></tr></table></figure></p>
+<p><em>安装流程</em><br>Step1.R端与L端Centos7安装git<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum install git -y</span><br><span class="line"><span class="comment">#sudo apt-get install git-core  #ubuntu上可以指向</span></span><br></pre></td></tr></table></figure></p>
+<p>Step2.R端-创建一个git用户用来运行git服务并设置密码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$sudo useradd git</span><br><span class="line">$passwd git</span><br><span class="line">Changing password for user git.</span><br><span class="line">New password:</span><br><span class="line">Retype new password:</span><br><span class="line">passwd: all authentication tokens updated successfully.</span><br></pre></td></tr></table></figure></p>
+<p>Step3.为了容易的访问服务器，我们设置一个免密 ssh 登录;首先在你本地电脑上创建一个 ssh 密钥(L端)：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#收集所有需要登录的用户的公钥，就是他们自己的id_rsa.pub文件，把所有公钥导入到/home/git/.ssh/authorized_keys文件里，一行一个。</span></span><br><span class="line">ssh-keygen -t rsa -p <span class="string">"passowrd"</span>  <span class="comment">#可以指定密匙登录的密码</span></span><br><span class="line">cat ~/.ssh/id_rsa.pub | ssh git@remote-server <span class="string">"mkdir -p ~/.ssh &amp;&amp; cat &gt;&gt; ~/.ssh/authorized_keys"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#也可采用这样的方式：(推荐简单)</span></span><br><span class="line"><span class="variable">$ssh</span>-copy-id git@10.10.107.222</span><br><span class="line"><span class="variable">$ssh</span> <span class="string">'git@10.10.107.222'</span></span><br><span class="line">Last login: Wed Jul 17 15:07:32 2019  <span class="comment">#密匙登录成功</span></span><br><span class="line">[git@master ~]$</span><br></pre></td></tr></table></figure></p>
+<p>Step4.R端初始化Git就会创建一个裸仓库，裸仓库没有工作区，因为服务器上的Git仓库纯粹是为了共享，所以不让用户直接登录到服务器上去改工作区，并且服务器上的Git仓库通常都以.git结尾。<br>假定是/opt/dev/sample.git/，在/srv目录下输入命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">su - git</span><br><span class="line">mkdir ~/dev;<span class="built_in">cd</span> ~/dev/</span><br><span class="line">git init --bare sample.git  <span class="comment">#初始化git仓库</span></span><br><span class="line"><span class="comment"># Initialized empty Git repository in /home/git/dev/sample.git/</span></span><br><span class="line"><span class="comment">#把owner改为git：</span></span><br><span class="line">sudo chown -R git:git sample.git</span><br></pre></td></tr></table></figure></p>
+<p>Step5.禁用shell登录：出于安全考虑，第二步创建的git用户不允许登录shell，这可以通过编辑/etc/passwd文件完成。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">git:x:1001:1001:,,,:/home/git:/bin/bash</span><br><span class="line"><span class="comment">#改为 git:x:1001:1001:,,,:/home/git:/usr/bin/git-shell</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#或者采用命令进行指定</span></span><br><span class="line"><span class="variable">$usermod</span> -s /usr/bin/git-shell git</span><br><span class="line"><span class="variable">$grep</span> <span class="string">"git"</span> /etc/passwd</span><br><span class="line">git:x:1003:1003::/home/git:/usr/bin/git-shell</span><br></pre></td></tr></table></figure></p>
 <p>这样git用户可以正常通过ssh使用git但无法登录shell，因为我们为git用户指定的git-shell每次一登录就自动退出。</p>
-<p>Step6.克隆远程仓库,现在可以通过git clone命令克隆远程仓库了，在各自的电脑上运行：<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> git@server:~/dev/sample.git</span><br></pre></td></tr></table></figure></p>
+<p>Step6.克隆远程仓库,现在可以通过git clone命令克隆远程仓库了，在各自的电脑上运行：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> git@server:~/dev/sample.git</span><br></pre></td></tr></table></figure></p>
 <figure class="image-box">
                 <a rel=Git服务器端搭建 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190717151853.png" title="WeiyiGeek.克隆仓库" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190717151853.png" alt="WeiyiGeek.克隆仓库" title class></a>
                 <p>WeiyiGeek.克隆仓库</p>
             </figure>
-<p>Step7.此时您可以建立文件进行git推送，其他机器也能进行git clone拉取项目;<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ubuntu@WeiyiGeek:~/sample$ <span class="built_in">echo</span> <span class="string">"Hello World! git server"</span> &gt; readme.md</span><br><span class="line">ubuntu@WeiyiGeek:~/sample$ git add readme.md</span><br><span class="line">ubuntu@WeiyiGeek:~/sample$ git commit -m <span class="string">"Hello World"</span></span><br><span class="line">[master (root-commit) e31c90a] Hello World</span><br><span class="line"> 1 file changed, 1 insertion(+)</span><br><span class="line"> create mode 100644 readme.md</span><br><span class="line">ubuntu@WeiyiGeek:~/sample$ git push</span><br><span class="line">Counting objects: 3, <span class="keyword">done</span>.</span><br><span class="line">Writing objects: 100% (3/3), 235 bytes | 117.00 KiB/s, <span class="keyword">done</span>.</span><br><span class="line">Total 3 (delta 0), reused 0 (delta 0)</span><br><span class="line">To 10.10.107.222:~/dev/sample.git</span><br><span class="line"> * [new branch]      master -&gt; master</span><br></pre></td></tr></table></figure></p>
+<p>Step7.此时您可以建立文件进行git推送，其他机器也能进行git clone拉取项目;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@WeiyiGeek:~/sample$ <span class="built_in">echo</span> <span class="string">"Hello World! git server"</span> &gt; readme.md</span><br><span class="line">ubuntu@WeiyiGeek:~/sample$ git add readme.md</span><br><span class="line">ubuntu@WeiyiGeek:~/sample$ git commit -m <span class="string">"Hello World"</span></span><br><span class="line">[master (root-commit) e31c90a] Hello World</span><br><span class="line"> 1 file changed, 1 insertion(+)</span><br><span class="line"> create mode 100644 readme.md</span><br><span class="line">ubuntu@WeiyiGeek:~/sample$ git push</span><br><span class="line">Counting objects: 3, <span class="keyword">done</span>.</span><br><span class="line">Writing objects: 100% (3/3), 235 bytes | 117.00 KiB/s, <span class="keyword">done</span>.</span><br><span class="line">Total 3 (delta 0), reused 0 (delta 0)</span><br><span class="line">To 10.10.107.222:~/dev/sample.git</span><br><span class="line"> * [new branch]      master -&gt; master</span><br></pre></td></tr></table></figure></p>
 <p><br></p>
-<p><em>使用案例2:（本地建立初始化仓库，再关联远程仓库）</em><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ git init sample</span><br><span class="line">Initialized empty Git repository <span class="keyword">in</span> /home/ubuntu/sample/.git/</span><br><span class="line">drwxrwxrwx 1 ubuntu ubuntu 4096 Jul 17 15:51 .git/</span><br><span class="line"></span><br><span class="line"><span class="comment">#添加远程仓库</span></span><br><span class="line">$ git remote add origin git@10.10.107.222:/home/git/dev/sample.git</span><br><span class="line"></span><br><span class="line"><span class="comment">#将远程仓库拉取下来与当前master分支合并</span></span><br><span class="line">$ git pull origin master</span><br><span class="line">remote: Counting objects: 3, <span class="keyword">done</span>.</span><br><span class="line">remote: Total 3 (delta 0), reused 0 (delta 0)</span><br><span class="line">Unpacking objects: 100% (3/3), <span class="keyword">done</span>.</span><br><span class="line">From 10.10.107.222:/home/git/dev/sample</span><br><span class="line"> * branch            master     -&gt; FETCH_HEAD</span><br><span class="line"></span><br><span class="line"><span class="comment">#此时的config文件为</span></span><br><span class="line">ubuntu@WeiyiGeek:~/sample$ cat .git/config</span><br><span class="line">[core]</span><br><span class="line">        repositoryformatversion = 0</span><br><span class="line">        filemode = <span class="literal">true</span></span><br><span class="line">        bare = <span class="literal">false</span></span><br><span class="line">        logallrefupdates = <span class="literal">true</span></span><br><span class="line">[remote <span class="string">"origin"</span>]</span><br><span class="line">        url = git@10.10.107.222:/home/git/dev/sample.git</span><br><span class="line">        fetch = +refs/heads/*:refs/remotes/origin/*</span><br></pre></td></tr></table></figure></p>
+<p><em>使用案例2:（本地建立初始化仓库，再关联远程仓库）</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ git init sample</span><br><span class="line">Initialized empty Git repository <span class="keyword">in</span> /home/ubuntu/sample/.git/</span><br><span class="line">drwxrwxrwx 1 ubuntu ubuntu 4096 Jul 17 15:51 .git/</span><br><span class="line"></span><br><span class="line"><span class="comment">#添加远程仓库</span></span><br><span class="line">$ git remote add origin git@10.10.107.222:/home/git/dev/sample.git</span><br><span class="line"></span><br><span class="line"><span class="comment">#将远程仓库拉取下来与当前master分支合并</span></span><br><span class="line">$ git pull origin master</span><br><span class="line">remote: Counting objects: 3, <span class="keyword">done</span>.</span><br><span class="line">remote: Total 3 (delta 0), reused 0 (delta 0)</span><br><span class="line">Unpacking objects: 100% (3/3), <span class="keyword">done</span>.</span><br><span class="line">From 10.10.107.222:/home/git/dev/sample</span><br><span class="line"> * branch            master     -&gt; FETCH_HEAD</span><br><span class="line"></span><br><span class="line"><span class="comment">#此时的config文件为</span></span><br><span class="line">ubuntu@WeiyiGeek:~/sample$ cat .git/config</span><br><span class="line">[core]</span><br><span class="line">        repositoryformatversion = 0</span><br><span class="line">        filemode = <span class="literal">true</span></span><br><span class="line">        bare = <span class="literal">false</span></span><br><span class="line">        logallrefupdates = <span class="literal">true</span></span><br><span class="line">[remote <span class="string">"origin"</span>]</span><br><span class="line">        url = git@10.10.107.222:/home/git/dev/sample.git</span><br><span class="line">        fetch = +refs/heads/*:refs/remotes/origin/*</span><br></pre></td></tr></table></figure></p>
 <p><em>项目总结：</em></p>
 <ul>
 <li>管理公钥: 可采用 Gitosis<ul>
@@ -309,22 +312,109 @@
 <blockquote class="post-copyright">
     <div class="content">
         
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
 <span class="post-time">
-    最后更新时间：<time datetime="2020-03-22T05:21:23.483Z" itemprop="dateUpdated">2020-03-22 13:21:23</time>
+    最后更新时间：<time datetime="2020-08-19T13:16:50.098Z" itemprop="dateUpdated">2020-08-19 21:16:50</time>
 </span><br>
 
 
         
-        转载注明出处，原文地址：<a href="/2019/7/git服务器端搭建.html" target="_blank" rel="external">http://weiyigeek.top/2019/7/git服务器端搭建.html</a>
+        转载注明出处，原文地址：<a href="/2019/7/git服务器端搭建.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/7/git服务器端搭建.html</a>
+        <br>本站文章内容遵循 <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
         
     </div>
     <footer>
-        <a href="http://weiyigeek.top">
+        <a href="https://blog.weiyigeek.top">
             <img src="/img/avatar.png" alt="WeiyiGeek">
             WeiyiGeek
         </a>
     </footer>
 </blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
 
         
         <div class="post-footer">
@@ -338,7 +428,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/7/git服务器端搭建.html&title=《Git服务器端搭建》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/7/git服务器端搭建.html&title=《Git服务器端搭建》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -350,7 +440,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/7/git服务器端搭建.html&title=《Git服务器端搭建》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/7/git服务器端搭建.html&title=《Git服务器端搭建》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
@@ -368,6 +458,8 @@
         </div>
         
             
+
+
 
 
         
@@ -457,7 +549,6 @@
 
             
         </p>
-      
     </div>
 </footer>
 
@@ -470,7 +561,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/7/git服务器端搭建.html&title=《Git服务器端搭建》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/7/git服务器端搭建.html&title=《Git服务器端搭建》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -482,7 +573,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/7/git服务器端搭建.html&title=《Git服务器端搭建》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/7/git服务器端搭建.html&title=《Git服务器端搭建》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
@@ -494,7 +585,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACMklEQVR42u3awY6DMAxF0f7/TzPSrCp1KPfZaTU4N6sKUcJhYdmxHw+8jt/1/Pt5vd55dp38fv3vsiVDhozbMo63izD4q7z/L9/rj+fLkCFjA0YtyKYkEkzJ/TJkyJCRJnAkpeNhVIYMGTL6AZeEzjS5THeRIUPGngye5PHjtlWMxbW4DBkybsioNQa+8/vj/Q0ZMmT8e8YRrn73sNN4OH2CDBkyRjPOAly/rE2HLRa0FmTIkLENIy1T+Wa8iOVDZqcBV4YMGYMY5NG1b5O2Rckup+8pQ4aM0Yz+yVVty/ToPz6YkyFDxjYMNOJQOnT73JCHDBkypjLSkQjOqJ2GpSWuDBkydmDUQiEZy+DDXsuKWBkyZAxldB7XGaRY/AlkyJAxlNFJBDvBMW1VXuwrQ4aM0Yw0XPKBDJI49hNNGTJk7MZIj/75xqtC88V7ypAhYxtGOgxBCtR0aIxTTwOuDBkyBjF4elc7IONUcrh2UYvLkCFjKIMHtbQBWWsDLGumypAhYxCDH8fzYjINkTzcX8yJyJAhYzSjU6zy6yQcpy0KGTJk7MDgYxa1hmVnR14wy5AhYzbjCFfa2uRlalokX5waypAhYxAjDZH8cZ0kj6SSxaAvQ4aM2zJ44brqfj5ywQtgGTJk7MBIE7i0Vk7Tx2L3VYYMGdsz0pcj1zvNCRkyZMjgjLR87R+xtVJDGTJk3JbBt28lcKWBMHRdhgwZoxn9eY30EK2TLKafVYYMGTdn/AD4FcdlT1f17gAAAABJRU5ErkJggg==" alt="微信分享二维码">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACL0lEQVR42u3aS46EMAxF0dr/pulpSS3CfXa6JZybESpRkMPAij+fD17X1/r9+/r+9T3kLduWDBkyXsu4luvuBXfX5Mnrrd+99+HTyJAh4wDGOiCmQXO9IR5w+XtlyJAhg2yXHBw7YV2GDBky+gG3f3zsBHoZMmScwCChkADIJtKj4eZcXIYMGS9k8Kr7/1//SX9DhgwZr2Jc4UqL/mk7s7ZkyJAxm8EDHD+QkTtrievDW2TIkDGUURuz6LQKCDj+RYYMGaMZcfEdNybTDRHSw2eSIUPGAYw0aUwDbvpL3ACQIUPGUAa31pqLtdAcD3DIkCHjAAZ/cVrorzVB0yfLkCFjNiMdveqX8mtpM3qODBkyRjNImb7WKuANAzKEgRqlMmTIGMrYUJQvNQ/2thBkyJAxlUEGLHgYTduZ/XAsQ4aMExjpg/pNx11B/GFmRIYMGYMY5G8clhbj+GG0NWwhQ4aMoYz+MARPjIPtrpsBMmTIGMrYVQjj6WunURpMjsiQIeMYRi0c12CdcC9DhoxzGCSVjdPL9v3xsIUMGTJGM/hxLS3Y1VoI5IMGJ1wZMmS8lnGFiwTive3MDWdbGTJkvJzRCXa1wlk6BNYZzpAhQ8YkBgmyPCB2Gpz8nmLVUIYMGS9n8KNbray2K6F9SGVlyJAhI9wc31CaJAdfUYYMGUcyyMGu/yHWOww6sTJkyBjEIEksGbyohWC0URkyZBzM4Kljrd1YaxKk1zJkyBjK+AGYhrwqP1V7iQAAAABJRU5ErkJggg==" alt="微信分享二维码">
 </div>
 
 
@@ -571,7 +662,7 @@
         var OriginTitile = document.title, titleTime;
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
                 clearTimeout(titleTime);
             } else {
                 document.title = '(つェ⊂)咦!又好了!';

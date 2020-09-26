@@ -4,10 +4,12 @@
     <meta charset="utf-8">
     
     
-    <title>基于Quartz的定时任务及crond表达式入门学习 | WeiyiGeek Blog&#39;s</title>
+    <title>基于Quartz的定时任务及crond表达式入门学习 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="keywords" content="Quartz,Crond">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
     <link rel="shortcut icon" href="/img/favicon.ico">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
     <link rel="stylesheet" href="/css/style.css?v=1.4.4">
@@ -18,7 +20,7 @@
             reward:	false,
             lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
             v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
-            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
             d: JSON.parse('{"app_id":"6537ff7a"}')
         };
     </script>
@@ -219,6 +221,7 @@
 
 	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Java/">Java</a></li></ul>
 
+
             
         </h5>
         
@@ -266,10 +269,10 @@
             <p>[TOC]</p>
 <a id="more"></a>
 <h4 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h4><h4 id="0x01-基础语法"><a href="#0x01-基础语法" class="headerlink" title="0x01 基础语法"></a>0x01 基础语法</h4><p>Java中Quartz Cron表达式(<code>Cron Expressions—Cron 表达式</code>)被用来配置CronTrigger实例,需要注意一点它不同于Linux中Cron表达式，我们从下面的格式可以看出区别;</p>
-<p>Cron表达式是一个由7个子表达式组成的字符串, 每个子表达式都描述了一个单独的日程细节并且采用空格分隔;<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#Linux crond</span></span><br><span class="line">分钟 小时 天 月 周 Command</span><br><span class="line">*    *    *  *  * 命令执行</span><br><span class="line"></span><br><span class="line"><span class="comment">#Quartz Cron</span></span><br><span class="line">* * * * * * ? </span><br><span class="line">秒（0~59）</span><br><span class="line">分钟（0~59）</span><br><span class="line">小时（0~23）</span><br><span class="line">天（月）（0~31，但是你需要考虑你月的天数）</span><br><span class="line">月（0~11）</span><br><span class="line">天（星期）（1~7 1=SUN 或 SUN，MON，TUE，WED，THU，FRI，SAT）</span><br><span class="line">年份（1970－2099）</span><br></pre></td></tr></table></figure></p>
+<p>Cron表达式是一个由7个子表达式组成的字符串, 每个子表达式都描述了一个单独的日程细节并且采用空格分隔;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Linux crond</span></span><br><span class="line">分钟 小时 天 月 周 Command</span><br><span class="line">*    *    *  *  * 命令执行</span><br><span class="line"></span><br><span class="line"><span class="comment">#Quartz Cron</span></span><br><span class="line">* * * * * * ? </span><br><span class="line">秒（0~59）</span><br><span class="line">分钟（0~59）</span><br><span class="line">小时（0~23）</span><br><span class="line">天（月）（0~31，但是你需要考虑你月的天数）</span><br><span class="line">月（0~11）</span><br><span class="line">天（星期）（1~7 1=SUN 或 SUN，MON，TUE，WED，THU，FRI，SAT）</span><br><span class="line">年份（1970－2099）</span><br></pre></td></tr></table></figure></p>
 <p>PS:从上面的比对中可以看出Quartz的Cron表达式比Linux中的Cron表达式更为强大和精细;</p>
-<p><strong>特殊字符含义:</strong><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">, : 其表示一个列表如(9,10,11,12)</span><br><span class="line">- : 其表示一个连续的区间如(9-12) , 例如：子表达式（天（星期））可以为 “MON-FRI”，“MON，WED，FRI”，“MON-WED,SAT” ;</span><br><span class="line">* : 其表示一个通配符即 “*”字符代表所有可能的值 </span><br><span class="line">/ : 其表示一个指定数值的增量,如一个间隔时间(8-18/4)(/表示每隔4小时),在子表达式（分钟）里的“0/15”表示从第0分钟开始，每15分钟 ;</span><br><span class="line">? : 其字符仅被用于天（月）和天（星期）两个子表达式，表示不指定值, 当2个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为“？” </span><br><span class="line">L : 字符仅被用于天（月-最后一天）和天（星期-最后一周）两个子表达式，它是单词“last”的缩写, 但是它在两个子表达式里的含义是不同的。  例如：“6L”表示这个月的倒数第6天，FRIL表示这个月的最一个星期五;</span><br></pre></td></tr></table></figure></p>
-<p><strong>基础示例:</strong><br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#示例1.每天上午10点，下午14点，16点触发执行</span></span><br><span class="line">0 0 10,14,16 * * ?</span><br><span class="line"></span><br><span class="line"><span class="comment">#示例2.朝九晚五工作时间内每半小时</span></span><br><span class="line">0 0/30 9-17 * * ?</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例3.由于"月份中的日期 天(月)"和"星期中的日期-天(星期)"这两个元素互斥的,必须要对其中一个设置?. </span></span><br><span class="line">0 0 12 ? * WED  <span class="comment">#表示每个星期三中午12点</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>特殊字符含义:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">, : 其表示一个列表如(9,10,11,12)</span><br><span class="line">- : 其表示一个连续的区间如(9-12) , 例如：子表达式（天（星期））可以为 “MON-FRI”，“MON，WED，FRI”，“MON-WED,SAT” ;</span><br><span class="line">* : 其表示一个通配符即 “*”字符代表所有可能的值 </span><br><span class="line">/ : 其表示一个指定数值的增量,如一个间隔时间(8-18/4)(/表示每隔4小时),在子表达式（分钟）里的“0/15”表示从第0分钟开始，每15分钟 ;</span><br><span class="line">? : 其字符仅被用于天（月）和天（星期）两个子表达式，表示不指定值, 当2个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为“？” </span><br><span class="line">L : 字符仅被用于天（月-最后一天）和天（星期-最后一周）两个子表达式，它是单词“last”的缩写, 但是它在两个子表达式里的含义是不同的。  例如：“6L”表示这个月的倒数第6天，FRIL表示这个月的最一个星期五;</span><br></pre></td></tr></table></figure></p>
+<p><strong>基础示例:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#示例1.每天上午10点，下午14点，16点触发执行</span></span><br><span class="line">0 0 10,14,16 * * ?</span><br><span class="line"></span><br><span class="line"><span class="comment">#示例2.朝九晚五工作时间内每半小时</span></span><br><span class="line">0 0/30 9-17 * * ?</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例3.由于"月份中的日期 天(月)"和"星期中的日期-天(星期)"这两个元素互斥的,必须要对其中一个设置?. </span></span><br><span class="line">0 0 12 ? * WED  <span class="comment">#表示每个星期三中午12点</span></span><br></pre></td></tr></table></figure></p>
 <p><em>注意事项:</em></p>
 <ul>
 <li>1.在使用“L”参数时，不要指定列表或范围，因为这会导致问题</li>
@@ -281,22 +284,109 @@
 <blockquote class="post-copyright">
     <div class="content">
         
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
 <span class="post-time">
-    最后更新时间：<time datetime="2020-05-25T13:00:46.382Z" itemprop="dateUpdated">2020-05-25 21:00:46</time>
+    最后更新时间：<time datetime="2020-08-19T13:16:50.110Z" itemprop="dateUpdated">2020-08-19 21:16:50</time>
 </span><br>
 
 
         
-        转载注明出处，原文地址：<a href="/2020/5/基于quartz的定时任务及crond表达式入门学习.html" target="_blank" rel="external">http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html</a>
+        转载注明出处，原文地址：<a href="/2020/5/基于quartz的定时任务及crond表达式入门学习.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html</a>
+        <br>本站文章内容遵循 <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
         
     </div>
     <footer>
-        <a href="http://weiyigeek.top">
+        <a href="https://blog.weiyigeek.top">
             <img src="/img/avatar.png" alt="WeiyiGeek">
             WeiyiGeek
         </a>
     </footer>
 </blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
 
         
         <div class="post-footer">
@@ -310,7 +400,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -322,7 +412,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
@@ -342,15 +432,17 @@
             
 
 
+
+
         
     </div>
     
 <nav class="post-nav flex-row flex-justify-between">
   
     <div class="prev">
-      <a href="/2020/5/linux之pam系统模块详解说明.html" id="post-prev" class="post-nav-link">
+      <a href="/2020/5/linux基础命令行使用技巧.html" id="post-prev" class="post-nav-link">
         <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">Linux之PAM系统模块详解说明</h4>
+        <h4 class="title">Linux基础命令行使用技巧</h4>
       </a>
     </div>
   
@@ -429,7 +521,6 @@
 
             
         </p>
-      
     </div>
 </footer>
 
@@ -442,7 +533,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -454,7 +545,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5/基于quartz的定时任务及crond表达式入门学习.html&title=《基于Quartz的定时任务及crond表达式入门学习》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
@@ -466,7 +557,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPYAAAD2CAAAAADAeSUUAAADRElEQVR42u3a227bQAwE0Pz/T6dAn1rAlxlSLazN0ZMR2yudNRCCw/36iq/v39ez13/+5fXfk9XydZ5967ILGxsb+ybs75dXsnT77ut75dvx+md4vT42Njb2eeykzORlKSl1SfFLniH5ebCxsbGxZ4Bky/KV2+fExsbGxp7dPuElOU8eb2FjY2Nj56FSW37yBmMTXf3zLA0bGxv749n7Qe/nvP6v821sbGzsD2B/l1cb4iSlZdZg5EXrwR2xsbGxD2IniyaYtgTOmpl2c988ITY2NvbR7NnSs5KT9AizluPN57GxsbGPYLdHZNqjkLM122EDNjY29k9m5/l58qBtUczXzEOoPMbCxsbGPo+dNxKzkXA7uM2P/iQ8bGxs7FPZsxFvO+i9ircZCT8Y8WJjY2Mfx56lLkl/k9fSNuQabhA2Njb2cezZqDU/gnPVqGB2qKjItLCxsbFvyE4KTNtCtIPkPAyaFbA3KRo2Njb2zdmbkepVhTAPmNqtfIrHxsbGPoi9LxL7kW0eXc2Cp6fbjY2NjX0QOy8Y+aA3D4Py4peD2yAMGxsb+77s9l9/G9/nV1sI22HwqhpjY2NjfzC7PVKzaQbyhqSotIuRMDY2NvYZ7FnLkY9p25ZjHypFYwxsbGzs49izuD8pM7PGI9+a9nDPBWeUsLGxsT+M3Qb3bdyzGTy0zUYNxsbGxj6IvYnd89Dn4l8pvnsRLWFjY2PfnL0/XnNVvcgHw/n44cFnsLGxsY9gt8doNmPdNpzalNI338XGxsY+iL0vM0njsR825IPk4qQSNjY29hHs/CHaliM/QLNpP/L7Pui9sLGxsY9gtwPdZNDblrTZCCHflKj9wMbGxr4texa+z2KmdqOToD+Prv56FxsbG/s4dv6FzSGeCyrt6JjO8IwSNjY29q3Ys1gnXycfSOTlqm1Lnp5RwsbGxr45O7/aFiV/lHYuPSt+Qzw2Njb2TdhJ+dlERW0UlRetdhSNjY2NfTY7GfTOQqX9+KENni4+soONjY19EHsT2V+7Ql50nyqwsbGxfzA7b0vaBmbGaI9mYmNjY5/KXhWDkpq3De34ufh5sLGxsQ9izwa9s3lyHvpvRgj5kAMbGxv75uxfS/YHStpbFmwAAAAASUVORK5CYII=" alt="微信分享二维码">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPYAAAD2CAAAAADAeSUUAAADK0lEQVR42u3aW2rrQBAFwOx/075wvwIh4pxuBaxxzZexFWlqDGn34+srXq//6/qd7+9/X799+vM+P1/PnnLbwsbGxn4I+3W58s1db7F97vXBXR9ich9sbGzs89jX201CRbLFhJ0fXPKUX9/HxsbG/kh2fhybcHjX3rCxsbGxk5/47UFstt6WpbCxsbE/jZ3A8gJQckDtgebsm2tp2NjY2G/Pbhu97/z6D/vb2NjY2G/JfpUrTw/yZ7V3e60XNjY29knsWVF+33ZtjyPfT5LMYGNjY5/HbhsDfwFug1x7Z2xsbOxT2bP2bdtqbYdy8jbDKmJjY2NjfwC7HYhpG7Ttp5sxI2xsbOxPYCeJR5s2tJh9LhXtBBsbG/sg9uZXetuO3YSi2ZV1YwAbGxv7geykNHOdkOSbm213dqyruI2NjY39QHb7v31WWkoGImejmfkT6/PGxsbGfgg7b6ze1TNtW7mzO/x6KNjY2NgHsTdloFnJvg1y+8PFxsbG/hz2pmC0GfTZt2lvKHhhY2NjP5ydB5X2kW0DYJbMtF8eNjY29nns5CDyK+9NLWYlqry1jI2Njf10dl7oycs3eeJxQzFoVvbCxsbGPpTdjuPsg8r1dts7FNdjY2NjH8TO04k8j2kLUm2gmoVJbGxs7E9gbxKGvA2wGe7c77buIWBjY2O/PTtJBvIgtCHl456zYVBsbGzsU9mzH/p5CemuctWsRBW5sLGxsY9gJ4zZaM5m0CcpEuVJDjY2Nvap7FewNqGrTWP2oSsZMMLGxsY+j50EqlmZqU028pC2ajxgY2NjH8SeJRttuGrD4XUQun4//3qwsbGxz2AnF9U1qqD0n5eQ2i8jSmOwsbGxj2MnYy6zxGB/uHmToB7TwcbGxj6Ina86y1msJDQOjwwbGxv7IPYNwaAcx5mN2swavXmLAhsbG/vp7DxotQcxS1HyUlFb3iqiNzY2NvYD2bNNtyFqH103qUXUJMDGxsY+mj1r1m4OblP8wsbGxsZu2bNS/r6snxSkikiIjY2N/Vh229zddBvycJgnNnUhDBsbG/sgdrvRm0chy/hyTWr/ChsbG/vh7H8oAMlduBLmPwAAAABJRU5ErkJggg==" alt="微信分享二维码">
 </div>
 
 
@@ -543,7 +634,7 @@
         var OriginTitile = document.title, titleTime;
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
                 clearTimeout(titleTime);
             } else {
                 document.title = '(つェ⊂)咦!又好了!';

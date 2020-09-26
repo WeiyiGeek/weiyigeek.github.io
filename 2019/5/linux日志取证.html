@@ -4,10 +4,12 @@
     <meta charset="utf-8">
     
     
-    <title>Linux日志取证 | WeiyiGeek Blog&#39;s</title>
+    <title>Linux日志取证 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="keywords" content="电子取证">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
     <link rel="shortcut icon" href="/img/favicon.ico">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
     <link rel="stylesheet" href="/css/style.css?v=1.4.4">
@@ -18,7 +20,7 @@
             reward:	false,
             lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
             v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
-            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
             d: JSON.parse('{"app_id":"6537ff7a"}')
         };
     </script>
@@ -219,6 +221,7 @@
 
 	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/基础知识/">基础知识</a></li></ul>
 
+
             
         </h5>
         
@@ -265,33 +268,120 @@
             
             <p>[TOC]</p>
 <a id="more"></a>
-<h4 id="登录痕迹"><a href="#登录痕迹" class="headerlink" title="登录痕迹"></a>登录痕迹</h4><p>(1)history和last与w命令中用户登录痕迹:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[root@master bash-5.0]<span class="variable">$history</span></span><br><span class="line">422  2019-08-02 17:03:43 192.168.1.88 root <span class="comment"># history</span></span><br><span class="line"></span><br><span class="line">[root@master bash-5.0]<span class="variable">$w</span></span><br><span class="line">16:01:52 up  1:11,  1 user,  load average: 0.00, 0.01, 0.05</span><br><span class="line">USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT</span><br><span class="line">root     pts/0    192.168.1.88    14:53    0.00s  0.31s  0.00s w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@master bash-5.0]<span class="variable">$last</span></span><br><span class="line">root     pts/0        192.168.1.88    Fri Aug  2 14:53   still logged <span class="keyword">in</span></span><br><span class="line">reboot   system boot  3.10.0-957.12.2. Fri Aug  2 14:51 - 16:01  (01:10)</span><br><span class="line">root     pts/1        192.168.1.88    Fri Aug  2 14:43 - down   (00:06)</span><br></pre></td></tr></table></figure></p>
-<p>(2)发现隐匿的ssh登录行为<br>如果是隐匿的ssh正在进行可以通过lsof 或者 netstat 或者ps 命令发现<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#lsof方法</span></span><br><span class="line">lsof -i:22 | grep EST</span><br><span class="line">sshd    5923 root    3u  IPv4  32629      0t0  TCP master:ssh-&gt;192.168.1.88:53505 (ESTABLISHED)</span><br><span class="line">sshd    5925 root    3u  IPv4  32692      0t0  TCP master:ssh-&gt;192.168.1.88:53506 (ESTABLISHED)</span><br><span class="line"></span><br><span class="line"><span class="comment">#ps方法</span></span><br><span class="line">ps aux | grep <span class="string">"notty"</span></span><br><span class="line">root      5925  0.0  0.3 161456  6296 ?        Ss   14:53   0:00 sshd: root@notty</span><br><span class="line"></span><br><span class="line"><span class="comment">#netstat方法</span></span><br><span class="line">netstat -atlnp | grep <span class="string">"sshd"</span></span><br><span class="line">tcp        0      0 10.10.107.222:22        192.168.1.88:53506     ESTABLISHED 5925/sshd: root@not</span><br><span class="line">tcp        0     48 10.10.107.222:22        192.168.1.88:53505     ESTABLISHED 5923/sshd: root@pts</span><br></pre></td></tr></table></figure></p>
-<p>(3)历史ssh 隐匿登录行为通过分析/var/log/secure 日志（有的系统是/var/log/auth.log）<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#通过分析/var/log/secure 日志有的系统是/var/log/auth.log</span></span><br><span class="line">从 Accepted publickey <span class="keyword">for</span> root from 192.168.12.54 一行可以得出ssh的登录时间 <span class="comment">#Disconnect</span></span><br><span class="line">从 Disconnected from 192.168.12.54 port 43000 一行可以得出ssh的退出时间</span><br></pre></td></tr></table></figure></p>
+<h4 id="登录痕迹"><a href="#登录痕迹" class="headerlink" title="登录痕迹"></a>登录痕迹</h4><p>(1)history和last与w命令中用户登录痕迹:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@master bash-5.0]<span class="variable">$history</span></span><br><span class="line">422  2019-08-02 17:03:43 192.168.1.88 root <span class="comment"># history</span></span><br><span class="line"></span><br><span class="line">[root@master bash-5.0]<span class="variable">$w</span></span><br><span class="line">16:01:52 up  1:11,  1 user,  load average: 0.00, 0.01, 0.05</span><br><span class="line">USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT</span><br><span class="line">root     pts/0    192.168.1.88    14:53    0.00s  0.31s  0.00s w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@master bash-5.0]<span class="variable">$last</span></span><br><span class="line">root     pts/0        192.168.1.88    Fri Aug  2 14:53   still logged <span class="keyword">in</span></span><br><span class="line">reboot   system boot  3.10.0-957.12.2. Fri Aug  2 14:51 - 16:01  (01:10)</span><br><span class="line">root     pts/1        192.168.1.88    Fri Aug  2 14:43 - down   (00:06)</span><br></pre></td></tr></table></figure></p>
+<p>(2)发现隐匿的ssh登录行为<br>如果是隐匿的ssh正在进行可以通过lsof 或者 netstat 或者ps 命令发现<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#lsof方法</span></span><br><span class="line">lsof -i:22 | grep EST</span><br><span class="line">sshd    5923 root    3u  IPv4  32629      0t0  TCP master:ssh-&gt;192.168.1.88:53505 (ESTABLISHED)</span><br><span class="line">sshd    5925 root    3u  IPv4  32692      0t0  TCP master:ssh-&gt;192.168.1.88:53506 (ESTABLISHED)</span><br><span class="line"></span><br><span class="line"><span class="comment">#ps方法</span></span><br><span class="line">ps aux | grep <span class="string">"notty"</span></span><br><span class="line">root      5925  0.0  0.3 161456  6296 ?        Ss   14:53   0:00 sshd: root@notty</span><br><span class="line"></span><br><span class="line"><span class="comment">#netstat方法</span></span><br><span class="line">netstat -atlnp | grep <span class="string">"sshd"</span></span><br><span class="line">tcp        0      0 10.10.107.222:22        192.168.1.88:53506     ESTABLISHED 5925/sshd: root@not</span><br><span class="line">tcp        0     48 10.10.107.222:22        192.168.1.88:53505     ESTABLISHED 5923/sshd: root@pts</span><br></pre></td></tr></table></figure></p>
+<p>(3)历史ssh 隐匿登录行为通过分析/var/log/secure 日志（有的系统是/var/log/auth.log）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过分析/var/log/secure 日志有的系统是/var/log/auth.log</span></span><br><span class="line">从 Accepted publickey <span class="keyword">for</span> root from 192.168.12.54 一行可以得出ssh的登录时间 <span class="comment">#Disconnect</span></span><br><span class="line">从 Disconnected from 192.168.12.54 port 43000 一行可以得出ssh的退出时间</span><br></pre></td></tr></table></figure></p>
 <p>如果系统配置了/etc/bash.bashrc、~/.bashrc记录执行记录,就可以记录到bash -i的执行记录（交互式会话会读取bashrc配置并执行）</p>
-<p>(4) 主要用到strace、strings、grep利用操作系统自身的工具手工快速查找后门<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#通过openssh后门功能中会记录正常用户登录账号密码，因此猜测会用到open系统调用</span></span><br><span class="line">strace –o ssh –ff–p pid  <span class="comment">#用strace跟踪sshd打开的系统调用，然后过滤open，就应该能获取到记录密码的文件及路径。</span></span><br></pre></td></tr></table></figure></p>
+<p>(4) 主要用到strace、strings、grep利用操作系统自身的工具手工快速查找后门<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过openssh后门功能中会记录正常用户登录账号密码，因此猜测会用到open系统调用</span></span><br><span class="line">strace –o ssh –ff–p pid  <span class="comment">#用strace跟踪sshd打开的系统调用，然后过滤open，就应该能获取到记录密码的文件及路径。</span></span><br></pre></td></tr></table></figure></p>
 
         </div>
         
 <blockquote class="post-copyright">
     <div class="content">
         
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
 <span class="post-time">
-    最后更新时间：<time datetime="2020-05-18T15:33:43.508Z" itemprop="dateUpdated">2020-05-18 23:33:43</time>
+    最后更新时间：<time datetime="2020-08-19T13:16:50.110Z" itemprop="dateUpdated">2020-08-19 21:16:50</time>
 </span><br>
 
 
         
-        转载注明出处，原文地址：<a href="/2019/5/linux日志取证.html" target="_blank" rel="external">http://weiyigeek.top/2019/5/linux日志取证.html</a>
+        转载注明出处，原文地址：<a href="/2019/5/linux日志取证.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/5/linux日志取证.html</a>
+        <br>本站文章内容遵循 <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
         
     </div>
     <footer>
-        <a href="http://weiyigeek.top">
+        <a href="https://blog.weiyigeek.top">
             <img src="/img/avatar.png" alt="WeiyiGeek">
             WeiyiGeek
         </a>
     </footer>
 </blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
 
         
         <div class="post-footer">
@@ -305,7 +395,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/5/linux日志取证.html&title=《Linux日志取证》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/5/linux日志取证.html&title=《Linux日志取证》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -317,7 +407,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/5/linux日志取证.html&title=《Linux日志取证》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/5/linux日志取证.html&title=《Linux日志取证》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
@@ -335,6 +425,8 @@
         </div>
         
             
+
+
 
 
         
@@ -424,7 +516,6 @@
 
             
         </p>
-      
     </div>
 </footer>
 
@@ -437,7 +528,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/5/linux日志取证.html&title=《Linux日志取证》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/5/linux日志取证.html&title=《Linux日志取证》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -449,7 +540,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/5/linux日志取证.html&title=《Linux日志取证》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/5/linux日志取证.html&title=《Linux日志取证》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
@@ -461,7 +552,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACJUlEQVR42u3aQW7DQAgF0Nz/0qnUXaXa/UBSKcybVZU4Ns8LOgM8HvF6fq/8k+fturr//TUvWBgYGB/LSB6ZPz65Q/VX0evAwMA4gHGfZK/S69Uj52k6jw0DAwMj2brl6TLHYGBgYEwSbvKYXsLFwMDAuGf0DpPvO8q+8SyOgYHxgYxqY+A//35jfwMDA+NDGM/WSoLI25YviAcDA2M146ocP59qqN7h/pooEWNgYCxlJI9Pmpd5Au1tQP+IHAMD4wBGMvRQHbPoBZp88su3GBgYqxnVov98hGK+lbx8cRgYGMcw8iDKwxDxUbb6QjEwME5j5MX6PBXmgeY1tOj/BgYGxgpGb9whKcDlx+N5IxMDA2M3I/9ZtSWQXJ8k+sIBGAMDYzWjWizrBTqaB8lbFxgYGOsY+UDDJKB8pCPfYhZqexgYGCsYvc1ftWSWtxPK8WBgYKxmVMtbSSktD7SKxMDAOJMxGZWYbC6jwlne/sTAwFjNyMe25uMXvaJetcyHgYGxldHb0k1S8OQYHNUOMTAwVjOqyDysZJPXK8lhYGCcwOjdtJouCy3JwbEZAwNjH+NZXNUtY+/OeUPiR9UQAwNjKWOS5ia1vep2EwMDA+O1AxDJMXU+TIaBgXEmIy+0JSW2XqrtvSYMDAyMeXug1/is3gEDAwMjL/HnQU8GyDAwMM5kJIfY6sBEfritNhswMDBOY7yqMZAk3N4msrfdxMDAWMH4AvIhx2W4/LoIAAAAAElFTkSuQmCC" alt="微信分享二维码">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKUlEQVR42u3aO3LjMBAFQN//0tzUgUS9N7C2ikAjUtE0hHYAz+/nJ17Xr7XyfPYtf7YwMDAey7hu18px3+3Tfr4/GwYGxjmMd4fI37k/RLLn/fsfzoyBgYERX75t5IaBgYHxbcbK9br+WxgYGKcxkiR2vcQ2u3D/OBfHwMB4ICOvuv//z1/pb2BgYDyKcZWr/fr2irxGCwMDY29GfsHNkLOhiuEOGBgYWzPyhmLbeszT2vUnGBgYuzLy8a/ZT/My2SwMfRHhYmBgbMdoj9KWzFbGwmaXNQYGxn6MPKRLmo554zMPIu+fYGBgnMBIQq5ko3YAYrZ/kYVjYGBsxJiNO+ThY5F2loW8F/83MDAwtmbMGoorwxltE+LDcwwMjK0ZeZErSTJXSmlto/RtgIiBgbE1I28otsMWsxGNdlAMAwNjb0aepq5PYbV75mU4DAyMcxgrbYBZ4pqPndVXLQYGxnaMlYCsTYPbi7U4FQYGxtaM9WZkm6bOLvel2BYDA+OxjKQNOSvu5ylui3zxBAMD4xhG24xcAcwCx2jYAgMD4wBGnugmF+isDZBTMTAw9mZc5cqHM9oSf56+1rEtBgbGwxltZ7DddCXpnbVFMTAwdmW0l+zszfVm54dQFQMD4wDG7OLLg7xZwa4o4WFgYGCUrYK2cNYOahS1QAwMjOMZ+fDWSoYd/eEwMDAOYCSp6SzU+8b1ioGBcRqjbTHWV2FZhsvHLDAwMA5g/AOxdrJQ1Ar7cwAAAABJRU5ErkJggg==" alt="微信分享二维码">
 </div>
 
 
@@ -538,7 +629,7 @@
         var OriginTitile = document.title, titleTime;
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
                 clearTimeout(titleTime);
             } else {
                 document.title = '(つェ⊂)咦!又好了!';

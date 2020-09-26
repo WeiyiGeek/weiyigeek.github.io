@@ -4,10 +4,12 @@
     <meta charset="utf-8">
     
     
-    <title>2.vSphere基础操作配置 | WeiyiGeek Blog&#39;s</title>
+    <title>2.vSphere基础操作配置 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="keywords" content="Vmware">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
     <link rel="shortcut icon" href="/img/favicon.ico">
     <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css">
     <link rel="stylesheet" href="/css/style.css?v=1.4.4">
@@ -18,7 +20,7 @@
             reward:	false,
             lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
             v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
-            g: JSON.parse('{"enable":false,"lazy":true,"owner":"codefine","repo":"gitment","oauth":{"client_id":null,"client_secret":null},"perPage":10}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
             d: JSON.parse('{"app_id":"6537ff7a"}')
         };
     </script>
@@ -219,6 +221,7 @@
 
 	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/virtualization/">virtualization</a></li></ul>
 
+
             
         </h5>
         
@@ -352,7 +355,7 @@
 </ul>
 <p><br></p>
 <h5 id="2-vSphere-初始化配置"><a href="#2-vSphere-初始化配置" class="headerlink" title="2.vSphere 初始化配置"></a>2.vSphere 初始化配置</h5><p><strong>配置1.设置ESXi服务器时间和NTP的方法</strong><br>描述:在ESXi中可以利用esxcli更新系统时间或者NTP方法来更新应用的时间；</p>
-<p>NTP启动同步与时区配置:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 1.配置ntp文件中进行配置ntp服务器</span></span><br><span class="line"><span class="variable">$cat</span> /etc/ntp.conf</span><br><span class="line">restrict default nomodify notrap nopeer noquery</span><br><span class="line">restrict 127.0.0.1</span><br><span class="line">driftfile /etc/ntp.drift</span><br><span class="line">server 192.168.10.254</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.进行时区的更改从CENTOS6或者CENGTOS7将/etc/localtime</span></span><br><span class="line">[root@master-01 ~]<span class="comment"># cat /etc/redhat-release</span></span><br><span class="line">CentOS Linux release 7.8.2003 (Core)</span><br><span class="line">[root@master-01 ~]<span class="comment"># ls -alh /etc/localtime  #</span></span><br><span class="line">lrwxrwxrwx. 1 root root 35 6月   2 14:15 /etc/localtime -&gt; ../usr/share/zoneinfo/Asia/Shanghai</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.从其他一台Linux主机拷贝一个 /usr/share/zoneinfo/Asia/Shanghai 文件到ESXI主机的数据卷目录</span></span><br><span class="line">[root@ESXI-09:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] ls -l Asia-shanghai-localtime</span><br><span class="line">-rw-r--r--    1 root     root           556 Jul 14 01:50 Asia-shanghai-localtime</span><br><span class="line"><span class="comment"># 由于ESXI每次重启后基础配置文件会恢复默认，所以我们需要编辑ESXI上的启动脚本 /etc/rc.local.d/local.sh 将时区文件每次机器开机时候自动拷贝</span></span><br><span class="line">vi /etc/rc.local.d/local.sh</span><br><span class="line">rm -f /etc/localtime &amp;&amp; cp /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/Asia-shanghai-localtime /etc/localtime</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.执行重启ntp服务同步与时区设置设置</span></span><br><span class="line">[root@ESXI-09:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] /etc/init.d/ntpd restart</span><br><span class="line">[root@ESXI-09:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] sh /etc/rc.local.d/local.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.时区时间恢复正常</span></span><br><span class="line"><span class="variable">$date</span></span><br><span class="line">Tue Jul 14 09:53:40 CST 202</span><br><span class="line"></span><br><span class="line"><span class="variable">$esxcli</span> system time get</span><br><span class="line">2020-07-14T10:13:40Z</span><br></pre></td></tr></table></figure></p>
+<p>NTP启动同步与时区配置:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.配置ntp文件中进行配置ntp服务器</span></span><br><span class="line"><span class="variable">$cat</span> /etc/ntp.conf</span><br><span class="line">restrict default nomodify notrap nopeer noquery</span><br><span class="line">restrict 127.0.0.1</span><br><span class="line">driftfile /etc/ntp.drift</span><br><span class="line">server 192.168.10.254</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.进行时区的更改从CENTOS6或者CENGTOS7将/etc/localtime</span></span><br><span class="line">[root@master-01 ~]<span class="comment"># cat /etc/redhat-release</span></span><br><span class="line">CentOS Linux release 7.8.2003 (Core)</span><br><span class="line">[root@master-01 ~]<span class="comment"># ls -alh /etc/localtime  #</span></span><br><span class="line">lrwxrwxrwx. 1 root root 35 6月   2 14:15 /etc/localtime -&gt; ../usr/share/zoneinfo/Asia/Shanghai</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.从其他一台Linux主机拷贝一个 /usr/share/zoneinfo/Asia/Shanghai 文件到ESXI主机的数据卷目录</span></span><br><span class="line">[root@ESXI-09:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] ls -l Asia-shanghai-localtime</span><br><span class="line">-rw-r--r--    1 root     root           556 Jul 14 01:50 Asia-shanghai-localtime</span><br><span class="line"><span class="comment"># 由于ESXI每次重启后基础配置文件会恢复默认，所以我们需要编辑ESXI上的启动脚本 /etc/rc.local.d/local.sh 将时区文件每次机器开机时候自动拷贝</span></span><br><span class="line">vi /etc/rc.local.d/local.sh</span><br><span class="line">rm -f /etc/localtime &amp;&amp; cp /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/Asia-shanghai-localtime /etc/localtime</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.执行重启ntp服务同步与时区设置设置</span></span><br><span class="line">[root@ESXI-09:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] /etc/init.d/ntpd restart</span><br><span class="line">[root@ESXI-09:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] sh /etc/rc.local.d/local.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.时区时间恢复正常</span></span><br><span class="line"><span class="variable">$date</span></span><br><span class="line">Tue Jul 14 09:53:40 CST 202</span><br><span class="line"></span><br><span class="line"><span class="variable">$esxcli</span> system time get</span><br><span class="line">2020-07-14T10:13:40Z</span><br></pre></td></tr></table></figure></p>
 <figure class="image-box">
                 <a rel=2.vSphere基础操作配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200714101352.png" title="WeiyiGeek.两种方式更改时间" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200714101352.png" alt="WeiyiGeek.两种方式更改时间" title class></a>
                 <p>WeiyiGeek.两种方式更改时间</p>
@@ -364,17 +367,17 @@
 <ul>
 <li>Step 1.选择对应的ESXI<code>操作-&gt;存储-&gt;新建数据存储</code>即可以指定数据存储类型;</li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">* VMFS: 通过FC SAN(LUN)或者本地磁盘上创建 VMFS 数据存储。</span><br><span class="line">* NFS: 通过网络在 NFS 共享中创建 NFS 数据存储。</span><br><span class="line">* VVol: 在连接到存储提供程序的存储容器上创建 Virtual Volumes 数据存储(存储集群)。</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">* VMFS: 通过FC SAN(LUN)或者本地磁盘上创建 VMFS 数据存储。</span><br><span class="line">* NFS: 通过网络在 NFS 共享中创建 NFS 数据存储。</span><br><span class="line">* VVol: 在连接到存储提供程序的存储容器上创建 Virtual Volumes 数据存储(存储集群)。</span><br></pre></td></tr></table></figure>
 <ul>
 <li>Step 2.如果选择NFS进行添加演示，你需要选择NFS版本,之后进行配置存储名称以及NFS服务器，之后便可;</li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">NFS 3: 允许 6.0 版本以前的 ESX/ESXi 主机访问数据存储</span><br><span class="line">NFS 4.1: 为服务器提供多路径，并且支持 Kerberos 身份验证协议</span><br><span class="line"></span><br><span class="line"><span class="comment">#常规配置结果</span></span><br><span class="line">名称: 	VMwareBackup</span><br><span class="line">类型: 	NFS 3</span><br><span class="line">NFS 设置</span><br><span class="line">服务器: 	192.168.12.249</span><br><span class="line">文件夹: 	/VMwareBackup</span><br><span class="line">访问模式: 	读写</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">NFS 3: 允许 6.0 版本以前的 ESX/ESXi 主机访问数据存储</span><br><span class="line">NFS 4.1: 为服务器提供多路径，并且支持 Kerberos 身份验证协议</span><br><span class="line"></span><br><span class="line"><span class="comment">#常规配置结果</span></span><br><span class="line">名称: 	VMwareBackup</span><br><span class="line">类型: 	NFS 3</span><br><span class="line">NFS 设置</span><br><span class="line">服务器: 	192.168.12.249</span><br><span class="line">文件夹: 	/VMwareBackup</span><br><span class="line">访问模式: 	读写</span><br></pre></td></tr></table></figure>
 <figure class="image-box">
                 <a rel=2.vSphere基础操作配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200818142926.png" title="WeiyiGeek.名称和配置" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200818142926.png" alt="WeiyiGeek.名称和配置" title class></a>
                 <p>WeiyiGeek.名称和配置</p>
             </figure>
 <hr>
-<h4 id="0x01-进阶操作"><a href="#0x01-进阶操作" class="headerlink" title="0x01 进阶操作"></a>0x01 进阶操作</h4><h5 id="1-实践-vSphere-ESXI-补丁安装"><a href="#1-实践-vSphere-ESXI-补丁安装" class="headerlink" title="1.实践 vSphere ESXI 补丁安装"></a>1.实践 vSphere ESXI 补丁安装</h5><p>基础实践:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">1.并设置主机为维护模式。</span><br><span class="line">2.上传指定版本的补丁到存储。</span><br><span class="line">3.使用`esxcli software vib update`命令升级</span><br><span class="line"><span class="variable">$esxcli</span> software vib update -d /vmfs/volumes/data/iso/ESXi650-201811001.zip</span><br><span class="line">4.重启机器</span><br><span class="line"><span class="variable">$reboot</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="0x01-进阶操作"><a href="#0x01-进阶操作" class="headerlink" title="0x01 进阶操作"></a>0x01 进阶操作</h4><h5 id="1-实践-vSphere-ESXI-补丁安装"><a href="#1-实践-vSphere-ESXI-补丁安装" class="headerlink" title="1.实践 vSphere ESXI 补丁安装"></a>1.实践 vSphere ESXI 补丁安装</h5><p>基础实践:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1.并设置主机为维护模式。</span><br><span class="line">2.上传指定版本的补丁到存储。</span><br><span class="line">3.使用`esxcli software vib update`命令升级</span><br><span class="line"><span class="variable">$esxcli</span> software vib update -d /vmfs/volumes/data/iso/ESXi650-201811001.zip</span><br><span class="line">4.重启机器</span><br><span class="line"><span class="variable">$reboot</span></span><br></pre></td></tr></table></figure></p>
 <p><br></p>
 <h5 id="2-实践-vSphere-ESXI-升级"><a href="#2-实践-vSphere-ESXI-升级" class="headerlink" title="2.实践 vSphere ESXI 升级"></a>2.实践 vSphere ESXI 升级</h5><p>描述:vSphere ESXI 从低版本升级到指定版本可以采用下图中的几种方式进行安装更新，但是需要注意您的ESXI是否支持跨大版本升级，更多信息您需要在VMware官网进行找寻；</p>
 <p>Tips:在升级前最好检查下硬件兼容性列表，以避免因兼容性问题导致的未知问题</p>
@@ -392,12 +395,12 @@
 <li>在线</li>
 </ul>
 <p><br></p>
-<h6 id="示例1-离线升级6-7版本"><a href="#示例1-离线升级6-7版本" class="headerlink" title="(示例1).离线升级6.7版本"></a>(示例1).离线升级6.7版本</h6><p>描述：原始ESXI环境及其版本情况:<br><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># ESXI 版本</span></span><br><span class="line">客户端版本:1.33.1</span><br><span class="line">客户端内部版本号:12086396</span><br><span class="line">ESXi 版本:6.0.0</span><br><span class="line">ESXi 内部版本号:2494585</span><br></pre></td></tr></table></figure></p>
+<h6 id="示例1-离线升级6-7版本"><a href="#示例1-离线升级6-7版本" class="headerlink" title="(示例1).离线升级6.7版本"></a>(示例1).离线升级6.7版本</h6><p>描述：原始ESXI环境及其版本情况:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ESXI 版本</span></span><br><span class="line">客户端版本:1.33.1</span><br><span class="line">客户端内部版本号:12086396</span><br><span class="line">ESXi 版本:6.0.0</span><br><span class="line">ESXi 内部版本号:2494585</span><br></pre></td></tr></table></figure></p>
 <figure class="image-box">
                 <a rel=2.vSphere基础操作配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200713151922.png" title="WeiyiGeek.旧版本" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200713151922.png" alt="WeiyiGeek.旧版本" title class></a>
                 <p>WeiyiGeek.旧版本</p>
             </figure>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 升级流程:</span></span><br><span class="line">6.0 -&gt; 6.0 update3 -&gt; 6.5 update3 -&gt; 6.7 update3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 离线包:</span></span><br><span class="line">update-from-esxi6.0-6.0_update03.zip  </span><br><span class="line">update-from-esxi6.7-6.7_update03.zip</span><br><span class="line">update-from-esxi6.5-6.5_update03.zip</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 升级流程:</span></span><br><span class="line">6.0 -&gt; 6.0 update3 -&gt; 6.5 update3 -&gt; 6.7 update3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 离线包:</span></span><br><span class="line">update-from-esxi6.0-6.0_update03.zip  </span><br><span class="line">update-from-esxi6.7-6.7_update03.zip</span><br><span class="line">update-from-esxi6.5-6.5_update03.zip</span><br></pre></td></tr></table></figure>
 <figure class="image-box">
                 <a rel=2.vSphere基础操作配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200713151656.png" title="WeiyiGeek.update" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200713151656.png" alt="WeiyiGeek.update" title class></a>
                 <p>WeiyiGeek.update</p>
@@ -406,10 +409,10 @@
 <p><strong>升级流程步骤</strong></p>
 <ul>
 <li><p>Step1.升级前的准备登陆<code>ESXI-Web-Client</code>启用ESXI Shell，并且关闭运行的虚拟机;</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 1.查看当前系统版本</span></span><br><span class="line"><span class="variable">$esxcli</span> system version get</span><br><span class="line"><span class="comment"># Product: VMware ESXi</span></span><br><span class="line"><span class="comment">#    Version: 6.0.0</span></span><br><span class="line"><span class="comment">#    Build: Releasebuild-2494585</span></span><br><span class="line"><span class="comment">#    Update: 0</span></span><br><span class="line"><span class="comment">#    Patch: 0</span></span><br><span class="line"><span class="comment"># (Updated) ESXi-6.0.0-2494585-standard (localhost)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.ESXI 进入到维护模式</span></span><br><span class="line"><span class="variable">$vim</span>-cmd /hostsvc/maintenance_mode_enter</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.查看当前系统版本</span></span><br><span class="line"><span class="variable">$esxcli</span> system version get</span><br><span class="line"><span class="comment"># Product: VMware ESXi</span></span><br><span class="line"><span class="comment">#    Version: 6.0.0</span></span><br><span class="line"><span class="comment">#    Build: Releasebuild-2494585</span></span><br><span class="line"><span class="comment">#    Update: 0</span></span><br><span class="line"><span class="comment">#    Patch: 0</span></span><br><span class="line"><span class="comment"># (Updated) ESXi-6.0.0-2494585-standard (localhost)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.ESXI 进入到维护模式</span></span><br><span class="line"><span class="variable">$vim</span>-cmd /hostsvc/maintenance_mode_enter</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>Step2.将所有的离线升级包上传到ESXI存储之中，执行以下命令将进行<code>6.0 升级到 6.0 update 3</code> 版本;</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 1.列出离线升级仓库中的所有映像配置文件。</span></span><br><span class="line"><span class="variable">$esxcli</span> software sources profile list -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.0-6.0_update03.zip</span><br><span class="line">Name                              Vendor        Acceptance Level</span><br><span class="line">--------------------------------  ------------  ----------------</span><br><span class="line">ESXi-6.0.0-20170202001-standard   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.0.0-20170201001s-standard  VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.0.0-20170201001s-no-tools  VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.0.0-20170202001-no-tools   VMware, Inc.  PartnerSupported</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.指定离线包中的映像文件进行升级</span></span><br><span class="line"><span class="variable">$esxcli</span> software profile install -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.0-6.0_update03.zip -p ESXi-6.0.0-20170202001-standard</span><br><span class="line">Installation Result</span><br><span class="line">   Message: The update completed successfully, but the system needs to be rebooted <span class="keyword">for</span> the changes to be effective.  <span class="comment"># 表示成功完成升级，需要重启系统后生效</span></span><br><span class="line">   Reboot Required: <span class="literal">true</span></span><br><span class="line">   VIBs Installed: VMware_bootbank_ehci-ehci-hcd_1.0-3vmw.600.2.52.4600944, ....... VMware_locker_tools-light_6.0.0-0.0.2494585</span><br><span class="line">   VIBs Skipped: VMWARE_bootbank_mtip32xx-native_3.8.5-1vmw.600.0.0.2494585, ...... VMware 1.0-3vmw.600.0.0.2494585</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.重启机器</span></span><br><span class="line">reboot -d 0 <span class="comment"># 如若系统没反应则 -f 参数强制重启</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.列出离线升级仓库中的所有映像配置文件。</span></span><br><span class="line"><span class="variable">$esxcli</span> software sources profile list -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.0-6.0_update03.zip</span><br><span class="line">Name                              Vendor        Acceptance Level</span><br><span class="line">--------------------------------  ------------  ----------------</span><br><span class="line">ESXi-6.0.0-20170202001-standard   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.0.0-20170201001s-standard  VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.0.0-20170201001s-no-tools  VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.0.0-20170202001-no-tools   VMware, Inc.  PartnerSupported</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.指定离线包中的映像文件进行升级</span></span><br><span class="line"><span class="variable">$esxcli</span> software profile install -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.0-6.0_update03.zip -p ESXi-6.0.0-20170202001-standard</span><br><span class="line">Installation Result</span><br><span class="line">   Message: The update completed successfully, but the system needs to be rebooted <span class="keyword">for</span> the changes to be effective.  <span class="comment"># 表示成功完成升级，需要重启系统后生效</span></span><br><span class="line">   Reboot Required: <span class="literal">true</span></span><br><span class="line">   VIBs Installed: VMware_bootbank_ehci-ehci-hcd_1.0-3vmw.600.2.52.4600944, ....... VMware_locker_tools-light_6.0.0-0.0.2494585</span><br><span class="line">   VIBs Skipped: VMWARE_bootbank_mtip32xx-native_3.8.5-1vmw.600.0.0.2494585, ...... VMware 1.0-3vmw.600.0.0.2494585</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.重启机器</span></span><br><span class="line">reboot -d 0 <span class="comment"># 如若系统没反应则 -f 参数强制重启</span></span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 <figure class="image-box">
@@ -417,7 +420,7 @@
                 <p>WeiyiGeek.升级成功后登陆UI</p>
             </figure>
 <ul>
-<li>Step 3.从6.0 update 3 升级到 6.5 update 3之中<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 1.列出6.5update离线升级仓库中的所有映像配置文件。</span></span><br><span class="line"><span class="variable">$esxcli</span> software sources profile list -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.5-6.5_update03.zip</span><br><span class="line">Name                              Vendor        Acceptance Level</span><br><span class="line">--------------------------------  ------------  ----------------</span><br><span class="line">ESXi-6.5.0-20190702001-standard   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.5.0-20190701001s-no-tools  VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.5.0-20190702001-no-tools   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.5.0-20190701001s-standard  VMware, Inc.  PartnerSupported</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.指定离线包中的映像文件进行升级</span></span><br><span class="line"><span class="variable">$esxcli</span> software profile install -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.5-6.5_update03.zip -p ESXi-6.5.0-20190702001-standard</span><br><span class="line">Installation Result</span><br><span class="line">   Message: The update completed successfully, but the system needs to be rebooted <span class="keyword">for</span> the changes to be effective.</span><br><span class="line">   Reboot Required: <span class="literal">true</span></span><br><span class="line">   VIBs Installed: VMW_bootbank_ata-libata-92_3.00.9.2-16vmw.650.0.0.4564106, ......, VMware_locker_tools-light_6.0.0-3.57.5050593</span><br><span class="line">   VIBs Skipped:</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.同样重启机器</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<li>Step 3.从6.0 update 3 升级到 6.5 update 3之中<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.列出6.5update离线升级仓库中的所有映像配置文件。</span></span><br><span class="line"><span class="variable">$esxcli</span> software sources profile list -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.5-6.5_update03.zip</span><br><span class="line">Name                              Vendor        Acceptance Level</span><br><span class="line">--------------------------------  ------------  ----------------</span><br><span class="line">ESXi-6.5.0-20190702001-standard   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.5.0-20190701001s-no-tools  VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.5.0-20190702001-no-tools   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.5.0-20190701001s-standard  VMware, Inc.  PartnerSupported</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.指定离线包中的映像文件进行升级</span></span><br><span class="line"><span class="variable">$esxcli</span> software profile install -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.5-6.5_update03.zip -p ESXi-6.5.0-20190702001-standard</span><br><span class="line">Installation Result</span><br><span class="line">   Message: The update completed successfully, but the system needs to be rebooted <span class="keyword">for</span> the changes to be effective.</span><br><span class="line">   Reboot Required: <span class="literal">true</span></span><br><span class="line">   VIBs Installed: VMW_bootbank_ata-libata-92_3.00.9.2-16vmw.650.0.0.4564106, ......, VMware_locker_tools-light_6.0.0-3.57.5050593</span><br><span class="line">   VIBs Skipped:</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.同样重启机器</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 <figure class="image-box">
@@ -425,7 +428,7 @@
                 <p>WeiyiGeek.ESXIupdate6.5-UI</p>
             </figure>
 <ul>
-<li>Step 4.从6.5 update 3 升级到 6.7 update 3 版本之中<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 1.列出6.7update离线升级仓库中的所有映像配置文件。</span></span><br><span class="line">[root@localhost:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] esxcli software sources profile list -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.7-6.7_update03.zip</span><br><span class="line">Name                              Vendor        Acceptance Level</span><br><span class="line">--------------------------------  ------------  ----------------</span><br><span class="line">ESXi-6.7.0-20190801001s-no-tools  VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.7.0-20190802001-no-tools   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.7.0-20190802001-standard   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.7.0-20190801001s-standard  VMware, Inc.  PartnerSupported</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.指定离线包中的映像文件进行升级</span></span><br><span class="line">[root@localhost:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] esxcli software profile install -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.7-6.7_update</span><br><span class="line">03.zip  -p ESXi-6.7.0-20190802001-standard</span><br><span class="line">Installation Result</span><br><span class="line">   Message: The update completed successfully, but the system needs to be rebooted <span class="keyword">for</span> the changes to be effective.</span><br><span class="line">   Reboot Required: <span class="literal">true</span></span><br><span class="line">   VIBs Installed: VMW_bootbank_ata-libata-92_3.00.9.2-16vmw.670.0.0.8169922, ...., VMware_locker_tools-light_10.3.10.12406962-14141615</span><br><span class="line">   VIBs Removed: VMW_bootbank_ata-libata-92_3.00.9.2-16vmw.650.0.0.4564106, ...., VMware_locker_tools-light_6.5.0-2.92.13873656</span><br><span class="line">   VIBs Skipped:</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.同样重启机器</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<li>Step 4.从6.5 update 3 升级到 6.7 update 3 版本之中<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.列出6.7update离线升级仓库中的所有映像配置文件。</span></span><br><span class="line">[root@localhost:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] esxcli software sources profile list -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.7-6.7_update03.zip</span><br><span class="line">Name                              Vendor        Acceptance Level</span><br><span class="line">--------------------------------  ------------  ----------------</span><br><span class="line">ESXi-6.7.0-20190801001s-no-tools  VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.7.0-20190802001-no-tools   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.7.0-20190802001-standard   VMware, Inc.  PartnerSupported</span><br><span class="line">ESXi-6.7.0-20190801001s-standard  VMware, Inc.  PartnerSupported</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.指定离线包中的映像文件进行升级</span></span><br><span class="line">[root@localhost:/vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO] esxcli software profile install -d /vmfs/volumes/5bec054f-e37ea7be-d6e8-d4ae528208aa/ISO/update-from-esxi6.7-6.7_update</span><br><span class="line">03.zip  -p ESXi-6.7.0-20190802001-standard</span><br><span class="line">Installation Result</span><br><span class="line">   Message: The update completed successfully, but the system needs to be rebooted <span class="keyword">for</span> the changes to be effective.</span><br><span class="line">   Reboot Required: <span class="literal">true</span></span><br><span class="line">   VIBs Installed: VMW_bootbank_ata-libata-92_3.00.9.2-16vmw.670.0.0.8169922, ...., VMware_locker_tools-light_10.3.10.12406962-14141615</span><br><span class="line">   VIBs Removed: VMW_bootbank_ata-libata-92_3.00.9.2-16vmw.650.0.0.4564106, ...., VMware_locker_tools-light_6.5.0-2.92.13873656</span><br><span class="line">   VIBs Skipped:</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.同样重启机器</span></span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 <figure class="image-box">
@@ -433,7 +436,7 @@
                 <p>WeiyiGeek.6.7-UI</p>
             </figure>
 <ul>
-<li>Step 5.升级成功退出维护模式与查看升级后系统版本信息，至此安装更新全部完成；<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$vim</span>-cmd /hostsvc/maintenance_mode_exit</span><br><span class="line"><span class="variable">$esxcli</span> system version get</span><br><span class="line">Product: VMware ESXi</span><br><span class="line">   Version: 6.7.0</span><br><span class="line">   Build: Releasebuild-14320388</span><br><span class="line">   Update: 3</span><br><span class="line">   Patch: 73</span><br></pre></td></tr></table></figure>
+<li>Step 5.升级成功退出维护模式与查看升级后系统版本信息，至此安装更新全部完成；<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$vim</span>-cmd /hostsvc/maintenance_mode_exit</span><br><span class="line"><span class="variable">$esxcli</span> system version get</span><br><span class="line">Product: VMware ESXi</span><br><span class="line">   Version: 6.7.0</span><br><span class="line">   Build: Releasebuild-14320388</span><br><span class="line">   Update: 3</span><br><span class="line">   Patch: 73</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 <p><strong>补充说明:</strong></p>
@@ -441,7 +444,7 @@
 <li>(1) 若升级中间有异常报错请查看其错误信息(<code>常常出现在次版本升级之中</code>)当解决后继续执行, 我将我所遇的坑进行记录如果有遇到相似的问题请参考其它文章<code>《n2.vSphere各版本所遇入坑解决》</code>;</li>
 </ul>
 <p><br></p>
-<h6 id="示例2-在线升级6-7版本"><a href="#示例2-在线升级6-7版本" class="headerlink" title="(示例2).在线升级6.7版本"></a>(示例2).在线升级6.7版本</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$esxcli</span> software sources profile list -d https://hostupdate.vmware.com/software/VUM/PRODUCTION/main/vmw-depot-index.xml</span><br></pre></td></tr></table></figure>
+<h6 id="示例2-在线升级6-7版本"><a href="#示例2-在线升级6-7版本" class="headerlink" title="(示例2).在线升级6.7版本"></a>(示例2).在线升级6.7版本</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$esxcli</span> software sources profile list -d https://hostupdate.vmware.com/software/VUM/PRODUCTION/main/vmw-depot-index.xml</span><br></pre></td></tr></table></figure>
 <figure class="image-box">
                 <a rel=2.vSphere基础操作配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200713173311.png" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200713173311.png" alt="WeiyiGeek." title class></a>
                 <p>WeiyiGeek.</p>
@@ -459,22 +462,109 @@
 <blockquote class="post-copyright">
     <div class="content">
         
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
 <span class="post-time">
-    最后更新时间：<time datetime="2020-08-18T09:34:08.764Z" itemprop="dateUpdated">2020-08-18 17:34:08</time>
+    最后更新时间：<time datetime="2020-08-19T13:16:50.109Z" itemprop="dateUpdated">2020-08-19 21:16:50</time>
 </span><br>
 
 
         
-        转载注明出处，原文地址：<a href="/2019/6/2-vsphere基础操作配置.html" target="_blank" rel="external">http://weiyigeek.top/2019/6/2-vsphere基础操作配置.html</a>
+        转载注明出处，原文地址：<a href="/2019/6/2-vsphere基础操作配置.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/6/2-vsphere基础操作配置.html</a>
+        <br>本站文章内容遵循 <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
         
     </div>
     <footer>
-        <a href="http://weiyigeek.top">
+        <a href="https://blog.weiyigeek.top">
             <img src="/img/avatar.png" alt="WeiyiGeek">
             WeiyiGeek
         </a>
     </footer>
 </blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
 
         
         <div class="post-footer">
@@ -488,7 +578,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/6/2-vsphere基础操作配置.html&title=《2.vSphere基础操作配置》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/6/2-vsphere基础操作配置.html&title=《2.vSphere基础操作配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -500,7 +590,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/6/2-vsphere基础操作配置.html&title=《2.vSphere基础操作配置》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/6/2-vsphere基础操作配置.html&title=《2.vSphere基础操作配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
@@ -518,6 +608,8 @@
         </div>
         
             
+
+
 
 
         
@@ -607,7 +699,6 @@
 
             
         </p>
-      
     </div>
 </footer>
 
@@ -620,7 +711,7 @@
     <ul class="reset share-icons">
       
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://weiyigeek.top/2019/6/2-vsphere基础操作配置.html&title=《2.vSphere基础操作配置》 — WeiyiGeek Blog's&pic=http://weiyigeek.top/img/avatar.png" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/6/2-vsphere基础操作配置.html&title=《2.vSphere基础操作配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -632,7 +723,7 @@
       </li>
       
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://weiyigeek.top/2019/6/2-vsphere基础操作配置.html&title=《2.vSphere基础操作配置》 — WeiyiGeek Blog's&source=[TOC]" data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/6/2-vsphere基础操作配置.html&title=《2.vSphere基础操作配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
@@ -644,7 +735,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLUlEQVR42u3aQY7CMAwFUO5/aUaa1UhA+x2nYpq8rKpSlbwgmdjO4xGP5+/Ir//eeR2vn366M3lgYGDclvE8HMmE8kl/uq5+7xsqBgbGBowkyB5P/fhOEiGTIP7xPgYGBkb7meRJDAwMjFmM4+CbbOnGNpEYGBgY+auTjV2e6OZb0mm5OAYGxg0ZVzQGZl1/ub+BgYHxDxidrVtns5gX7KJZYWBgLM3IC/TVrVsSuJP7SfEOAwNjbcbcoxVXFOkiPAYGxtKMuYctqkW6vJ0ZpbsYGBiLMo7D38mOspiI9tknuTgGBsaijLGpV8Plda2IR+cXwMDAuDljVjEuebIajgsBFwMDYwlGUlCrTrQaKPNG6UkSi4GBsTRjLFyOMfIlKLRLMTAwlmYkgS8vfnWOVowtBAYGxg6MamNyrAGZL0HSWnhDwsDAWJpRbVJWw2X10+p/BQYGxg6MaksgL6XlByk6rYLBzgYGBsatGPkBi2r5LG829N+AgYGxMyNPMqvFtc4RjZNnMDAwlmPkRbROaayT3JYbAxgYGNswjieXhMLOcpQTWgwMjKUZefjLj0SMHbOoLg0GBsY+jGdxVEt1yfZxLNBjYGDsw8hHfzPXKepV/xgwMDDWYyRBdixQVpPSvIV50tnAwMBYlNEJsv3S21gSi4GBgTEWHMfS3f42FAMDAyMpqPUXpXogDAMDYzdGnoJWg2x1igkbAwNjN0bnpZ32ZKfkVwZgYGDclfEDK8I84lLfhBEAAAAASUVORK5CYII=" alt="微信分享二维码">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACp0lEQVR42u3aQW7DMAwEwPz/0+21QGt7SYpBCoxPQRo7GgWQ2KVer/j6ur1+fub36+QJV0+7f+axCw8PD29t6Ffv3N9bHW4+fcn34uHh4e3xrr4meXTCeBjExb3JeB4seHh4eB/Ay+9NCutqPYyHh4f3f3m9MKI6Kfnz8fDw8N7P60W0k8I6KaPvJ+hw1oKHh4cX8/Iu0ue8Xunv4eHh4Y276qeaYdWRHBstHh4e3gIvX3Crram8AXZflPfKbjw8PLw9XnVxr4azo8bVPDLGw8PDW+AlBev8y+YbyWRq8PDw8M7yJoVsrw12alqTQhwPDw9vj5eUpPPAorrBVFf4woDw8PDwBry8sZQfJqiGFPlxrrz4xsPDw9vjnQoRehPRizPyghsPDw9vm5cPaN4Gy0vqUSmPh4eHt8yrRq6T9/OoojfdeHh4eO/hzRtOvadVGfnPgIeHh7fBqxavSXiah8LVw7KjzQYPDw9vjZcHBNUNozopp+IMPDw8vLO8vESeNPWrS381aL4E4+Hh4S3wtkvkXmxRnaAHBR4eHt4ar/cPf76s94rp6nQUCms8PDy8Aa8XOvSGVT2gkGwn0Y+Bh4eHd4hXDQISRh5M5IPOS3k8PDy8bV6VVA1eq0Opttbyu/Dw8PDO8vLjAnk7P2cnRXnvXjw8PLxtXm+Bzo9nTTaDPPYtN8Dw8PDwxrzesYBeU+pU6+vh83h4eHhHeV/FqzcFSbA7n44//oqHh4e3wKsuuKdgeUCc3/uaXHh4eHhFXq89P2lNVbei0caAh4eHt8bLo4RqkZ0s4s1SONkk8PDw8D6Sd7Yc78W7l5/Hw8PD+wDe5BBA9QjCpATHw8PD2+ZVm17VyLVXdufNs4eSGg8PD+8or3dWa9L4PxtAHOjy4eHh4aXj+Qacjw0BFLwbAwAAAABJRU5ErkJggg==" alt="微信分享二维码">
 </div>
 
 
@@ -721,7 +812,7 @@
         var OriginTitile = document.title, titleTime;
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                document.title = 'WeiyiGeek Blog's-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
                 clearTimeout(titleTime);
             } else {
                 document.title = '(つェ⊂)咦!又好了!';

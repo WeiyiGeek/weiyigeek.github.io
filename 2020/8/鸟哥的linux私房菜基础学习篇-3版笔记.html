@@ -493,6 +493,7 @@
 <blockquote>
 <p>答: 假如桌面的分辨率为1024<em>768且使用全彩(每个像素占用3B的容量)，其计算公式为`1024\</em>768 = 786432 像素 * 3B = 2.25MB`内存;</p>
 </blockquote>
+<hr>
 <h6 id="磁盘-Disk"><a href="#磁盘-Disk" class="headerlink" title="磁盘 - Disk"></a>磁盘 - Disk</h6><p>Q: 什么是磁盘?</p>
 <blockquote>
 <p>答: 用来供计算机存储或者读取数据的设备，其尺寸大多为3.5 / 2.5 英寸的;</p>
@@ -505,9 +506,78 @@
 <blockquote>
 <p>答: 需先了解盘片的数据格式扇区(sector)和磁道(track)以及柱面(Cylinder);<br>扇区: 由圆心以放射状的方式分割出磁盘的最小单位即一小块饼图类似于年轮，在物理组成方面每个扇区大小为512bytes该值固定且不会改变;<br>磁道: 由扇区组成的圆<br>柱面: 如果在多磁盘上面所有的盘片上面的同一磁道可以组成一个柱面(平面圆环)，而它是分割磁盘时候的最小单位;</p>
 </blockquote>
+<p>Q: 磁盘基本知识补充详解?</p>
+<blockquote>
+<p>答: 主要从<code>盘片（platter）/ 磁头（head）/ 磁道（track）/ 扇区（sector）/柱面（cylinder）</code>五个方面进行讲解</p>
+</blockquote>
+<blockquote>
+<p>1.盘片与磁头的关系</p>
+<ul>
+<li>1.1 硬盘中一般会有多个盘片组成(<code>受到硬盘整体体积和生产成本的限制一般在五片以内</code>)，每个盘片包含两个面每个盘面都对应地有一个读/写磁头，<code>盘片的编号自下向上从0开始，如最下边的盘片有0面和1面，再上一个盘片就编号为2面和3面。</code></li>
+</ul>
+</blockquote>
+<figure class="image-box">
+                <a rel=鸟哥的Linux私房菜基础学习篇-3版笔记 href="https://upload-images.jianshu.io/upload_images/2843224-46fb935cd31addbd.png" title="盘片与磁头" data-fancybox="images"><img src="https://upload-images.jianshu.io/upload_images/2843224-46fb935cd31addbd.png" alt="盘片与磁头" title class></a>
+                <p>盘片与磁头</p>
+            </figure>
+<blockquote>
+<p>2.扇区与磁道的关系</p>
+<ul>
+<li>2.1 以一个盘面为例进行讲解,盘面中一圈圈灰色同心圆为一条条磁道，从圆心向外画直线，可以将磁道划分为若干个弧段，每个磁道上一个弧段被称之为一个扇区（图践绿色部分）。</li>
+<li>2.2 扇区是磁盘的最小组成单元，通常是512字节（<code>由于不断提高磁盘的大小，部分厂商设定每个扇区的大小是4096字节</code>）</li>
+</ul>
+</blockquote>
+<figure class="image-box">
+                <a rel=鸟哥的Linux私房菜基础学习篇-3版笔记 href="https://upload-images.jianshu.io/upload_images/2843224-56f2056f0b36009f.png" title="扇区与磁道" data-fancybox="images"><img src="https://upload-images.jianshu.io/upload_images/2843224-56f2056f0b36009f.png" alt="扇区与磁道" title class></a>
+                <p>扇区与磁道</p>
+            </figure>
+<blockquote>
+<p>3.磁头和柱面关系</p>
+<ul>
+<li>3.1 硬盘通常由重叠的一组盘片构成，每个盘面都被划分为数目相等的磁道;</li>
+<li>3.2 并从外缘的“0”开始编号，具有相同编号的<code>磁道形成一个圆柱</code>，称之为磁盘的柱面</li>
+<li>3.3 磁盘的<code>柱面数与一个盘面上的磁道数是相等的</code>。由于每个盘面都有自己的磁头，因此盘面数等于总的磁头数。</li>
+</ul>
+</blockquote>
+<figure class="image-box">
+                <a rel=鸟哥的Linux私房菜基础学习篇-3版笔记 href="https://upload-images.jianshu.io/upload_images/2843224-e0854f19c817c83c.png" title="磁头和柱面" data-fancybox="images"><img src="https://upload-images.jianshu.io/upload_images/2843224-e0854f19c817c83c.png" alt="磁头和柱面" title class></a>
+                <p>磁头和柱面</p>
+            </figure>
+<p>Q: 什么是块和簇?</p>
+<blockquote>
+<p>答: 其实它们磁盘块/簇都是<code>虚拟出来的</code>;</p>
+<ul>
+<li>1.块是操作系统中最小的逻辑存储单位,OS与磁盘打交道的最小单位是磁盘块,但由于操作系统文件系统类型的不同导致的叫法不同，<code>如在Windows下NTFS等文件系统中叫做簇</code>，而在Linux下如Ext4等文件系统中叫做块(<code>block</code>);</li>
+<li>2.每个簇或者块可以包括2、4、8、16、32、64…2的n次方个扇区。</li>
+</ul>
+</blockquote>
+<p>Q: 为什么存在磁盘块？</p>
+<blockquote>
+<p>答: 1.读取方便：由于扇区的数量比较小，数目众多在寻址时比较困难，所以操作系统就将相邻的扇区组合在一起，形成一个块，再对块进行整体的操作。<br>2.分离对底层的依赖：操作系统忽略对底层物理存储结构的设计。通过虚拟出来磁盘块的概念，在系统中认为块是最小的单位。</p>
+</blockquote>
+<p>Q: 什么是Page(页)?</p>
+<blockquote>
+<ul>
+<li>操作系统经常与内存和硬盘这两种存储设备进行通信，类似于“块”的概念，都需要一种虚拟的基本单位。</li>
+<li>与内存操作是虚拟一个页的概念来作为最小单位。</li>
+<li>与硬盘打交道就是以块为最小单位。</li>
+</ul>
+</blockquote>
+<p>Q: 扇区、块/簇、page的关系?</p>
+<blockquote>
+<p>答: 扇区(<code>硬盘的最小读写单元</code>)、块/簇(<code>是操作系统针对硬盘读写的最小单元</code>)、page(<code>是内存与操作系统之间操作的最小单元</code>)<br>关系: 扇区 &lt;= 块/簇 &lt;= page</p>
+</blockquote>
 <p>Q: 计算磁盘存储量的公式?</p>
 <blockquote>
-<p>答: Header 数量 <em> 每个 Header 负责的柱面数量 </em> 每个柱面含有的扇区数 <em> 扇区容量 ;<br>单位换算: header </em> (cylinder / header) <em> (sector /cylinder) </em> 512byte<br>简单写法: Head <em> Cylinder </em> Sector * 512Bytes</p>
+<p>答: Header 数量 <em> 每个 Header 负责的柱面数量 </em> 每个柱面含有的扇区数 <em> 扇区容量;<br>单位换算: header </em> (cylinder / header) <em> (sector /cylinder) </em> 512byte<br>简单写法: Head <em> Cylinder </em> Sector <em> 512Bytes<br>简单描述: 存储容量 ＝ 磁头数 × 磁道(柱面)数 × 每道扇区数 × 每扇区字节数<br>例如上图磁盘是一个 3个圆盘6个磁头，7个柱面（每个盘片7个磁道） 的磁盘，图3中每条磁道有12个扇区;<br>磁盘的容量: 6 </em> 7 <em> 12 </em> 512 Bytes = 258048 B</p>
+<ul>
+<li>外圈的密度小，内圈的密度大，每圈可存储的数据量是一样的</li>
+<li>新的硬盘数据的密度都一致,这样磁道的周长越长，扇区就越多，存储的数据量就越大。</li>
+</ul>
+</blockquote>
+<p>Q: 磁盘读取响应时间?</p>
+<blockquote>
+<p>答: 读写一次磁盘信息所需的时间可分解为<code>寻道时间、延迟时间、传输时间</code>,为提高磁盘传输效率软件应着重考虑减少寻道时间和延迟时间。<br>1.寻道时间：磁头从开始移动到数据所在磁道所需要的时间，寻道时间越短，I/O操作越快，目前磁盘的平均寻道时间一般在3－15ms，一般都在10ms左右。<br>2.旋转延迟：盘片旋转将请求数据所在扇区移至读写磁头下方所需要的时间，旋转延迟取决于磁盘转速。普通硬盘一般都是7200rpm，慢的5400rpm。<br>3.数据传输时间：完成传输所请求的数据所需要的时间。<br>小结一下: 从上面的指标来看、其实最重要的、或者说、我们最关心的应该只有两个<code>寻道时间、旋转延迟</code>。</p>
 </blockquote>
 <p>Q: 磁盘传输接口?</p>
 <blockquote>
@@ -599,7 +669,7 @@
 <blockquote>
 <p>答:操作系统通常会提供一个开发接口给硬件开发商，让其根据这个接口设计可以驱动他们硬件的驱动程序,然后由用户安装驱动程序后即可在该操作系统上驱动并使用这张显卡;<br>注意: 适当的驱动程序表明了不同的操作系统驱动程序可能无法成功安装和驱动;</p>
 </blockquote>
-<p><br></p>
+<hr>
 <h5 id="1-Linux介绍"><a href="#1-Linux介绍" class="headerlink" title="1.Linux介绍"></a>1.Linux介绍</h5><p>Q: Linux是什么?</p>
 <blockquote>
 <p>描述: Linux是一套完整操作系统，其内核原型由1991年Linux Torvalds开发，不过当前的内核仅仅驱动389所有的硬件而已并不包含其他的应用程序, 随着作者的开源该项目越来越多的开发者加入其中并得到基金会的帮助使其生态圈逐渐完善; 虽然Linux仅是其内核与内核提供工具，然而他们通过与软件开发者锁提供的软件整合，使得Linux成为了一个更完整的、功能强大的操作系统;</p>
@@ -782,7 +852,8 @@
 <li>2.2 Shareware ：起初免费试用但并非全部功能，到了试用期后就必须要付费使用否则便不能正常使用;</li>
 </ul>
 </blockquote>
-<h5 id="3-Linux-如何学习"><a href="#3-Linux-如何学习" class="headerlink" title="3.Linux 如何学习"></a>3.Linux 如何学习</h5><p>实践是学习Linuxde最佳方案，多读书建立兴趣与成就感很重要、另外协助回答问题参与团队活动也是增加热情的方式!</p>
+<hr>
+<h5 id="2-Linux-如何学习"><a href="#2-Linux-如何学习" class="headerlink" title="2.Linux 如何学习"></a>2.Linux 如何学习</h5><p>实践是学习Linuxde最佳方案，多读书建立兴趣与成就感很重要、另外协助回答问题参与团队活动也是增加热情的方式!</p>
 <p>Q: 以笔者个人的经验为例:</p>
 <ul>
 <li>0.学习的原动力?<ul>
@@ -833,6 +904,86 @@
 <blockquote>
 <p>答: 在提交问题前一定要清楚自己想要询问什么，表达不能模糊不清。<br>在提交问题的同时应该加上你当前Linux发行版 + 内核版本 + 软件信息 + 异常错误信息;</p>
 </blockquote>
+<hr>
+<h5 id="3-主机规划基础知识"><a href="#3-主机规划基础知识" class="headerlink" title="3.主机规划基础知识"></a>3.主机规划基础知识</h5><p>Q: 进行计算机硬件购买配置需要考虑哪些角度?</p>
+<blockquote>
+<ul>
+<li>1.目的: 游戏娱乐 、设计工作站、企业服务器</li>
+<li>2.价格: 简单的说就是性价比;</li>
+<li>3.支持度: 购买的硬件不至于太陈旧(我们知道计算机更新换代确实很快)而系统不能识别或者不支持,当然最新的设备也要慎重;</li>
+<li>4.性能: 与购买的硬件息息相关</li>
+<li>5.消耗: 一般耗电量以<code>每瓦性能</code>为单位，每瓦电力所发挥的性能越高当然代表越省电;</li>
+</ul>
+</blockquote>
+<p>Q: 硬件设备在Linux的文件名称?</p>
+<blockquote>
+<p>答: Linux 中有一个概念即 <code>一切皆文件</code>,也包括硬件设备在Linux上的对待方式;<br>常见的接口设备与文件名称对应:<br>IDE 硬盘 : <code>/dev/hd[a-d]</code><br>SCSI/SATA/USB 硬盘 : <code>/dev/sd[a-p]</code><br>CD / DVD : /dev/cdrom<br>鼠标 : 当前鼠标 /dev/mouse ,<code>USB /dev/usb/mouse[0-15]</code>,PS2 /dev/psaux</p>
+</blockquote>
+<p>Q: 磁盘连接方式和顺序与设备文件名称关系?</p>
+<blockquote>
+<p>答: 对于IDE磁盘接口的设备(现在已经很少使用)来说，一个IDE扁平电缆可以接两个IDE设备即被区分为Master(主设备)与Slave(从设备)<br>对于SCSI接口磁盘都是以SCSI模块进行驱动而Linux系统上的文件名称是使用检测到的顺序来决定设备文件名称而非是实际插槽;</p>
+</blockquote>
+<p>Q: 简单复习磁盘方面的知识 </p>
+<blockquote>
+<p>答: 磁盘的组成<code>盘片、主轴马达、磁头、机械手臂</code>，而盘片又细分出扇区(Sector)与柱面(Cylinder)两种单位其中扇区每个为512bytes;</p>
+</blockquote>
+<p>Q: 磁盘中盘片上的扇区的作用?</p>
+<blockquote>
+<p>答:磁盘中第一个扇区(<code>保留为主引导扇区位于0磁头0柱面1扇区</code>)非常重要,因为其记录了整块磁盘的重要信息分别是(以扇区512bytes为例): </p>
+<ul>
+<li>1.硬盘主引导记录MBR(Main Boot Record): 446 bytes, 安装引导加载程序的地方，系统在开机时会主动去读取这个区块内容然后才进行加载内核进行读取文件系统;</li>
+<li>2.分区表DPT(Disk Partition Table): 64 bytes, 记录整块磁盘分区的状态，将磁盘分区为多个区段;</li>
+</ul>
+</blockquote>
+<p>Q: 分区表DPT(Disk Partition Table)的划分?</p>
+<blockquote>
+<p>答: 磁盘中开始与结束的柱面是文件系统分区的最小单位;</p>
+<ul>
+<li>1.在分区表64bytes容量中总共分为四组记录每组记录区记录了该区段的<code>起始柱面号码</code>;</li>
+<li>2.由于分区表的大小有限64=4*8 bytes最多容纳四个分区(主(Primary)或扩展(Extended)分区)</li>
+</ul>
+</blockquote>
+<p>Q: 为什么需要分区?</p>
+<blockquote>
+<p>答:当系统对磁盘写入数据时需参考磁盘分区表才能针对某个分区进行数据的处理;</p>
+<ul>
+<li>1.数据的安全习惯: 不同分区间的数据互不干扰</li>
+<li>2.系统的搜寻性能: 指定搜索的分区有助于数据读取的速度与性能;</li>
+</ul>
+</blockquote>
+<p>Q: 主分区与扩展分区?</p>
+<blockquote>
+<ul>
+<li>1.主分区: 主分区与扩展分区最多只能有四个对于512bytes的扇区(磁盘限制)</li>
+<li>2.扩展分区: 其本身不能被拿来格式化并且由于操作系统限制最多只能有一个,目的是使用额外的扇区来记录分区信息<ul>
+<li>2.1 逻辑分区: 由扩展分区记录的分区可以进行格式化后存储数据，需要注意逻辑分区的设备名称号码由5号开始编号，因为前四个号码是给主、扩展分区使用，例如<br>P1: /dev/hda1<br>P2: /dev/hda2<br>L1: /dev/hd5<br>注意: 逻辑分区数量因操作系统不同在Linux中IDE硬盘最多有59个逻辑分区(5~63号)而SATA磁盘有11个逻辑分区(5~15号)<br>分区以柱面(cylinder)为单位的连续的磁盘空间，且扩展分区又是一个类似于独立的磁盘空间所以在分区时需要特别注意;</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>Q: 分区划分推荐方式?</p>
+<blockquote>
+<ul>
+<li>1.P+P+P+E即三个主分区加上一个扩展分区</li>
+<li>2.P+E</li>
+</ul>
+</blockquote>
+<p>Q: 开机流程与主引导分区(MBR)?</p>
+<blockquote>
+<p>开机流程:BIOS-&gt;MBR-&gt;Boot Loader-&gt;Kernel<br>Boot Loader : 主要提供菜单、加载内核、转交控制权给其他Loader,其安装位置有两个分别是MBR与boot sector;</p>
+</blockquote>
+<p>Q: Linux 磁盘分区与文件结构规划?</p>
+<blockquote>
+<p>答: 将未来可能被读写频繁的目录或者重要的目录分别独立为一个分区并挂载到一个目录中;<br>例如以下方式:<code>/boot 、/ 、/home、/usr、Swap(一般设备内存的50%)</code>进行单独分区，为了方便扩展建议使用LVM创建磁盘分区;</p>
+</blockquote>
+<p>Q: Swap 交换分区的作用?</p>
+<blockquote>
+<p>答: 即内存交换分区，当系统内存不够用时候(80%)将会使用到硬盘的内存交换空间(swap),简单的说就是将内存存放不了的一部分写入磁盘的swap分区中;</p>
+</blockquote>
+<p>Q: 磁盘阵列一句话描述?</p>
+<blockquote>
+<p>答: 他就是我们经常所说的Raid, 利用硬件技术将数个硬盘整合成为一个大硬盘的方法，在操作系统中识别为一块硬盘，并且拥有速度快、性能好、容灾等方面的特性;</p>
+</blockquote>
 
         </div>
         
@@ -845,7 +996,7 @@
         
         
 <span class="post-time">
-    最后更新时间：<time datetime="2020-09-26T05:18:48.042Z" itemprop="dateUpdated">2020-09-26 13:18:48</time>
+    最后更新时间：<time datetime="2020-09-30T07:12:51.112Z" itemprop="dateUpdated">2020-09-30 15:12:51</time>
 </span><br>
 
 

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>n-Kubernetes配置解析与入坑解决FAQ记录 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="k8s">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>n-Kubernetes配置解析与入坑解决FAQ记录</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">n-Kubernetes配置解析与入坑解决FAQ记录</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-05-02T09:37:47.000Z" itemprop="datePublished" class="page-time">
+  2020-05-02
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Kubernetes/n-Kubernetes配置解析与入坑解决FAQ记录"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">n-Kubernetes配置解析与入坑解决FAQ记录</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-05-02 17:37:47" datetime="2020-05-02T09:37:47.000Z"  itemprop="datePublished">2020-05-02</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-简述"><a href="#0x00-简述" class="headerlink" title="0x00 简述"></a>0x00 简述</h4><p>描述:在学习任何一门新技术总是免不了坑坑拌拌，当您学会了记录坑后然后将其记录当下次遇到，相同问题的时候可以第一时间进行处理;</p>
+<hr>
+<h4 id="0x01-配置文件与启动参数"><a href="#0x01-配置文件与启动参数" class="headerlink" title="0x01 配置文件与启动参数"></a>0x01 配置文件与启动参数</h4><h4 id="Kubelet-启动参数"><a href="#Kubelet-启动参数" class="headerlink" title="Kubelet 启动参数"></a>Kubelet 启动参数</h4><p>启动参数总结一览表:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--register-node [Boolean] <span class="comment"># 节点是否自动注册</span></span><br></pre></td></tr></table></figure></p>
+<p>/etc/kubernetes/kubelet.conf</p>
+<p>关于构建环境</p>
+<p>您可以根据自己的情况将构建环境与部署环境分开，例如：</p>
+<pre><code>学习时，参考本教程，使用 kubernetes 的 master 节点完成 构建和镜像推送
+开发时，在自己的笔记本上完成 构建和镜像推送
+工作中，使用 Jenkins Pipeline 或者 gitlab-runner Pipeline 来完成 构建和镜像推送
+</code></pre><hr>
+<h4 id="0x02-入坑弃坑"><a href="#0x02-入坑弃坑" class="headerlink" title="0x02 入坑弃坑"></a>0x02 入坑弃坑</h4><h5 id="安装所遇"><a href="#安装所遇" class="headerlink" title="安装所遇"></a>安装所遇</h5><p><em>问题1.初始化master节点问题:</em></p>
+<ul>
+<li>APISERVER_NAME 不能是 master 的 hostname，且必须全为小写字母、数字、小数点，不能包含减号<code>export APISERVER_NAME=apiserver.weiyi</code>；</li>
+<li>POD_SUBNET 所使用的网段不能与 master节点/worker节点 所在的网段重叠( <code>CIDR 值:无类别域间路由，Classless Inter-Domain Routing</code>),<code>export POD_SUBNET=10.100.0.1/16</code>。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.如不能下载 kubernetes 的 docker 镜像 ，请替换镜像源以及手工初始化</span></span><br><span class="line">imageRepository: gcr.azk8s.cn/google-containers</span><br><span class="line">imageRepository: mirrorgcrio</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.检查环境变量</span></span><br><span class="line"><span class="built_in">echo</span> MASTER_IP=<span class="variable">$&#123;MASTER_IP&#125;</span> &amp;&amp; <span class="built_in">echo</span> APISERVER_NAME=<span class="variable">$&#123;APISERVER_NAME&#125;</span> &amp;&amp; <span class="built_in">echo</span> POD_SUBNET=<span class="variable">$&#123;POD_SUBNET&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>注意事项:</p>
+<ul>
+<li>重新初始化 master 节点前，请先执行 <code>kubeadm reset -f</code> 操作;</li>
+</ul>
+<p><br></p>
+<p><em>问题2.Master与pod状态查看异常问题</em><br>问题描述:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$kubectl</span> get pods calico-node-4vql2 -n kube-system -o wide</span><br><span class="line">NAME                READY   STATUS    RESTARTS   AGE     IP       NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">calico-node-4vql2   0/1     Pending[ImagePullBackoff ]   0          7m22s   &lt;none&gt;   node   &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>1.如果输出结果中出现 ImagePullBackoff 或者长时间处于 Pending 的情况<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">NAME                                          READY   STATUS              RESTARTS   AGE</span><br><span class="line">coredns-94d74667-6dj45                        1/1     ImagePullBackOff    0          12m</span><br><span class="line">calico-node-4vql2                             1/1     Pending             0          12m</span><br></pre></td></tr></table></figure>
+解决方法如下:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#（1）通过get pods找到pod被调度到了哪一个节点并，确定 Pod 所使用的容器镜像：</span></span><br><span class="line">kubectl get pods calico-node-4vql2 -n kube-system -o  yaml | grep image:</span><br><span class="line">- image: calico/node:v3.13.1</span><br><span class="line">- image: calico/cni:v3.13.1</span><br><span class="line">- image: calico/pod2daemon-flexvol:v3.13.1</span><br><span class="line"></span><br><span class="line">kubectl get pods coredns-94d74667-6dj45 -n kube-system -o yaml | grep image:</span><br><span class="line">- image: registry.aliyuncs.com/google_containers/coredns:1.3.1</span><br><span class="line"></span><br><span class="line"><span class="comment">#（2）在 Pod 所在节点执行 docker pull 指令(当Node状态为NotReady时候也可以采用此种方法，但不是唯一)d</span></span><br><span class="line">docker pull calico/node:v3.13.1</span><br><span class="line">docker pull calico/cni:v3.13.1</span><br><span class="line">docker pull calico/pod2daemon-flexvol:v3.13.1</span><br><span class="line"></span><br><span class="line">docker pull registry.aliyuncs.com/google_containers/coredns:1.3.1</span><br><span class="line"></span><br><span class="line"><span class="comment">#（3）然后在master节点上查看状态恢复正常</span></span><br><span class="line">NAME                                       READY   STATUS    RESTARTS   AGE   IP              NODE   NOMINATED NODE   READINESS GATES</span><br><span class="line">calico-node-4vql2                          1/1     Running   0          36m   10.10.107.192   node   &lt;none&gt;           &lt;none&gt;</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=n-Kubernetes配置解析与入坑解决FAQ记录 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200507094655.png" target="_blank" title="WeiyiGeek.Pending" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200507094655.png" alt="WeiyiGeek.Pending" title="" class=""></a>
+                <p>WeiyiGeek.Pending</p>
+            </figure></li>
+<li>2.输出结果中某个 Pod 长期处于 <code>ContainerCreating、PodInitializing 或 Init:0/3</code> 的状态：<br>解决办法:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#（1）查看该 Pod 的状态</span></span><br><span class="line">kubectl describe pods -n kube-system calico-node-4vql2</span><br><span class="line">kubectl describe pods -n kube-system coredns-8567978547-bmd9f</span><br><span class="line"></span><br><span class="line"><span class="comment">#（2）如果输出结果中，最后一行显示的是 Pulling image，请耐心等待</span></span><br><span class="line">Normal  Pulling   44s   kubelet, k8s-worker-02  Pulling image <span class="string">"calico/pod2daemon-flexvol:v3.13.1"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#（3）将该 Pod 删除，系统会自动重建一个新的 Pod</span></span><br><span class="line">kubectl delete pod kube-flannel-ds-amd64-8l25c -n kube-system</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><em>问题3.worker节点 join加入cluster集群不成功的几种情况</em></p>
+<ul>
+<li>1.#worker 节点不能访问 apiserver<ul>
+<li>如果 master 节点能够访问 apiserver、而 worker 节点不能，则请检查自己的网络设置，<code>/etc/hosts 是否正确设置？ 是否有安全组或防火墙的限制？</code><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#master节点验证</span></span><br><span class="line">curl -ik https://localhost:6443</span><br><span class="line"><span class="comment">#worker节点验证</span></span><br><span class="line">curl -ik https://apiserver.weiyi:6443</span><br><span class="line"><span class="comment">#正常输出结果如下所示：</span></span><br><span class="line">HTTP/1.1 403 Forbidden</span><br><span class="line">Cache-Control: no-cache, private</span><br><span class="line">Content-Type: application/json</span><br><span class="line">X-Content-Type-Options: nosniff</span><br><span class="line">Date: Fri, 15 Nov 2019 04:34:40 GMT</span><br><span class="line">Content-Length: 233</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"kind"</span>: <span class="string">"Status"</span>,</span><br><span class="line">  <span class="string">"apiVersion"</span>: <span class="string">"v1"</span>,</span><br><span class="line">  <span class="string">"metadata"</span>: &#123;</span><br><span class="line">...</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>2.#worker 节点默认网卡<ul>
+<li>Kubelet使用的 IP 地址 与 master 节点可互通（无需 NAT 映射），且没有防火墙、安全组隔离 </li>
+</ul>
+</li>
+<li>3.#master 节点生成的token已过有效时间为 2 个小时 <code>kubeadm token create</code></li>
+</ul>
+<p><br/></p>
+<p><em>问题4.在master节点上执行kubectl命令报错<code>localhost:8080 was refused</code></em><br>错误信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f calico-3.13.1.yaml</span><br><span class="line">The connection to the server localhost:8080 was refused - did you specify the right host or port?</span><br></pre></td></tr></table></figure><br>错误原因: 由于在初始化之后没将k8s的<code>/etc/kubernetes/admin.conf</code>拷贝到用户的加目录之中<code>/root/.kube/config</code><br>解决办法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rm -rf /root/.kube/</span><br><span class="line">mkdir /root/.kube/</span><br><span class="line">cp -i /etc/kubernetes/admin.conf /root/.kube/config</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><em>问题5:安装K8s时候kubelet报错提示<code>Container runtime network not ready</code></em><br>错误信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl status kubelet</span><br><span class="line">6月 23 09:04:02 master-01 kubelet[8085]: E0623 09:04:02.186893    8085 kubelet.go:2187] Container runtime network not ready: NetworkReady=<span class="literal">false</span> reason:NetworkPluginNotReady mes...ninitialized</span><br><span class="line">6月 23 09:04:04 master-01 kubelet[8085]: W0623 09:04:04.938700    8085 cni.go:237] Unable to update cni config: no networks found <span class="keyword">in</span> /etc/cni/net.d</span><br></pre></td></tr></table></figure><br>问题原因: 由于master节点初始化安装后报错，在未进行重置的情况下又进行初始化操作或者重置操作不完整导致,还有一种情况是没有安装网络组件比如(<code>flannel 或者 calico</code>);<br>解决办法: 执行以下命令重置初始化信息，然后在重新初始化;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop kubelet</span><br><span class="line">docker stop $(docker ps -aq)</span><br><span class="line">docker rm -f $(docker ps -aq)</span><br><span class="line">systemctl stop docker</span><br><span class="line">kubeadm reset</span><br><span class="line">rm -rf <span class="variable">$HOME</span>/.kube /etc/kubernetes</span><br><span class="line">rm -rf /var/lib/cni/ /etc/cni/ /var/lib/kubelet/* </span><br><span class="line">iptables -F &amp;&amp; iptables -t nat -F &amp;&amp; iptables -t mangle -F &amp;&amp; iptables -X</span><br><span class="line">systemctl start docker</span><br><span class="line">systemctl start kubelet</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#安装 calico 网络插件</span></span><br><span class="line">rm -f calico-3.13.1.yaml</span><br><span class="line">wget -L https://kuboard.cn/install-script/calico/calico-3.13.1.yaml</span><br><span class="line">kubectl apply -f calico-3.13.1.yaml</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><em>问题6:执行<code>kubeadm reset</code>无法进行节点重置，提示<code>retrying of unary invoker failed</code></em>;<br>错误信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[reset] Removing info <span class="keyword">for</span> node <span class="string">"master-01"</span> from the ConfigMap <span class="string">"kubeadm-config"</span> <span class="keyword">in</span> the <span class="string">"kube-system"</span> Namespace</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"warn"</span>,<span class="string">"ts"</span>:<span class="string">"2020-06-23T09:10:30.074+0800"</span>,<span class="string">"caller"</span>:<span class="string">"clientv3/retry_interceptor.go:61"</span>,<span class="string">"msg"</span>:<span class="string">"retrying of unary invoker failed"</span>,<span class="string">"target"</span>:<span class="string">"endpoint://client-174bf993-5731-4b29-9b30-7e958ade79a4/10.10.107.191:2379"</span>,<span class="string">"attempt"</span>:0,<span class="string">"error"</span>:<span class="string">"rpc error: code = Unknown desc = etcdserver: re-configuration failed due to not enough started members"</span>&#125;</span><br></pre></td></tr></table></figure><br>问题原因: 在重置前etcd容器处于运转之中导致无法进行节点的重置操作;<br>解决办法: 停止所有的容器以及docker服务然后再执行节点的重置操作<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stop $(docker ps -aq) &amp;&amp; systemctl stop docker</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><em>问题7:节点初始化在进行preflight时候提示<code>error execution phase preflight:[ERROR ImagePull]</code></em><br>问题描述:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">kubeadm init --config=kubeadm-config.yaml --upload-certs</span><br><span class="line">W0623 09:17:13.281279   29557 configset.go:202] WARNING: kubeadm cannot validate component configs <span class="keyword">for</span> API groups [kubelet.config.k8s.io kubeproxy.config.k8s.io]</span><br><span class="line">[init] Using Kubernetes version: v1.18.4</span><br><span class="line">[preflight] You can also perform this action <span class="keyword">in</span> beforehand using <span class="string">'kubeadm config images pull'</span></span><br><span class="line">error execution phase preflight: [preflight] Some fatal errors occurred:</span><br><span class="line">        [ERROR ImagePull]: failed to pull image registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver:v1.18.4: output: Error response from daemon: manifest <span class="keyword">for</span> registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver:v1.18.4 not found: manifest unknown: manifest unknown</span><br><span class="line">, error: <span class="built_in">exit</span> status 1</span><br></pre></td></tr></table></figure><br>问题原因: 由于k8s.gcr.io官方镜像网站无法下载镜像，而采用的同步镜像源站<code>registry.cn-hangzhou.aliyuncs.com/google_containers/</code>仓库中没有指定k8s版本的依赖组件；<br>解决办法: 换其它镜像进行尝试或者离线将镜像包导入的docker中(参考前面的笔记<code>2-Kubernetes入门手动安装部署</code>)，建议在进行执行上面的命令前先执行<code>kubeadm config images pull --image-repository mirrorgcrio --kubernetes-version=1.18.4</code>查看镜像是否能被拉取;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 常规k8s.gcr.io镜像站点</span></span><br><span class="line">gcr.azk8s.cn/google_containers/</span><br><span class="line">registry.aliyuncs.com/google_containers/</span><br><span class="line">registry.cn-hangzhou.aliyuncs.com/google_containers/</span><br><span class="line"></span><br><span class="line"><span class="comment"># harbor中k8s.gcr.io的镜像</span></span><br><span class="line">mirrorgcrio</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><em>问题8:容器内部Kubernetes Service不能ping;</em><br>问题描述:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PING gateway-example.example.svc.cluster.local (10.105.141.232) 56(84) bytes of data.</span><br><span class="line">From 172.17.76.171 (172.17.76.171) icmp_seq=1 Time to live exceeded</span><br><span class="line">From 172.17.76.171 (172.17.76.171) icmp_seq=2 Time to live exceeded</span><br></pre></td></tr></table></figure><br>问题原因:在 Kubernetes 的网络中Service 就是 ping 不通的,因为 Kubernetes 只是为 Service 生成了一个虚拟 IP 地址，实现的方式有三种 <code>User space / Iptables / IPVS</code> 等代理模式;<br>不管是哪种代理模式Kubernetes Service 的 IP 背后都没有任何实体可以响应「ICMP」<code>全称为 Internet 控制报文协议（Internet Control Message Protocol）</code>,但是可以通过curl或者telnet进行访问与<br>问题解决:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$kubectl</span> cluster-info</span><br><span class="line"><span class="comment"># Kubernetes master is running at https://k8s.weiyigeek.top:6443</span></span><br><span class="line"><span class="comment"># KubeDNS is running at https://k8s.weiyigeek.top:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h4 id="0x03-FAQ"><a href="#0x03-FAQ" class="headerlink" title="0x03 FAQ"></a>0x03 FAQ</h4><p><a href="https://www.cnblogs.com/dwq-good/p/13175150.html" target="_blank" rel="noopener">https://www.cnblogs.com/dwq-good/p/13175150.html</a></p>
+<p><a href="https://www.cnblogs.com/klvchen/archive/2018/09/04/9585746.html" target="_blank" rel="noopener">https://www.cnblogs.com/klvchen/archive/2018/09/04/9585746.html</a></p>
+<p><a href="https://blog.csdn.net/weixin_39963973/article/details/80568498" target="_blank" rel="noopener">https://blog.csdn.net/weixin_39963973/article/details/80568498</a></p>
+<p><a href="https://blog.csdn.net/weixin_43224068/article/details/104060320" target="_blank" rel="noopener">https://blog.csdn.net/weixin_43224068/article/details/104060320</a></p>
+<p><a href="https://www.cnblogs.com/djoker/p/10700607.html" target="_blank" rel="noopener">https://www.cnblogs.com/djoker/p/10700607.html</a></p>
+<p><a href="https://www.cnblogs.com/minseo/p/12447147.html" target="_blank" rel="noopener">https://www.cnblogs.com/minseo/p/12447147.html</a></p>
+<p><a href="https://www.cnblogs.com/1gaoyu/p/12983127.html" target="_blank" rel="noopener">https://www.cnblogs.com/1gaoyu/p/12983127.html</a></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-10-10T02:37:51.123Z" itemprop="dateUpdated">2020-10-10 10:37:51</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2020/5/472.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/5/472.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/k8s/" rel="tag">k8s</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5/472.html&title=《n-Kubernetes配置解析与入坑解决FAQ记录》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5/472.html&title=《n-Kubernetes配置解析与入坑解决FAQ记录》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/5/473.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">n1-Kubernetes名称概念解释一览</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/5/475.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">n3-Kubernets对象字段描述一览</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 简述</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-配置文件与启动参数"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 配置文件与启动参数</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Kubelet-启动参数"><span class="post-toc-number">3.</span> <span class="post-toc-text">Kubelet 启动参数</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-入坑弃坑"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x02 入坑弃坑</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-FAQ"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x03 FAQ</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5/472.html&title=《n-Kubernetes配置解析与入坑解决FAQ记录》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5/472.html&title=《n-Kubernetes配置解析与入坑解决FAQ记录》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABxElEQVR42u3aS47DIBAFQN//0p7tSBbOaxoTz6hYRU4ChReoPxxHPM5f4/p89Pn6++TbBQMXF7fNPW/H6DdX4ujJiHg//3BLuLi4G7mjBXJEdUv5/Li4uH+FW1ggCIBwcXH/EzcJhqqJEy4u7nu41TDl/vn9zJtyNVxc3AY3r1I+9/mR+i4uLu4U9yyOakqTt1ui1XFxcbdw8wMlb67MhTuF5i4uLu7D3E4qkjdX5kKoD+8VFxd3C3dtmFK9fhG9Jlxc3C3cvOg51z5Ze7Th4uLu4XYaJP1kKW/E4uLifpc7VzadC33K6RMuLu4Wbuc6RT51kjhV6x64uLjPcRfsL0DngdSH4iwuLu5GblQ7CZZZdbeqnPzg4uIu5VYXmGuuHMWRvDJcXNynuXNBSX4ho5o43a+Ci4v7Bm6nsVoNa6JLYLi4uBu51dLG4qQlT6VwcXEf5p7FkQQ3/WOrVVPBxcVtc/vFkbx0MletmdwMLi5um5sfOtWp803m/8LFxd3JzQ+aTrCSnKBRroaLi/tiblIuyYuthYwNFxf3ldxknmojNhLi4uJu5FaLpHNXK6qXM3Bxcb/F7fdpq9PNXd3AxcXdwv0B+s97iksa424AAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

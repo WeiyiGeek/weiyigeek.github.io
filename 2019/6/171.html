@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>brctl快速入门与基础 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="网络命令">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>brctl快速入门与基础</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">brctl快速入门与基础</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-06-14T11:35:30.000Z" itemprop="datePublished" class="page-time">
+  2019-06-14
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux%E5%91%BD%E4%BB%A4/">Linux命令</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Linux/常用命令/网络查看类命令/brctl快速入门与基础"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">brctl快速入门与基础</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-06-14 19:35:30" datetime="2019-06-14T11:35:30.000Z"  itemprop="datePublished">2019-06-14</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux%E5%91%BD%E4%BB%A4/">Linux命令</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-快速入门"><a href="#0x00-快速入门" class="headerlink" title="0x00 快速入门"></a>0x00 快速入门</h4><p>命令brctl主要运用于 Linux 网桥配置,Linux网关模式下将有线LAN和无线LAN共享网段实现局域网内互联；</p>
+<p><em>什么是网桥?</em><br>答：网桥是一种在链路层实现中继，对帧进行转发的技术，根据MAC分区块，可隔离碰撞，将网络的多个网段在数据链路层连接起来的网络设备（类似于VLAN）。</p>
+<p><em>思路其实很简单：</em><br>就是将虚拟出一个bridge口，将对应的有线LAN和无线LAN都绑定在这个虚拟bridge口上，并给这个bridge口分配一个地址，其他子网微机配置网关为bridge口的地址便可以了。当，因为是设备是网关模式，路由和nat也是必须的了。如果设备本身便是网桥模式那么路由和nat便可以省掉了</p>
+<p>安装网桥管理工具包：bridge-utile<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">yum install bridge-utils -y</span><br><span class="line">apt-get install bridge-utils</span><br><span class="line"></span><br><span class="line"><span class="comment">#加入到内核（手动）</span></span><br><span class="line">modprobe bridge</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"1"</span>&gt;/proc/sys/net/ipv4/ip_forward  <span class="comment">#设置转发支持（iptables NAT转发也需要此）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#配置桥开机激活 </span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"modprobe bridge"</span>&gt;&gt;/etc/rc.local @<span class="comment">#开机加载 bridge 模块，或者echo "bridge"&gt;&gt;/etc/modules</span></span><br><span class="line">cp /etc/network/interfaces /etc/network/interfaces.default <span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#或者编译安装bridge-utils</span></span><br><span class="line">（1）进入到/usr/src 目录下，下载bridge-utils-1.4.tar.gz ：</span><br><span class="line"><span class="comment">#cd /usr/src</span></span><br><span class="line"><span class="comment">#wget http://launchpad.net/bridgeutils/main/1.4/+download/bridge-utils-1.4.tar.gz</span></span><br><span class="line"></span><br><span class="line">（2）解压缩：</span><br><span class="line"><span class="comment">#tar zxvf bridge-utils-1.4.tar.gz</span></span><br><span class="line">进入bridge-utils-1.4目录：</span><br><span class="line"><span class="comment">#cd bridge-utils-1.4</span></span><br><span class="line"></span><br><span class="line">（3）编译安装：</span><br><span class="line"><span class="comment">#autoconf</span></span><br><span class="line">生成configure文件：</span><br><span class="line"><span class="comment">#./configure</span></span><br><span class="line"><span class="comment">#make</span></span><br><span class="line"><span class="comment">#make install</span></span><br><span class="line">编译安装完成。最后将命令brctl复制到/sbin下：</span><br><span class="line"><span class="comment">#cp/usr/local/sbin/brctl/sbin</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h4 id="0x01-brctl-命令"><a href="#0x01-brctl-命令" class="headerlink" title="0x01 brctl 命令"></a>0x01 brctl 命令</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">Usage: brctl [commands]</span><br><span class="line"></span><br><span class="line"><span class="comment">#参数</span></span><br><span class="line">addbr [name] <span class="comment">#添加网桥</span></span><br><span class="line">delbr [name] <span class="comment">#删除网桥</span></span><br><span class="line">addif [name] [interface] <span class="comment">#将接口添加进入网桥</span></span><br><span class="line">show [name]  <span class="comment">#网桥信息查看</span></span><br><span class="line"></span><br><span class="line">        addbr           &lt;bridge&gt;                add bridge</span><br><span class="line">        delbr           &lt;bridge&gt;                delete bridge</span><br><span class="line">        addif           &lt;bridge&gt; &lt;device&gt;       add interface to bridge</span><br><span class="line">        delif           &lt;bridge&gt; &lt;device&gt;       delete interface from bridge</span><br><span class="line">        setageing       &lt;bridge&gt; &lt;time&gt;          <span class="comment">#设置老化时间，即生存周期</span></span><br><span class="line">        setbridgeprio   &lt;bridge&gt; &lt;prio&gt;         <span class="comment">#设置bridge的优先级</span></span><br><span class="line">        setfd           &lt;bridge&gt; &lt;time&gt;         <span class="comment">#设置bridge转发延迟时间</span></span><br><span class="line">        sethello        &lt;bridge&gt; &lt;time&gt;         <span class="built_in">set</span> hello time</span><br><span class="line">        setmaxage       &lt;bridge&gt; &lt;time&gt;         <span class="comment"># #设置消息的最大生命周期</span></span><br><span class="line">        sethashel       &lt;bridge&gt; &lt;int&gt;          <span class="built_in">set</span> <span class="built_in">hash</span> elasticity</span><br><span class="line">        sethashmax      &lt;bridge&gt; &lt;int&gt;          <span class="built_in">set</span> <span class="built_in">hash</span> max</span><br><span class="line">        setmclmc        &lt;bridge&gt; &lt;int&gt;          <span class="built_in">set</span> multicast last member count</span><br><span class="line">        setmcrouter     &lt;bridge&gt; &lt;int&gt;          <span class="built_in">set</span> multicast router</span><br><span class="line">        setmcsnoop      &lt;bridge&gt; &lt;int&gt;          <span class="built_in">set</span> multicast snooping</span><br><span class="line">        setmcsqc        &lt;bridge&gt; &lt;int&gt;          <span class="built_in">set</span> multicast startup query count</span><br><span class="line">        setmclmi        &lt;bridge&gt; &lt;time&gt;         <span class="built_in">set</span> multicast last member interval</span><br><span class="line">        setmcmi         &lt;bridge&gt; &lt;time&gt;         <span class="built_in">set</span> multicast membership interval</span><br><span class="line">        setmcqpi        &lt;bridge&gt; &lt;time&gt;         <span class="built_in">set</span> multicast querier interval</span><br><span class="line">        setmcqi         &lt;bridge&gt; &lt;time&gt;         <span class="built_in">set</span> multicast query interval</span><br><span class="line">        setmcqri        &lt;bridge&gt; &lt;time&gt;         <span class="built_in">set</span> multicast query response interval</span><br><span class="line">        setmcqri        &lt;bridge&gt; &lt;time&gt;         <span class="built_in">set</span> multicast startup query interval</span><br><span class="line">        setpathcost     &lt;bridge&gt; &lt;port&gt; &lt;cost&gt;  <span class="built_in">set</span> path cost</span><br><span class="line">        setportprio     &lt;bridge&gt; &lt;port&gt; &lt;prio&gt;  <span class="built_in">set</span> port priority</span><br><span class="line">        setportmcrouter &lt;bridge&gt; &lt;port&gt; &lt;int&gt;   <span class="built_in">set</span> port multicast router</span><br><span class="line">        show            [ &lt;bridge&gt; ]            <span class="comment">#显示网新信息</span></span><br><span class="line">        showmacs        &lt;bridge&gt;                <span class="comment">##显示MAC地址</span></span><br><span class="line">        showstp         &lt;bridge&gt;                show bridge stp info</span><br><span class="line">        stp             &lt;bridge&gt; &#123;on|off&#125;       turn stp on/off</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h4 id="0x02-实际案例"><a href="#0x02-实际案例" class="headerlink" title="0x02 实际案例"></a>0x02 实际案例</h4><p>示例1.添加网桥并将接口进行接入,将有线和无线都设置为10.0.0.*网段，即可通过网上邻居进行访问；<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">brctl addbr bridge   <span class="comment">#添加了一个bridge名称的网桥</span></span><br><span class="line">brctl addif bridge eth0  <span class="comment">#并将接口加入到其中;</span></span><br><span class="line">brctl addif bridge ath0 <span class="comment">#无线接口</span></span><br><span class="line"></span><br><span class="line">ifconfig eth0  0.0.0.0 <span class="comment">#</span></span><br><span class="line">ifconfig bridge 10.0.0.1 netmask 255.255.255.0 up <span class="comment">#设置哇</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#添加防火墙规则</span></span><br><span class="line">iptables -t nat -A POSTROUTING -o eth1 -j SNAT --to 192.168.2.173</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>示例2.有五台主机。其中一台主机装有linux 安装了网桥模块，而且有四块物理网卡，分别连接同一网段的其他主机，我们希望其成为一个网桥（192.168.1.1.），为其他四台主机(IP分别为192.168.1.2 ，192.168.1.3，192.168.1.4，192.168.1.5) 之间转发数据包</p>
+<ul>
+<li>同时为了方便管理，使用网桥能一个IP就可以在192.168.1.0/24网段内的主机上telnet到网桥，及连接不同网段的主机;<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实际上，我们可以把逻辑网段192.168.1.0/24看作使一个VLAN ，而br0则是这个VLAN的名称。</span></span><br><span class="line">brctl addbr br0        <span class="comment"># (建立一个逻辑网段，名称为br0)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#在Linux中，一个端口实际上就是一个物理网卡，假如网桥的每个物理网卡的名称则分别为eth0，eth1，eth2，eth3</span></span><br><span class="line">brctl addif br0 eth0               (让eth0成为br0的一个端口)</span><br><span class="line">brctl addif br0 eth1               (让eth1成为br0的一个端口)</span><br><span class="line">brctl addif br0 eth0               (让eth2成为br0的一个端口)</span><br><span class="line">brctl addif br0 eth3               (让eth3成为br0的一个端口)</span><br><span class="line"></span><br><span class="line"><span class="comment">#网桥的每个物理网卡作为一个端口，运行于混杂模式，而且是在链路层工作，所以就不需要IP了。</span></span><br><span class="line">ifconfig eth0 0.0.0.0</span><br><span class="line">ifconfig eth1 0.0.0.0</span><br><span class="line">ifconfig eth2 0.0.0.0</span><br><span class="line">ifconfig eth3 0.0.0.0</span><br><span class="line"></span><br><span class="line"><span class="comment">#然后给br0的虚拟网卡配置IP：192.168.1.1。那样就能远程管理网桥。</span></span><br><span class="line">ifconfig br0 192.168.1.1</span><br><span class="line"><span class="comment">#给br0配置了IP之后，网桥就能够工作了。192.168.1.0/24网段内的主机都可以telnet到网桥上对其进行配置。</span></span><br><span class="line"><span class="comment">#以上配置的是一个逻辑网段，实际上Linux网桥也能配置成多个逻辑网段(相当于交换机中划分多个VLAN)。</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p>示例3.设置Linux让网桥运行配置网桥;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">brctl addbr br0</span><br><span class="line">brctl stp br0 off <span class="comment">#不需要STP(生成树协议)等。因为我们只有一个路由器，是绝对不可能形成一个环的，则关闭它</span></span><br><span class="line"><span class="comment">#关闭生成树协议，减少数据包污染，因为我这里只有一个路由器哦！</span></span><br><span class="line"></span><br><span class="line">brctl addif br0 eth0 eth1 <span class="comment">#添加两个（或更多）以太网物理接口</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#原来我们的两个以太网物理接口变成了网桥上的两个逻辑端口。那两个物理接口过去存在，未来也不会消失</span></span><br><span class="line"><span class="comment">#现在他们成了逻辑网桥设备的一部分了，所以不再需要IP地址。下面我们将这些IP地址释放掉</span></span><br><span class="line"><span class="variable">$ifconfig</span> eth0 down</span><br><span class="line"><span class="variable">$ifconfig</span> eth1 down</span><br><span class="line"><span class="variable">$ifconfig</span> eth0 0.0.0.0 up</span><br><span class="line"><span class="variable">$ifconfig</span> eth1 0.0.0.0 up</span><br><span class="line"></span><br><span class="line"><span class="comment">#最后，启用网桥并配置其地址</span></span><br><span class="line"><span class="variable">$ifconfig</span> br0 10.0.3.129 up</span><br><span class="line"></span><br><span class="line"><span class="comment">#如果需要关闭和删除网桥</span></span><br><span class="line">brctl delif br0 eth1 eth0;</span><br><span class="line">ifconfig br0 down;</span><br><span class="line">brctl delbr br0;</span><br></pre></td></tr></table></figure></p>
+<p>示例4.配置eth0 eth1 br0开机启动，eth0、eth1未设置IP信息，在启动br0网卡时，开启了eth0，eth1的混杂模式，并桥接了它们。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[inbi@debian~]<span class="variable">$vim</span> /etc/network/interfaces</span><br><span class="line">auto lo eth0 eth1 br0  <span class="comment">#将接口加入</span></span><br><span class="line">iface lo inet loopback <span class="comment">#设置本地地址为回路</span></span><br><span class="line">iface br0 inet static</span><br><span class="line">    address 10.10.10.1</span><br><span class="line">    netmask 255.255.0.0</span><br><span class="line">    gateway 10.10.10.254</span><br><span class="line">    pre-up ip link <span class="built_in">set</span> eth0 promisc on</span><br><span class="line">    pre-up ip link <span class="built_in">set</span> eth1 promisc ono</span><br><span class="line">    pre-up <span class="built_in">echo</span> <span class="string">"1"</span>&gt;/proc/sys/net/ipv4/ip_forward</span><br><span class="line">    bridge_ports eth0 eth1</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-10-10T02:37:45.395Z" itemprop="dateUpdated">2020-10-10 10:37:45</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/6/171.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/6/171.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E5%91%BD%E4%BB%A4/" rel="tag">网络命令</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/6/171.html&title=《brctl快速入门与基础》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/6/171.html&title=《brctl快速入门与基础》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/6/487.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">1.vSphere基础安装与快速入门</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/6/162.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">系统内置命令分类查看一览</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-快速入门"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 快速入门</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-brctl-命令"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 brctl 命令</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-实际案例"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 实际案例</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/6/171.html&title=《brctl快速入门与基础》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/6/171.html&title=《brctl快速入门与基础》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABw0lEQVR42u3aS3LDIBAFQN//0soBIuM3DGAl1axcLixaXkzNh9crXle8fu8fP+21Y+Hi4ra51ePfHVYlJs+/eRouLu5B7rsDxnuS/cmLJQZcXNznc3PcOGzh4uL+D+44qOXJCi4u7vO5SfGzqqVyqFbDxcVtcPMj933e0t/FxcWd4l7FNU4+koFKHrxuTsfFxT3CrTZD1yY6k+fi4uI+gJscMA5PcylUeciKi4u7lNsvivJXyoevW9C4uLgxt3pVYq4x2g9tuLi4T+DOXaRIWiTV5gsuLu5JbhJcqmVPnvokydDN/4qLi3ucm9DzV8pHKVGChYuL+yVuno7kzZEkCCblEy4u7hnu+GfVhmmnwTpZq+Hi4m7mJteq8nKoM7H5EARxcXGPc6vfzF3jyBOaQnMEFxd3AzcfsiYJSnWIMln84OLibubONTerLdRqilO+5YGLi9vmXsWVJDf9sNXqqeDi4ra51eCSX8VY0P7oBERcXNw2d66Yycer1dbqh38UFxf3IDcPNJ2UJQl2Ua2Gi4v7SO5c8ZPvwcXF/bvcavBa0ELFxcU9yO2PP8tlTDDKxcXF/RZ3rrm5Cle+mIWLi7uX+wM94sNCgoSG7AAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

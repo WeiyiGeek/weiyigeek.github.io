@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>哈希生成与文件验证 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="证书哈希">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>哈希生成与文件验证</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">哈希生成与文件验证</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-05-27T12:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-05-27
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Windows%E5%91%BD%E4%BB%A4/">Windows命令</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Windows/常用命令/证书哈希类命令/哈希生成与文件验证"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">哈希生成与文件验证</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-05-27 20:36:30" datetime="2019-05-27T12:36:30.000Z"  itemprop="datePublished">2019-05-27</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Windows%E5%91%BD%E4%BB%A4/">Windows命令</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="certutil-命令"><a href="#certutil-命令" class="headerlink" title="certutil 命令"></a>certutil 命令</h4><p>描述:certutil用于备份证书服务下载查看缓存,管理Windows命令通过文件生成并显示加密哈希生成Hashfile，MD5,SHA1,SHA256，并且可以校验文件MD5/SHA1值等<br>更多操作说明见<a href="https://technet.microsoft.com/zh-cn/library/cc755341(v=ws.10).aspx" target="_blank" rel="noopener">https://technet.microsoft.com/zh-cn/library/cc755341(v=ws.10).aspx</a></p>
+<p>语法参数：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line">动词:</span><br><span class="line">  -dump             -- 转储配置信息或文件</span><br><span class="line">  -dumpPFX          -- 转储 PFX 结构</span><br><span class="line">  -asn              -- 分析 ASN.1 文件</span><br><span class="line"></span><br><span class="line">  -decodehex        -- 解码十六进制编码的文件</span><br><span class="line">  -decode           -- 解码 Base64 编码的文件</span><br><span class="line">  -encode           -- 将文件编码为 Base64</span><br><span class="line">  -hashfile         -- 通过文件生成并显示加密哈希支持: MD2 MD4 MD5 SHA1 SHA256 SHA384 SHA512</span><br><span class="line"></span><br><span class="line">  -deny             -- 拒绝挂起的申请</span><br><span class="line">  -resubmit         -- 重新提交挂起的申请</span><br><span class="line">  -setattributes    -- 为挂起申请设置属性</span><br><span class="line">  -setextension     -- 为挂起申请设置扩展</span><br><span class="line">  -revoke           -- 吊销证书</span><br><span class="line">  -isvalid          -- 显示当前证书部署</span><br><span class="line"></span><br><span class="line">  -getconfig        -- 获取默认配置字符串</span><br><span class="line">  -ping             -- Ping Active Directory 证书服务申请接口</span><br><span class="line">  -pingadmin        -- Ping Active Directory 证书服务管理接口</span><br><span class="line">  -CAInfo           -- 显示 CA 信息</span><br><span class="line">  -ca.cert          -- 检索 CA 的证书</span><br><span class="line">  -ca.chain         -- 检索 CA 的证书链</span><br><span class="line">  -GetCRL           -- 获取 CRL</span><br><span class="line">  -CRL              -- 发布新的 CRL [或仅增量 CRL]</span><br><span class="line">  -shutdown         -- 关闭 Active Directory 证书服务</span><br><span class="line"></span><br><span class="line">  -installCert      -- 安装证书颁发机构证书</span><br><span class="line">  -renewCert        -- 续订证书颁发机构证书</span><br><span class="line"></span><br><span class="line">  -schema           -- 转储证书架构</span><br><span class="line">  -view             -- 转储证书视图</span><br><span class="line">  -db               -- 转储原始数据库</span><br><span class="line">  -deleterow        -- 删除服务器数据库行</span><br><span class="line"></span><br><span class="line">  -backup           -- 备份 Active Directory 证书服务</span><br><span class="line">  -backupDB         -- 备份 Active Directory 证书服务数据库</span><br><span class="line">  -backupKey        -- 备份 Active Directory 证书服务证书和私钥</span><br><span class="line">  -restore          -- 还原 Active Directory 证书服务</span><br><span class="line">  -restoreDB        -- 还原 Active Directory 证书服务数据库</span><br><span class="line">  -restoreKey       -- 还原 Active Directory 证书服务证书和私钥</span><br><span class="line">  -importPFX        -- 导入证书和私钥</span><br><span class="line">  -dynamicfilelist  -- 显示动态文件列表</span><br><span class="line">  -databaselocations -- 显示数据库位置</span><br><span class="line"></span><br><span class="line">  -store            -- 转储证书存储</span><br><span class="line">  -enumstore        -- 枚举证书存储</span><br><span class="line">  -addstore         -- 将证书添加到存储</span><br><span class="line">  -delstore         -- 从存储删除证书</span><br><span class="line">  -verifystore      -- 验证存储中的证书</span><br><span class="line">  -repairstore      -- 修复密钥关联，或者更新证书属性或密钥安全描述符</span><br><span class="line">  -viewstore        -- 转储证书存储</span><br><span class="line">  -viewdelstore     -- 从存储删除证书</span><br><span class="line">  -UI               -- 调用 CryptUI</span><br><span class="line">  -attest           -- 验证密钥证明请求</span><br><span class="line"></span><br><span class="line">  -dsPublish        -- 将证书或 CRL 发布到 Active Directory</span><br><span class="line"></span><br><span class="line">  -ADTemplate       -- 显示 AD 模板</span><br><span class="line">  -Template         -- 显示注册策略模板</span><br><span class="line">  -TemplateCAs      -- 显示模板的 CA</span><br><span class="line">  -CATemplates      -- 显示 CA 的模板</span><br><span class="line">  -SetCASites       -- 管理 CA 的站点名称</span><br><span class="line">  -enrollmentServerURL -- 显示、添加或删除与 CA 关联的注册服务器 URL</span><br><span class="line">  -ADCA             -- 显示 AD CA</span><br><span class="line">  -CA               -- 显示注册策略 CA</span><br><span class="line">  -Policy           -- 显示注册策略</span><br><span class="line">  -PolicyCache      -- 显示或删除注册策略缓存项目</span><br><span class="line">  -CredStore        -- 显示、添加或删除凭据存储项目</span><br><span class="line">  -InstallDefaultTemplates -- 安装默认的证书模板</span><br><span class="line">  -URLCache         -- 显示或删除 URL 缓存项目</span><br><span class="line">  -pulse            -- 以脉冲方式执行自动注册事件或 NGC 任务</span><br><span class="line">  -MachineInfo      -- 显示 Active Directory 计算机对象信息</span><br><span class="line">  -DCInfo           -- 显示域控制器信息</span><br><span class="line">  -EntInfo          -- 显示企业信息</span><br><span class="line">  -TCAInfo          -- 显示 CA 信息</span><br><span class="line">  -SCInfo           -- 显示智能卡信息</span><br><span class="line"></span><br><span class="line">  -SCRoots          -- 管理智能卡根证书</span><br><span class="line"></span><br><span class="line">  -DeleteHelloContainer -- 删除 Hello 登录容器。</span><br><span class="line">     ** 在使用此选项后, 用户需要注销才能完成。**</span><br><span class="line">  -verifykeys       -- 验证公/私钥集</span><br><span class="line">  -verify           -- 验证证书，CRL 或链</span><br><span class="line">  -verifyCTL        -- 验证 AuthRoot 或不允许的证书 CTL</span><br><span class="line">  -syncWithWU       -- 与 Windows 更新同步</span><br><span class="line">  -generateSSTFromWU -- 通过 Windows 更新生成 SST</span><br><span class="line">  -generatePinRulesCTL -- 生成捆绑规则 CTL</span><br><span class="line">  -downloadOcsp     -- 下载 OCSP 响应并写入目录</span><br><span class="line">  -generateHpkpHeader -- 使用指定文件或目录中的证书生成 HPKP 头</span><br><span class="line">  -flushCache       -- 刷新选定进程(例如 lsass.exe)中的指定缓存</span><br><span class="line">  -addEccCurve      -- 添加 ECC 曲线</span><br><span class="line">  -deleteEccCurve   -- 删除 ECC 曲线</span><br><span class="line">  -displayEccCurve  -- 显示 ECC 曲线</span><br><span class="line">  -sign             -- 重新签名 CRL 或证书</span><br><span class="line"></span><br><span class="line">  -vroot            -- 创建/删除 Web 虚拟根和文件共享</span><br><span class="line">  -vocsproot        -- 创建/删除 OCSP Web Proxy 的 Web 虚拟根</span><br><span class="line">  -addEnrollmentServer -- 添加注册服务器应用程序</span><br><span class="line">  -deleteEnrollmentServer -- 删除注册服务器应用程序</span><br><span class="line">  -addPolicyServer  -- 添加策略服务器应用程序</span><br><span class="line">  -deletePolicyServer -- 删除策略服务器应用程序</span><br><span class="line">  -oid              -- 显示 ObjectId 或设置显示名称</span><br><span class="line">  -error            -- 显示错误代码消息文本</span><br><span class="line">  -getreg           -- 显示注册表值</span><br><span class="line">  -setreg           -- 设置注册表值</span><br><span class="line">  -delreg           -- 删除注册表值</span><br><span class="line"></span><br><span class="line">  -ImportKMS        -- 为密钥存档导入用户密钥和证书到服务器数据库</span><br><span class="line">  -ImportCert       -- 将证书文件导入数据库</span><br><span class="line">  -GetKey           -- 检索存档的私钥恢复 Blob，生成恢复脚本 或恢复存档的密钥</span><br><span class="line">  -RecoverKey       -- 恢复存档的私钥</span><br><span class="line">  -MergePFX         -- 合并 PFX 文件</span><br><span class="line">  -ConvertEPF       -- 将 PFX 文件转换为 EPF 文件</span><br><span class="line"></span><br><span class="line">  -add-chain        -- (-AddChain) 添加证书链</span><br><span class="line">  -add-pre-chain    -- (-AddPrechain) 添加预植证书链</span><br><span class="line">  -get-sth          -- (-GetSTH) 获取签名树头</span><br><span class="line">  -get-sth-consistency -- (-GetSTHConsistency) 获取签名树头更改</span><br><span class="line">  -get-proof-by-hash -- (-GetProofByHash) 获取哈希证明</span><br><span class="line">  -get-entries      -- (-GetEntries) 获取项</span><br><span class="line">  -get-roots        -- (-GetRoots) 获取根</span><br><span class="line">  -get-entry-and-proof -- (-GetEntryAndProof) 获取项和证明</span><br><span class="line">  -VerifyCT         -- 验证证书 SCT</span><br><span class="line"></span><br><span class="line"><span class="comment">#帮助示例：</span></span><br><span class="line">CertUtil -dump -?   -- 显示 <span class="string">"dump"</span> 动词的帮助文本</span><br></pre></td></tr></table></figure></p>
+<p>基础示例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.文件校验(计算文件hash)</span></span><br><span class="line">certutil -hashfile yourfilename.ext MD5</span><br><span class="line">certutil -hashfile yourfilename.ext SHA1</span><br><span class="line">certutil -hashfile yourfilename.ext SHA256</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.将文件进行base64编码和解码 (可用于windows的playload下载)</span></span><br><span class="line">CertUtil -encode InFile OutFile</span><br><span class="line">certutil -encode cos.conf base64.txt</span><br><span class="line"><span class="comment"># 输入长度 = 241</span></span><br><span class="line"><span class="comment"># 输出长度 = 392</span></span><br><span class="line"><span class="comment"># CertUtil: -encode 命令成功完成。</span></span><br><span class="line"></span><br><span class="line">CertUtil -decode InFile OutFile</span><br><span class="line">certutil -decode base64.txt new.txt <span class="comment">#解码</span></span><br><span class="line"><span class="comment"># 输入长度 = 392</span></span><br><span class="line"><span class="comment"># 输出长度 = 241</span></span><br><span class="line"><span class="comment"># CertUtil: -decode 命令成功完成。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#3.文件下载(保存指定名称)</span></span><br><span class="line">certutil -urlcache -split -f https://github.com/weblogic.py test.py</span><br><span class="line">certutil -urlcache -f https://github.com/weblogic.py</span><br><span class="line"></span><br><span class="line"><span class="comment">#4.查看与清除缓存</span></span><br><span class="line">certutil.exe -urlcache *</span><br><span class="line"></span><br><span class="line"><span class="comment">#@清除下载文件副本方法</span></span><br><span class="line">- 方法一：直接删除缓存目录对应文件</span><br><span class="line">- 方法二，命令行:certutil -urlcache -f https://github.com/weblogic.py delete</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-10-10T02:37:46.937Z" itemprop="dateUpdated">2020-10-10 10:37:46</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/5/251.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/5/251.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%AF%81%E4%B9%A6%E5%93%88%E5%B8%8C/" rel="tag">证书哈希</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/5/251.html&title=《哈希生成与文件验证》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/5/251.html&title=《哈希生成与文件验证》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/5/252.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Win系统安装部署流程与工具</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/5/206.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Linux磁盘管理之LVM快速入门配置</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#certutil-命令"><span class="post-toc-number">1.</span> <span class="post-toc-text">certutil 命令</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/5/251.html&title=《哈希生成与文件验证》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/5/251.html&title=《哈希生成与文件验证》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABv0lEQVR42u3aQY7CMAwFUO5/6c4Waabw7TQujF5WVaHug4VlO3k84nX8Ws/3z66f75xFe+xYuLi4y9zj5aq+PieexX8TDRcXd5B79oIkdB4nob+x4eLifjA3+ebr7+Di4v5vbrVg6v1IXFzceW7S/CTcJPJQr4aLi7vAzV+873rLfBcXF7fFPYqr91Qvef0RARcXd4SbJ5T14qMXARcXd56bPJaMNpKNlmoJdfq/4uLijnB7jVB1kJFsn0QVGS4u7k3c3sGL/NPmIAYXF/cm7lKiKZY+5Ti4uLgj3PUt0uowND/2UR6+4OLiXsRN2pWVNJQXTEnqxMXF/Rxu3sb0ElaSwnBxcee5SejXL9g3bC30ari4uBdxkwSUjzyWOq14NIOLi3sXt1e+5Mc4ooImT2S4uLibuUnxUaX3Ip/+Ebi4uIPc3nAzH6n0SpxCBYSLi3sR9yiuXuFSTVtLMxVcXNxl7rWDzt7wND+KgYuLO8nNk86+Mih/ChcXd5LbO1DVK4ku69VwcXE/jJtsuuRtT7ljw8XF/RJuNU5zhIqLizvIvXZjtTqDydstXFzcGW5v4zM6KlEcvyajFlxc3M3cH7tiAS/qGS6VAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

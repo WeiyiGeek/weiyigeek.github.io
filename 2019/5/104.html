@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>NFS网络文件系统基础配置与使用 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="NFS">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>NFS网络文件系统基础配置与使用</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">NFS网络文件系统基础配置与使用</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-05-16T05:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-05-16
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/OperationTools/">OperationTools</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/DiskManagement/NetworkStorage/NFS网络文件系统基础配置与使用"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">NFS网络文件系统基础配置与使用</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-05-16 13:34:30" datetime="2019-05-16T05:34:30.000Z"  itemprop="datePublished">2019-05-16</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/OperationTools/">OperationTools</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h4><p>描述: 先来学习三大步，任何事物皆可用;</p>
+<p><strong>Q: 什么是NFS?为什么要NFS?</strong></p>
+<blockquote>
+<p>描述:NFS（Network File System）即网络文件系统, 利用网络使得在不同的机器之间共享文件。<br>通过NFS可以将另一台机器的某个目录挂载到本机的某个目录下, 在使用的时候挂载过来的目录就像在本地一样, 极大的方便了多台服务器之间的文件共享。</p>
+</blockquote>
+<p><br></p>
+<p><strong>补充:在提到NFS服务的时候都会提到RPC服务，那么什么是RPC服务，为什么需要RPC服务呢?</strong><br>答:RPC是<code>Remote Procedure Call</code>的缩写即远程过程调用，其次关于为什么要RPC服务是因为NFS服务在启动的时候对于端口的选择是随机的，NFS在启动的时候回随机选择小于1024的端口进行数据的传输。而RPC的主要功能就是记录每个NFS服务所对应的端口号，<code>当客户端尝试连接NFS服务时它会将其对应的端口号发送给客户端</code>，客户端根据获得的端口号进行连接。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rpc.nfsd：它是基本的NFS守护进程，主要功能是管理客户端是否能够登录服务器</span><br><span class="line">rpc.mount：主要功能是管理NFS的文件系统，当客户端顺利通过nfsd登录NFS服务器后，在使用NFS服务所提供的磁盘前，还必须通过目录使用权限的验证，它会读取NFS的配置文件/etc/exports（初始文件为空）来对比客户端权限</span><br><span class="line">portmap：主要功能是进行端口映射工作</span><br><span class="line">idmap：进程实现用户映射和压缩</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>Q: NFS 特点有哪里?</strong></p>
+<ul>
+<li>(1) 方便多台服务器之间的文件共享</li>
+<li>(2) 搭建使用简单</li>
+<li>(3) 可进行密码认证以及Kerberos认证</li>
+</ul>
+<p><br></p>
+<p><strong>Q：NFS 应用场景</strong></p>
+<ul>
+<li>(1) 比如Kubernetes中多台主机共享存储资源;</li>
+</ul>
+<p><br/></p>
+<p><strong>NFS 版本说明</strong></p>
+<ul>
+<li>(1) NFSv2 and NFSv3<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># NFSv3同时支持TCP和UDP传输层协议</span></span><br><span class="line"><span class="comment"># NFSv3使用大量辅助协议通过portmap/rpcbind获取rpc.mounted监听端口,再进行身份验证其次验证通过后nfs客户端才能与rpc.nfsd建立联系并访问共享</span></span><br><span class="line">Example <span class="keyword">for</span> NFSv2 and NFSv3:</span><br><span class="line"><span class="comment"># /srv/homes       hostname1(rw,sync,no_subtree_check) hostname2(ro,sync,no_subtree_check)</span></span><br><span class="line"></span><br><span class="line">mount -t nfs 11.11.165.115:/data /tmp/data  -o proto=tcp -o nolock</span><br></pre></td></tr></table></figure></li>
+<li>(2) NFSv4:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Example <span class="keyword">for</span> NFSv4:</span><br><span class="line"><span class="comment"># /srv/nfs4        gss/krb5(rw,sync,fsid=0,crossmnt,no_subtree_check)</span></span><br><span class="line"><span class="comment"># /srv/nfs4/homes  gss/krb5i(rw,sync,no_subtree_check)</span></span><br><span class="line"><span class="comment"># 客户端挂载过程需要通过mount –t nfs4指定NFS版本为4，默认采用nfsv3。</span></span><br><span class="line">mount -t nfs4 192.168.78.1:/data  /tmp/data</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>NFSv4和NFSv3的差别如下：</p>
+<ul>
+<li>(1) NFSv4设计成了一种有状态的协议，自身实现了文件锁功能和获取文件系统根节点功能，不需要NLM和MOUNT协议协助了。</li>
+<li>(2) NFSv4增加了安全性，支持RPCSEC-GSS身份认证。</li>
+<li>(3) NFSv4只提供了两个请求NULL和COMPOUND，所有的操作都整合进了COMPOUND中，客户端可以根据实际请求将多个操作封装到一个COMPOUND请求中，增加了灵活性。</li>
+<li>(4) NFSv4文件系统的命令空间发生了变化，服务器端必须设置一个根文件系统(fsid=0)，其他文件系统挂载在根文件系统上导出。客户端需要使用“nfs server ip:/”挂载伪文件系统，伪文件系统一般使用RO方式共享，其他共享可以通过mount –bind选项在伪文件系统目录下挂载;</li>
+<li>(5)NFSv4支持delegation。由于多个客户端可以挂载同一个文件系统，为了保持文件同步，NFSv3中客户端需要经常向服务器发起请求，请求文件属性信息，判断其他客户端是否修改了文件。如果文件系统是只读的，或者客户端对文件的修改不频繁，频繁向服务器请求文件属性信息会降低系统性能。NFSv4可以依靠delegation实现文件同步。当客户端A打开一个文件时，服务器会分配给客户端A一个delegation。只要客户端A具有delegation，就可以认为与服务器保持了一致。如果另外一个客户端B访问同一个文件，则服务器会暂缓客户端B的访问请求，向客户端A发送RECALL请求。当客户端A接收到RECALL请求时将本地缓存刷新到服务器中，然后将delegation返回服务器，这时服务器开始处理客户端B的请求。</li>
+<li>(6) NFSv4修改了文件属性的表示方法。由于NFS是Sun开发的一套文件系统，设计之出NFS文件属性参考了UNIX中的文件属性，可能Windows中不具备某些属性，因此NFS对操作系统的兼容性不太好。NFSv4将文件属性划分成了三类：<pre><code>* Mandatory Attributes: 这是文件的基本属性，所有的操作系统必须支持这些属性。
+* Recommended Attributes: 这是NFS建议的属性，如果可能操作系统尽量实现这些属性。
+* Named Attributes: 这是操作系统可以自己实现的一些文件属性。
+</code></pre></li>
+<li>（7）服务器端拷贝： 如果客户需要从一个NFS服务器拷贝数据到另外一个NFS服务器,nfsv4可以让两台NFS服务器之间直接拷贝数据，不需要经过客户端。</li>
+<li>（8）资源预留和回收：NFSv4为虚拟分配提供的新特性。随着存储虚拟分配功能的普及使用，nfsv4可以为预留固定大小的存储空间;同样在文件系统上删除文件后，也能够在存储上面释放相应空间。</li>
+<li>（9）国际化支持： NFSv4文件名、目录、链接、用户与组可以使用 UTF-8字符集，UTF-8兼容ASCII码，使得NFSv4支持更多语言。</li>
+<li>（10）RPC合并调用：NFSv4允许将多个请求合并为一个rpc引用，在NFSv3每个请求对应一个rpc调用。WAN环境中，NFSv4合并rpc调用可以显著降低延迟。</li>
+<li>（11）安全性：NFSv4用户验证采用“用户名+域名”的模式，与Windows  AD验证方式类似，NFSv4强制使用Kerberos验证方式。(Kerberos与Windows AD都遵循相同RFC1510标准)，这样方便windows和*nix环境混合部署。</li>
+<li>（12）pNFS并行NFS文件系统，元数据服务器负责用户请求调度、数据服务器负责客户请求处理。pNFS需要NFS服务器和客户端协同支持，pNFS架构示意图如下：<figure class="image-box">
+                <a rel=NFS网络文件系统基础配置与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200911220327.png" target="_blank" title="WeiyiGeek.pNFS架构" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200911220327.png" alt="WeiyiGeek.pNFS架构" title="" class=""></a>
+                <p>WeiyiGeek.pNFS架构</p>
+            </figure>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>NFS 服务协议</strong><br>描述:#对于不同的网络情况，有针对地选择 UDP 或 TCP 传输协议。传输协议可以自动选择，也可以手动设置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 一般情况下，使用 TCP 的 NFS 比较稳定，使用 UDP 的 NFS 速度较快。</span><br><span class="line"># 在机器较少，网络状况较好的情况下，使用 UDP 协议能带来较好的性能。</span><br><span class="line"># 当机器较多，网络情况复杂时，推荐使用 TCP 协议（V2 只支持 UDP 协议）。</span><br><span class="line"># 在局域网中使用 UDP 协议较好，因为局域网有比较稳定的网络保证，使用 UDP 可以带来更好的性能。</span><br><span class="line"># 在广域网中推荐使用 TCP 协议，TCP 协议能让 NFS 在复杂的网络环境中保持最好的传输稳定性。</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>客户端连接NFS服务的过程：</strong></p>
+<ul>
+<li>1.客户端首先向NFS服务所在的服务器的RPC服务发起请求RPC服务的端口固定为 111<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$rpcinfo</span> -p 192.168.1.216</span><br><span class="line"><span class="comment">#    program vers proto   port  service</span></span><br><span class="line"><span class="comment">#     100000    4   tcp    111  portmapper</span></span><br><span class="line"><span class="comment">#     100003    3   tcp   2049  nfs</span></span><br><span class="line"><span class="comment">#     100003    4   tcp   2049  nfs</span></span><br><span class="line"><span class="comment">#     100227    3   tcp   2049  nfs_acl</span></span><br><span class="line"><span class="comment">#     100003    3   udp   2049  nfs</span></span><br><span class="line"><span class="comment">#     100227    3   udp   2049  nfs_acl</span></span><br><span class="line">``` </span><br><span class="line">* 2.RPC服务在接收到客户端的请求之后，找到注册的NFS服务所对应的端口号，并将端口号发送给客户端例如:</span><br><span class="line">```bash</span><br><span class="line">tcp   0   0 192.168.1.216:2049  192.168.1.216:885    ESTABLISHED off (0.00/0/0)</span><br></pre></td></tr></table></figure></li>
+<li>3.客户端根据获取到NFS端口号进行连接;</li>
+</ul>
+<hr>
+<h4 id="0x01-NFS安装配置"><a href="#0x01-NFS安装配置" class="headerlink" title="0x01 NFS安装配置"></a>0x01 NFS安装配置</h4><h5 id="1-CentOS-系统"><a href="#1-CentOS-系统" class="headerlink" title="(1) CentOS 系统"></a>(1) CentOS 系统</h5><p>测试环境:CentOS Linux release 7.8.2003 (Core)<br><strong>NFS server端配置</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.检查服务器是否安装了nfs-util和rpcbind两个包</span></span><br><span class="line"><span class="variable">$rpm</span> -qa | grep nfs</span><br><span class="line"><span class="comment">#nfs-utils：NFS服务的全程序，包括rpc.nfsd、rpc.mountd这两个daemons和相关文档说明，以及执行命令文件等。</span></span><br><span class="line">nfs-utils-1.2.3-54.el6.x86_64</span><br><span class="line">nfs-utils-lib-1.1.5-9.el6.x86_64</span><br><span class="line"><span class="variable">$rpm</span> -qa | grep rpcbind</span><br><span class="line"><span class="comment">#rpcbind：Centos.x下面RPC的主程序。NFS可视为一个rpc程序，在互动任何一个RPC程序之前，需要做好端口和功能的对应映射工作，这个映射工作就是由RPCBIND服务来完成的。因此，在提供NFS服务之前必须先启动RPCBIND服务。</span></span><br><span class="line">rpcbind-0.2.0-11.el6.x86_64</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.如果没安装进行安装上述两个包即可</span></span><br><span class="line"><span class="variable">$yum</span> install –y rpcbind nfs-utils</span><br><span class="line"><span class="comment"># 正在安装:</span></span><br><span class="line"><span class="comment">#  nfs-utils                          x86_64                  1:1.3.0-0.66.el7_8                     updates                  412 k</span></span><br><span class="line"><span class="comment">#  rpcbind                            x86_64                  0.2.0-49.el7                           base                      60 k</span></span><br><span class="line"><span class="comment"># 为依赖而安装:</span></span><br><span class="line"><span class="comment">#  gssproxy                           x86_64                  0.7.0-28.el7                           base                     110 k</span></span><br><span class="line"><span class="comment">#  keyutils                           x86_64                  1.5.8-3.el7                            base                      54 k</span></span><br><span class="line"><span class="comment">#  libbasicobjects                    x86_64                  0.1.1-32.el7                           base                      26 k</span></span><br><span class="line"><span class="comment">#  libcollection                      x86_64                  0.7.0-32.el7                           base                      42 k</span></span><br><span class="line"><span class="comment">#  libevent                           x86_64                  2.0.21-4.el7                           base                     214 k</span></span><br><span class="line"><span class="comment">#  libini_config                      x86_64                  1.3.1-32.el7                           base                      64 k</span></span><br><span class="line"><span class="comment">#  libnfsidmap                        x86_64                  0.25-19.el7                            base                      50 k</span></span><br><span class="line"><span class="comment">#  libpath_utils                      x86_64                  0.2.1-32.el7                           base                      28 k</span></span><br><span class="line"><span class="comment">#  libref_array                       x86_64                  0.1.5-32.el7                           base                      27 k</span></span><br><span class="line"><span class="comment">#  libtirpc                           x86_64                  0.2.4-0.16.el7                         base                      89 k</span></span><br><span class="line"><span class="comment">#  libverto-libevent                  x86_64                  0.2.5-4.el7                            base                     8.9 k</span></span><br><span class="line"><span class="comment">#  quota                              x86_64                  1:4.01-19.el7                          base                     179 k</span></span><br><span class="line"><span class="comment">#  quota-nls                          noarch                  1:4.01-19.el7                          base                      90 k</span></span><br><span class="line"><span class="comment"># tcp_wrappers                       x86_64                  7.6-77.el7                             base                      78 k</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.设置开机启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> rpcbind nfs</span><br><span class="line"><span class="comment"># Created symlink from /etc/systemd/system/multi-user.target.wants/nfs-server.service to /usr/lib/systemd/system/nfs-server.service.</span></span><br><span class="line"><span class="comment"># /etc/init.d/rpcbind start # deprecated</span></span><br><span class="line"><span class="comment"># /etc/init.d/nfs start     # deprecated</span></span><br><span class="line"><span class="comment"># Starting NFS services:                                     [  OK  ]</span></span><br><span class="line"><span class="comment"># Starting NFS quotas:                                       [  OK  ]</span></span><br><span class="line"><span class="comment"># Starting NFS mountd:                                       [  OK  ]</span></span><br><span class="line"><span class="comment"># Starting NFS daemon:                                       [  OK  ]</span></span><br><span class="line"><span class="comment"># Starting RPC idmapd:                                       [  OK  ]</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.设置共享目录以及读写权限可以添加多台主机</span></span><br><span class="line"><span class="comment"># 创卷NFS共享目录</span></span><br><span class="line">mkdir -p /nfs/&#123;data,share,backdata,upload,demo&#125;</span><br><span class="line"><span class="comment"># 共享目录所属者与组设置</span></span><br><span class="line">chown -R nfsnobody.nfsnobody /nfs/share </span><br><span class="line"><span class="variable">$vi</span> /etc/exports</span><br><span class="line">/nfs/data   192.168.1.0/255.255.255.0(rw,sync,root_squash,anonuid=500,anongid=500,insecure)</span><br><span class="line">/nfs/share  192.168.8.0/24(rw,sync)</span><br><span class="line">/nfs/backdata  192.168.8.7(rw) 192.168.8.8(ro)</span><br><span class="line">/nfs/upload    192.168.8.0/24(rw,all_squash,anonuid=1001,anongid=1001)  </span><br><span class="line">/nfs/demo      192.168.8.0/24(ro) *(ro,all_squash)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.nfs server服务开启</span></span><br><span class="line"><span class="comment"># 开启前查看rpc信息</span></span><br><span class="line"><span class="variable">$rpcinfo</span> -p</span><br><span class="line"><span class="comment"># program vers proto   port  service</span></span><br><span class="line"><span class="comment">#     100000    4   tcp    111  portmapper</span></span><br><span class="line"><span class="comment">#     100000    3   tcp    111  portmapper</span></span><br><span class="line"><span class="comment">#     100000    2   tcp    111  portmapper</span></span><br><span class="line"><span class="comment">#     100000    4   udp    111  portmapper</span></span><br><span class="line"><span class="comment">#     100000    3   udp    111  portmapper</span></span><br><span class="line"><span class="comment">#     100000    2   udp    111  portmapper</span></span><br><span class="line"><span class="variable">$systemctl</span> start rpcbind</span><br><span class="line"><span class="variable">$systemctl</span> start nfs</span><br><span class="line"><span class="comment"># 确认NFS服务器启动成功(只贴入新增部分)</span></span><br><span class="line"><span class="variable">$rpcinfo</span> -p</span><br><span class="line"><span class="comment">#  100024    1   udp  39651  status</span></span><br><span class="line"><span class="comment">#     100024    1   tcp  40171  status</span></span><br><span class="line"><span class="comment">#     100005    1   udp  20048  mountd</span></span><br><span class="line"><span class="comment">#     100005    1   tcp  20048  mountd</span></span><br><span class="line"><span class="comment">#     100005    2   udp  20048  mountd</span></span><br><span class="line"><span class="comment">#     100005    2   tcp  20048  mountd</span></span><br><span class="line"><span class="comment">#     100005    3   udp  20048  mountd</span></span><br><span class="line"><span class="comment">#     100005    3   tcp  20048  mountd</span></span><br><span class="line"><span class="comment">#     100003    3   tcp   2049  nfs</span></span><br><span class="line"><span class="comment">#     100003    4   tcp   2049  nfs</span></span><br><span class="line"><span class="comment">#     100227    3   tcp   2049  nfs_acl</span></span><br><span class="line"><span class="comment">#     100003    3   udp   2049  nfs</span></span><br><span class="line"><span class="comment">#     100227    3   udp   2049  nfs_acl</span></span><br><span class="line"><span class="comment">#     100021    1   udp  38221  nlockmgr</span></span><br><span class="line"><span class="comment">#     100021    3   udp  38221  nlockmgr</span></span><br><span class="line"><span class="comment">#     100021    4   udp  38221  nlockmgr</span></span><br><span class="line"><span class="comment">#     100021    1   tcp  45789  nlockmgr</span></span><br><span class="line"><span class="comment">#     100021    3   tcp  45789  nlockmgr</span></span><br><span class="line"><span class="comment">#     100021    4   tcp  45789  nlockmgr</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.修改配置文件后立即生效/etc/exports</span></span><br><span class="line">exportfs -av </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 7.CentOS7.8防火墙相关配置(正式环境请看下面的安全配置)</span></span><br><span class="line">测试设置如下</span><br><span class="line"><span class="comment"># firewall-cmd --permanent --zone=public --add-service=nfs</span></span><br><span class="line"><span class="comment"># firewall-cmd --permanent --zone=public --add-service=mountd</span></span><br><span class="line"><span class="comment"># firewall-cmd --permanent --zone=public --add-service=rpc-bind</span></span><br><span class="line"><span class="comment"># firewall-cmd --reload</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 8.查看nfs共享目录信息</span></span><br><span class="line"><span class="variable">$showmount</span> -e</span><br><span class="line">Export list <span class="keyword">for</span> k8s-yum-server:</span><br><span class="line">/nfs/share *</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>Client 端配置</strong><br>描述:客户端主要针对Linux与Windows等环境下进行相应的配置;</p>
+<ul>
+<li><p>Linux ：使用linux连接到nfs服务器的共享目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) NFS客户端安装</span></span><br><span class="line">yum install nfs-utils -y</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 使用mount命令直接挂载</span></span><br><span class="line">mkdir -p /mnt/nfs/share nfs</span><br><span class="line">mount -t nfs -o sync,tcp,noatime,rsize=1024,wsize=1024 EXPORT_MACHINE:/EXPORTED_DIR /DIR</span><br><span class="line">mount –t nfs 10.10.107.201:/data /mnt/nfs/share</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 方式将挂载配置写入到/etc/fstab中</span></span><br><span class="line">10.10.107.201:/nfs/share /mnt/nfs/share nfs defaults 0 0</span><br><span class="line">mount -a <span class="comment"># 重新挂载所有设备</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 查看客户端挂载信息</span></span><br><span class="line">df -h | grep <span class="string">"nfs"</span></span><br><span class="line">10.10.107.201:/nfs/share   46G  6.8G   39G   16% /mnt/nfs/share</span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) Linux/windows相同取消挂载使用</span></span><br><span class="line">umount /mnt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Windows: 可以直接添加Window功能:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 建立一个777的共享目录(注意权限貌似windwos上必须要x权限)</span></span><br><span class="line">$ chmod 777 /data/  <span class="comment">#方式1</span></span><br><span class="line">$ chmod o+w /data/  <span class="comment">#方式2</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2)使用windows连接linux上面的NFS服务进行共享数据：</span></span><br><span class="line">telnet 192.168.1.169 111 </span><br><span class="line">telnet 192.168.1.169 2049</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3)windows功能中安装NFS客户户端，安装完成后会有mount命令</span></span><br><span class="line">mount  <span class="comment">#查看挂载情况</span></span><br><span class="line">mount -h <span class="comment">#挂载帮助</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 查看nfs挂载的目录(windows与linux相同)</span></span><br><span class="line">showmount -e 10.10.107.21  <span class="comment">#显示指定NFS服务器上的共享目录列表（或者叫输出列表） </span></span><br><span class="line"><span class="comment"># 导出列表在 10.10.107.221:</span></span><br><span class="line"><span class="comment"># /nfs/share 10.10.107.0/255.255.255.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (5)查看已被挂载的客户端信息</span></span><br><span class="line">[root@Security-221 data]<span class="comment"># showmount -a</span></span><br><span class="line">All mount points on Security-221:</span><br><span class="line">10.10.107.112:/data</span><br><span class="line"></span><br><span class="line"><span class="comment"># (6) 挂载nfs目录：mount \\NFS的IP地址或者主机名\nfs目录名 挂载点</span></span><br><span class="line">mount \\10.10.107.221\data x:</span><br><span class="line">x: 现已成功连接到 \\10.10.107.221\data</span><br><span class="line">命令已成功完成。</span><br><span class="line"></span><br><span class="line"><span class="comment"># (7) 取消挂载：umount 挂载目录</span></span><br><span class="line">umount x:</span><br><span class="line">正在断开                x:      \\10.10.107.221\data</span><br><span class="line">命令已成功完成。</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=NFS网络文件系统基础配置与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517101939.png" target="_blank" title="WeiyiGeek.windows安装NFS客户端" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517101939.png" alt="WeiyiGeek.windows安装NFS客户端" title="" class=""></a>
+                <p>WeiyiGeek.windows安装NFS客户端</p>
+            </figure>
+<p>从Windows中实现文件上传的NFS中(<code>重点:注意事项</code>)：</p>
+<ul>
+<li><p>方式1:就是将共享文件的权限设置为777,但是这样是极不安全的</p>
+<figure class="image-box">
+                <a rel=NFS网络文件系统基础配置与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517104210.png" target="_blank" title="WeiyiGeek.Windwos连接NFS客户端" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517104210.png" alt="WeiyiGeek.Windwos连接NFS客户端" title="" class=""></a>
+                <p>WeiyiGeek.Windwos连接NFS客户端</p>
+            </figure>
+</li>
+<li><p>方式2：修改win7对nfs分区只读属性<br>Win7 NFS客户端使用mount命令挂载NFS服务之后，文件系统对Win7只读，无法写入文件，无法新建文件夹，此时使用mount命令可以查看到如下状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">本地    远程                                 属性</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">x:       \\10.10.107.221\data                   UID=-2, GID=-2</span><br><span class="line">                                                rsize=32768, wsize=32768</span><br><span class="line">                                                mount=soft, timeout=1.6</span><br><span class="line">                                                retry=1, locking=no</span><br><span class="line">                                                fileaccess=755, lang=GB2312-80</span><br><span class="line">                                                casesensitive=no</span><br><span class="line">                                                sec=sys</span><br><span class="line"><span class="comment">#UID=-2由于在存储设备上共享出来的NFS文件系统归属于root权限，并且无法修改该所属用户，而Windows通过UID=-2的用户去写，肯定写不进去。</span></span><br><span class="line">解决办法: 让Win7在挂载NFS的时候将UID和GID改成0即可</span><br><span class="line">打开注册表：HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ClientForNFS\CurrentVersion\Default</span><br><span class="line">增加两项：AnonymousUid，AnonymousGid</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=NFS网络文件系统基础配置与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517105922.png" target="_blank" title="WeiyiGeek.register" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517105922.png" alt="WeiyiGeek.register" title="" class=""></a>
+                <p>WeiyiGeek.register</p>
+            </figure>
+</li>
+</ul>
+<p><br></p>
+<h5 id="2-Ubuntu-系统"><a href="#2-Ubuntu-系统" class="headerlink" title="(2) Ubuntu 系统"></a>(2) Ubuntu 系统</h5><p>测试环境:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/lsb-release</span><br><span class="line">DISTRIB_ID=Ubuntu</span><br><span class="line">DISTRIB_RELEASE=20.04</span><br><span class="line">DISTRIB_CODENAME=focal</span><br><span class="line">DISTRIB_DESCRIPTION=<span class="string">"Ubuntu 20.04.1 LTS"</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>NFS Server/Client</strong><br>适用系统：Debian/Ubuntu<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Step1.服务端、客户端安装</span></span><br><span class="line"><span class="comment"># - Install Required Packages（Server）</span></span><br><span class="line"><span class="variable">$apt</span>-get update</span><br><span class="line"><span class="variable">$apt</span>-get install nfs-kernel-server rpcbind</span><br><span class="line"></span><br><span class="line"><span class="comment"># - Client Side SetUp （Client端）</span></span><br><span class="line"><span class="variable">$apt</span>-get install nfs-common rpcbind</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Step2.Configure NFS privilege</span></span><br><span class="line">​<span class="comment">#配置文件 修改：</span></span><br><span class="line"><span class="variable">$nano</span> /etc/default/rpcbind</span><br><span class="line">OPTIONS=<span class="string">""</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置允许连接的ip</span></span><br><span class="line">nano /etc/hosts.allow</span><br><span class="line">portmap: 192.168.1.0/24    <span class="comment">#Example Allow 192.168.1.0/24 to be Accessed on Network</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Configure idmapd</span></span><br><span class="line"><span class="variable">$nano</span> /etc/default/nfs-common</span><br><span class="line">NEED_IDMAPD=YES  <span class="comment">#插入</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$nano</span> /etc/idmapd.conf</span><br><span class="line">[General]</span><br><span class="line">Verbosity = 0</span><br><span class="line">Pipefs-Directory = /var/lib/nfs/rpc_pipefs</span><br><span class="line">Domain = localdomain</span><br><span class="line"></span><br><span class="line">[Mapping]</span><br><span class="line">Nobody-User = nobody</span><br><span class="line">Nobody-Group = nogroup</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="variable">$nano</span> /etc/exports</span><br><span class="line">/nfs/share 192.168.1.0/255.255.255.0(rw,no_root_squash,no_subtree_check,crossmnt,fsid=0)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step3、配置共享目录</span></span><br><span class="line">mkdir -p /nfs/share</span><br><span class="line"></span><br><span class="line"><span class="comment"># Step4、启动RPC服务于nfs共享服务</span></span><br><span class="line">systemctl <span class="built_in">enable</span> rpcbind nfs </span><br><span class="line">/etc/init.d/nfs-kernel-server start</span><br><span class="line">/etc/init.d/rpcbind star</span><br><span class="line"><span class="comment"># systemctl start rpcbind nfs </span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.客户端挂载情况</span></span><br><span class="line"><span class="comment"># NFS默认是用UDP协议，换成TCP协议挂载即可（网络不稳定）情况下</span></span><br><span class="line">mount -t nfs 11.11.165.115:/tmp/test0920   /data  -o proto=tcp -o nolock</span><br><span class="line"></span><br><span class="line"><span class="variable">$mount</span> -l</span><br><span class="line">10.10.107.201:/nfs/share on /mnt/nfs/share <span class="built_in">type</span> nfs4 (rw,relatime,vers=4.2,rsize=262144,wsize=262144,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,clientaddr=10.20.172.241,local_lock=none,addr=10.10.107.201)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.卸载挂载点</span></span><br><span class="line">umount /nfs/share</span><br><span class="line"><span class="comment"># 如果卸载不掉可以强制卸载挂载点</span></span><br><span class="line">fuser -km /nfs/share  先使用这条命令</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="0x02-NFS配置介绍"><a href="#0x02-NFS配置介绍" class="headerlink" title="0x02 NFS配置介绍"></a>0x02 NFS配置介绍</h4><p>描述:在进行使用NFS我们需要对其进行配置，以下是是其主要的软件结构;</p>
+<p><strong>NFS主要软件结构</strong></p>
+<ul>
+<li>/etc/exports NFS的主要配置文件，在该文件中定义NFS输出的目录、权限等属性</li>
+<li>/usr/sbin/exportfs 管理NFS共享资源的命令，在NFS的server端使用</li>
+<li>/usr/sbin/showmount 查询NFS共享资源的命令，在client端使用</li>
+<li>/var/lib/nfs/etab NFS的日志文件，记录了NFS共享出来的目录的完整权限设置值</li>
+<li>/var/lib/nfs/xtab NFS连接信息的日志文件，记录了曾经链接到此NFS服务器的相关客户端的数据</li>
+</ul>
+<p><br></p>
+<p><strong>exportfs 命令 - 维护导出的NFS文件系统的表</strong><br>语法参数<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 语法</span></span><br><span class="line">exportfs [-aruv]</span><br><span class="line">/usr/sbin/exportfs [-avi] [-o options,..] [client:/path ..]</span><br><span class="line">/usr/sbin/exportfs -r [-v]</span><br><span class="line">/usr/sbin/exportfs [-av] -u [client:/path ..]</span><br><span class="line">/usr/sbin/exportfs [-v]</span><br><span class="line">/usr/sbin/exportfs -f</span><br><span class="line">/usr/sbin/exportfs -s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数</span></span><br><span class="line">-a:全部挂载或卸载</span><br><span class="line">-r:重新挂载/etc/exports配置文件中的信息</span><br><span class="line">-u:卸载某一目录</span><br><span class="line">-v:将内容显示输出</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 常用实例</span></span><br><span class="line"><span class="comment"># 将添加/etc/exports中列出的所有目录和/etc/exports.下的/etc/exports.d 到/var/lib/nfs/etab</span></span><br><span class="line">exportfs -av</span><br><span class="line"><span class="comment"># 修改配置文件后重新加载</span></span><br><span class="line">exportfs -r</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将/usr/tmp目录导出到django主机上，允许来自客户端的不安全的文件锁定请求:</span></span><br><span class="line">exportfs -o insecure_locks django:/usr/tmp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取消导出/usr/tmp目录:</span></span><br><span class="line">exportfs -u django:/usr/tmp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 取消导出/etc/exports和/etc/exports.d下面文件中列出的所有导出 </span></span><br><span class="line">exportfs -au</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将/usr/tmp目录导出到IPv6链接-本地客户端:</span></span><br><span class="line">exportfs [fe80::]/64:/usr/tmp</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>showmount 命令 - 显示NFS服务器的挂载信息</strong><br>描述:showmount查询远程主机上的mount守护进程，以获取关于该机器上NFS服务器状态的信息。由于没有选项showmount列出了从该主机装载的nfs共享目录。showmount的输出被设计成好像是通过sort -u处理的。</p>
+<p>基础语法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 语法</span></span><br><span class="line">showmount [-ae] [hostname|IP]</span><br><span class="line">showmount [ -adehv ] [ --all ] [ --directories ] [ --exports ] [ --<span class="built_in">help</span> ] [ --version ] [ host ]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数</span></span><br><span class="line">-a,--all         <span class="comment">#以host:dir格式列出客户端主机名或IP地址和挂载的目录(一定可靠)</span></span><br><span class="line">-d,--directories <span class="comment">#仅列出某些客户端挂载的目录。</span></span><br><span class="line">-e              <span class="comment">#显示指定NFS服务器的共享资源情况</span></span><br><span class="line">--no-headers    <span class="comment">#输出不带标题栏 Suppress the descriptive headings from the output.</span></span><br></pre></td></tr></table></figure></p>
+<p>常用实例<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.查看NFS共享资源的情况</span></span><br><span class="line"><span class="variable">$showmount</span> -e  <span class="comment"># 默认本机</span></span><br><span class="line"><span class="variable">$showmount</span> -e [127.0.0.1|192.168.1.12]</span><br><span class="line"><span class="comment"># Export list for WeiyiGeek:</span></span><br><span class="line"><span class="comment"># /mnt/nfs/k8slog 192.168.1.218,192.168.1.217,192.168.1.216</span></span><br><span class="line"><span class="comment"># /mnt/nfs/k8sapp 192.168.1.218,192.168.1.217,192.168.1.216</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.仅列出某些客户端挂载的目录。</span></span><br><span class="line"><span class="variable">$showmount</span> -d</span><br><span class="line"><span class="comment"># Directories on WeiyiGeek:</span></span><br><span class="line"><span class="comment"># /mnt/nfs/k8sapp</span></span><br><span class="line"><span class="comment"># /mnt/nfs/k8slog</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.客户端挂载情况</span></span><br><span class="line">All mount points on WeiyiGeek:</span><br><span class="line">192.168.1.216:/mnt/nfs/k8sapp</span><br><span class="line">192.168.1.216:/mnt/nfs/k8slog</span><br><span class="line">192.168.1.218:/mnt/nfs/k8sapp</span><br><span class="line">192.168.1.218:/mnt/nfs/k8slog</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="etc-exports"><a href="#etc-exports" class="headerlink" title="/etc/exports"></a>/etc/exports</h5><p>该配置文件中的格式：<code>&lt;输出目录&gt; [客户端1(权限)] [客户端2(权限)]</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- 输出目录:指定共享的文件目录</span><br><span class="line">- 客户端:指定可以访问共享资源的客户端</span><br><span class="line">  * 指定IP的方式：192.168.1.1</span><br><span class="line">  * 指定网段的方式：192.168.1.0/24或者192.168.1.0/255.255.255.0</span><br><span class="line">  * 指定主机名的方式：node1，但是这个主机名必须在记录在/etc/hosts文件内，需要能解析到对应的ip</span><br><span class="line">  * 通配符的方式：*表示所有的主机，*.bsmart.cn主机名通配</span><br><span class="line">- 权限: 指该主机对nfs服务目录的相应权限(下面详解)</span><br></pre></td></tr></table></figure></p>
+<p>Q:如果我们在启动NFS服务之后又修改了 exports 文件的话怎么办，是不是需要重新启动NFS服务才能使的这些配置生效?</p>
+<blockquote>
+<p>答案当然是否定的这样多麻烦我们有 exportfs 命令</p>
+</blockquote>
+<p><strong>权限说明:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 帮助文档</span></span><br><span class="line">man exportfs</span><br><span class="line"><span class="comment"># nosuid         # 选项是禁止 set-UID 程序</span></span><br><span class="line"><span class="comment"># noexec         # 选项是禁止直接执行其中的二进制文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 权限</span></span><br><span class="line">rw             <span class="comment"># 选项是指定权限读写</span></span><br><span class="line">ro             <span class="comment"># 选项是指定权限只读</span></span><br><span class="line">sync           <span class="comment"># 选项是指同步模式，内存中数据时时写入磁盘</span></span><br><span class="line">async          <span class="comment"># 选项是指不同步，把内存中数据定期写入磁盘中( 表示数据会先暂存于内存中，而非直接写入到硬盘中)</span></span><br><span class="line">root_squash    <span class="comment"># 选项是指定如果client以root用户连接上来的话，server端会将该用户转换为匿名用户进行访问。</span></span><br><span class="line">no_root_squash <span class="comment"># 选项是指定客户端采用root连接将不转换成匿名用户进行访问</span></span><br><span class="line">all_squash     <span class="comment"># 选项是指定无论client用什么账户连接上来，都会被转换成匿名用户</span></span><br><span class="line">no_all_squash  <span class="comment"># 选项是指定无论client用什么账户连接上来，都不会被转换成匿名用户</span></span><br><span class="line">anonuid=&lt;UID&gt;  <span class="comment"># 选项是指定匿名访问用户的本地用户UID，默认为nfsnobody（65534）</span></span><br><span class="line">anongid=&lt;GID&gt;  <span class="comment"># 选项是指定匿名访问用户的本地用户组GID，默认为nfsnobody（65534）</span></span><br><span class="line">secure（默认）  <span class="comment"># 选项是指定限制客户端只能从小于1024的tcp/ip端口连接服务器</span></span><br><span class="line">insecure       <span class="comment"># 选项是指定允许客户端从大于1024的tcp/ip端口连接服务器</span></span><br><span class="line">wdelay（默认）  <span class="comment"># 选项是指定检查是否有相关的写操作，如果有则将这些写操作一起执行(提高效率)</span></span><br><span class="line">no_wdelay       <span class="comment"># 选项是指定若有写操作则立即执行，应与sync配合使用；</span></span><br><span class="line">subtree_check（默认） <span class="comment"># 选项是指定若输出目录是一个子目录，则nfs服务器将检查其父目录的权限；</span></span><br><span class="line">no_subtree_check      <span class="comment"># 选项是指定即使输出目录是一个子目录，nfs服务器也不检查其父目录的权限，(提高效率)；</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 待补充</span></span><br><span class="line">hide          </span><br><span class="line">nohide <span class="comment"># 选项仅适用于NFSv2和NFSv3，当使用NFSv4时此选项不相关由于NFSv4从不隐藏下级文件系统。通常如果服务器导出两个文件系统，其中一个挂载在另一个上，然后客户端必须挂载显式地访问这两个文件系统。如果它只是挂载父节点，它将看到其他文件系统挂载位置的空目录。文件系统是“隐藏的”。在文件系统上设置nohide选项会使文件系统不被隐藏，并提供适当的autho‐rised客户端将能够从父文件系统移动到该文件系统而不注意更改。然而一些NFS客户端不能很好地处理这种情况，例如它是所有‐一个文件系统中的两个文件具有相同的inode编号。nohide选项目前仅对单个主机导出有效。它并不可靠使用网络组、子网或通配符导出。这个选项在某些情况下非常有用，但是应该谨慎使用，而且只能使用在确认客户系统能有效应对情况后</span></span><br><span class="line"></span><br><span class="line">crossmnt   <span class="comment"># 该选项与nohide类似但它使客户机能够访问所有文件系统挂载在标记为crossmnt的文件系统上；因此当子文件系统“B”挂载在父文件系统“a”上时，在“a”上设置crossmnt与在B上设置“nohide”具有相似的效果。如果之前设置过，nocrossmnt选项可以明确地禁用crossmnt</span></span><br><span class="line">nocrossmnt</span><br><span class="line"></span><br><span class="line">fsid=num|root|uuid  <span class="comment">#NFS需要能够标识它导出的每个文件系统,而通常它将为文件系统使用UUID(如果文件系统有这样的东西)或保存文件系统的设备的设备号(如果文件系统存储在设备上)。 由于不是所有文件系统都存储在设备上也不是所有文件系统都有uuid所以需要制定该选项显示的告诉; 对于NFSv4有一个特殊的文件系统，它是所有导出的文件系统的根,使用fsid=root或fsid=0指定的两者的意思完全相同。</span></span><br><span class="line"><span class="comment"># acl</span></span><br><span class="line"><span class="comment"># no_pnfs</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># RPCSEC_GSS security 选项:您可以使用特殊的字符串“gss/krb5”，“gss/krb5i”，或“gss/krb5p”来限制访问客户端的rpcsec_gss安全，使用“sec=”导出选项:</span></span><br><span class="line">sec=sys  <span class="comment">#后面是一个以冒号分隔的安全样式列表，它限制了对使用这些样式的客户机的导出，可用的安全样式包含sys  (the  default--no  crypto‐ graphic  security),  krb5  (authentication only), krb5i (integrity protection), and krb5p (privacy protection)</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="var-lib-nfs-etab"><a href="#var-lib-nfs-etab" class="headerlink" title="/var/lib/nfs/etab"></a>/var/lib/nfs/etab</h5><p>描述:exports配置文件中都有默认权限配置可通过etab文件查看，该文件中完整的记录了NFS共享资源的所有配置;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$cat</span> /var/lib/nfs/etab</span><br><span class="line">/nfs/share      *(rw,sync,wdelay,hide,nocrossmnt,secure,no_root_squash,no_all_squash,no_subtree_check,secure_locks,acl,no_pnfs,anonuid=65534,anongid=65534,sec=sys,rw,secure,no_root_squash,no_all_squash)</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h4 id="0x03-NFS安全配置"><a href="#0x03-NFS安全配置" class="headerlink" title="0x03 NFS安全配置"></a>0x03 NFS安全配置</h4><p>描述:在Linux系统中的文件都有访问权限，可以指定用户访问，那么我通过NFS访问文件权限是如何设定的呢?</p>
+<p>比如我再NFS server上有一个文件的属主与属组都是weiyigeek,那我再client端普通用户weiyi访问这个文件，可以做修改吗？再比如如果是使用root用户访问这个文件，可以做修改吗？</p>
+<p>NFS文件系统的权限访问的原则是：<code>服务器端会以客户端的用户UID与GID等身份来尝试读取服务器端的文件系统</code></p>
+<p>以下是NFS是如何判断是否一个文件可写的步骤:</p>
+<ul>
+<li>客户端以user1这个账户访问NFS目录，实际是以client端的user1的UID以及GID进行访问的</li>
+<li>NFS server收到客户端访问请求中的UID、GID，并根据这个UID在server端所在的服务器找到相应的用户，以该用户的权限进行访问</li>
+<li>如果找不到对应UID的用户，则NFS server端会将连接的身份转换为匿名用户的连接</li>
+<li>根据/etc/exports配置文件判断该目录是否有写入权限只有在满足以下条件客户端才可以写入NFS是共享目录：<ul>
+<li>1、用户有写入权限 </li>
+<li>2、exports设置为有写入权限 </li>
+<li>3、文件具有写入权限</li>
+</ul>
+</li>
+</ul>
+<p>根据上述步骤的话，可以想到一种情况，如果我client端是通过root账户连接的，那我是不是对所有的文件具有可读、可写权限；在exports文件中，设定权限的时候可以指定<code>no_root_squash、root_squash、all_squash</code>，这三个就是控制我client连接上来的用户，最终在server端会以哪个用户进行访问, 对应着共享目录的权限。</p>
+<p>Tips: nfs匿名用户<code>nfsnobody:x:65534:65534:Anonymous NFS User:/var/lib/nfs:/sbin/nologin</code></p>
+<p><br/></p>
+<p><strong>NFS安全配置流程:</strong></p>
+<ul>
+<li><p>1.限制Client访问限制</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 1. 修改 /etc/hosts.allow 和 /etc /hosts.deny 来限制客户机数量。</span></span><br><span class="line">$/etc/hosts.allow</span><br><span class="line">portmap: 192.168.0.0/255.255.255.0 : allow</span><br><span class="line">portmap: 140.116.44.125 : allow</span><br><span class="line"></span><br><span class="line">$/etc/hosts.deny</span><br><span class="line">portmap: ALL : deny</span><br><span class="line"></span><br><span class="line"><span class="comment">## 2.设置哪些客户端可以访问共享目录(一定不能是 * 号 通配符)</span></span><br><span class="line"><span class="variable">$vi</span> /etc/exports</span><br><span class="line">/nfs/share 192.168.1.2(rw,no_root_squash) 192.168.1.3(rw,no_root_squash)</span><br><span class="line"></span><br><span class="line"><span class="comment">## 3.防火墙访问限制(RPC 111/NFS 2049)使其除了NFS Client端可以看到共享资源外其它都不行;</span></span><br><span class="line"><span class="comment"># 下面这种方式在正式环境是不行得(所有的IP都能够访问)</span></span><br><span class="line"><span class="comment"># firewall-cmd --permanent --zone=public --add-service=nfs</span></span><br><span class="line"><span class="comment"># firewall-cmd --permanent --zone=public --add-service=mountd</span></span><br><span class="line"><span class="comment"># firewall-cmd --permanent --zone=public --add-service=rpc-bind</span></span><br><span class="line"><span class="comment"># firewall-cmd --reload</span></span><br><span class="line"><span class="comment"># 正确的做法</span></span><br><span class="line">firewall-cmd --add-rich-rule <span class="string">"rule family=ipv4 source address=192.168.1.2 service name='nfs' accept"</span></span><br><span class="line">firewall-cmd --add-rich-rule <span class="string">"rule family=ipv4 source address=192.168.1.2 service name='mountd' accept"</span></span><br><span class="line">firewall-cmd --add-rich-rule <span class="string">"rule family=ipv4 source address=192.168.1.2 service name='rpc-bind'accept"</span></span><br><span class="line"><span class="comment"># 或者由于rpc和nfs除了使用111和2049端口号外还会部分端口号是动态的下面可能行不通</span></span><br><span class="line"><span class="comment"># firewall-cmd --add-rich-rule 'rule family=ipv4 source address=192.168.1.3  port port="111" protocol="tcp" accept'</span></span><br><span class="line"><span class="comment"># firewall-cmd --add-rich-rule 'rule family=ipv4 source address=192.168.1.3  port port="26-1024" protocol="tcp" accept'</span></span><br><span class="line"><span class="comment"># firewall-cmd --add-rich-rule 'rule family=ipv4 source address=192.168.1.3  port port="2049" protocol="tcp" accept'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 对于iptables的社指定ip开放所有端口-iptables方式配置</span></span><br><span class="line">iptables -A INPUT -s 192.168.1.2 -p all -j ACCEPT</span><br><span class="line">service iptables save</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">## 4.防火墙不关闭，开放指定端口号</span></span><br><span class="line"><span class="comment">## 由于rpc和nfs除了使用111和2049端口号外，还会部分端口号是动态的，故需要先配置为静态端口</span></span><br><span class="line"><span class="variable">$vim</span> /etc/sysconfig/nfs  <span class="comment">#CentOS系统 末尾增加如下静态端口</span></span><br><span class="line">RQUOTAD_PORT=30001</span><br><span class="line">LOCKD_TCPPORT=30002</span><br><span class="line">LOCKD_UDPPORT=30002</span><br><span class="line">MOUNTD_PORT=30003</span><br><span class="line">STATD_PORT=30004</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># firewall方式配置开放端口111,2049,30001,30002,30003,30004</span></span><br><span class="line">firewall-cmd --zone=public --add-port=111/tcp --add-port=111/udp --add-port=2049/tcp --add-port=2049/udp --add-port=30001/tcp --add-port=30001/udp --add-port=30002/tcp --add-port=30002/udp --add-port=30003/tcp --add-port=30003/udp --add-port=30004/tcp --add-port=30004/udp --permanent</span><br><span class="line">firewall-cmd --reload</span><br><span class="line"></span><br><span class="line"><span class="comment"># iptables方式配置开放端口111,2049,30001,30002,30003,30004</span></span><br><span class="line">iptables -I INPUT -s 192.168.1.101 -p tcp -m multiport --dports 111,2049,30001,30002,30003,30004 -m comment --comment <span class="string">"NFS服务"</span> -j ACCEPT</span><br><span class="line">service iptables save</span><br><span class="line">systemctl restart iptables.service</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>2.共享的文件目录权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 1. 配置 nosuid 和 noexec</span></span><br><span class="line"><span class="comment"># SUID (Set User ID) 或 SGID (Set Group ID) 程序可以让普通用户以超过自己权限来执行。很多 SUID/SGID 可执行程序是必须的，但也可能被一些恶意的本地用户利用，获取本不应有的权限。</span></span><br><span class="line"><span class="comment">#尽量减少所有者是 root，或是在 root 组中却拥有 SUID/SGID 属性的文件。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#如禁止 set-UID 程序与直接执行其中的二进制文件在 NFS 服务器上运行，可以在 /etc/exports 加入一行</span></span><br><span class="line">/www www.abc.com(rw, root_squash, nosuid, noexec)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li>3.密码认证<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## NFS V2 / V3 版本</span></span><br><span class="line"><span class="variable">$useradd</span> nfsuser -s /sbin/nologin  <span class="comment"># 创建nfs认证用户</span></span><br><span class="line">passwd nfsuser</span><br><span class="line"><span class="variable">$chown</span> -R nfsuser:nfsuser /home/upload <span class="comment">#建立的共享文件目录需要采用nfsuser共享用户权限</span></span><br><span class="line"><span class="variable">$cat</span> /etc/passwd|grep nfs          <span class="comment"># 查看用户的uid与guid</span></span><br><span class="line">nfsuser:x:1001:1001::/home/nfsuser:/sbin/nologin</span><br><span class="line"><span class="variable">$vi</span> /etc/exports</span><br><span class="line">/home/upload  192.168.8.0/24(rw,all_squash,anonuid=1001,anongid=1001)  <span class="comment">#设置NFS配置文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## NFS V4 采用Gss/Kerberos进行认证(后续补充)</span></span><br><span class="line">/srv/nfs4 gss/krb5(rw,sync,fsid=0,crossmnt,no_subtree_check)</span><br><span class="line">mount.nfs4 192.168.1.2:/nfsdata /mnt/nfs <span class="comment">#客户端</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<h4 id="0x04-入坑出坑"><a href="#0x04-入坑出坑" class="headerlink" title="0x04 入坑出坑"></a>0x04 入坑出坑</h4><p><strong>问题1.当NFS服务器出现网络故障，造成NFS-Client使用df -h或其它命令一直卡着不动时，解决方法如下</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$umount</span> -lf /data</span><br><span class="line"><span class="variable">$df</span> -h</span><br><span class="line">文件系统                 容量  已用  可用 已用% 挂载点</span><br><span class="line">/dev/mapper/centos-root   20G  1.2G   18G    6% /</span><br><span class="line">devtmpfs                 907M     0  907M    0% /dev</span><br><span class="line">tmpfs                    918M     0  918M    0% /dev/shm</span><br><span class="line">tmpfs                    918M  9.0M  910M    1% /run</span><br><span class="line">tmpfs                    918M     0  918M    0% /sys/fs/cgroup</span><br><span class="line">/dev/sda1                497M  138M  359M   28% /boot</span><br><span class="line">tmpfs                    184M     0  184M    0% /run/user/0</span><br></pre></td></tr></table></figure><br>Tips:<code>/data请手动打，不要使用Tab键自动补全，否则又会卡死</code></p>
+<hr>
+<h4 id="0x05-参考连接"><a href="#0x05-参考连接" class="headerlink" title="0x05 参考连接"></a>0x05 参考连接</h4><ul>
+<li>Kerberos+LDAP+NFSv4 实现单点登录(中):<a href="https://blog.51cto.com/13752418/2443823" target="_blank" rel="noopener">https://blog.51cto.com/13752418/2443823</a></li>
+</ul>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-10-10T02:37:44.129Z" itemprop="dateUpdated">2020-10-10 10:37:44</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/5/104.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/5/104.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/NFS/" rel="tag">NFS</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/5/104.html&title=《NFS网络文件系统基础配置与使用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/5/104.html&title=《NFS网络文件系统基础配置与使用》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/5/256.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Windows-Server基础安装配置</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/5/223.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">IIS服务配置及优化</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-NFS安装配置"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 NFS安装配置</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-NFS配置介绍"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 NFS配置介绍</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-NFS安全配置"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 NFS安全配置</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-入坑出坑"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 入坑出坑</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x05-参考连接"><span class="post-toc-number">6.</span> <span class="post-toc-text">0x05 参考连接</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/5/104.html&title=《NFS网络文件系统基础配置与使用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/5/104.html&title=《NFS网络文件系统基础配置与使用》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABvElEQVR42u3aS27DMAwFwNz/0um2QGvnUZRYFxitgsSwRlkQ4uf1itc7Xj+fv3/b68TCxcVtc9e2v3/++zP3b8gNuLi489yriHH1zNU3STi7p3+w4eLiPpibH6Ma1HBxcf8vt39ZwcXFfT43SX6qYejq/UO5Gi4uboObVynPfT5S38XFxV3ivosrCUy7iqS/7IKLizvCzQNKv4u7dn3BxcX9W27eQM1HK/LjJYESFxd3hrtW2ij/H3ExJbqR4eLijnCTIYm1Ua29oQ0XF/cJ3LWyafXalP9luLi4M9y1VuhaAnM/flFOn3BxcY9x8wGLamirjnBFAREXF3eEu1YQKbw6PkYeTHFxcU9zO1uutV035Gq4uLiHuXtHJTrl0eq1CRcX9zQ3b5F2cNXWy4fkBxcXd5xbHdLKyx/VvS5zNVxc3EHuhipLIzWKbmG4uLiHue/i6gS+DQNbuLi4I9y1Qmf1136DtnwYXFzcNjcPOnmZo3rIwvAHLi7uIDcPNPmFppyH5bkaLi7uw7hriVPnkLi4uM/nVjcoT3/cC3FxcQe5/eJmp6GSt29xcXFnuHuLm9Xya3kwCxcX9yz3Cy5X4jHqYff/AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

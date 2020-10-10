@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>Linux系统异常排查实践与总结 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="异常排查">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Linux系统异常排查实践与总结</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Linux系统异常排查实践与总结</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-01-27T05:34:30.000Z" itemprop="datePublished" class="page-time">
+  2020-01-27
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/SystemOperation/">SystemOperation</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Linux/运维实践/异常排错/异常排错实践方法与总结"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Linux系统异常排查实践与总结</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-01-27 13:34:30" datetime="2020-01-27T05:34:30.000Z"  itemprop="datePublished">2020-01-27</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/SystemOperation/">SystemOperation</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h4><p>描述:本文章主要针对于本人日常运维所遇到的一些性能问题并进行总结解决思路流程;</p>
+<p>无论是 CPU 使用率，还是平均负载，都只是反映系统健康状态的度量指标，而不是问题的根因;</p>
+<p>因此它们的价值主要体现在两个方面：</p>
+<ul>
+<li>一是综合反映当前系统的健康程度，结合监控告警产品，实现快速响应；</li>
+<li>二是初步定位问题方向，缩小排查范围，降低故障恢复时间。</li>
+</ul>
+<p>比如当 CPU iowait 高时，应优先排查磁盘 I/O；当 CPU steal 高时，就优先排查宿主机状态。</p>
+<hr><br><br>#### 0x01 Linux信息收集<br>描述:当我们对异常系统进行处理，必须先进行主机基础信息的收集，以防出错后可以更快的恢复或者求助;<br><br><br>CentOS系列:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"系统版本:<span class="variable">$(cat /etc/redhat-release)</span>"</span> </span><br><span class="line"><span class="built_in">echo</span> <span class="string">"内核信息:<span class="variable">$(uname -a)</span>"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"SeLinux values 设置情况:<span class="variable">$(getenforce)</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"用户信息:\n<span class="variable">$(getent passwd)</span>"</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"密码信息:\n<span class="variable">$(getent shadow)</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"网络信息:\n<span class="variable">$(ip addr show)</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"CPU信息:<span class="variable">$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c)</span>"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"物理CPU数:<span class="variable">$(cat /proc/cpuinfo |grep 'physical id'|sort |uniq|wc -l)</span>"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"逻辑CPU数:<span class="variable">$(cat /proc/cpuinfo |grep "processor"|wc -l)</span>"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"CPU核心数:<span class="variable">$(cat cat /proc/cpuinfo |grep "cores"|uniq)</span>"</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"CPU综合信息:\n<span class="variable">$(lscpu)</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"磁盘UUID信息:\n<span class="variable">$(blkid)</span>"</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"磁盘信息:\n<span class="variable">$(fdisk -l | egrep '/dev|Disk')</span>"</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"磁盘分区信息:\n<span class="variable">$(lsblk)</span>"</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"磁盘空间信息:\n<span class="variable">$(df -h)</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"挂载信息:\n<span class="variable">$(mount -l)</span>"</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"挂载配置文件:\n<span class="variable">$(cat /etc/fstab | egrep -v '#|^$')</span>"</span></span><br></pre></td></tr></table></figure><br><br><br><br>CPU:通过下面的脚本来打印出当前机器的socket，core和thread的数量<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Simple print cpu topology</span></span><br><span class="line"><span class="comment"># Author: kodango</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> get_nr_processor()</span><br><span class="line">&#123;</span><br><span class="line">    grep <span class="string">'^processor'</span> /proc/cpuinfo | wc -l</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> get_nr_socket()</span><br><span class="line">&#123;</span><br><span class="line">    grep <span class="string">'physical id'</span> /proc/cpuinfo | awk -F: <span class="string">'&#123;</span></span><br><span class="line"><span class="string">            print $2 | "sort -un"&#125;'</span> | wc -l</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> get_nr_siblings()</span><br><span class="line">&#123;</span><br><span class="line">    grep <span class="string">'siblings'</span> /proc/cpuinfo | awk -F: <span class="string">'&#123;</span></span><br><span class="line"><span class="string">            print $2 | "sort -un"&#125;'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> get_nr_cores_of_socket()</span><br><span class="line">&#123;</span><br><span class="line">    grep <span class="string">'cpu cores'</span> /proc/cpuinfo | awk -F: <span class="string">'&#123;</span></span><br><span class="line"><span class="string">            print $2 | "sort -un"&#125;'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">'===== CPU Topology Table ====='</span></span><br><span class="line"><span class="built_in">echo</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">'+--------------+---------+-----------+'</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">'| Processor ID | Core ID | Socket ID |'</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">'+--------------+---------+-----------+'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> line; <span class="keyword">do</span></span><br><span class="line">    <span class="keyword">if</span> [ -z <span class="string">"<span class="variable">$line</span>"</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">printf</span> <span class="string">'| %-12s | %-7s | %-9s |\n'</span> <span class="variable">$p_id</span> <span class="variable">$c_id</span> <span class="variable">$s_id</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">'+--------------+---------+-----------+'</span></span><br><span class="line">        <span class="built_in">continue</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">echo</span> <span class="string">"<span class="variable">$line</span>"</span> | grep -q <span class="string">"^processor"</span>; <span class="keyword">then</span></span><br><span class="line">        p_id=`<span class="built_in">echo</span> <span class="string">"<span class="variable">$line</span>"</span> | awk -F: <span class="string">'&#123;print $2&#125;'</span> | tr -d <span class="string">' '</span>`</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">echo</span> <span class="string">"<span class="variable">$line</span>"</span> | grep -q <span class="string">"^core id"</span>; <span class="keyword">then</span></span><br><span class="line">        c_id=`<span class="built_in">echo</span> <span class="string">"<span class="variable">$line</span>"</span> | awk -F: <span class="string">'&#123;print $2&#125;'</span> | tr -d <span class="string">' '</span>`</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">echo</span> <span class="string">"<span class="variable">$line</span>"</span> | grep -q <span class="string">"^physical id"</span>; <span class="keyword">then</span></span><br><span class="line">        s_id=`<span class="built_in">echo</span> <span class="string">"<span class="variable">$line</span>"</span> | awk -F: <span class="string">'&#123;print $2&#125;'</span> | tr -d <span class="string">' '</span>`</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">done</span> &lt; /proc/cpuinfo</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span></span><br><span class="line"></span><br><span class="line">awk -F: <span class="string">'&#123;</span></span><br><span class="line"><span class="string">    if ($1 ~ /processor/) &#123;</span></span><br><span class="line"><span class="string">        gsub(/ /,"",$2);</span></span><br><span class="line"><span class="string">        p_id=$2;</span></span><br><span class="line"><span class="string">    &#125; else if ($1 ~ /physical id/)&#123;</span></span><br><span class="line"><span class="string">        gsub(/ /,"",$2);</span></span><br><span class="line"><span class="string">        s_id=$2;</span></span><br><span class="line"><span class="string">        arr[s_id]=arr[s_id] " " p_id</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">END&#123;</span></span><br><span class="line"><span class="string">    for (i in arr)</span></span><br><span class="line"><span class="string">        printf "Socket %s:%s\n", i, arr[i];</span></span><br><span class="line"><span class="string">&#125;'</span> /proc/cpuinfo</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">'===== CPU Info Summary ====='</span></span><br><span class="line"><span class="built_in">echo</span></span><br><span class="line"></span><br><span class="line">nr_processor=`get_nr_processor`</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Logical processors: <span class="variable">$nr_processor</span>"</span></span><br><span class="line"></span><br><span class="line">nr_socket=`get_nr_socket`</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Physical socket: <span class="variable">$nr_socket</span>"</span></span><br><span class="line"></span><br><span class="line">nr_siblings=`get_nr_siblings`</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Siblings in one socket: <span class="variable">$nr_siblings</span>"</span></span><br><span class="line"></span><br><span class="line">nr_cores=`get_nr_cores_of_socket`</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Cores in one socket: <span class="variable">$nr_cores</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">let</span> nr_cores*=nr_socket</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Cores in total: <span class="variable">$nr_cores</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$nr_cores</span>"</span> = <span class="string">"<span class="variable">$nr_processor</span>"</span> ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Hyper-Threading: off"</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Hyper-Threading: on"</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">'===== END ====='</span></span><br></pre></td></tr></table></figure><br><br><br></hr>
+
+<h4 id="0x02-异常解决"><a href="#0x02-异常解决" class="headerlink" title="0x02 异常解决"></a>0x02 异常解决</h4><p>如何排查用户态 CPU 使用率高？</p>
+<p><strong>问题1.业务服务器 CPU 占用负载高问题</strong><br>用户态 CPU 使用率反映了应用程序的繁忙程度，通常与我们自己写的代码息息相关。因此，当你在做应用发布、配置变更或性能优化时，如果想定位消耗 CPU 最多的 Java 代码，可以遵循如下思路：</p>
+<p>排查思路:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.定位高负载进程 pid 通过观察load average，以及负载评判标准确认服务器是否存在负载较高的情况；</span></span><br><span class="line"><span class="variable">$top</span> -n 1</span><br><span class="line"><span class="comment">#2.找到相关负载进程的子线程PID</span></span><br><span class="line"><span class="variable">$top</span> -Hp [PID]</span><br><span class="line"><span class="comment">#3.将线程PID转换为 16进制，为后面查找 jstack 日志做准备</span></span><br><span class="line"><span class="built_in">printf</span> <span class="string">"0x%x"</span> [PID]  <span class="comment">#比如0x431</span></span><br><span class="line"><span class="comment">#4.jstack日志异常查询</span></span><br><span class="line">jstack 1040|vim +/0x431 -</span><br><span class="line"><span class="comment">#5.定位具体的异常业务使用 pwdx 命令根据 pid 找到业务进程路径</span></span><br><span class="line">pwdx [PID]</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=Linux系统异常排查实践与总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200122142247.png" target="_blank" title="WeiyiGeek.CPU占用率高" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200122142247.png" alt="WeiyiGeek.CPU占用率高" title="" class=""></a>
+                <p>WeiyiGeek.CPU占用率高</p>
+            </figure></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-10-10T02:37:46.047Z" itemprop="dateUpdated">2020-10-10 10:37:46</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2020/1/205.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/1/205.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BC%82%E5%B8%B8%E6%8E%92%E6%9F%A5/" rel="tag">异常排查</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/1/205.html&title=《Linux系统异常排查实践与总结》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/1/205.html&title=《Linux系统异常排查实践与总结》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/1/112.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">NTP服务器时间同步设置</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/1/182.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">系统与应用异常定位诊断</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-异常解决"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x02 异常解决</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/1/205.html&title=《Linux系统异常排查实践与总结》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/1/205.html&title=《Linux系统异常排查实践与总结》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABy0lEQVR42u3aQW4DIQwF0Nz/0qnUbVr0bQMdVY9VpEzIm41lvnm94vX+Xp+f19/mT25euLi4Y+57uX57Zg1aP5ns//kMLi7ufW5SvPLXyHfLDbi4uM/kJq3JmoWLi/tfueumJG+ecHFxn8/Nt1tvXT1KHTyr4eLiDriTwHTX50v5Li4u7ngqkRSUPCKpFq8fdsPFxb3CrY5JqnUmOWIlu0V/g4uLu4k7CTuSCKM3go36LFxc3IvcvKxUm5gNg1tcXNwr3PxnScDRK4Ll0oaLi3uFm/cS+TB11wAmouPi4h7m9pqSPEIdjU5xcXGvcPMtkm/XDc2kzOHi4t7k9uKJcpDROvaMzmq4uLgHuMkfJ63M/LZVVH1xcXEPcMtNRnG4cuL8gouLe47bCziqFzXyA0+h4uLi4l7hTqKN/ACTD12iQAQXF/cAtzdEqQYrhT4r7mdwcXHPcd/F1cP1ihouLu5fcas3H6qxSHUEW85ycHFxj3F7xSt5gV1D1vLkBxcXdxM3CUwnuF7pbI5XcXFxL3Krl6iq5S+6xoGLi/tIbq9UVcOR0T0RXFzcTdz88JOEI/kQpdwk4eLiXuH2AtP1AakXjlTjVFxc3APcL+jSmnlMq/7CAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

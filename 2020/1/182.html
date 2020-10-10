@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>系统与应用异常定位诊断 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="Linux异常排查命令">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>系统与应用异常定位诊断</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">系统与应用异常定位诊断</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-01-27T05:34:30.000Z" itemprop="datePublished" class="page-time">
+  2020-01-27
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux%E5%91%BD%E4%BB%A4/">Linux命令</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux%E5%91%BD%E4%BB%A4/SystemOperation/">SystemOperation</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Linux/常用命令/诊断异常类命令/系统与应用异常定位诊断"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">系统与应用异常定位诊断</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-01-27 13:34:30" datetime="2020-01-27T05:34:30.000Z"  itemprop="datePublished">2020-01-27</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux%E5%91%BD%E4%BB%A4/">Linux命令</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux%E5%91%BD%E4%BB%A4/SystemOperation/">SystemOperation</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="前言简述"><a href="#前言简述" class="headerlink" title="前言简述"></a>前言简述</h4><p>在运维的日常工作中，故障处理和问题诊断是个主要的内容，也是必备的技能</p>
+<h4 id="0x00-系统诊断"><a href="#0x00-系统诊断" class="headerlink" title="0x00 系统诊断"></a>0x00 系统诊断</h4><h5 id="strace-命令-可用于诊断、调试和教学的Linux用户空间跟踪器"><a href="#strace-命令-可用于诊断、调试和教学的Linux用户空间跟踪器" class="headerlink" title="strace 命令 - 可用于诊断、调试和教学的Linux用户空间跟踪器"></a>strace 命令 - 可用于诊断、调试和教学的Linux用户空间跟踪器</h5><p>描述:官方介绍 strace是一个可用于诊断、调试和教学的Linux用户空间跟踪器。我们用它来<code>监控用户空间进程和内核的交互</code>，比如系统调用、信号传递、进程状态变更等。其底层的实现方式是<code>基于ptrace特性</code>;</p>
+<p>Q:strace究竟能做什么呢?</p>
+<blockquote>
+<p>它作为一种动态跟踪工具，能够帮助运维高效地定位进程和服务故障。它像是一个侦探，通过系统调用的蛛丝马迹，告诉你异常的真相。<br>它能够打开应用进程的这个黑盒，通过系统调用的线索告诉你进程大概在干嘛。</p>
+</blockquote>
+<p>Q:在进入strace使用的主题之前，我们的先理解什么是系统调用?</p>
+<blockquote>
+<p>按维基百科中的解释，在计算机中，系统调用（英语：system call），又称为系统呼叫，指运行在用户空间的程序向操作系统内核请求需要更高权限运行的服务。<br>系统调用提供用户程序与操作系统之间的接口,在Linux系统上应用代码<code>通过glibc库封装的函数</code>间接使用系统调用。</p>
+</blockquote>
+<p>操作系统的进程空间分为用户空间和内核空间：</p>
+<ul>
+<li>1.操作系统内核直接运行在硬件上，提供设备管理、内存管理、任务调度等功能。</li>
+<li>2.用户空间通过API请求内核空间的服务来完成其功能——内核提供给用户空间的这些API, 就是系统调用。</li>
+</ul>
+<p>Linux内核目前有300多个系统调用，详细的列表以通过syscalls手册页查看,系统调用主要分为几类：</p>
+<ul>
+<li>文件和设备访问类 比如open/close/read/write/chmod等</li>
+<li>进程管理类 fork/clone/execve/exit/getpid等</li>
+<li>信号类 signal/sigaction/kill 等</li>
+<li>内存管理 brk/mmap/mlock等</li>
+<li>进程间通信IPC shmget/semget * 信号量，共享内存，消息队列等</li>
+<li>网络通信 socket/connect/sendto/sendmsg 等</li>
+</ul>
+<p>Syntax &amp; Parameter:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">yum install -y strace</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数</span></span><br><span class="line">strace [ -dffhiqrtttTvxx ] [ -acolumn ] [ -eexpr ] ... [ -ofile ] [-ppid ] ... [ -sstrsize ] [ -uusername ] [ -Evar=val ] ... [ -Evar ]... [ <span class="built_in">command</span> [ arg ... ] ]</span><br><span class="line">strace -c [ -eexpr ] ... [ -Ooverhead ] [ -Ssortby ] [ <span class="built_in">command</span> [ arg... ] ]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数:</span></span><br><span class="line">-c 统计每一系统调用的所执行的时间,次数和出错的次数等. </span><br><span class="line">-d 输出strace关于标准错误的调试信息. </span><br><span class="line">-f 跟踪由fork调用所产生的子进程. </span><br><span class="line">-ff 如果提供-o filename,则所有进程的跟踪结果输出到相应的filename.pid中,pid是各进程的进程号. </span><br><span class="line">-F 尝试跟踪vfork调用.在-f时,vfork不被跟踪. </span><br><span class="line">-h 输出简要的帮助信息. </span><br><span class="line">-i 输出系统调用的入口指针. </span><br><span class="line">-q 禁止输出关于脱离的消息. </span><br><span class="line">-r 打印出相对时间关于,,每一个系统调用. </span><br><span class="line">-t 在输出中的每一行前加上时间信息. </span><br><span class="line">-tt 在输出中的每一行前加上时间信息,微秒级. </span><br><span class="line">-ttt 微秒级输出,以秒了表示时间. </span><br><span class="line">-T 显示每一调用所耗的时间. </span><br><span class="line">-v 输出所有的系统调用.一些调用关于环境变量,状态,输入输出等调用由于使用频繁,默认不输出. </span><br><span class="line">-V 输出strace的版本信息. </span><br><span class="line">-x 以十六进制形式输出非标准字符串 </span><br><span class="line">-xx 所有字符串以十六进制形式输出. </span><br><span class="line">-a column 设置返回值的输出位置.默认 为40. </span><br><span class="line">-e expr 指定一个表达式,用来控制如何跟踪.格式如下: [qualifier=][!]value1[,value2]... </span><br><span class="line">  <span class="comment">#qualifier只能是 trace,abbrev,verbose,raw,signal,read,write其中之一.value是用来限定的符号或数字.默认的 qualifier是 trace.感叹号是否定符号.</span></span><br><span class="line">  <span class="comment">#例如: -eopen等价于-e trace=open,表示只跟踪open调用.而-etrace!=open表示跟踪除了open以外的其他调用.有两个特殊的符号 all 和 none. </span></span><br><span class="line">  <span class="comment">#注意有些shell使用!来执行历史记录里的命令,所以要使用\\.</span></span><br><span class="line">-e trace=all  <span class="comment">#只跟踪指定的系统 调用.例如:-e trace=open,close,rean,write表示只跟踪这四个系统调用.默认的为set=all. </span></span><br><span class="line">-e trace=file <span class="comment">#只跟踪有关文件操作的系统调用. </span></span><br><span class="line">-e trace=process  <span class="comment">#只跟踪有关进程控制的系统调用. 比如fork/exec/exit_group</span></span><br><span class="line">-e trace=network  <span class="comment">#跟踪与网络有关的所有系统调用. 比如socket/sendto/connect</span></span><br><span class="line">-e trace=signal <span class="comment">#跟踪所有与系统信号有关的系统调用. 比如kill/sigaction</span></span><br><span class="line">-e trace=desc  <span class="comment">#和文件描述符相关，比如write/read/select/epoll等</span></span><br><span class="line">-e trace=ipc     <span class="comment">#跟踪所有与进程通讯有关的系统调用 ，比如shmget等</span></span><br><span class="line">-e execve   <span class="comment">#跟踪某个脚本里面的执行程序</span></span><br><span class="line">-e abbrev= <span class="comment">#设定 strace输出的系统调用的结果集.-v 等与 abbrev=none.默认为abbrev=all. </span></span><br><span class="line">-e raw=   <span class="comment">#将指定的系统调用的参数以十六进制显示. </span></span><br><span class="line">-e signal= <span class="comment">#指定跟踪的系统信号.默认为all.如 signal=!SIGIO(或者signal=!io),表示不跟踪SIGIO信号. </span></span><br><span class="line">-e <span class="built_in">read</span>=  <span class="comment">#输出从指定文件中读出 的数据</span></span><br><span class="line">-e write= <span class="comment">#输出写入到指定文件中的数据.</span></span><br><span class="line">-o filename  <span class="comment">#将strace的输出写入文件filename </span></span><br><span class="line">-p pid  <span class="comment">#跟踪指定的进程pid. (可跟踪多个进程PID)</span></span><br><span class="line">-s strsize <span class="comment">#指定输出的字符串的最大长度.默认为32.文件名一直全部输出. </span></span><br><span class="line">-u username <span class="comment">#以username 的UID和GID执行被跟踪的命令</span></span><br><span class="line"></span><br><span class="line">它的两种运行模式:</span><br><span class="line">- 1.通过它启动要跟踪的进程(可以类似理解为沙箱进行程序运行分析) <span class="comment">#strace ls -lh /var/log/messages</span></span><br><span class="line">- 2.跟踪已经在运行的进程(在不中断进程执行的情况下理解它在干嘛) <span class="comment">#strace -p &lt;pid&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 0.简单的程序来演示strace的基本用法</span></span><br><span class="line"><span class="variable">$nano</span> hello.c</span><br><span class="line"><span class="comment">#include&lt;stdio.h&gt;</span></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">  int a=0;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"please input:\n"</span>);</span><br><span class="line">  scanf(<span class="string">"%d"</span>,&amp;a);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"%9d\n"</span>,a);                                                      </span><br><span class="line">  <span class="built_in">return</span> 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable">$gcc</span> hello.c &amp;&amp;  ./a.out</span><br><span class="line"><span class="comment"># please input:</span></span><br><span class="line"><span class="comment"># 123</span></span><br><span class="line"><span class="comment">#       123</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$strace</span> -s 2049 ./a.out</span><br><span class="line"><span class="comment"># 从下图输出中可以得出系统首先调用execve开始一个新的进行，接着进行些环境的初始化操作，最后停顿在”read(0,"上面,此时等待执行到了我们的scanf函数之中并且输入1024数字格式,在调用write函数将格式化后的数值"1024″输出到屏幕，最后调用exit_group退出进行，完成整个程序的执行过程。</span></span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=系统与应用异常定位诊断 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200726144348.png" target="_blank" title="WeiyiGeek.实例0" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200726144348.png" alt="WeiyiGeek.实例0" title="" class=""></a>
+                <p>WeiyiGeek.实例0</p>
+            </figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.跟踪nginx查看其启动时都访问了哪些文件</span></span><br><span class="line">strace -tt -T -f -e trace=file -o /data/<span class="built_in">log</span>/strace.log -s 1024 ./nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.跟踪已启动的nginx(pid=23489)进程</span></span><br><span class="line">strace -tt -T -v -f -e trace=file -o /data/<span class="built_in">log</span>/strace.log -s 1024 -p 23489</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.指定跟踪相关的系统调用这里监控所有的系统调用</span></span><br><span class="line"><span class="comment">#  跟踪28979进程的所有系统调用（-e trace=all），并统计系统调用的花费时间，以及开始时间（并以可视化的时分秒格式显示），最后将记录结果存在output.txt文件里面。</span></span><br><span class="line">strace -o output.txt -T -tt -e trace=all -p 28979</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.跟踪信号传递（此处还是以上面的hello.c代码与a.out为例）指定进程的pid号</span></span><br><span class="line">[root@terminal-1 ~]$ ./a.out  <span class="comment">#终端1 执行</span></span><br><span class="line"><span class="comment"># please input:</span></span><br><span class="line"><span class="comment"># 已终止</span></span><br><span class="line">[root@terminal-1 ~]$ strace -s 1024 -p 2225 <span class="comment">#终端2 跟踪进程信号</span></span><br><span class="line"><span class="comment"># strace: Process 2225 attached</span></span><br><span class="line"><span class="comment"># read(0, 0x7f9b2ab43000, 1024)           = ? ERESTARTSYS (To be restarted if SA_RESTART is set)</span></span><br><span class="line"><span class="comment"># --- SIGTERM &#123;si_signo=SIGTERM, si_code=SI_USER, si_pid=2277, si_uid=0&#125; ---</span></span><br><span class="line"><span class="comment">#+++ killed by SIGTERM +++             #关键点 捕捉到终端停止信号</span></span><br><span class="line">[root@terminal-1 ~]$ killall ./a.out  <span class="comment">#终端3 kill掉./a.out进程</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.系统调用统计通过使用参数-c能将进程所有的系统调用做一个统计分析;</span></span><br><span class="line">strace -c -o hello.txt ./a.out</span><br><span class="line"><span class="comment"># please input:</span></span><br><span class="line"><span class="comment"># 10247</span></span><br><span class="line"><span class="comment">#     10247</span></span><br><span class="line">cat hello.txt </span><br><span class="line">% time     seconds  usecs/call     calls    errors syscall</span><br><span class="line">------ ----------- ----------- --------- --------- ----------------</span><br><span class="line">  0.00    0.000000           0         2           <span class="built_in">read</span></span><br><span class="line">  0.00    0.000000           0         2           write</span><br><span class="line">  0.00    0.000000           0         2           open</span><br><span class="line">  0.00    0.000000           0         2           close</span><br><span class="line">  0.00    0.000000           0         4           fstat</span><br><span class="line">  0.00    0.000000           0         9           mmap</span><br><span class="line">  0.00    0.000000           0         4           mprotect</span><br><span class="line">  0.00    0.000000           0         1           munmap</span><br><span class="line">  0.00    0.000000           0         1           brk</span><br><span class="line">  0.00    0.000000           0         1         1 access</span><br><span class="line">  0.00    0.000000           0         1           execve</span><br><span class="line">  0.00    0.000000           0         1           arch_prctl</span><br><span class="line">------ ----------- ----------- --------- --------- ----------------</span><br><span class="line">100.00    0.000000                    30         1 total</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. 截断输出长度设置与限制跟踪特定的系统调用</span></span><br><span class="line">strace -f -s10 -o text.txt -e execve ./a.out &amp;&amp; cat text.txt</span><br><span class="line"><span class="comment"># please input:</span></span><br><span class="line"><span class="comment"># 1024</span></span><br><span class="line"><span class="comment">#      1024</span></span><br><span class="line"><span class="comment"># 2377  execve("./a.out", ["./a.out"], 0x7fff80272970 /* 26 vars */) = 0</span></span><br><span class="line"><span class="comment"># 2377  +++ exited with 0 +++</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 7. 系统调用计时，参数-T将每个系统所花费的时间打印出来</span></span><br><span class="line">strace -T -tt -o hello1.txt ./a.out &amp;&amp; cat hello1.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 8. 查看进程打开的文件进行过滤</span></span><br><span class="line">strace -e trace=file killall bt_uinfo_memcached 2&gt;&amp;1 | grep open | tail</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=系统与应用异常定位诊断 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200726150726.png" target="_blank" title="WeiyiGeek.实例7系统调用计时" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200726150726.png" alt="WeiyiGeek.实例7系统调用计时" title="" class=""></a>
+                <p>WeiyiGeek.实例7系统调用计时</p>
+            </figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 8.strace实战定位共享内存异常</span></span><br><span class="line"><span class="comment"># 有个服务启动时报错,错误日志大概告诉我们是获取共享内存出错通过strace看下</span></span><br><span class="line"><span class="comment"># shmget 267264 30097568: Invalid argument Can not get shm...exit!</span></span><br><span class="line">strace -tt -f -e trace=ipc ./a_mon_svr ../conf/a_mon_svr.conf <span class="comment"># 只跟踪和进程通信相关的系统调用。</span></span><br><span class="line"><span class="comment"># 输出结果:</span></span><br><span class="line"><span class="comment"># 22:46:36.351798 shmget(0x5feb, 12000, 0666) = 0</span></span><br><span class="line"><span class="comment"># 22:46:36.351939 shmat(0, 0, 0)          = ?</span></span><br><span class="line"><span class="comment"># Process 21406 attached</span></span><br><span class="line"><span class="comment"># 22:46:36.355439 shmget(0x41400, 30097568, 0666) = -1 EINVAL (Invalid argument)</span></span><br><span class="line"><span class="comment"># shmget 267264 30097568: Invalid argument</span></span><br><span class="line"><span class="comment"># Can not get shm...exit!</span></span><br><span class="line"></span><br><span class="line">从strace输出我们知道是shmget系统调用出错了errno是EINVAL。同样查询下shmget手册页搜索EINVAL的错误码的说明:</span><br><span class="line"><span class="comment"># EINVAL A new segment was to be created and size &lt; SHMMIN or size &gt; SHMMAX, or no new segment was to be created, a segment with given key existed, but size is greater than the size of that segment</span></span><br><span class="line">shmget设置EINVAL错误码的原因为下列之一：</span><br><span class="line">* 要创建的共享内存段比 SHMMIN小 (一般是1个字节)</span><br><span class="line">* 要创建的共享内存段比 SHMMAX 大 (内核参数kernel.shmmax配置)</span><br><span class="line">* 指定key的共享内存段已存在，其大小和调用shmget时传递的值不同。</span><br><span class="line"></span><br><span class="line">从strace输出看我们要连的共享内存key 0x41400, 指定的大小是30097568字节，明显与第1、2种情况不匹配。</span><br><span class="line">那只剩下第三种情况使用ipcs看下是否真的是大小不匹配,可以看到已经0x41400这个key已经存在，并且其大小为30095516字节，和我们调用参数中的30097568不匹配于是产生了这个错误。</span><br><span class="line"><span class="comment"># ipcs -m | grep 41400</span></span><br><span class="line"><span class="comment"># key        shmid      owner      perms      bytes      nattch     status    </span></span><br><span class="line"><span class="comment"># 0x00041400 1015822    root       666        30095516   1</span></span><br><span class="line"></span><br><span class="line">在我们这个案例里面导致共享内存大小不一致的原因是一组程序中，`其中一个编译为32位另外一个编译为64位`,代码里面使用了long这个变长int数据类型, 把两个程序都编译为64解决了这个问题。</span><br></pre></td></tr></table></figure>
+<p><strong>总结</strong></p>
+<ul>
+<li>1.当发现进程或服务异常时我们可以通过strace命令进行快速定位异常原因;</li>
+<li>2.其可以让我们熟悉常用系统调用，能够更好地理解和使用strace命令;</li>
+<li>3.当目标进程卡死在用户态时strace没有输出，此时我们需要其他的跟踪手段，比如gdb/perf/SystemTap等。<ul>
+<li>3.1) perf原因kernel支持</li>
+<li>3.2) ftrace kernel支持可编程</li>
+<li>3.3) systemtap 功能强大RedHat系统支持，对用户态，内核态逻辑都能探查，使用范围更广;</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="0x01-应用诊断"><a href="#0x01-应用诊断" class="headerlink" title="0x01 应用诊断"></a>0x01 应用诊断</h4>
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-10-10T02:37:45.607Z" itemprop="dateUpdated">2020-10-10 10:37:45</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2020/1/182.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/1/182.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E5%BC%82%E5%B8%B8%E6%8E%92%E6%9F%A5%E5%91%BD%E4%BB%A4/" rel="tag">Linux异常排查命令</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/1/182.html&title=《系统与应用异常定位诊断》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/1/182.html&title=《系统与应用异常定位诊断》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/1/205.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Linux系统异常排查实践与总结</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/1/45.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">MySQL数据库编程基础入门3</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言简述</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-系统诊断"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x00 系统诊断</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-应用诊断"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x01 应用诊断</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/1/182.html&title=《系统与应用异常定位诊断》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/1/182.html&title=《系统与应用异常定位诊断》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABvklEQVR42u3aS27DMAwFwNz/0u42QAvlkbQUoxitAqeRR10Q4uf1itf1tt6frL99f7Le7eaFi4s75l7LlXB/75YfKTfg4uKe505eXA1nvcPj4uI+mbv+7ZqIi4v7v7nzywouLu7zuUnyE20X1DEO5Wq4uLgDbl6l3Pd5S30XFxe3xb2Kq9du6QWvP96Oi4t7hNu7pvQapXf9C3BxcXdzJ43VZLSiepgPO+Di4h7nVoPR/Nt1G+bDjQwXF3cbN2+TJMEu/5tJIQYXF/cMtxpokpSperB8hAsXF/c8d1IQycPfDekTLi7ucW512CJJe9ZHStIhXFzcM9xeYtNLe5LDfxjhwsXFPcLN2xjVhspktqrQE8bFxf0St3r16ZVHy6VSXFzcI9zkBbtLqEmChIuL+wRuPlSRvLLXjsXFxf0WNymM9pKcyRWnHE1xcXHH3Ku48ovOloEtXFzcI9xJoXMeEPOCS/kwuLi4Y24veFULH9XEqXnRwcXFvZWbB5p8bKKch/VyNVxc3Idx5wNbzYwNFxf3Ydzqk8kgV9RKwcXF3cbNQ09CqYanfEgUFxf3DLcaSgpDVMUWzmRPXFzcm7g/2GnDQk7KO+AAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

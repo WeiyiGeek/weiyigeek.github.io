@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>Subdomain-Takeover子域名接管原理和利用案例 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="Subdomain-Takeover">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Subdomain-Takeover子域名接管原理和利用案例</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Subdomain-Takeover子域名接管原理和利用案例</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-09-17T02:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-09-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90/">域名解析</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/PenetrationNote/域名解析/Subdomain-Takeover子域名接管原理和利用案例"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Subdomain-Takeover子域名接管原理和利用案例</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-09-17 10:36:30" datetime="2019-09-17T02:36:30.000Z"  itemprop="datePublished">2019-09-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90/">域名解析</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><b style="color:red">注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。</b></p>
+<p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言介绍"><a href="#0x00-前言介绍" class="headerlink" title="0x00 前言介绍"></a>0x00 前言介绍</h4><p>描述:子域名接管漏洞通常被滥用于以下几个目的：恶意软件分发、网络钓鱼/鱼叉式网络钓鱼、XSS 、身份验证绕过等等。由于某些证书颁发机构仅需要域验证，因此也可以轻松生成SSL证书。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sub.expample.com(常规域名) 60 IN CNAME anotherdomain.com.(规范域名)</span><br></pre></td></tr></table></figure></p>
+<p>子域名接管是注册不存在的域名以获得对另一个域的控制权的过程常见的情况如下：</p>
+<ul>
+<li>1.域名（例如sub.example.com）将CNAME记录用于另一个域（例如sub.example.com CNAME anotherdomain.com）。</li>
+<li>2.在某个时间点，anotherdomain.com到期并可供任何人注册。</li>
+<li>3.由于未从example.com DNS区域删除CNAME记录，因此注册anotherdomain.com的任何人都可以完全控制sub.example.com，直到删除DNS记录。</li>
+</ul>
+<p>注意事项：</p>
+<ul>
+<li>使用子域名接管，攻击者可以从合法域发送网络钓鱼电子邮件，执行跨站点脚本（XSS）或破坏与域关联的品牌声誉。</li>
+<li>子域名接管不仅限于CNAME记录/NS记录/MX记录甚至A记录也会受到影响。</li>
+</ul>
+<hr>
+
+<h4 id="0x01-子域名接管原理"><a href="#0x01-子域名接管原理" class="headerlink" title="0x01 子域名接管原理"></a>0x01 子域名接管原理</h4><p>描述:我们在了解子域名接管的时候需要了解一哈DNS解析流程：<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924104446.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924104446.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>CNAME记录的域名的Web浏览器的行为流程:<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924125006.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924125006.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br><br><em>子域名接管漏洞类型:</em></p>
+<ul>
+<li>CNAME子域名接管: CNAME子域接管的主要类型之一是叫做互联网常规域名的规范域</li>
+<li>NS子域名接管: 一个NS记录的规范域名的基本域可用于注册</li>
+<li>MX子域名接管</li>
+</ul>
+<p>(1)CNAME子域名接管漏洞的成因:</p>
+<ul>
+<li>因为域名（源域名）配置了CNAME，但是CNAME指向的域名并没有被注册。那么攻击者可以注册这个CNAME指向的域名，就可以控制了源域名。</li>
+<li>危害：绕过HttpOnly和Secure Cookie的安全配置，盗取用户的cookie</li>
+<li>CNAME子域名接管的整个流程如下：<ul>
+<li>1.源域名(sub.example.com)设置了一个CNAME且指向了sub.weiyigeek.github.io记录</li>
+<li>2.检查weiyigeek.github.io是否被注册,如果没有注册就可以注册创建恶意页面最终接管sub.example.com</li>
+</ul>
+</li>
+</ul>
+<p>(2)NS子域名接管漏洞的成因:</p>
+<ul>
+<li>域名的NS记录中如果有一个域名没有被注册那么这个域名就可能被接管。(<code>查找类似SERVFAIL或的响应，REFUSED并根据其发出警报</code>)  </li>
+<li>例如：sub.example.com有两个NS记录，分别是ns1.vuln.com, ns2.novuln.com，<ul>
+<li>如果攻击者注册了vuln.com这个域名，那么就有50%的几率受到攻击。</li>
+<li>如果DNS解析选择了ns1.vuln.com，那么攻击者可以返回一个钓鱼页面，并非原来sub.example.com的页面，并且会缓存很长的时间，攻击者可以设置TTL的时长。</li>
+</ul>
+</li>
+</ul>
+<p>(3)MX子域名接管漏洞的成因: </p>
+<ul>
+<li>由于MX记录仅用于接收电子邮件，因此在MX记录中获得对规范域名的控制仅允许攻击者接收发往源域名的电子邮件(邮件伪造)。</li>
+<li>虽然影响不如CNAME或NS子域名接管那么重要，但MX子域名接管可能会在鱼叉式网络钓鱼攻击和知识产权窃取中发挥作用。</li>
+</ul>
+<p><em>原理解析案例:</em></p>
+<ul>
+<li>假如我拥有一个wolframe.eu用于测试目的的域名,通过更改dig谷歌DNS服务器@8.8.8.8此域的（权威）名称服务器,为四个AWS服务器之一来获得权威性答案：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dig ns wolframe.eu@8.8.8.8 +nostats</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924104903.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924104903.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></li>
+<li>实际DNS区域是由AWS管理的（更具体地说是AWS Route53）,比如上面指定NS记录指向的DNS服务器是不权威的，则得到的结果是不权威的答案(非权威性意味着它不是由权威DNS服务器（在此示例中为四个AWS之一）返回的,相当于是一个中间人的形式;</li>
+<li><p>您可以看见wolframe.eu本身只有一个A记录设置为1.1.1.1;所以一旦DNS请求*.wolframe.eu就会随机选择这上面这四个AWS名称服务器之一并返回A记录结果;</p>
+<figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924105355.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924105355.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+<li><p>采用DNSPython模块自定义DNS解析器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">import dns</span><br><span class="line">import dns.rdatatype</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> NAMESERVER_IP <span class="keyword">in</span> NAMESERVER_IPS:</span><br><span class="line">    custom_resolver = dns.resolver.Resolver()</span><br><span class="line">    custom_resolver.nameservers = [NAMESERVER_IP]</span><br><span class="line">    q = custom_resolver.query(DOMAIN, dns.rdatatype.A)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>总体而言，应通过以下过程扩展自动化：<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924110100.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924110100.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>注意事项:</p>
+<ul>
+<li>Web浏览器隐式地信任放在DNS解析器返回的任何内容上。这种信任意味着当攻击者获得对DNS记录的控制时，绕过所有Web浏览器安全策略（例如，同源策略）。带来相当大的安全威胁，因为子域名接管会破坏域名的真实性，攻击者可以通过多种方式利用域名的真实性</li>
+</ul>
+<hr>
+
+<h4 id="0x02-子域名接管检查"><a href="#0x02-子域名接管检查" class="headerlink" title="0x02 子域名接管检查"></a>0x02 子域名接管检查</h4><p>描述：子域名接管检查漏洞主要是看 CNAME，因此我们可以把收集到子域名的CNAME找出来(当然MX/A也可以但是出现这样的机率是非常少的)；<br>漏洞检查工具: EdOverflow的can-i-take-over-xyz<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#!Coded by Suleman Malik</span></span><br><span class="line"><span class="comment">#!www.sulemanmalik.com</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">cont</span></span>()&#123;</span><br><span class="line">rm /tmp/cnames</span><br><span class="line">rm /tmp/cname-ln</span><br><span class="line">rm /tmp/fn-py</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="title">bl</span></span>()&#123;</span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">"\033[0;31m-------------------------------------------------------------\033[0m"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="title">ban</span></span>()&#123;</span><br><span class="line"><span class="built_in">echo</span> <span class="string">''</span><span class="string">'</span></span><br><span class="line"><span class="string">  ________                                                                   </span></span><br><span class="line"><span class="string"> /__  ___/                                                           </span></span><br><span class="line"><span class="string">   / /   ___     / ___      ___      ___              ___      __    </span></span><br><span class="line"><span class="string">  / /  //   ) ) //\ \     //___) ) //   ) ) ||  / / //___) ) //  ) ) </span></span><br><span class="line"><span class="string"> / /  //   / / //  \ \   //       //   / /  || / / //       //       </span></span><br><span class="line"><span class="string">/ /  ((___( ( //    \ \ ((____   ((___/ /   ||/ / ((____   //        </span></span><br><span class="line"><span class="string">'</span><span class="string">''</span></span><br><span class="line">&#125;</span><br><span class="line">cont &gt; /dev/null 2&gt;&amp;1</span><br><span class="line">clear                                                                        </span><br><span class="line">ban</span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"\033[0;32m  @sulemanmalik_3                              v1\033[0m"</span></span><br><span class="line">bl</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"File Name:"</span></span><br><span class="line"><span class="built_in">read</span> inp</span><br><span class="line"><span class="built_in">echo</span> <span class="string">''</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">''</span></span><br><span class="line">cot=0</span><br><span class="line">lof=$(wc -l &lt; <span class="variable">$inp</span> | sed <span class="string">'s/ //g'</span>)</span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> dom</span><br><span class="line"><span class="keyword">do</span> </span><br><span class="line">  cot=$((<span class="variable">$cot</span> + 1))</span><br><span class="line">  <span class="built_in">echo</span> -ne <span class="string">"\033[0;32mScanning Subdomains:\033[0m <span class="variable">$cot</span>/<span class="variable">$lof</span>\r"</span></span><br><span class="line">  cname=$( dig CNAME <span class="variable">$dom</span> | grep <span class="string">"CNAME"</span> | tail -n1 | cut -c<span class="string">"29-"</span> | sed <span class="string">'s/^.*E//'</span> &gt;&gt; /tmp/cnames)</span><br><span class="line">  <span class="built_in">echo</span> <span class="string">"<span class="variable">$cot</span> - <span class="variable">$dom</span> --&gt; "</span> &gt;&gt; /tmp/cname-ln</span><br><span class="line"><span class="keyword">done</span> &lt; <span class="variable">$inp</span></span><br><span class="line">  prog=$(awk <span class="string">'NR==FNR&#123;a[++y]=$0;next&#125;&#123;b[++x]=$0&#125;</span></span><br><span class="line"><span class="string">  END&#123;z=x&gt;y?x:y;while(++i&lt;=z)&#123;print a[i],b[i]&#125;&#125;'</span> /tmp/cname-ln /tmp/cnames &gt; /tmp/fn-py)</span><br><span class="line"><span class="built_in">echo</span> <span class="string">''</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">''</span></span><br><span class="line">cat /tmp/fn-py</span><br><span class="line">sleep 1</span><br><span class="line"><span class="built_in">echo</span> <span class="string">''</span></span><br><span class="line">bl</span><br><span class="line">cont &gt; /dev/null 2&gt;&amp;1</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924092823.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924092823.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<hr>
+
+<h4 id="0x03-子域名接管利用案例"><a href="#0x03-子域名接管利用案例" class="headerlink" title="0x03 子域名接管利用案例"></a>0x03 子域名接管利用案例</h4><p>描述:关于子域名接管首先先得有能让你接管的子域名，所以我们针对子域名要进行收集，然后对比指纹查看是否有接管的可能。<br>常常使用dig、nslookup、host等命令进行收集查看:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ nslookup c1h2e1.github.io</span><br><span class="line">$ host c1h2e1.github.io</span><br><span class="line">$ dig c1h2e1.github.io</span><br></pre></td></tr></table></figure></p>
+<p>记录一些典型案例:</p>
+<p><strong>案例1：feedpress子域名接管</strong><br>参考案例:<a href="https://hackerone.com/reports/195350" target="_blank" rel="noopener">https://hackerone.com/reports/195350</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#podcasts.slack-core.com是CNAME'd to redirect.feedpress.me:</span></span><br><span class="line">$ dig podcasts.slack-core.com </span><br><span class="line"></span><br><span class="line">;; OPT PSEUDOSECTION:</span><br><span class="line">; EDNS: version: 0, flags:; udp: 512</span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;podcasts.slack-core.com.   IN  A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">podcasts.slack-core.com. 299    IN  CNAME   redirect.feedpress.me.</span><br><span class="line">redirect.feedpress.me.  3599    IN  A   5.135.16.40</span><br><span class="line"></span><br><span class="line">;; Query time: 253 msec</span><br><span class="line">;; SERVER: 8.8.8.8<span class="comment">#53(8.8.8.8)</span></span><br></pre></td></tr></table></figure><br>思路:首先执行了dig命令发现解析了 redirect.feedpress.me 然而feedpress可以导致子域名接管，通过在Feed上创建我自己的帐户并且注册设置podcasts.slack-core.com作为我订阅的“自定义域名”，在它通过Feed传播之后最终成功的接管了域名podcasts.slack-core.com提供的内容。</p>
+<p><br></p>
+<p><strong>案例2：Heroku子域名接管</strong><br>描述：该漏洞是CNAME子域名接管漏洞类型案例;<br>页面特征:<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924093116.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924093116.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>利用条件：CNAME指向 herokudns.com的子域如果一个子域使用Heroku 服务的子域名，例如 vuln.example.com 显示如上错误页面，当通过子域名挖掘时，他就会产生子域名接管漏洞</p>
+<blockquote>
+<p>vuln.example.com  60  IN   CNAME vuln.example.com.herokudns.com</p>
+</blockquote>
+<p><em>漏洞利用:</em><br>1.注册Heroku（<a href="https://signup.heroku.com/" target="_blank" rel="noopener">https://signup.heroku.com/</a>)<br>2.在Heroku上部署应用程序。<br>(1)安装git<br>(2)安装 heroku cli<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl https:&#x2F;&#x2F;cli-assets.heroku.com&#x2F;install.sh | sh</span><br></pre></td></tr></table></figure><br>(3)创建一个简单页面<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~</span><br><span class="line">mkdir herokudeploy</span><br><span class="line"><span class="built_in">cd</span> herokudeploy</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"&#123;&#125;"</span> &gt; composer.json</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"Subdomain takeover PoC"</span> &gt; index.html</span><br><span class="line">touch index.php</span><br><span class="line"></span><br><span class="line"><span class="comment">#编辑index.php</span></span><br><span class="line">&lt;?php header( <span class="string">'Location: /index.html'</span> ) ; ?&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#接下来，</span></span><br><span class="line">git init</span><br><span class="line">git add .</span><br><span class="line">git commit -m <span class="string">"just simple poc"</span></span><br><span class="line">heroku apps:create justsimplesubdomaintakeoverpoc</span><br></pre></td></tr></table></figure><br>如果Heroku中不存在应用程序的名称，则将创建应用程序。此外如果您从未登录过Heroku，系统会要求您提供Heroku帐户电子邮件和密码。请登录然后将本地文件推送到Heroku仓库。</p>
+<blockquote>
+<p>git push heroku master</p>
+</blockquote>
+<p>您正在部署的应用程序可以在*.herokuapp.com中看到。<br>本教程中的示例变为：<a href="https://justsimplesubdomaintakeoverpoc.herokuapp.com" target="_blank" rel="noopener">https://justsimplesubdomaintakeoverpoc.herokuapp.com</a><br>3.添加要覆盖的子域,然后添加域即可<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924093417.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924093417.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<p><strong>案例3：Tumblr子域名接管</strong><br>描述：该漏洞是CNAME子域名接管漏洞类型案例;<br>要在Tumblr中使用自定义域，我们需要添加A记录，如果使用的是主域则该记录将指向66.6.44.4，如果Tumblr自定义域位于子域上则添加CNAME，例如我的blog.site.com然后CNAME是您拥有的tumblr子域site.tumblr.com。<br>攻击过程:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ curl -I www.leifroswold.com</span><br><span class="line">HTTP/1.1 404 Not Found</span><br><span class="line">Server: openresty</span><br><span class="line">Date: Mon, 24 Sep 2018 15:14:30 GMT</span><br><span class="line">Content-Type: text/html; charset=UTF-8</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">X-Rid: 57de79ef9b33ae549a1795eecfd68570</span><br><span class="line">P3p: CP=Tumblr s privacy policy is available here: https://www.tumblr.com/policy/en/priva</span><br><span class="line"></span><br><span class="line"><span class="comment">#用dig查看他以前用过的tumblr用户名。</span></span><br><span class="line">$ dig www.leifroswold.com</span><br><span class="line">.....</span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.leifroswold.com.    942     IN      A       66.6.44.4  <span class="comment">#这里配置错误实际应该设置CNAME指向字节Tumblr域名</span></span><br></pre></td></tr></table></figure>
+<p>现在转到您的Tumblr博客设置然后更改域名,因为没有创建CNAME记录，我们可以使用任何用户名的tumblr子域。只需要添加想要定义的域然后保存即可;<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924100206.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924100206.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<p><strong>案例4：Fastmail 子域名接管</strong><br>描述:Fastmail也存在子域名接管漏洞。因为当我们设置自定义域时没有额外的验证。<br>漏洞特征：<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924100302.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924100302.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>利用条件：</p>
+<ul>
+<li>1.CNAME 可定义为 web.messagingengine.com</li>
+<li>2.A 记录 指向 66.111.4.53   66.111.4.54</li>
+</ul>
+<p>漏洞利用：<br>第一步是添加要覆盖的自定义域。进入设置菜单，然后进入域。<br>第二步是创建网站。成功添加要覆盖的域后，现在我们创建公共站点。首先在左下角菜单中，选择“ 文件”,上传html文件。<br>第三步是单击 websites 设置域名,最终使用<a href="http://www.zafkiel.net接管" target="_blank" rel="noopener">www.zafkiel.net接管</a>  web.messagingengine.com。<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924100445.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924100445.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<p><em>总结可接管服务：</em><br>参考:<a href="https://github.com/EdOverflow/can-i-take-over-xyz/blob/master/README.md" target="_blank" rel="noopener">https://github.com/EdOverflow/can-i-take-over-xyz/blob/master/README.md</a><br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923232412.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923232412.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure><br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923232436.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923232436.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure><br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923232454.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923232454.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>补充:启发式测试以确定是否可以接管子域/域<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">Engine 	Possible 	Fingerprint 	Reference</span><br><span class="line">AWS/S3 	Yes 	The specified bucket does not exist</span><br><span class="line">Bitbucket 	Yes 	Repository not found</span><br><span class="line">Campaign Monitor 	Yes 	Support Page</span><br><span class="line">Cargo Collective 	Yes 	404 Not Found 	Cargo Support Page</span><br><span class="line">Cloudfront 	Yes 	Bad Request: ERROR: The request could not be satisfied 	https://blog.zsec.uk/subdomainhijack/</span><br><span class="line">Desk 	No</span><br><span class="line">Fastly 	Yes 	Fastly error: unknown domain:</span><br><span class="line">Feedpress 	Yes 	The feed has not been found. 	https://hackerone.com/reports/195350</span><br><span class="line">Freshdesk 	No 	Freshdesk Support Page</span><br><span class="line">Ghost 	Yes 	The thing you were looking <span class="keyword">for</span> is no longer here, or never was</span><br><span class="line">Github 	Yes 	There isn<span class="string">'t a Github Pages site here. 	https://hackerone.com/reports/263902</span></span><br><span class="line"><span class="string">Gitlab 	No 	https://hackerone.com/reports/312118</span></span><br><span class="line"><span class="string">Google Cloud Storage 	No</span></span><br><span class="line"><span class="string">Help Juice 	Yes 	We could not find what you'</span>re looking <span class="keyword">for</span>. 	Help Juice Support Page</span><br><span class="line">Help Scout 	Yes 	No settings were found <span class="keyword">for</span> this company: 	HelpScout Docs</span><br><span class="line">Heroku 	Yes 	No such app</span><br><span class="line">JetBrains 	Yes 	is not a registered InCloud YouTrack</span><br><span class="line">Mashery 	No 	Unrecognized domain 	https://hackerone.com/reports/275714</span><br><span class="line">Microsoft Azure 	Yes</span><br><span class="line">Sendgrid 	No</span><br><span class="line">Shopify 	Yes 	Sorry, this shop is currently unavailable.</span><br><span class="line">Squarespace 	No</span><br><span class="line">Statuspage 	Yes 	You are being redirected 	https://hackerone.com/reports/49663</span><br><span class="line">Surge.sh 	Yes 	project not found 	https://surge.sh/<span class="built_in">help</span>/adding<span class="_">-a</span>-custom-domain</span><br><span class="line">Tumblr 	Yes 	Whatever you were looking <span class="keyword">for</span> doesn<span class="string">'t currently exist at this address</span></span><br><span class="line"><span class="string">Tilda 	No 	Please renew your subscription</span></span><br><span class="line"><span class="string">Unbounce 	Yes 	The requested URL was not found on this server. 	https://hackerone.com/reports/202767</span></span><br><span class="line"><span class="string">UserVoice 	Yes 	This UserVoice subdomain is currently available!</span></span><br><span class="line"><span class="string">Wordpress 	Yes 	Do you want to register *.wordpress.com?</span></span><br><span class="line"><span class="string">WP Engine 	No</span></span><br><span class="line"><span class="string">Zendesk 	Yes 	Help Center Closed 	Zendesk Support</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>简要概述了CloudFront（虚拟主机架构）非常相似的其他云服务。</p>
+<ul>
+<li><p>Amazon S3 - 以前简要提到了Amazon S3。用于访问存储桶的默认基本域并不总是相同，并且取决于所使用的AWS区域。AWS文档中提供了Amazon S3基本域的完整列表。与CloudFront类似，Amazon S3允许指定备用（自定义）域名以访问存储桶的内容。</p>
+</li>
+<li><p>Heroku - Heroku是一个平台即服务提供商，可以使用简单的工作流程部署应用程序。由于需要访问应用程序，Heroku使用herokuapp.com上形成的子域公开应用程序。但是也可以指定自定义域名以访问已部署的应用程序。</p>
+</li>
+<li><p>Shopify - Shopify提供了一种在云中创建和自定义电子商务商店的方法。访问商店的默认子域是在myshopify.com上构建的。作为之前描述的服务，Shopify允许指定备用域名。值得注意的是Shopify验证了正确的CNAME记录配置。但是，此验证不是域名所有权验证。Shopify仅检查备用域的DNS区域中存在的准确CNAME记录。因此，此验证不会阻止子域名的接管。</p>
+</li>
+<li><p>GitHub - GitHub是Git的版本控制存储库。GitHub还允许使用他们的GitHub Pages项目进行免费的虚拟主机托管。此Web托管通常用于项目的文档，技术博客或支持Web页面到开源项目。除github.io下的默认域名外，GitHub Pages还支持自定义域名。</p>
+</li>
+<li><p>Microsoft Azure - Microsoft Azure是一个更加突出的云提供商，类似于AWS。与上面提到的云服务相比，它不同，因为它不提供虚拟主机架构。简而言之，对于每个云服务，Azure都会创建自己的具有自己IP地址的虚拟机。因此，域名和IP地址之间的映射是明确的（一对一映射）。值得注意的是，由于这不是常规虚拟主机设置，因此不一定必须在资源设置中明确定义配置CNAME记录。Azure提供多种云服务，但本文中讨论的云服务具有cloudapp.net和azurewebsites.net的默认域。其文档描述了使用A或CNAME记录设置域名和Azure资源之间的链接（指向前面提到的两个域之一）。一个有趣的观察是，对于A记录，Azure使用TXT记录进行域所有权验证。但是，对于CNAME记录而言并非如此，因此即使在Microsoft Azure的情况下也可以进行子域接管。</p>
+</li>
+</ul>
+<p><br></p>
+<p><strong>案例5：Surge.sh 子域名接管</strong><br>漏洞特征：<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924101431.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924101431.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>利用条件：<br>CNAME 可定义为  na-west1.surge.sh，A 记录 指向 45.55.110.124 （其中一个条件得到满足，我们就可以接管。）<br>例如：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">dig agilesysadmin.com</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.10.3-P4-Ubuntu &lt;&lt;&gt;&gt; agilesysadmin.com</span><br><span class="line">;; global options: +cmd</span><br><span class="line">.......</span><br><span class="line">; EDNS: version: 0, flags:; udp: 4096</span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;agilesysadmin.com. IN A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">agilesysadmin.com. 3599 IN A 45.55.110.124</span><br></pre></td></tr></table></figure></p>
+<p>漏洞利用<br>第一步，安装nodejs后，执行： <code>sudo npm install --global surge</code></p>
+<p>第二步，创建一个文件夹，上传自定义html文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir surge</span><br><span class="line">cd surge</span><br><span class="line">nano index.html</span><br></pre></td></tr></table></figure><br>第三步，运行 sunger : <code>surge path_project namadomain.</code><br>比如：surge /home/linuxsec/surge/ agilesysadmin.com<br><figure class="image-box">
+                <a rel=Subdomain-Takeover子域名接管原理和利用案例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924101657.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190924101657.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<hr>
+
+<h4 id="0x04-安全防御"><a href="#0x04-安全防御" class="headerlink" title="0x04 安全防御"></a>0x04 安全防御</h4><p>建议:在绑定第三方域名解析记录的时候,需要了解其业务解析流程并进行CNAME安全配置，如果不使用第三方页面托管服务将需要取消其解析记录;</p>
+<hr>
+
+<h4 id="0x05-来源参考"><a href="#0x05-来源参考" class="headerlink" title="0x05 来源参考"></a>0x05 来源参考</h4><ul>
+<li><a href="https://devi1ex.com/2018/12/14/subdomain-takeover/" target="_blank" rel="noopener">https://devi1ex.com/2018/12/14/subdomain-takeover/</a></li>
+<li><a href="https://github.com/EdOverflow/can-i-take-over-xyz" target="_blank" rel="noopener">https://github.com/EdOverflow/can-i-take-over-xyz</a></li>
+<li><a href="https://exploit.linuxsec.org/" target="_blank" rel="noopener">https://exploit.linuxsec.org/</a></li>
+</ul>
+<ul>
+<li><a href="https://dzone.com/articles/what-are-subdomain-takeovers-how-to-test-and-avoid" target="_blank" rel="noopener">https://dzone.com/articles/what-are-subdomain-takeovers-how-to-test-and-avoid</a></li>
+</ul>
+<ul>
+<li><a href="https://0xpatrik.com/subdomain-takeover-ns/" target="_blank" rel="noopener">https://0xpatrik.com/subdomain-takeover-ns/</a></li>
+</ul>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-10-10T02:37:49.755Z" itemprop="dateUpdated">2020-10-10 10:37:49</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/9/400.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/9/400.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Subdomain-Takeover/" rel="tag">Subdomain-Takeover</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/9/400.html&title=《Subdomain-Takeover子域名接管原理和利用案例》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/9/400.html&title=《Subdomain-Takeover子域名接管原理和利用案例》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/9/385.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">HPP攻击原理介绍和利用</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/9/257.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Doubbo架构入门学习和使用</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言介绍</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-子域名接管原理"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 子域名接管原理</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-子域名接管检查"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 子域名接管检查</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-子域名接管利用案例"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 子域名接管利用案例</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-安全防御"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 安全防御</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x05-来源参考"><span class="post-toc-number">6.</span> <span class="post-toc-text">0x05 来源参考</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2020
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/9/400.html&title=《Subdomain-Takeover子域名接管原理和利用案例》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/9/400.html&title=《Subdomain-Takeover子域名接管原理和利用案例》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击,请勿恶意使用下面描述技术进行非法操作。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABwElEQVR42u3au27DMBAEQP//TyttikjZ5QtKMKwMWyZHzeG45OcTj+vbeP7m7tfn2RYPXFzcae71OFpu/gJ3v94ZcHFxz3PvKkbyTP6SCf0XGy4u7iu5d8u3s+Hi4v4nbvIySbOCi4v7fm7SrOTL5A3Qxr0aLi7uBDdPKfd93pLv4uLiDnGvcrRbmplm6IfVcXFxj3DzgpJHn2PtTrEuLi7uC7htnDG2dXkucFGKg4uLu42bL9b+Kzk+qVscXFzcDdyx8CLfzKwtbbi4uG/gjh2LPpetNnwpChkuLu5SbluY8otW+QzR9gkXF/cIty1DY1Pn5XIwkMXFxd3Gba9nJej8NZJ5cHFxz3PzI9U2OmnvVi2ou7i4uNPc9g/583k8WoQvuLi4B7kzTcmqCDXy4OLiHuTmlyHapidva6LNDy4u7kFuXnTagGOmxfmMLYaLizvBvcrRhqRjZStKa3Bxcbdx2+LSlrOp+GOmIOLi4k5z2+PVdtOy9mgWFxf3JHem0KwtdvVeDRcX9zXcsc1P/gwuLu7f5c48ORih4uLiHuTmpef5m7EMJtlu4eLinuSOhZvRVYnyCCeJYHBxcTdzvwAXF+IxoVIICgAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

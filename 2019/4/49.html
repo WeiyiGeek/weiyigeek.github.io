@@ -527,6 +527,8 @@
 <li>Step4.修改配置文件权限<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">touch &#x2F;etc&#x2F;redis.conf</span><br><span class="line">chown redis:redis &#x2F;etc&#x2F;redis.conf</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
+<p><br></p>
+<p><strong>2.Redis 数据库db迁移</strong><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#redis</span></span><br><span class="line"><span class="comment"># 把db2 的数据迁移到 db14 里</span></span><br><span class="line"><span class="comment"># 需求分析：</span></span><br><span class="line"><span class="string">'''1、建立两个redis连接</span></span><br><span class="line"><span class="string">   2、获取所有的keys（）</span></span><br><span class="line"><span class="string">   3、获取keys的类型：string hash'''</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> redis</span><br><span class="line">src_redis = redis.Redis(host=<span class="string">'211.149.218.16'</span>,</span><br><span class="line">                password=<span class="string">'123456'</span>,</span><br><span class="line">                port=<span class="number">6379</span>,</span><br><span class="line">                db=<span class="number">2</span>)</span><br><span class="line">target_redis = redis.Redis(host=<span class="string">'211.149.218.16'</span>,</span><br><span class="line">                password=<span class="string">'123456'</span>,</span><br><span class="line">                port=<span class="number">6379</span>,</span><br><span class="line">                db=<span class="number">14</span>)</span><br><span class="line">                </span><br><span class="line"><span class="keyword">for</span> key <span class="keyword">in</span> src_redis.keys(): <span class="comment"># redis获取的数据都是bytes类型的，所以key的类型是 bytes 类型</span></span><br><span class="line">    <span class="keyword">if</span> src_redis.type(key) == <span class="string">b'string'</span>:<span class="comment"># 也可以用decode() 把key转换成string，这样等号右边就不需要加b</span></span><br><span class="line">        v = src_redis.get(key)  <span class="comment">#先获取原来的数据</span></span><br><span class="line">        target_redis.set(key,v) <span class="comment">#set到新的数据库里</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        all_hash_data = src_redis.hgetall(key) <span class="comment"># 获取hash类型里面所有的数据，获取出来的数据是字典格式的  但是有b，需要转换</span></span><br><span class="line">        <span class="keyword">for</span> k,v <span class="keyword">in</span> all_hash_data.items():<span class="comment"># 因为获取到字典格式的hash类型的原数据有b，所以需要用for循环来进行转换后重新赋值给新的数据库</span></span><br><span class="line">            target_redis.hset(key,k,v) <span class="comment"># key是外面的，k是里面的key，v是k对应的value</span></span><br></pre></td></tr></table></figure></p>
 <h4 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h4><ul>
 <li><a href="https://github.com/qishibo/AnotherRedisDesktopManager" target="_blank" rel="noopener">Redis-Client 连接软件</a></li>
 </ul>
@@ -542,7 +544,7 @@
         
         
 <span class="post-time">
-    最后更新时间：<time datetime="2020-10-10T02:37:43.070Z" itemprop="dateUpdated">2020-10-10 10:37:43</time>
+    最后更新时间：<time datetime="2020-11-16T13:20:52.516Z" itemprop="dateUpdated">2020-11-16 21:20:52</time>
 </span><br>
 
 
@@ -707,9 +709,9 @@ function yzm_vertify(){
 
   
     <div class="next">
-      <a href="/2019/4/73.html" id="post-next" class="post-nav-link">
+      <a href="/2019/4/380.html" id="post-next" class="post-nav-link">
         <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">Android设备调试工具一览表</h4>
+        <h4 class="title">模糊测试之攻击回显</h4>
       </a>
     </div>
   

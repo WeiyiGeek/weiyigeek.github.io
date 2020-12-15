@@ -769,6 +769,10 @@
                 <a rel=vCenterServer安装与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200927000538.png" target="_blank" title="WeiyiGeek.启用后兼容性检测通过" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200927000538.png" alt="WeiyiGeek.启用后兼容性检测通过" title="" class=""></a>
                 <p>WeiyiGeek.启用后兼容性检测通过</p>
             </figure></p>
+<p><br></p>
+<p><em>问题(6): 在Vcenter上传文件至存储卷：提示不信任证书，导致无法上传</em><br>故障现象：chrome浏览器浏览器上传镜至vcenter 6.5 存储卷<br>提示：由于不确定的原因,操作失败。通常当浏览器不信任证书时会发生此问题。<br>解决办法: 在vcenter管理页面上下载受信任的root CA证书<a href="https://vcsa.weiyigeek.top/certs/download.zip" target="_blank" rel="noopener">https://vcsa.weiyigeek.top/certs/download.zip</a>，然后将证书导入到浏览器即可;</p>
+<p><br></p>
+<p><em>问题(7): 无法访问 vCenter — 错误：503 服务不可用，无法连接到端点 (000535920)</em><br>问题描述：Dell EMC VxRail：无法访问 vCenter — 错误：503 服务不可用，无法连接到端点：<code>[N7Vmacore4Http20NamedPipeServiceSpecE:0x00007f975808ee30] _serverNamespace = / action = Allow _pipeName =/var/run/vmware/vpxd-webserver-pipe) (000535920)</code> Vpxd 和清单服务无法启动;<br>问题原因: 计算机帐户使用的密码会定期自动刷新。此密码存储在 vCenter Server 上的计算机帐户中以及驻留在 Platform Services Controller 上的 VMware 目录服务中。如果用于执行恢复的备份的日期在最近的密码刷新之前，则在进行恢复时，计算机帐户将无法登录 VMware 目录服务。此外，如果将 vCenter Server 回滚到日期在最近的密码刷新之前的快照状态，则在进行恢复时，计算机帐户将无法登录 VMware 目录服务。<br>解决办法:对于 vCenter Server 一体机以 root 用户身份，通过 SSH 登录 vCenter Server, 运行以下命令<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /usr/lib/vmware-vmafd/bin/dir-cli computer password-reset --login administrator --live-dc-hostname &lt;Platform Services Controller FQDN&gt; --password &lt;administrator@vsphere.local password&gt;</span></span><br><span class="line"><span class="comment"># 例如：</span></span><br><span class="line">/usr/lib/vmware-vmafd/bin/dir-cli computer password-reset --login administrator --live-dc-hostname mgmt01psc01.sfo01.rainpole.local --password <span class="string">'VMware1!'</span></span><br><span class="line"><span class="comment"># 成功的密码重置将输出：</span></span><br><span class="line"><span class="comment"># Password for machine account reset.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 运行以下命令以启动 vCenter Server 服务：</span></span><br><span class="line">service-control --stop --all</span><br><span class="line">service-control --start --all</span><br></pre></td></tr></table></figure><br>VMware 知识库文章：<a href="https://kb.vmware.com/s/article/2149010" target="_blank" rel="noopener">https://kb.vmware.com/s/article/2149010</a></p>
 <hr>
 <h4 id="0x05-参考来源"><a href="#0x05-参考来源" class="headerlink" title="0x05 参考来源"></a>0x05 参考来源</h4><ul>
 <li>VMware vSphere Documentation : <a href="https://docs.vmware.com/cn/VMware-vSphere/index.html" target="_blank" rel="noopener">https://docs.vmware.com/cn/VMware-vSphere/index.html</a></li>
@@ -786,7 +790,7 @@
         
         
 <span class="post-time">
-    最后更新时间：<time datetime="2020-10-10T02:37:51.363Z" itemprop="dateUpdated">2020-10-10 10:37:51</time>
+    最后更新时间：<time datetime="2020-12-12T04:21:57.773Z" itemprop="dateUpdated">2020-12-12 12:21:57</time>
 </span><br>
 
 

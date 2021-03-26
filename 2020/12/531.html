@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>Jenkins进阶之分布式服务器环境配置 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="Jenkins">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Jenkins进阶之分布式服务器环境配置</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Jenkins进阶之分布式服务器环境配置</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-12-30T04:34:30.000Z" itemprop="datePublished" class="page-time">
+  2020-12-30
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/DevSecOps/">DevSecOps</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/DevSecOps/CI-CD/">CI-CD</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/自动化运维/CI-CD/Jenkins/4.Jenkins进阶之分布式服务器环境配置"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Jenkins进阶之分布式服务器环境配置</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-12-30 12:34:30" datetime="2020-12-30T04:34:30.000Z"  itemprop="datePublished">2020-12-30</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/DevSecOps/">DevSecOps</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/DevSecOps/CI-CD/">CI-CD</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<hr>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><p><strong>Q: 什么是Jenkins的分布式节点构建?</strong></p>
+<blockquote>
+<p>描述: 简单的说就是通过将构建过程分配到从属Slave节点上，从而减轻Master节点的压力，而且可以同时构建多个有点类似负载均衡的概念。<br>随着现在容器的盛行我们可以将server节点和agent节点在容器或者基于Kubernetes中部署, 可以实现动态的资源分配等等好处。</p>
+</blockquote>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113140710.png" target="_blank" title="WeiyiGeek.Jenkins分布式节点" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113140710.png" alt="WeiyiGeek.Jenkins分布式节点" title="" class=""></a>
+                <p>WeiyiGeek.Jenkins分布式节点</p>
+            </figure>
+<p><br></p>
+<h3 id="1-节点说明"><a href="#1-节点说明" class="headerlink" title="1.节点说明"></a>1.节点说明</h3><p>描述: 我们在使用Jenkins的时候一般都会分为server节点与agent节点(也可以叫 slave 节点)。</p>
+<ul>
+<li>1) server ：主要用于处理调度构建作业，把构建分发到slave节点进行实际执行，监视slave节点的状态（必要时让它们进行上线或者离线），记录和发布构建产物。</li>
+<li>2) agent ： 主要用于处理Job任务等例如编译和发布, agent节点可以分为静态节点和动态节点;</li>
+</ul>
+<p><strong>节点类型:</strong></p>
+<ul>
+<li>1) 静态节点是固定的一台vm虚机或者容器。</li>
+<li>2) 动态节点是随着任务的构建来自动创建agent节点。</li>
+</ul>
+<p><br></p>
+<h3 id="2-节点管理"><a href="#2-节点管理" class="headerlink" title="2.节点管理"></a>2.节点管理</h3><p><strong>agent节点加入的两种方式:</strong></p>
+<ul>
+<li>ssh : 在Linux系统中最方便的就是通过SSH启动Jenkins节点,关键是需要再Slave机器中开启sshd服务以及网络连通;</li>
+<li>jnlp ：兼容各种操作系统只要网络可以正常通信都可以采用此种方法(需要安装Java环境);</li>
+</ul>
+<p><br/></p>
+<h4 id="SSH-方式"><a href="#SSH-方式" class="headerlink" title="SSH 方式"></a>SSH 方式</h4><p>环境依赖: SSH Slaves plugin 插件 、SSH Credentials Plugin 插件（管理认证票据）<br>添加流程: </p>
+<ul>
+<li>1) 输入Slave节点IP</li>
+<li>2) 添加Credentials认证票据(账号密码、或、密钥登陆)</li>
+<li>3）在这里设置的credentials在jenkins的其他需要credentials的地方，可以通过下拉菜单选择使用，比如添加slave时可以直接在Credentials下拉菜单里选择对应的credential就行</li>
+</ul>
+<p><br/></p>
+<p><strong>用户密码方式添加:</strong><br>添加流程:</p>
+<ul>
+<li>1) 新建节点-&gt;输入节点IP</li>
+<li>2）基础信息配置</li>
+<li>3) 选择Jenkins凭据</li>
+<li>4）启动代理</li>
+</ul>
+<p><strong>私钥方式方式添加:</strong><br>添加流程:(相比于上面的流程唯一不同的是Jenkins凭据选择为<code>ssh private key</code>) </p>
+<ul>
+<li>记住是私钥不是公钥 <code>cat .ssh/id_rsa</code> 输入到Private Key之中</li>
+</ul>
+<p><br/></p>
+<h4 id="JNLP-方式"><a href="#JNLP-方式" class="headerlink" title="JNLP 方式"></a>JNLP 方式</h4><p>描述: 与ssh方式是master主动连接slave不同而JNLP方式是slave主动连接master。</p>
+<p>Tips : 复制节点在节点环境配置好之后，我们再添加节点就可以复制了修改IP和其他自定义配置即可。</p>
+<p>Tips : 在需要Jenkins全局安全配置上开启 Inbound agents 端口 50000/tcp 代理端口, 此端口的作用是便于Agent的jnlp与jenkins的master节点间进行通信;</p>
+<p><br></p>
+<h3 id="3-点明主题"><a href="#3-点明主题" class="headerlink" title="3.点明主题"></a>3.点明主题</h3><p><strong>Q: 传统Jenkins的server、agent分布式方案有什么缺陷?</strong></p>
+<ul>
+<li>1.高可用管理: Master 节点发生单点故障时整个流程都不可用了;</li>
+<li>2.配置管理维护: 每个 Slave节点的配置环境不一样，来完成不同语言的编译打包等操作，但是这些差异化的配置导致管理起来非常不方便，维护起来也是比较费劲</li>
+<li>3.资源分配不均衡：有的 Slave节点要运行的job出现排队等待，而有的Slave节点处于空闲状态</li>
+<li>4.资源浪费： 每台 Slave节点可能是实体机或者VM，当Slave节点处于空闲状态时，也不会完全释放掉资源</li>
+</ul>
+<p>Tips : 正因为上面的这些种种痛点我们渴望一种更高效更可靠的方式来完成这个 CI/CD 流程，而 Docker 虚拟化容器技术能很好的解决这个痛点，又特别是在 Kubernetes 集群环境下面能够更好来解决上面的问题，所以我们可以引入Kubernates来解决！</p>
+<p>Tips : 基于Kubernete的CI/CD可以使用的工具有很多, 比如Jenkins、Gitlab CI已经新兴的drone之类的都是可以，大家可以根据需求进行学习搭建并落地;</p>
+<p><br></p>
+<p><strong>Q: 什么是 Kubernetes ? 它有何作用?</strong><br>答: Kubernetes （简称K8S）是Google开源的容器集群管理系统，在Docker技术的基础上，为容器化的应用提供部署运行、资源调度、服务发现和动态伸缩等一系列完整功能，提高了大规模容器集群管理的便捷性。<br>其主要功能如下：</p>
+<ul>
+<li>1.使用Docker对应用程序包装(package)、实例化(instantiate)、运行(run)。</li>
+<li>2.以集群的方式运行、管理跨机器的容器。以集群的方式运行、管理跨机器的容器。</li>
+<li>3.解决 Docker跨机器容器之间的通讯问题。解决Docker跨机器容器之间的通讯问题。</li>
+<li>4.Kubernetes 的自我修复机制使得容器集群总是运行在用户期望的状态。</li>
+</ul>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113142559.png" target="_blank" title="WeiyiGeek.Kubernetes 搭建 Jenkins 集群示意图" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113142559.png" alt="WeiyiGeek.Kubernetes 搭建 Jenkins 集群示意图" title="" class=""></a>
+                <p>WeiyiGeek.Kubernetes 搭建 Jenkins 集群示意图</p>
+            </figure>
+<p>PS : 从图上可以看到 <code>Jenkins Master 和 Jenkins Slave</code> 以 Pod 形式运行在 Kubernetes 集群的 Node 上，Master 运行在其中一个节点，并且将其配置数据存储到一个 Volume 上去，Slave 运行在各个节点上，并且它不是一直处于运行状态，它会按照需求动态的创建并自动删除。<br>PS : 这种方式的工作流程大致为当 Jenkins Master 接受到 Build 请求时，会根据配置的 Label 动态创建一个运行在 Pod 中的 Jenkins Slave 并注册到 Master 上，当运行完 Job 后，这个 Slave 会被注销并且这个 Pod 也会自动删除，恢复到最初状态</p>
+<p><br></p>
+<p><strong>Q: Kubernets方式部署给我们带来什么好处?</strong></p>
+<ul>
+<li>1.服务高可用，当 Jenkins Master 出现故障时，Kubernetes 会自动创建一个新的 Jenkins Master 容器，并且将 Volume 分配给新创建的容器，保证数据不丢失，从而达到集群服务高可用。</li>
+<li>2.动态伸缩，合理使用资源，每次运行 Job 时，会自动创建一个 Jenkins Slave，Job 完成后，Slave 自动注销并删除容器，资源自动释放，而且 Kubernetes 会根据每个资源的使用情况，动态分配 Slave 到空闲的节点上创建，降低出现因某节点资源利用率高，还排队等待在该节点的情况。</li>
+<li>3.扩展性好，当 Kubernetes 集群的资源严重不足而导致 Job 排队等待时，可以很容易的添加一个 Kubernetes Node 到集群中，从而实现扩展。</li>
+</ul>
+<p><strong>常用 Kubernates + Harbor + Jenkins + gitlab 持续集成方案：</strong><br>Tips : 大致工作流程 <code>手动 /自动构建 -&gt; Jenkins 调度 K8S API -&gt; 动态生成 Jenkins Slave pod -&gt; Slave pod
+拉取 Git 代码／编译／打包镜像 -&gt;推送到镜像仓库 Harbor -&gt; Slave 工作完成，Pod 自动销毁 -&gt; 部署
+到测试或生产 Kubernetes平台</code>。（完全自动化，无需人工干预）</p>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://img2020.cnblogs.com/blog/1829785/202006/1829785-20200603233012120-1568519709.png" target="_blank" title="weiyigeek.CI/CD集成" data-fancybox="images"><img src="https://img2020.cnblogs.com/blog/1829785/202006/1829785-20200603233012120-1568519709.png" alt="weiyigeek.CI/CD集成" title="" class=""></a>
+                <p>weiyigeek.CI/CD集成</p>
+            </figure>
+<p><br></p>
+<h3 id="4-知识扩展"><a href="#4-知识扩展" class="headerlink" title="4.知识扩展"></a>4.知识扩展</h3><p><strong>(1) 官方的Jenkins镜像网站</strong><br>Hub Docker Images : <a href="https://hub.docker.com/r/jenkins/jenkins/" target="_blank" rel="noopener">https://hub.docker.com/r/jenkins/jenkins/</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull jenkins/jenkins</span><br></pre></td></tr></table></figure></p>
+<p><strong>(2) Kubernetes 插件官方帮助</strong><br>kubernetes Plugs : <a href="https://plugins.jenkins.io/kubernetes/" target="_blank" rel="noopener">https://plugins.jenkins.io/kubernetes/</a></p>
+<hr>
+<h2 id="0x01-安装部署"><a href="#0x01-安装部署" class="headerlink" title="0x01 安装部署"></a>0x01 安装部署</h2><h3 id="1-单主机部署配置固定-agent"><a href="#1-单主机部署配置固定-agent" class="headerlink" title="(1) 单主机部署配置固定 agent"></a>(1) 单主机部署配置固定 agent</h3><p>描述: 添加一个普通、固定的节点到Jenkins。之所以叫做“固定”，是因为Jenkins没给这种节点提供更高级的集成方式;</p>
+<ul>
+<li>例如：动态配置。没有其他类型能选择的话可以选择该类型；</li>
+<li>例如，你在添加不受Jenkins管理的物理机、虚拟机等等。</li>
+</ul>
+<p><strong>环境准备:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ lsb_release -a</span><br><span class="line">No LSB modules are available.</span><br><span class="line">Distributor ID: Ubuntu</span><br><span class="line">Description:    Ubuntu 20.04.1 LTS</span><br><span class="line">Release:        20.04</span><br><span class="line">Codename:       focal</span><br><span class="line"></span><br><span class="line">kubernetes 安装的 Jenkins 2.275 : `http://jenkins.weiyigeek.top:8080/`</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h4 id="Java-Web-启动-Agent-方式"><a href="#Java-Web-启动-Agent-方式" class="headerlink" title="Java Web 启动 Agent 方式"></a>Java Web 启动 Agent 方式</h4><p><strong>Q: 如何实现Jenkins分布式构建?</strong></p>
+<ul>
+<li><p>Step 1.开启代理程序的TCP端口：Manage Jenkins -&gt; Configure Global Security(全局安全配置) -&gt; 代理 -&gt; 设置为固定的50000端口</p>
+</li>
+<li><p>Step 2.在 Manage Jenkins -&gt; Manage Nodes 节点列表 -&gt; 新增节点 -&gt; 节点名称（agent-机器名称）-&gt; 添加一个普通、固定的节点到Jenkins;</p>
+</li>
+<li><p>Step 3.此时有两种 Slave 节点连接Master节点的方法 -&gt; (<code>Launch agent by connecting it to the master</code> 或者 <code>通过Java Web启动代理</code>) ;<br>描述: 使用<code>Java Web Start</code>就必须在Agent机器上打开JNLP文件，然后将创建到Jenkins服务器的TCP连接，意味着<code>不需要Jenkins服务器访问Agent 而是Agent能够链接到Jenkins Server即可</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在命令行中启动节点</span></span><br><span class="line">java -jar agent.jar -jnlpUrl http://192.168.12.107:30001/computer/node-1/jenkins-agent.jnlp -secret 52e2e9b37cd4a36310d39984ff461b48ef95b40101a4d34875b7248a7622bd92 -workDir <span class="string">"/home/jenkins"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Run from agent command line, with the secret stored in a file:</span></span><br><span class="line"><span class="built_in">echo</span> 52e2e9b37cd4a36310d39984ff461b48ef95b40101a4d34875b7248a7622bd92 &gt; secret-file</span><br><span class="line">java -jar agent.jar -jnlpUrl http://192.168.12.107:30001/computer/node-1/jenkins-agent.jnlp -secret @secret-file -workDir <span class="string">"/home/jenkins"</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210203194425.png" target="_blank" title="WeiyiGeek.Create-Node" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210203194425.png" alt="WeiyiGeek.Create-Node" title="" class=""></a>
+                <p>WeiyiGeek.Create-Node</p>
+            </figure>
+<ul>
+<li><p>Step 4.采用<code>VM方式</code>运行agent.jar连接到Jenkins的Server节点, 首先我们知道上面的agent.jar和secret信息等;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 我们在一台Linux服务器中下载agent.jar和启动连接。</span></span><br><span class="line">wget http://192.168.12.107:30001/jnlpJars/agent.jar</span><br><span class="line">java -jar agent.jar -jnlpUrl http://192.168.12.107:30001/computer/node-1/jenkins-agent.jnlp -secret 52e2e9b37cd4a36310d39984ff461b48ef95b40101a4d34875b7248a7622bd92 -workDir <span class="string">"/home/jenkins"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 运行后输入以下日志</span></span><br><span class="line">  <span class="comment"># INFO: Agent discovery successful</span></span><br><span class="line">  <span class="comment"># Agent address: 192.168.1.200</span></span><br><span class="line">  <span class="comment"># Agent port:    30081</span></span><br><span class="line">  <span class="comment"># Identity:      0b:a1:da:6c:8e:e2:ca:f8:17:f6:b7:ee:cb:ff:84:0d</span></span><br><span class="line">  <span class="comment"># Jul 24, 2020 5:57:29 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Handshaking</span></span><br><span class="line">  <span class="comment"># Jul 24, 2020 5:57:29 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Connecting to 192.168.1.200:30081</span></span><br><span class="line">  <span class="comment"># Jul 24, 2020 5:57:29 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Trying protocol: JNLP4-connect</span></span><br><span class="line">  <span class="comment"># Jul 24, 2020 5:57:29 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Remote identity confirmed: 0b:a1:da:6c:8e:e2:ca:f8:17:f6:b7:ee:cb:ff:84:0d</span></span><br><span class="line">  <span class="comment"># Jul 24, 2020 5:57:30 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Connected   # 表示 成功</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 使用nohup后台运行agent</span></span><br><span class="line">nohup java -jar agent.jar -jnlpUrl http://192.168.12.107:30001/computer/node-1/jenkins-agent.jnlp -secret 52e2e9b37cd4a36310d39984ff461b48ef95b40101a4d34875b7248a7622bd92 -workDir <span class="string">"/home/jenkins"</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 5.采用<code>Docker方式</code>运行agent.jar连接到Jenkins的Server节点, 此种方式非常简单拉取镜像和启动镜像；<br>参考连接: <a href="https://hub.docker.com/r/jenkins/inbound-agent" target="_blank" rel="noopener">https://hub.docker.com/r/jenkins/inbound-agent</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 拉取镜像</span></span><br><span class="line">docker pull jenkins/inbound-agent:alpine</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 获取 Jenkins 的 SVC 地址(由于我的Master是采用K8s搭建的)</span></span><br><span class="line">~$ kubectl get svc -n devops</span><br><span class="line">  <span class="comment"># NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                          AGE</span></span><br><span class="line">  <span class="comment"># jenkins          NodePort    10.99.55.239     &lt;none&gt;        8080:30001/TCP,50000:32001/TCP   19d</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 启动 agent 镜像(注意参数)</span></span><br><span class="line"><span class="comment"># docker run --init jenkins/inbound-agent -url http://jenkins-server:port -workDir=/home/jenkins/agent &lt;secret&gt; &lt;agent name&gt;</span></span><br><span class="line">~$ docker run -d --name jenkins-agent --init jenkins/inbound-agent:alpine -url http://10.99.55.239:8080 -workDir=/home/jenkins/agent 52e2e9b37cd4a36310d39984ff461b48ef95b40101a4d34875b7248a7622bd92 node-1</span><br><span class="line">c7a00c89f92f16c07d35e572d2ba9da3c17c47a2746e46e3d3225bff418a78f3</span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 查看是否启动成功</span></span><br><span class="line">~$ docker logs c7a00c89f92f16c07d35e572d2ba9da3c17c47a2746e46e3d3225bff418a78f3</span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:39 AM hudson.remoting.jnlp.Main createEngine</span></span><br><span class="line">  <span class="comment"># INFO: Setting up agent: node-1</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:39 AM hudson.remoting.jnlp.Main$CuiListener &lt;init&gt;</span></span><br><span class="line">  <span class="comment"># INFO: Jenkins agent is running in headless mode.</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:40 AM hudson.remoting.Engine startEngine</span></span><br><span class="line">  <span class="comment"># INFO: Using Remoting version: 4.6</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:40 AM org.jenkinsci.remoting.engine.WorkDirManager initializeWorkDir</span></span><br><span class="line">  <span class="comment"># INFO: Using /home/jenkins/agent/remoting as a remoting work directory</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:40 AM org.jenkinsci.remoting.engine.WorkDirManager setupLogging</span></span><br><span class="line">  <span class="comment"># INFO: Both error and output logs will be printed to /home/jenkins/agent/remoting</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:40 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Locating server among [http://10.99.55.239:8080]</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:40 AM org.jenkinsci.remoting.engine.JnlpAgentEndpointResolver resolve</span></span><br><span class="line">  <span class="comment"># INFO: Remoting server accepts the following protocols: [JNLP4-connect, Ping]</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:40 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Agent discovery successful</span></span><br><span class="line">  <span class="comment">#   Agent address: 10.99.55.239</span></span><br><span class="line">  <span class="comment">#   Agent port:    50000</span></span><br><span class="line">  <span class="comment">#   Identity:      8e:c7:1e:e1:39:ee:f4:2a:43:f6:aa:d9:0e:b7:b6:62</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:40 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Handshaking</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:40 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Connecting to 10.99.55.239:50000</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:57:40 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Trying protocol: JNLP4-connect</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:58:00 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Remote identity confirmed: 8e:c7:1e:e1:39:ee:f4:2a:43:f6:aa:d9:0e:b7:b6:62</span></span><br><span class="line">  <span class="comment"># Feb 03, 2021 11:58:02 AM hudson.remoting.jnlp.Main$CuiListener status</span></span><br><span class="line">  <span class="comment"># INFO: Connected   # 表示连接成功</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210203200129.png" target="_blank" title="WeiyiGeek.jenkins-agent-docker" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210203200129.png" alt="WeiyiGeek.jenkins-agent-docker" title="" class=""></a>
+                <p>WeiyiGeek.jenkins-agent-docker</p>
+            </figure>
+<ul>
+<li>Step 6.采用kubernetes集群以静态的方式部署agent，我们首先编写一个部署文件，并且定义好名称空间、镜像、agent配置信息。同样此处我们创建一个node-2的agent节点;</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (0) 在命令行中启动节点参数实例 (注意K8s下面的环境变量)</span></span><br><span class="line">java -jar agent.jar -jnlpUrl http://192.168.12.107:30001/computer/node-2/jenkins-agent.jnlp -secret a06d5adaef69cbaf34e9296d8340d464163ab9f5bbf6b465a290237dc38d45db -workDir <span class="string">"/home/jenkins/agent"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (1) Jenkins-agent-Deployment 资源清单</span></span><br><span class="line">cat &gt; Jenkins-agent-Deployment.yaml &lt;&lt;<span class="string">'END'</span></span><br><span class="line">kind: Deployment</span><br><span class="line">apiVersion: apps/v1</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    k8s-app: jenkins-agent</span><br><span class="line">  name: jenkins-agent-node2</span><br><span class="line">  namespace: devops</span><br><span class="line">spec:</span><br><span class="line">  replicas: 1</span><br><span class="line">  revisionHistoryLimit: 10</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      k8s-app: jenkins-agent-node</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        k8s-app: jenkins-agent-node</span><br><span class="line">      namespace: devops</span><br><span class="line">      name: jenkins-agent-node2</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">        - name: jenkins-agent</span><br><span class="line">          image: jenkins/inbound-agent:alpine</span><br><span class="line">          imagePullPolicy: IfNotPresent</span><br><span class="line">          resources:</span><br><span class="line">            limits:</span><br><span class="line">              cpu: 1000m</span><br><span class="line">              memory: 2Gi</span><br><span class="line">            requests:</span><br><span class="line">              cpu: 500m</span><br><span class="line">              memory: 512Mi</span><br><span class="line">          env:</span><br><span class="line">            - name: JENKINS_URL</span><br><span class="line">              value: http://10.99.55.239:8080</span><br><span class="line">            - name: JENKINS_SECRET</span><br><span class="line">              value: a06d5adaef69cbaf34e9296d8340d464163ab9f5bbf6b465a290237dc38d45db</span><br><span class="line">            - name: JENKINS_AGENT_NAME</span><br><span class="line">              value: node-2</span><br><span class="line">            - name: JENKINS_AGENT_WORKDIR</span><br><span class="line">              value: /home/jenkins/workspace</span><br><span class="line">END</span><br><span class="line"></span><br><span class="line"><span class="comment"># JENKINS_URL: url for the Jenkins server, can be used as a replacement to -url option, or to set alternate jenkins URL</span></span><br><span class="line"><span class="comment"># JENKINS_TUNNEL: (HOST:PORT) connect to this agent host and port instead of Jenkins server, assuming this one do route TCP traffic to Jenkins master</span></span><br><span class="line"><span class="comment"># JENKINS_SECRET: agent secret, if not set as an argument</span></span><br><span class="line"><span class="comment"># JENKINS_AGENT_NAME: agent name, if not set as an argument</span></span><br><span class="line"><span class="comment"># JENKINS_AGENT_WORKDIR: agent work directory, if not set by optional parameter -workDir</span></span><br><span class="line"><span class="comment"># JENKINS_WEB_SOCKET: true if the connection should be made via WebSocket rather than TCP</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2)通过kubectl工具在k8s集群中部署`jenkins agent deployment`并查验状态</span></span><br><span class="line">kubectl create -f Jenkins-agent-Deployment.yaml</span><br><span class="line">  <span class="comment"># deployment.apps/jenkins-agent-node2 created</span></span><br><span class="line"></span><br><span class="line">~/k8s/jenkins$ kubectl get pod -n devops -o wide | grep <span class="string">"jenkins-agent"</span></span><br><span class="line">  <span class="comment"># jenkins-agent-node2-574bb65cb8-5kh7g   1/1     Running   0          29s     172.16.182.237 </span></span><br><span class="line"></span><br><span class="line">~/k8s/jenkins$ kubectl logs -f jenkins-agent-node2-574bb65cb8-5kh7g -n devops</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 在传入JENKINS_URL时建议尽量采用域名的方式;</span></span><br><span class="line">~/k8s/jenkins$ kubectl <span class="built_in">exec</span> -it jenkins-agent-node2-574bb65cb8-5kh7g -n devops bash</span><br><span class="line">  <span class="comment"># bash-5.0$ ping jenkins.devops</span></span><br><span class="line">  <span class="comment"># PING jenkins.devops (10.99.55.239): 56 data bytes</span></span><br><span class="line">  <span class="comment"># bash-5.0$ ping jenkins.devops.svc.cluster.local</span></span><br><span class="line">  <span class="comment"># PING jenkins.devops.svc.cluster.local (10.99.55.239): 56 data bytes</span></span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210203202042.png" target="_blank" title="WeiyiGeek.kubernetes-jenkins-agent" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210203202042.png" alt="WeiyiGeek.kubernetes-jenkins-agent" title="" class=""></a>
+                <p>WeiyiGeek.kubernetes-jenkins-agent</p>
+            </figure>
+<p><br></p>
+<h4 id="Launch-agents-via-SSH-启动-Agent-方式"><a href="#Launch-agents-via-SSH-启动-Agent-方式" class="headerlink" title="Launch agents via SSH 启动 Agent 方式"></a>Launch agents via SSH 启动 Agent 方式</h4><p>描述: 当前Jenkins 2.277版本默认是不支持SSH 启动 Agent 方式, 我们需要安装ssh Agent插件;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SSH Agent - This plugin allows you to provide SSH credentials to builds via a ssh-agent <span class="keyword">in</span> Jenkins</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<ul>
+<li><p>Step 1.首先创建一个凭据存储服务器认证信息。</p>
+</li>
+<li><p>Step 2.之后创建一个新的节点添加以下配置。配置ssh的主机和认证信息最后保存(agent配置完成)。</p>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210204090727.png" target="_blank" title="WeiyiGeek.ssh-agent" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210204090727.png" alt="WeiyiGeek.ssh-agent" title="" class=""></a>
+                <p>WeiyiGeek.ssh-agent</p>
+            </figure>
+<ul>
+<li>Step 3.保存后创建一个测试的Pipeline项目<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">pipeline &#123;</span><br><span class="line">  <span class="comment">// 此处agent指令是必须的</span></span><br><span class="line">  agent none</span><br><span class="line">  stages &#123;</span><br><span class="line">    <span class="comment">// docker 构建的</span></span><br><span class="line">    stage (<span class="string">'node-1'</span>)&#123;</span><br><span class="line">      agent &#123;</span><br><span class="line">        node &#123; label <span class="string">"docker-jenkins-slave"</span>&#125;</span><br><span class="line">      &#125;</span><br><span class="line">      steps &#123;</span><br><span class="line">        echo <span class="string">"----- node-1 ------"</span></span><br><span class="line">        sh <span class="string">"hostname &amp;&amp; ifconfig"</span></span><br><span class="line">        sh <span class="string">"env"</span></span><br><span class="line">        echo <span class="string">"----- node-1 end------"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// k8s 集群中构建的</span></span><br><span class="line">     stage (<span class="string">'node-2'</span>)&#123;</span><br><span class="line">      agent &#123;</span><br><span class="line">        node &#123; label <span class="string">"k8s-node-2"</span>&#125;</span><br><span class="line">      &#125;</span><br><span class="line">      steps &#123;</span><br><span class="line">        echo <span class="string">"----- node-2 ------"</span></span><br><span class="line">        sh <span class="string">"hostname &amp;&amp; ifconfig"</span></span><br><span class="line">        sh <span class="string">"env"</span></span><br><span class="line">        echo <span class="string">"----- node-2 end------"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>输出结果:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br></pre></td><td class="code"><pre><span class="line">Started by user Jenkins 管理员</span><br><span class="line">Running <span class="keyword">in</span> Durability level: MAX_SURVIVABILITY</span><br><span class="line">[Pipeline] Start of Pipeline</span><br><span class="line">[Pipeline] stage</span><br><span class="line"></span><br><span class="line">[Pipeline] &#123; (node-1)</span><br><span class="line">Running on node-1 <span class="keyword">in</span> /home/jenkins/workspace/pineline-use-node</span><br><span class="line">[Pipeline] <span class="built_in">echo</span></span><br><span class="line">----- node-1 ------</span><br><span class="line">[Pipeline] sh</span><br><span class="line">+ hostname</span><br><span class="line">c7a00c89f92f</span><br><span class="line">+ ifconfig</span><br><span class="line">eth0      Link encap:Ethernet  HWaddr 02:42:AC:11:00:02  </span><br><span class="line">          inet addr:172.17.0.2  Bcast:172.17.255.255  Mask:255.255.0.0</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:10783 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:14915 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0 </span><br><span class="line">          RX bytes:38664627 (36.8 MiB)  TX bytes:5669411 (5.4 MiB)</span><br><span class="line"></span><br><span class="line">lo        Link encap:Local Loopback  </span><br><span class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000 </span><br><span class="line">          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)</span><br><span class="line"></span><br><span class="line">[Pipeline] sh</span><br><span class="line">  <span class="comment"># + env</span></span><br><span class="line">  <span class="comment"># JENKINS_HOME=/var/jenkins_home</span></span><br><span class="line">  <span class="comment"># LANGUAGE=en_US:en</span></span><br><span class="line">  <span class="comment"># RUN_CHANGES_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/3/display/redirect?page=changes</span></span><br><span class="line">  <span class="comment"># HOSTNAME=c7a00c89f92f</span></span><br><span class="line">  <span class="comment"># NODE_LABELS=docker-jenkins-slave node-1</span></span><br><span class="line">  <span class="comment"># HUDSON_URL=http://192.168.12.107:30001/</span></span><br><span class="line">  <span class="comment"># SHLVL=3</span></span><br><span class="line">  <span class="comment"># HOME=/home/jenkins</span></span><br><span class="line">  <span class="comment"># BUILD_URL=http://192.168.12.107:30001/job/pineline-use-node/3/</span></span><br><span class="line">  <span class="comment"># HUDSON_COOKIE=de8bbafb-13fd-42d5-99a4-7ffaebf9a3e2</span></span><br><span class="line">  <span class="comment"># JENKINS_SERVER_COOKIE=durable-8dd62800688ecbc8d9c9e78a15c49a2d</span></span><br><span class="line">  <span class="comment"># WORKSPACE=/home/jenkins/workspace/pineline-use-node</span></span><br><span class="line">  <span class="comment"># JAVA_VERSION=jdk8u272-b10</span></span><br><span class="line">  <span class="comment"># NODE_NAME=node-1</span></span><br><span class="line">  <span class="comment"># RUN_ARTIFACTS_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/3/display/redirect?page=artifacts</span></span><br><span class="line">  <span class="comment"># STAGE_NAME=node-1</span></span><br><span class="line">  <span class="comment"># EXECUTOR_NUMBER=0</span></span><br><span class="line">  <span class="comment"># RUN_TESTS_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/3/display/redirect?page=tests</span></span><br><span class="line">  <span class="comment"># BUILD_DISPLAY_NAME=#3</span></span><br><span class="line">  <span class="comment"># HUDSON_HOME=/var/jenkins_home</span></span><br><span class="line">  <span class="comment"># AGENT_WORKDIR=/home/jenkins/agent</span></span><br><span class="line">  <span class="comment"># JOB_BASE_NAME=pineline-use-node</span></span><br><span class="line">  <span class="comment"># PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</span></span><br><span class="line">  <span class="comment"># BUILD_ID=3</span></span><br><span class="line">  <span class="comment"># BUILD_TAG=jenkins-pineline-use-node-3</span></span><br><span class="line">  <span class="comment"># LANG=en_US.UTF-8</span></span><br><span class="line">  <span class="comment"># JENKINS_URL=http://192.168.12.107:30001/</span></span><br><span class="line">  <span class="comment"># JOB_URL=http://192.168.12.107:30001/job/pineline-use-node/</span></span><br><span class="line">  <span class="comment"># BUILD_NUMBER=3</span></span><br><span class="line">  <span class="comment"># JENKINS_NODE_COOKIE=a822e652-5870-44ef-b671-d6c1f2afaffb</span></span><br><span class="line">  <span class="comment"># RUN_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/3/display/redirect</span></span><br><span class="line">  <span class="comment"># HUDSON_SERVER_COOKIE=04b411a999365c6a</span></span><br><span class="line">  <span class="comment"># JOB_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/display/redirect</span></span><br><span class="line">  <span class="comment"># JOB_NAME=pineline-use-node</span></span><br><span class="line">  <span class="comment"># LC_ALL=en_US.UTF-8</span></span><br><span class="line">  <span class="comment"># JAVA_HOME=/opt/java/openjdk</span></span><br><span class="line">  <span class="comment"># PWD=/home/jenkins/workspace/pineline-use-node</span></span><br><span class="line">  <span class="comment"># WORKSPACE_TMP=/home/jenkins/workspace/pineline-use-node@tmp</span></span><br><span class="line">  <span class="comment"># GITLAB_OBJECT_KIND=none</span></span><br><span class="line">[Pipeline] <span class="built_in">echo</span></span><br><span class="line">----- node-1 end------</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[Pipeline] stage</span><br><span class="line">[Pipeline] &#123; (node-2)</span><br><span class="line">Running on node-2 <span class="keyword">in</span> /home/jenkins/agent/workspace/pineline-use-node</span><br><span class="line">[Pipeline] &#123;</span><br><span class="line">[Pipeline] <span class="built_in">echo</span></span><br><span class="line">----- node-2 ------</span><br><span class="line">[Pipeline] sh</span><br><span class="line">+ hostname</span><br><span class="line">jenkins-agent-node2-574bb65cb8-5kh7g</span><br><span class="line">+ ifconfig</span><br><span class="line">eth0      Link encap:Ethernet  HWaddr 5E:A7:08:EA:68:0F  </span><br><span class="line">          inet addr:172.16.182.237  Bcast:172.16.182.237  Mask:255.255.255.255</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1480  Metric:1</span><br><span class="line">          RX packets:8149 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:11311 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:0 </span><br><span class="line">          RX bytes:30953238 (29.5 MiB)  TX bytes:4382625 (4.1 MiB)</span><br><span class="line"></span><br><span class="line">lo        Link encap:Local Loopback  </span><br><span class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000 </span><br><span class="line">          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)</span><br><span class="line"></span><br><span class="line">[Pipeline] sh</span><br><span class="line">  <span class="comment"># + env</span></span><br><span class="line">  <span class="comment"># JENKINS_HOME=/var/jenkins_home</span></span><br><span class="line">  <span class="comment"># JENKINS_SECRET=a06d5adaef69cbaf34e9296d8340d464163ab9f5bbf6b465a290237dc38d45db</span></span><br><span class="line">  <span class="comment"># agentType=k8s</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT=tcp://10.96.0.1:443</span></span><br><span class="line">  <span class="comment"># KUBERNETES_SERVICE_PORT=443</span></span><br><span class="line">  <span class="comment"># LANGUAGE=en_US:en</span></span><br><span class="line">  <span class="comment"># RUN_CHANGES_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/3/display/redirect?page=changes</span></span><br><span class="line">  <span class="comment"># SONARQUBE_PORT_9000_TCP_ADDR=10.100.233.217</span></span><br><span class="line">  <span class="comment"># HOSTNAME=jenkins-agent-node2-574bb65cb8-5kh7g</span></span><br><span class="line">  <span class="comment"># SHLVL=3</span></span><br><span class="line">  <span class="comment"># NODE_LABELS=k8s-node-2 node-2</span></span><br><span class="line">  <span class="comment"># HUDSON_URL=http://192.168.12.107:30001/</span></span><br><span class="line">  <span class="comment"># HOME=/home/jenkins</span></span><br><span class="line">  <span class="comment"># SONARQUBE_PORT_9000_TCP_PORT=9000</span></span><br><span class="line">  <span class="comment"># BUILD_URL=http://192.168.12.107:30001/job/pineline-use-node/3/</span></span><br><span class="line">  <span class="comment"># SONARQUBE_PORT_9000_TCP_PROTO=tcp</span></span><br><span class="line">  <span class="comment"># HUDSON_COOKIE=c088e600-327b-4e78-a80e-4ba7bd7254f3</span></span><br><span class="line">  <span class="comment"># JENKINS_SERVER_COOKIE=durable-4d6313311ef99675e2bfd51284774a87</span></span><br><span class="line">  <span class="comment"># JENKINS_AGENT_WORKDIR=/home/jenkins/workspace</span></span><br><span class="line">  <span class="comment"># SONARQUBE_SERVICE_HOST=10.100.233.217</span></span><br><span class="line">  <span class="comment"># WORKSPACE=/home/jenkins/agent/workspace/pineline-use-node</span></span><br><span class="line">  <span class="comment"># JAVA_VERSION=jdk8u272-b10</span></span><br><span class="line">  <span class="comment"># NODE_NAME=node-2</span></span><br><span class="line">  <span class="comment"># SONARQUBE_PORT_9000_TCP=tcp://10.100.233.217:9000</span></span><br><span class="line">  <span class="comment"># RUN_ARTIFACTS_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/3/display/redirect?page=artifacts</span></span><br><span class="line">  <span class="comment"># STAGE_NAME=node-2</span></span><br><span class="line">  <span class="comment"># EXECUTOR_NUMBER=1</span></span><br><span class="line">  <span class="comment"># SONARQUBE_SERVICE_PORT=9000</span></span><br><span class="line">  <span class="comment"># SONARQUBE_PORT=tcp://10.100.233.217:9000</span></span><br><span class="line">  <span class="comment"># RUN_TESTS_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/3/display/redirect?page=tests</span></span><br><span class="line">  <span class="comment"># BUILD_DISPLAY_NAME=#3</span></span><br><span class="line">  <span class="comment"># JENKINS_PORT_50000_TCP_ADDR=10.99.55.239</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1</span></span><br><span class="line">  <span class="comment"># HUDSON_HOME=/var/jenkins_home</span></span><br><span class="line">  <span class="comment"># AGENT_WORKDIR=/home/jenkins/agent</span></span><br><span class="line">  <span class="comment"># JOB_BASE_NAME=pineline-use-node</span></span><br><span class="line">  <span class="comment"># PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</span></span><br><span class="line">  <span class="comment"># JENKINS_SERVICE_HOST=10.99.55.239</span></span><br><span class="line">  <span class="comment"># SONARQUBE_SERVICE_PORT_SONARQUBE=9000</span></span><br><span class="line">  <span class="comment"># JENKINS_PORT_8080_TCP_ADDR=10.99.55.239</span></span><br><span class="line">  <span class="comment"># BUILD_ID=3</span></span><br><span class="line">  <span class="comment"># JENKINS_PORT_50000_TCP_PORT=50000</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT_443_TCP_PORT=443</span></span><br><span class="line">  <span class="comment"># JENKINS_SERVICE_PORT_AGENT=50000</span></span><br><span class="line">  <span class="comment"># JENKINS_PORT_50000_TCP_PROTO=tcp</span></span><br><span class="line">  <span class="comment"># BUILD_TAG=jenkins-pineline-use-node-3</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT_443_TCP_PROTO=tcp</span></span><br><span class="line">  <span class="comment"># JENKINS_URL=http://192.168.12.107:30001/</span></span><br><span class="line">  <span class="comment"># JENKINS_PORT_8080_TCP_PORT=8080</span></span><br><span class="line">  <span class="comment"># LANG=en_US.UTF-8</span></span><br><span class="line">  <span class="comment"># JOB_URL=http://192.168.12.107:30001/job/pineline-use-node/</span></span><br><span class="line">  <span class="comment"># JENKINS_AGENT_NAME=node-2</span></span><br><span class="line">  <span class="comment"># JENKINS_PORT_8080_TCP_PROTO=tcp</span></span><br><span class="line">  <span class="comment"># BUILD_NUMBER=3</span></span><br><span class="line">  <span class="comment"># JENKINS_NODE_COOKIE=243aa3e8-0de2-4297-b617-8764795f5cab</span></span><br><span class="line">  <span class="comment"># RUN_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/3/display/redirect</span></span><br><span class="line">  <span class="comment"># JENKINS_PORT=tcp://10.99.55.239:8080</span></span><br><span class="line">  <span class="comment"># JENKINS_SERVICE_PORT=8080</span></span><br><span class="line">  <span class="comment"># HUDSON_SERVER_COOKIE=04b411a999365c6a</span></span><br><span class="line">  <span class="comment"># JOB_DISPLAY_URL=http://192.168.12.107:30001/job/pineline-use-node/display/redirect</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443</span></span><br><span class="line">  <span class="comment"># JENKINS_PORT_50000_TCP=tcp://10.99.55.239:50000</span></span><br><span class="line">  <span class="comment"># KUBERNETES_SERVICE_PORT_HTTPS=443</span></span><br><span class="line">  <span class="comment"># JOB_NAME=pineline-use-node</span></span><br><span class="line">  <span class="comment"># LC_ALL=en_US.UTF-8</span></span><br><span class="line">  <span class="comment"># PWD=/home/jenkins/agent/workspace/pineline-use-node</span></span><br><span class="line">  <span class="comment"># JENKINS_PORT_8080_TCP=tcp://10.99.55.239:8080</span></span><br><span class="line">  <span class="comment"># JAVA_HOME=/opt/java/openjdk</span></span><br><span class="line">  <span class="comment"># KUBERNETES_SERVICE_HOST=10.96.0.1</span></span><br><span class="line">  <span class="comment"># JENKINS_SERVICE_PORT_WEB=8080</span></span><br><span class="line">  <span class="comment"># WORKSPACE_TMP=/home/jenkins/agent/workspace/pineline-use-node@tmp</span></span><br><span class="line">  <span class="comment"># GITLAB_OBJECT_KIND=none</span></span><br><span class="line">[Pipeline] <span class="built_in">echo</span></span><br><span class="line">----- node-2 end------</span><br><span class="line">[Pipeline] End of Pipeline</span><br><span class="line">Finished: SUCCESS</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210204105425.png" target="_blank" title="WeiyiGeek.Pipeline流水线选择" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210204105425.png" alt="WeiyiGeek.Pipeline流水线选择" title="" class=""></a>
+                <p>WeiyiGeek.Pipeline流水线选择</p>
+            </figure>
+<hr>
+<h3 id="2-集群搭建Jenkins-Master-节点"><a href="#2-集群搭建Jenkins-Master-节点" class="headerlink" title="(2) 集群搭建Jenkins Master 节点"></a>(2) 集群搭建Jenkins Master 节点</h3><p><strong>环境准备:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- Kubernetes 集群 ：<span class="string">"v1.19.6"</span></span><br><span class="line">- NFS : 数据持久化最常用的共享存储</span><br><span class="line">- Jenkins 镜像 : jenkins/jenkins:2.277-alpine</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="2-1-基础环境"><a href="#2-1-基础环境" class="headerlink" title="2.1) 基础环境"></a>2.1) 基础环境</h4><h5 id="NFS-Network-File-System-环境"><a href="#NFS-Network-File-System-环境" class="headerlink" title="NFS (Network File System) 环境"></a>NFS (Network File System) 环境</h5><p>描述：它最大的功能就是可以通过网络，让不同的机器、不同的操作系统可以共享彼此的文件。我们可以利用NFS共享Jenkins运行的配置文件、Maven的仓库依赖文件等。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># NFS 客户端安装: Master&amp;node节点都执行</span></span><br><span class="line">~$ ansible dtk8s -m shell -a <span class="string">"sudo apt-get install nfs-common rpcbind -y"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看Windows 2008 R2搭建的NFS服务端</span></span><br><span class="line">showmount -e 192.168.1.31</span><br><span class="line">Export list <span class="keyword">for</span> 192.168.1.31:</span><br><span class="line">/nask8sapp  (everyone)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安全配置 (设置指定的作用域)</span></span><br><span class="line">基于 Unix 软件的 Portmap 的入站规则，允许 Portmap 服务的流量。[TCP 111] - 设置其作用域</span><br><span class="line">NFS 服务器(NFS-UDP-In) NFS 服务器允许 NFS 通信的入站规则。[UDP 2049] - 设置其作用域</span><br><span class="line">NFS 服务器(NFS-TCP-In) NFS 服务器允许 NFS 通信的入站规则。[TCP 2049] - 设置其作用域</span><br><span class="line"></span><br><span class="line"><span class="comment"># 临时与永久挂载</span></span><br><span class="line">ansible dtk8s -m shell -a <span class="string">"sudo mkdir /nfsdisk-31"</span>  <span class="comment"># 目录创建</span></span><br><span class="line">sudo mount.nfs 192.168.12.31:/nask8sapp /nfsdisk-31/</span><br><span class="line">ls /nfsdisk-31/</span><br><span class="line"><span class="comment"># /nfsdisk-31/1.txt </span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 通过 /etc/fstab 挂载</span></span><br><span class="line">ansible dtk8s -m shell -a <span class="string">'echo "192.168.12.31:/nask8sapp /nfsdisk-31 nfs defaults 0 0"|sudo tee -a /etc/fstab'</span></span><br><span class="line"><span class="comment"># weiyigeek-* | CHANGED | rc=0 &gt;&gt;</span></span><br><span class="line"><span class="comment"># 192.168.12.31:/nask8sapp /nfsdisk-31 nfs defaults 0 0</span></span><br><span class="line"><span class="comment"># ...</span></span><br><span class="line">ansible dtk8s -m shell -a <span class="string">'sudo mount -a'</span></span><br><span class="line">ansible dtk8s -m shell -a <span class="string">'mount | grep "nfs"'</span></span><br><span class="line"><span class="comment"># weiyigeek-* | CHANGED | rc=0 &gt;&gt;</span></span><br><span class="line"><span class="comment"># 192.168.12.31:/nask8sapp on /nfsdisk-31 type nfs (rw,relatime,vers=3,rsize=32768,wsize=32768,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,mountaddr=192.168.12.31,mountvers=3,mountport=1048,mountproto=udp,local_lock=none,addr=192.168.12.31)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 至此下一步我们需要在k8s集群中进行配置 NFS client provisioner</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="NFS-Client-Provisioner-环境"><a href="#NFS-Client-Provisioner-环境" class="headerlink" title="NFS Client Provisioner 环境"></a>NFS Client Provisioner 环境</h5><p>注意: 安装配置是一个Kubernetes的简易NFS的外部provisioner，本身不提供NFS，需要现有 的NFS服务器提供存储。<br>nfs-client-provisioner 构建的yaml文件:<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; nfs-client-provisioner.yaml  &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"># NFS 驱动编排的资源清单</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="attr">  strategy:</span>          <span class="comment"># 策略</span></span><br><span class="line"><span class="attr">    type:</span> <span class="string">Recreate</span>   <span class="comment"># 再生(循环使用)</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      serviceAccountName:</span> <span class="string">nfs-client-provisioner</span>   <span class="comment"># 服务帐户名称</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">registry.cn-hangzhou.aliyuncs.com/open-ali/nfs-client-provisioner</span> </span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">timezone</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/etc/localtime</span>                <span class="comment"># 时区设置</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">nfs-client-root</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/persistentvolumes</span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">PROVISIONER_NAME</span>                   <span class="comment"># StorageClass 对象中定义的 provisioner 键需要保持一致</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">fuseim.pri/ifs</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">NFS_SERVER</span></span><br><span class="line"><span class="attr">          value:</span> <span class="number">192.168</span><span class="number">.12</span><span class="number">.31</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">NFS_PATH</span></span><br><span class="line"><span class="attr">          value:</span> <span class="string">/nask8sapp</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">timezone</span>                            <span class="comment"># 时区定义</span></span><br><span class="line"><span class="attr">        hostPath:</span></span><br><span class="line"><span class="attr">          path:</span> <span class="string">/usr/share/zoneinfo/Asia/Shanghai</span>   </span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nfs-client-root</span>                     <span class="comment"># 存储卷</span></span><br><span class="line"><span class="attr">        nfs:</span></span><br><span class="line"><span class="attr">          server:</span> <span class="number">192.168</span><span class="number">.12</span><span class="number">.31</span></span><br><span class="line"><span class="attr">          path:</span> <span class="string">/nask8sapp</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># Storageclass 部署文件</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">storage.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StorageClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">managed-nfs-storage</span>    <span class="comment"># 重要 StorageClass Name绑定</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="string">storageclass.kubernetes.io/is-default-class:</span> <span class="string">"true"</span>   <span class="comment">#设置其为默认存储后端</span></span><br><span class="line"><span class="attr">provisioner:</span> <span class="string">fuseim.pri/ifs</span>   <span class="comment"># 或选择另一个名称，必须与NFS 驱动编排匹配部署的 env PROVISIONER_NAME</span></span><br><span class="line"><span class="attr">parameters:</span></span><br><span class="line"><span class="attr">  archiveOnDelete:</span> <span class="string">"false"</span>    <span class="comment"># 删除pvc后，后端存储上的pv也自动删除</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># nfs-client-provisioner - rbac授权资源清单</span></span><br><span class="line"><span class="string">cat</span> <span class="string">&gt; nfs-client-rbac.yaml&lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nfs-client-provisioner-runner</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["persistentvolumes"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"create"</span><span class="string">,</span> <span class="string">"delete"</span><span class="string">]</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["persistentvolumeclaims"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"update"</span><span class="string">]</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">["storage.k8s.io"]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["storageclasses"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">]</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["events"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["create",</span> <span class="string">"update"</span><span class="string">,</span> <span class="string">"patch"</span><span class="string">]</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">run-nfs-client-provisioner</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nfs-client-provisioner-runner</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">leader-locking-nfs-client-provisioner</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">- apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">  resources:</span> <span class="string">["endpoints"]</span></span><br><span class="line"><span class="attr">  verbs:</span> <span class="string">["get",</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"create"</span><span class="string">,</span> <span class="string">"update"</span><span class="string">,</span> <span class="string">"patch"</span><span class="string">]</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">leader-locking-nfs-client-provisioner</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nfs-client-provisioner</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">default</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">Role</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">leader-locking-nfs-client-provisioner</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
+<p>执行 &amp; 运行pod<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">~/k8s/nfs-client-provisioner$ ls</span><br><span class="line"><span class="comment"># nfs-client-provisioner.yaml  nfs-client-rbac.yaml</span></span><br><span class="line"></span><br><span class="line">~/k8s/nfs-client-provisioner$ kubectl create -f .</span><br><span class="line"><span class="comment"># deployment.apps/nfs-client-provisioner created</span></span><br><span class="line"><span class="comment"># storageclass.storage.k8s.io/managed-nfs-storage created</span></span><br><span class="line"><span class="comment"># serviceaccount/nfs-client-provisioner created</span></span><br><span class="line"><span class="comment"># clusterrole.rbac.authorization.k8s.io/nfs-client-provisioner-runner created</span></span><br><span class="line"><span class="comment"># clusterrolebinding.rbac.authorization.k8s.io/run-nfs-client-provisioner created</span></span><br><span class="line"><span class="comment"># role.rbac.authorization.k8s.io/leader-locking-nfs-client-provisioner created</span></span><br><span class="line"><span class="comment"># rolebinding.rbac.authorization.k8s.io/leader-locking-nfs-client-provisioner created</span></span><br><span class="line"></span><br><span class="line">$ kubectl get storageclasses.storage.k8s.io</span><br><span class="line"><span class="comment"># NAME                            PROVISIONER      RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE</span></span><br><span class="line"><span class="comment"># managed-nfs-storage (default)   fuseim.pri/ifs   Delete          Immediate           false                  53s</span></span><br><span class="line"></span><br><span class="line">$ kubectl get pod</span><br><span class="line"><span class="comment"># NAME                                     READY   STATUS    RESTARTS   AGE</span></span><br><span class="line"><span class="comment"># nfs-client-provisioner-57946d456-b4s7l   1/1     Running   0          22s</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h4 id="2-2-搭建流程"><a href="#2-2-搭建流程" class="headerlink" title="2.2) 搭建流程"></a>2.2) 搭建流程</h4><h5 id="资源清单"><a href="#资源清单" class="headerlink" title="资源清单"></a>资源清单</h5><ul>
+<li><strong>Step 1.创建PV、PVC，为Jenkins提供数据持久化</strong><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; jenkins-PVC.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Namespace</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">devops</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolumeClaim</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">jenkins-pvc</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">devops</span></span><br><span class="line"><span class="attr">  annotations:</span>   <span class="comment"># 空间标注</span></span><br><span class="line">    <span class="string">volume.beta.kubernetes.io/storage-class:</span> <span class="string">"managed-nfs-storage"</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  accessModes:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">ReadWriteMany</span></span><br><span class="line"><span class="attr">  resources:</span></span><br><span class="line"><span class="attr">    requests:</span></span><br><span class="line"><span class="attr">      storage:</span> <span class="number">5</span><span class="string">Gi</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li><strong>Step 2.创建角色授权</strong><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; jenkins-role.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">jenkins-sa</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">devops</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">jenkins-cr</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">["extensions",</span> <span class="string">"apps"</span><span class="string">]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["deployments"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["create",</span> <span class="string">"delete"</span><span class="string">,</span> <span class="string">"get"</span><span class="string">,</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"patch"</span><span class="string">,</span> <span class="string">"update"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["services"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["create",</span> <span class="string">"delete"</span><span class="string">,</span> <span class="string">"get"</span><span class="string">,</span> <span class="string">"list"</span><span class="string">,</span> <span class="string">"watch"</span><span class="string">,</span> <span class="string">"patch"</span><span class="string">,</span> <span class="string">"update"</span><span class="string">]</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["pods"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["create","delete","get","list","patch","update","watch"]</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["pods/exec"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["create","delete","get","list","patch","update","watch"]</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["pods/log"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["get","list","watch"]</span></span><br><span class="line"><span class="attr">  - apiGroups:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">    resources:</span> <span class="string">["secrets"]</span></span><br><span class="line"><span class="attr">    verbs:</span> <span class="string">["get"]</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">jenkins-crd</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">jenkins-cr</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">jenkins-sa</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">devops</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li><strong>Step 3.在Kubernetes中Deployment部署Jenkins以及Service资源创建</strong><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; jenkins-deployment.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">jenkins</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">devops</span> </span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">jenkins</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">jenkins</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      terminationGracePeriodSeconds:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">      serviceAccount:</span> <span class="string">jenkins-sa</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">jenkins</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">jenkins/jenkins:2.275-alpine</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">JAVA_OPTS</span></span><br><span class="line"><span class="attr">          value:</span> <span class="attr">-XshowSettings:vm</span> <span class="bullet">-Dhudson.slaves.NodeProvisioner.initialDelay=0</span> <span class="bullet">-Dhudson.slaves.NodeProvisioner.MARGIN=50</span> <span class="bullet">-Dhudson.slaves.NodeProvisioner.MARGIN0=0.85</span> <span class="bullet">-Duser.timezone=Asia/Shanghai</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">8080</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">          protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">50000</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">agent</span></span><br><span class="line"><span class="attr">          protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">        resources:</span></span><br><span class="line"><span class="attr">          limits:</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="number">1000</span><span class="string">m</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">1</span><span class="string">Gi</span></span><br><span class="line"><span class="attr">          requests:</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="number">500</span><span class="string">m</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">512</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">        livenessProbe:</span></span><br><span class="line"><span class="attr">          httpGet:</span></span><br><span class="line"><span class="attr">            path:</span> <span class="string">/login</span></span><br><span class="line"><span class="attr">            port:</span> <span class="number">8080</span></span><br><span class="line"><span class="attr">          initialDelaySeconds:</span> <span class="number">60</span></span><br><span class="line"><span class="attr">          timeoutSeconds:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">          failureThreshold:</span> <span class="number">12</span></span><br><span class="line"><span class="attr">        readinessProbe:</span></span><br><span class="line"><span class="attr">          httpGet:</span></span><br><span class="line"><span class="attr">            path:</span> <span class="string">/login</span></span><br><span class="line"><span class="attr">            port:</span> <span class="number">8080</span></span><br><span class="line"><span class="attr">          initialDelaySeconds:</span> <span class="number">60</span></span><br><span class="line"><span class="attr">          timeoutSeconds:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">          failureThreshold:</span> <span class="number">12</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">jenkinshome</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/var/jenkins_home</span></span><br><span class="line"><span class="attr">      securityContext:</span></span><br><span class="line"><span class="attr">        fsGroup:</span> <span class="number">1000</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">jenkinshome</span></span><br><span class="line"><span class="attr">        persistentVolumeClaim:</span></span><br><span class="line"><span class="attr">          claimName:</span> <span class="string">jenkins-pvc</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">jenkins</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">devops</span> </span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">jenkins</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">jenkins</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">NodePort</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">8080</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">    nodePort:</span> <span class="number">30001</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">agent</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">50000</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="string">agent</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<h5 id="创建查看"><a href="#创建查看" class="headerlink" title="创建查看"></a>创建查看</h5><ul>
+<li><strong>Step 4.采用kubectl命令创建上面的资源清单</strong></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) PVC 持久卷创建</span></span><br><span class="line">$ kubectl create -f jenkins-PVC.yaml</span><br><span class="line">  <span class="comment"># namespace/devops created</span></span><br><span class="line">  <span class="comment"># persistentvolumeclaim/jenkins-pvc created</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) Jenkins 在集群中角色创建绑定</span></span><br><span class="line">kubectl create -f jenkins-role.yaml</span><br><span class="line">  <span class="comment"># serviceaccount/jenkins-sa created</span></span><br><span class="line">  <span class="comment"># clusterrole.rbac.authorization.k8s.io/jenkins-cr created</span></span><br><span class="line">  <span class="comment"># clusterrolebinding.rbac.authorization.k8s.io/jenkins-crd created</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 部署 Jenkins deployment 和 SVC </span></span><br><span class="line">kubectl create -f jenkins-deployment.yaml</span><br><span class="line">  <span class="comment"># deployment.apps/jenkins created</span></span><br><span class="line">  <span class="comment"># service/jenkins created</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li><strong>Step 5.查看创建的PVC、POD以及SVC</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">~$ kubectl get pvc,pod,svc -n devops</span><br><span class="line">  <span class="comment"># NAME                                STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          AGE</span></span><br><span class="line">  <span class="comment"># persistentvolumeclaim/jenkins-pvc   Bound    pvc-3cd916df-91cb-470d-b9ef-e9b4f115223d   5Gi        RWX            managed-nfs-storage   23m</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># NAME                          READY   STATUS    RESTARTS   AGE</span></span><br><span class="line">  <span class="comment"># pod/jenkins-689775956-nph9z   1/1     Running   0          15m</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># NAME              TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE</span></span><br><span class="line">  <span class="comment"># service/jenkins   NodePort   10.104.214.1   &lt;none&gt;        8080:30001/TCP,50000:30465/TCP   15m</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li><strong>Step 6.我们进入Pod容器内部进行查看</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl <span class="built_in">exec</span> -n devops -it jenkins-7db7878f8f-78tmk bash</span><br><span class="line">$ ps aux   <span class="comment"># 可看到有两个进程正在运行</span></span><br><span class="line"><span class="comment"># PID   USER     TIME  COMMAND</span></span><br><span class="line"><span class="comment"># 1 jenkins   0:39 /sbin/tini -- /usr/local/bin/jenkins.sh  # 主运行文件</span></span><br><span class="line"><span class="comment"># 6 jenkins  57:00 java -Duser.home=/var/jenkins_home -XshowSettings:vm -Dhudson.slaves.NodeProvisioner.initialDelay=0 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85 -Duser.timezone=Asia/Shanghai -Djenkins.model.Jenkins.slaveAgentPort=50000 -jar /usr/share/jenkins/jenkins.war   # 运行 jenkins.war 的命令</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>查看容器入口执行文件: cat <code>/usr/local/bin/jenkins.sh</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#! /bin/bash -e</span></span><br><span class="line">: <span class="string">"<span class="variable">$&#123;JENKINS_WAR:="/usr/share/jenkins/jenkins.war"&#125;</span>"</span></span><br><span class="line">: <span class="string">"<span class="variable">$&#123;JENKINS_HOME:="/var/jenkins_home"&#125;</span>"</span></span><br><span class="line">: <span class="string">"<span class="variable">$&#123;COPY_REFERENCE_FILE_LOG:="$&#123;JENKINS_HOME&#125;</span>/copy_reference_file.log"</span>&#125;<span class="string">"</span></span><br><span class="line"><span class="string">: "</span><span class="variable">$&#123;REF:="/usr/share/jenkins/ref"&#125;</span><span class="string">"</span></span><br><span class="line"><span class="string">touch "</span><span class="variable">$&#123;COPY_REFERENCE_FILE_LOG&#125;</span><span class="string">" || &#123; echo "</span>Can not write to <span class="variable">$&#123;COPY_REFERENCE_FILE_LOG&#125;</span>. Wrong volume permissions?<span class="string">"; exit 1; &#125;</span></span><br><span class="line"><span class="string">echo "</span>--- Copying files at $(date)<span class="string">" &gt;&gt; "</span><span class="variable">$COPY_REFERENCE_FILE_LOG</span><span class="string">"</span></span><br><span class="line"><span class="string">find "</span><span class="variable">$&#123;REF&#125;</span><span class="string">" \( -type f -o -type l \) -exec bash -c '. /usr/local/bin/jenkins-support; for arg; do copy_reference_file "</span><span class="variable">$arg</span><span class="string">"; done' _ &#123;&#125; +</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># if `docker run` first argument start with `--` the user is passing jenkins launcher arguments</span></span><br><span class="line"><span class="string">if [[ <span class="variable">$#</span> -lt 1 ]] || [[ "</span><span class="variable">$1</span><span class="string">" == "</span>--<span class="string">"* ]]; then</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  # read JAVA_OPTS and JENKINS_OPTS into arrays to avoid need for eval (and associated vulnerabilities)</span></span><br><span class="line"><span class="string">  java_opts_array=()</span></span><br><span class="line"><span class="string">  while IFS= read -r -d '' item; do</span></span><br><span class="line"><span class="string">    java_opts_array+=( "</span><span class="variable">$item</span><span class="string">" )</span></span><br><span class="line"><span class="string">  done &lt; &lt;([[ <span class="variable">$JAVA_OPTS</span> ]] &amp;&amp; xargs printf '%s\0' &lt;&lt;&lt;"</span><span class="variable">$JAVA_OPTS</span><span class="string">")</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  readonly agent_port_property='jenkins.model.Jenkins.slaveAgentPort'</span></span><br><span class="line"><span class="string">  if [ -n "</span><span class="variable">$&#123;JENKINS_SLAVE_AGENT_PORT:-&#125;</span><span class="string">" ] &amp;&amp; [[ "</span><span class="variable">$&#123;JAVA_OPTS:-&#125;</span><span class="string">" != *"</span><span class="variable">$&#123;agent_port_property&#125;</span><span class="string">"* ]]; then</span></span><br><span class="line"><span class="string">    java_opts_array+=( "</span>-D<span class="variable">$&#123;agent_port_property&#125;</span>=<span class="variable">$&#123;JENKINS_SLAVE_AGENT_PORT&#125;</span><span class="string">" )</span></span><br><span class="line"><span class="string">  fi</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  if [[ "</span><span class="variable">$DEBUG</span><span class="string">" ]] ; then</span></span><br><span class="line"><span class="string">    java_opts_array+=( \</span></span><br><span class="line"><span class="string">      '-Xdebug' \</span></span><br><span class="line"><span class="string">      '-Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y' \</span></span><br><span class="line"><span class="string">    )</span></span><br><span class="line"><span class="string">  fi</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  jenkins_opts_array=( )</span></span><br><span class="line"><span class="string">  while IFS= read -r -d '' item; do</span></span><br><span class="line"><span class="string">    jenkins_opts_array+=( "</span><span class="variable">$item</span><span class="string">" )</span></span><br><span class="line"><span class="string">  done &lt; &lt;([[ <span class="variable">$JENKINS_OPTS</span> ]] &amp;&amp; xargs printf '%s\0' &lt;&lt;&lt;"</span><span class="variable">$JENKINS_OPTS</span><span class="string">")</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  exec java -Duser.home="</span><span class="variable">$JENKINS_HOME</span><span class="string">" "</span><span class="variable">$&#123;java_opts_array[@]&#125;</span><span class="string">" -jar <span class="variable">$&#123;JENKINS_WAR&#125;</span> "</span><span class="variable">$&#123;jenkins_opts_array[@]&#125;</span><span class="string">" "</span><span class="variable">$@</span><span class="string">"</span></span><br><span class="line"><span class="string">fi</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># As argument is not jenkins, assume user want to run his own process, for example a `bash` shell to explore this image</span></span><br><span class="line"><span class="string">exec "</span><span class="variable">$@</span><span class="string">"</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips : <code>/usr/local/bin/jenkins.sh</code> 以及 <code>usr/share/jenkins/</code>可用帮助我们进行Jenkins手动升级;</p>
+<p><br/></p>
+<h5 id="服务访问"><a href="#服务访问" class="headerlink" title="服务访问"></a>服务访问</h5><ul>
+<li><strong>Step 7.因为我们Service是采用NodePort类型其端口为30001，我们直接在浏览器用这个端口访问Jenkins UI, 下面是精简操作如果不理解的童鞋，需要按照第一篇文章的操作进行初始化；</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Jenkins 初始化密码获取的两种方式;</span></span><br><span class="line"><span class="comment"># 方式1.认证</span></span><br><span class="line">$ kubectl logs -n devops pod/jenkins-689775956-nph9z | grep -A 2 <span class="string">"following password"</span></span><br><span class="line">Please use the following password to proceed to installation:</span><br><span class="line"></span><br><span class="line">c45f558fa237472f9f8f954ceb3a323e</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2.动态卷Jenkins持久化目录</span></span><br><span class="line"><span class="comment"># 容器中的目录 : /var/jenkins_home/secrets/initialAdminPassword - pvc-3cd916df-91cb-470d-b9ef-e9b4f115223d</span></span><br><span class="line">$ cat /nfsdisk-31/devops-jenkins-pvc-pvc-3cd916df-91cb-470d-b9ef-e9b4f115223d/secrets/initialAdminPassword</span><br><span class="line">c45f558fa237472f9f8f954ceb3a323e</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113162155.png" target="_blank" title="WeiyiGeek.Jenkins Init" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113162155.png" alt="WeiyiGeek.Jenkins Init" title="" class=""></a>
+                <p>WeiyiGeek.Jenkins Init</p>
+            </figure>
+<p><br/></p>
+<ul>
+<li><strong>Step 7.安装 <code>Jenkins入门学习之持续化集成与部署</code> 文章的操作进行初始化, 当然您也可以选择自定义插件安装 -&gt; Languages (两项插件) 先进行汉化</strong></li>
+</ul>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113163216.png" target="_blank" title="WeiyiGeek.Languages-Chinese" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113163216.png" alt="WeiyiGeek.Languages-Chinese" title="" class=""></a>
+                <p>WeiyiGeek.Languages-Chinese</p>
+            </figure>
+<p><br/></p>
+<ul>
+<li><strong>Step 8.Create First Admin User -&gt; Instance Configuration (Jenkins URL) -&gt; Save -&gt; Restart 安装成功</strong><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Jenkins URL: http://jenkins.weiyigeek.com.cn:30001/  <span class="comment"># 注意需要添加解析</span></span><br><span class="line">Jenkins URL: http://192.168.10.10:30001</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113163957.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/Weiyigeek/blogimage/2021/1/20210113163957.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li><p><strong>Step 9.插件镜像仓库设置加快拉取进度 <code>Dashboard -&gt; 插件管理 -&gt; 高级 -&gt; 升级站点</code>;</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 升级站点</span></span><br><span class="line">https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用户定义的时区 -&gt; Time Zone -&gt; Asia/Beijing</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Step 10.最后最新进行常用插件安装，可以参考最后一章</strong></p>
+</li>
+</ul>
+<hr>
+<h3 id="3-集群动态创建-Agent-节点-Slave-节点"><a href="#3-集群动态创建-Agent-节点-Slave-节点" class="headerlink" title="(3) 集群动态创建 Agent 节点 - Slave 节点"></a>(3) 集群动态创建 Agent 节点 - Slave 节点</h3><p>描述: 前面我们说过Jenkins的分布式架构(Master-Slave)，其中 master 主要负责负载地调度而 slave 执行构建任务， 并且当Job构建完成后Pod就会自动销毁, 所以其可以很好地解决性能与资源占用问题。</p>
+<p>kubernetes 插件帮助（非常重要）: <a href="https://plugins.jenkins.io/kubernetes/" target="_blank" rel="noopener">https://plugins.jenkins.io/kubernetes/</a></p>
+<h4 id="内置-Jenkins-Master-接入内部-K8s-集群"><a href="#内置-Jenkins-Master-接入内部-K8s-集群" class="headerlink" title="内置 Jenkins Master 接入内部 K8s 集群"></a>内置 Jenkins Master 接入内部 K8s 集群</h4><p><strong>配置流程:</strong></p>
+<ul>
+<li>Step 1.安装kubernetes插件: 点击 Manage Jenkins -&gt; Manage Plugins -&gt; Available -&gt; Kubernetes 勾选安装即可。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 kubernetes plugins</span></span><br><span class="line">Kubernetes Client API Plugin - Kubernetes客户端API插件，供其他Jenkins插件使用 - 4.11.1		</span><br><span class="line">Kubernetes Credentials Plugin - Kubernetes证书的公共类 - 0.8.0	</span><br><span class="line">Kubernetes plugin - 这个插件集成了Jenkins与Kubernetes - 1.28.7</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<ul>
+<li>Step 2.在Jenkins中配置k8s信息：安装完毕后点击 Manage Jenkins —&gt; Configure System —&gt; (拖到最下方) Add a new cloud —&gt; 选择 Kubernetes，然后填写 Kubernetes 和 Jenkins 配置信息。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubernetes 集群名称 Name:</span></span><br><span class="line">kubernetes </span><br><span class="line"><span class="comment"># Kubernetes 地址</span></span><br><span class="line">https://kubernetes.default.svc.cluster.local</span><br><span class="line"><span class="comment"># Kubernetes 服务证书 key 内容</span></span><br><span class="line">ca.crt </span><br><span class="line"><span class="comment"># Kubernetes 命名空间</span></span><br><span class="line">devops</span><br><span class="line"><span class="comment"># 添加凭据可选</span></span><br><span class="line"><span class="comment"># Jenkins 地址 : The URL of the Jenkins Master server. </span></span><br><span class="line"><span class="comment"># 格式 : 服务名.namespace.svc.cluster.local:8080</span></span><br><span class="line">http://jenkins.devops.svc.cluster.local:8080</span><br><span class="line"><span class="comment"># 注意: Jenkins通道不需要添加slave它会自动识别(网上博客说加上之后可能导致Pod反复重启-应该在新版本中不会存在)</span></span><br><span class="line"><span class="comment"># Jenkins 通道</span></span><br><span class="line">jenkins.devops.svc.cluster.local:50000</span><br><span class="line"><span class="comment"># Pod Labels</span></span><br><span class="line">Key: app</span><br><span class="line">Value: k8s</span><br><span class="line"><span class="comment"># 其它值默认即可(如需配置相应即可)</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips: 设置JNLP访问协议，打开<code>Jenkins/Configure Global Security</code>找到 Agents, 设置 Port 为 指定端口50000（<code>对于集群搭建Jenkins-Master想接入其它VM物理机上的Agent节点</code>）, Agent protocols 选Inbound TCP Agent Protocol/4 (TLS encryption)保存；</p>
+<p><br></p>
+<ul>
+<li>Step 3.点击Test Connection，如果出现 <code>Connected to Kubernetes v1.19.6</code> 的提示信息证明 Jenkins 已经可以和 Kubernetes 系统正常通信了(CSDN - 滞后性太严重了，还是得看官网)<br>Tips : 注意如果这里 Connection 失败的话，很有可能是权限问题，这里就需要把我们创建的 jenkins 的 serviceAccount 对应的 secret 添加到这里的 Credentials 里面。</li>
+</ul>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210202224506.png" target="_blank" title="WeiyiGeek.JenkinsConnectionK8s" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210202224506.png" alt="WeiyiGeek.JenkinsConnectionK8s" title="" class=""></a>
+                <p>WeiyiGeek.JenkinsConnectionK8s</p>
+            </figure>
+<p><br></p>
+<h4 id="独立Jenkins-Master节点接入外部K8s集群"><a href="#独立Jenkins-Master节点接入外部K8s集群" class="headerlink" title="独立Jenkins Master节点接入外部K8s集群"></a>独立Jenkins Master节点接入外部K8s集群</h4><ul>
+<li>Step 1.创建<code>Kubernetes Namespace</code>与<code>Service Account</code>(可参考前面搭建)<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在Kubenates的上创建devops命名空间，用于Jenkins使用</span></span><br><span class="line">kubectl create namespace devops</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在Kubernetes上为Jenkins构建创建有Cluster Admin权限的Service Account jenkins：</span></span><br><span class="line">kubectl create clusterrolebinding jenkins --clusterrole cluster-admin --serviceaccount=devops:jenkins</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Step 2.生成调度凭证即<code>Kubernetes的 server certificate key和Client P12 Certificate File</code>, 其作用是采用<code>P12 Certificate File</code>提供给<code>jenkins Master</code>去调用Kubenetes,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ~/.kube/config 运行以下命令分别生成生成 ca.crt, client.crt, client.key</span></span><br><span class="line">$ cat ~/.kube/config</span><br><span class="line">apiVersion: v1</span><br><span class="line">clusters:</span><br><span class="line">- cluster:</span><br><span class="line">    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ********ORCBDRVJUSUZJQ0FURS0tLS0tCg==</span><br><span class="line">    server: https://weiyigeek-lb-vip.k8s:16443</span><br><span class="line">  name: kubernetes</span><br><span class="line">contexts:</span><br><span class="line">- context:</span><br><span class="line">    cluster: kubernetes</span><br><span class="line">    user: kubernetes-admin</span><br><span class="line">  name: kubernetes-admin@kubernetes</span><br><span class="line">current-context: kubernetes-admin@kubernetes</span><br><span class="line">kind: Config</span><br><span class="line">preferences: &#123;&#125;</span><br><span class="line">users:</span><br><span class="line">- name: kubernetes-admin</span><br><span class="line">  user:</span><br><span class="line">    client-certificate-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUR........VRFMLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=</span><br><span class="line">    client-key-data: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNS........BQUklWQVRFIEtFWS0tLS0tCg==</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (1) 复制 certificate-authority-data 的内容运行以下命令生成 `ca.crt` - ca证书</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"&lt;certificate-authority-data&gt;"</span> | base64 -d &gt; ca.crt</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM1ekNDQWMrZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJeE1ERXhNVEEwTlRRMU0xb1hEVE14TURFd09UQTBOVFExTTFvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTDdTCmNReTNnZDRoK0dHNitKcC8wcmloVGhkd096ZUsxZEFkK1oyK016ZkhvdFVMd2xva2dtd0h0S2JyTm9RdVNFOTMKdXFHbnpBeDArWmduRkx4cVR1bHk4U1A0eXhJTW9Fb0oxKytXNDl0ZklQa0NHOE50aVlmaG5sZ1VIU2haalR2TwpVSzF0Z2ZmSzR1UGlyazk1QWFYWnArMDloQmZDVnR4aFBjbzBxSDZlUVJUZk5xdVU1cHg3TnQzVlo4Wm5MQVBICkxKb0JCS081ZjJXd1l0aXNtZ0FxSkZCWWltQk84R1Z4azdEcjQwVGRRVWZ0NWNmZmFERW1tMlByb0l5WWpobXQKbDIrYVNJc3pGRFBRbDZpMVFnNVJKbzJ2aTgzTDltQ1F5Z3RWVEQ3QUwvSFkralNHbDgvbTVISlBvSUJWY0ZoVApUTi9DQmYwMWIzd1lqNGhVeFVzQ0F3RUFBYU5DTUVBd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0hRWURWUjBPQkJZRUZIZHpBb2lGNytHeVpGN1dDZUFQbndNRjZQNk5NQTBHQ1NxR1NJYjMKRFFFQkN3VUFBNElCQVFBK2pjL1VGTkZNUUp5a1pEYUV0NDQ2MWg4cXQyOFVjYVYzelU0NUlyY2psaXU1T0FJZAoya2RYdXFtSCtncUJmMktDY1d0VGM4VU83ak9Kbm8yTWRpZVpJNG5od0crWG5mOWpjcFhabE5Ma1RjazdqdS9CCmk5UUUvWVdJS2JWOW9nQmlwTXR1VmdLbW4rYmM5b0RlTVk4dWRnN2czVUE1TVlla1ZqOG1FYXB3UmEyZk9udmcKVVI4Znd4Q2xyRXdtS2tqVlhKL0hSaWU1NFcvWkkzT1l6dE1zaGFRT0VNMTY2K2lQWUxSU3lscG96RTZ6WFZMZQpvVVQ0RCttdlJHRVJTcytpaVYzNzJLSENQUDByTWJHSHBncG1BNFh4NVpOdnlKL29TVTNIUjRGWVBzMEUvaG5KCktsalRFQThuM0FsTUxkWlhHTHd6ckoydEV5bENmYUFVaUFxVAotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg=="</span> | base64 -d &gt; ca.crt</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 复制 client-certificate-data的内容，运行以下命令生成 `client.crt` -  客户端证书</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"&lt;client-certificate-data&gt;"</span> | base64 -d &gt; client.crt</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURFekNDQWZ1Z0F3SUJBZ0lJV0JlN0JvSnhTWEF3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TVRBeE1URXdORFUwTlROYUZ3MHlNakF4TVRFd05EVTBOVFphTURReApGekFWQmdOVkJBb1REbk41YzNSbGJUcHRZWE4wWlhKek1Sa3dGd1lEVlFRREV4QnJkV0psY201bGRHVnpMV0ZrCmJXbHVNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTVxL1lOYTh0K2JQZk1rUGwKZnU1NGVCVGtCSHVlcURKWTFvZ0pDVFMyWFNydkVrNTB4ZDVPVVZCWXloNlo4ZFdPZXhRVmVNR3RYZzlObWMzbwprVGRlMzh2eVRVNEE5VXNDakpibDlVenNBR3NCNGRUYVN2azJPUEJWN0pZYUNYMnZQQUtvdEI2aVl5WnJmQW5FClY2UlYzYTlKS1RaSEw3bFNUc3VtZ3A2WGtTVHBaSnYrSEpHTHF0ZFYxNk8vdjhoZ0llL2s1a0lZSjR1d01VOFIKUEpTbGdhdDJhck9GSU9HYkVqTEhjd3lXSWxFcGJSbklxQW41MzhvR01WZHF3WlhoaHRvbjZDWFJya1poRzRTbQpZUnBUdy9WZDRhTnB5ZElqbU9NYmlqeFE5aVRMckp1QjhNc3h6UnZjc2dkeG9iNjNCTzNCV0lWTE9aUExaVlU4Cks5M3BXUUlEQVFBQm8wZ3dSakFPQmdOVkhROEJBZjhFQkFNQ0JhQXdFd1lEVlIwbEJBd3dDZ1lJS3dZQkJRVUgKQXdJd0h3WURWUjBqQkJnd0ZvQVVkM01DaUlYdjRiSmtYdFlKNEErZkF3WG8vbzB3RFFZSktvWklodmNOQVFFTApCUUFEZ2dFQkFMdWw4c3Fhc0VCRGVLclBPNUNZTk5UQjVoNXlBZ25SWi9TMDQ4S3NEOUd3UWhjeFFhdDFSdHRPClRuQ0VFbzZlU0t6ZXpMMW9ER3JiU2w3NDJkRFhiSDJzd0VHeFJjTEJ4ZTVhRVUxK2N6QklGRlBPN0xaWFlvYXUKNVRJeDVSODVVMXU3WXFUVERkUXR3LzFoUFJGajI0UnFSWkVIekl4NWpaZFY1ZTk0b0NYVENnVHhCeTNsdUZnMApSeXRML3I3eEdHdzF5cFdTZ0RUYVNQU2c3eGxNVGxOWVRFMVJ1RGh2THNpelpFb09PMjJnWDM4L0lCU1dwQ1U5CjJFUlFBbUhoYTZqOWQ4eDBub2xieTVIYXZqS3VadVVhYWMrVVNWNFNaMGw0QjJWeC9pNzZVSGRhSmgxL2lZenAKdHJEQ3NZeThTY2hFZFBxemdvS3krU2QxS3pNakZ0Zz0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo="</span>  | base64 -d &gt; client.crt</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 复制 client-key-data的内容，运行以下命令生成 `client.key` - 密钥</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"&lt;client-key-data&gt;"</span> | base64 -d &gt; client.key</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBNXEvWU5hOHQrYlBmTWtQbGZ1NTRlQlRrQkh1ZXFESlkxb2dKQ1RTMlhTcnZFazUwCnhkNU9VVkJZeWg2WjhkV09leFFWZU1HdFhnOU5tYzNva1RkZTM4dnlUVTRBOVVzQ2pKYmw5VXpzQUdzQjRkVGEKU3ZrMk9QQlY3SllhQ1gydlBBS290QjZpWXlacmZBbkVWNlJWM2E5SktUWkhMN2xTVHN1bWdwNlhrU1RwWkp2KwpISkdMcXRkVjE2Ty92OGhnSWUvazVrSVlKNHV3TVU4UlBKU2xnYXQyYXJPRklPR2JFakxIY3d5V0lsRXBiUm5JCnFBbjUzOG9HTVZkcXdaWGhodG9uNkNYUnJrWmhHNFNtWVJwVHcvVmQ0YU5weWRJam1PTWJpanhROWlUTHJKdUIKOE1zeHpSdmNzZ2R4b2I2M0JPM0JXSVZMT1pQTFpWVThLOTNwV1FJREFRQUJBb0lCQUR2UWdvNUE4dm5aQXRtRQpzMS83TTI5bmMwd2FSYVExRWNYbWxmazJHc2NEbCtPMlJoNzhLbkI1RmR5cW5KNFJFcFdsT29BS01BckFpdzJEClQzYy8xVERRTCs2TmVFQWlCL0l1T2tnbGZ0Z0k1djhJY3VXWHd0QjJ1TURVbHNHNVBoT2dXT0FEUlhYU0EzS3gKRWFEcjhudTl0SW1rRWtjMGxUdnJJQ3lrTklha2ZudkJMbVVsWm9RdFRBWVBQZVk0bmYzK3YrLzJodHJkWittWgpxRzdhQ0tBOHUwcUYxMFpoYlNXUWNVbWpOYnJRODMwa0JON04vYlFwSVNUcEh3NVNzMjdZM2VMY0lCTjRzTHZUCndISGRPbXVLOXI4YXpsWTYza1d3MlJNL1NGQlhxM0FpOUo2T1hnUzNaUndTVzk1aEFheDhtQUFINnFYZ1liaWIKS0MyTzZkRUNnWUVBOEVEZ1Z1ZFJVYis5R0ZJZTNNYnl5VWFyWU01cEZmdU80N2lNeDJuWnBXUWlCN0RVbGdrbQpPTERyOHpzL2NFbUdaZzdFT2RYcUxBQkcvUzFwbi80aHRZcXFlaXNUWGJBcDY0Ky9QMHQ5SjRSWUc0TWk3c1ROCjdtbzdZRnkwbU5xU3dEZTFiWndGeTZTczJteWtpU2ZtNFIwY041QmtMZHpHQk9BdXI3eldzeTBDZ1lFQTljNTAKZC9sbWpvZXBQQW94V2dZaEJFTzdnQ2FEbDYreWRNY3hwZ2RNNWVYdEs0d1o3b0IzOGY2Nk9yUkMyR21Hek51cQo1cTdFeWVpZzh5UHNTVHBLVndTRFA1WlRIUGZSU0JaRmlxeCt3SlVLMHFWWUtPNENVU29tSVZqeE1pOXRLenRRCmRRNVR4UnlPWUhzT1ZYMk5EVTZwMWFQTE5DVGFFeGlJbUZNRldsMENnWUJpbnQ3NERXQXVKSHprdk9ENlU1aFoKMHU2S2dIQldtN3FkODZXbVBlY2ZveWpzNjBONGl5enJYSVNlaFpXVzdEZUZNVTZQUnlZbkJiNGVNMFFHYnZVNwpaajV3ZzdvaFhTejRDenZBS2Fhb1VBVXkxZlBDKzNwbEFhcDU5ZFFVWXJTV3ZzZDB4UFVFRVFiN2FsbG9DNzhVCmJUU21BbGw5RWdFZkF6OW0yQ2R4eVFLQmdIL2p4UEZQRDY4RW9tYWNud1RKdjQvcWRibTlVQ1l4d2RYRWRlNSsKU2VJcmVQUjVWbHlpOXNVdjFWRUp6T1d3TWZTUUxpRUx1Vk9iOTNISnRQeDhtWVVnMGZEWms3QzB0MnljT2Q1bQoxU1A1NThHbFNYTXlNbjVzUVo2RUdpb1VSdWFCVytFcmJTWlhMelMva2J1bE1TaEZUMVBhZnJWSW56WGtROTJOCkJISDVBb0dBSWdrVFg1UnA2bk10UHF1aytOMy9JQVNXS2lURkxwQ0d6VXNsaGNoejBQM25oMDQxR3dsMlNveGYKNkRlYmRRK2ovbTJPcG9sai9sQm04NVB0WGx5WTdUTUh2MVFKSCs4TEFUb0NJQTRuaHdOMjl6V1hrRXhySTVTZApRU1NobU93R25nbWhZVEhEWWlTeDdPWFFhODE1dGpSc1hQRWtNVS9DOWs2UXdWK1RvRU09Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg=="</span> | base64 -d &gt; client.key</span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 之后再根据前面步骤生成的 ca.crt, client.crt 和 client.key 来生成 PKCS12 格式的 cert.pfx</span></span><br><span class="line">openssl pkcs12 -<span class="built_in">export</span> -out cert.pfx -inkey client.key -<span class="keyword">in</span> client.crt -certfile ca.crt</span><br><span class="line">  <span class="comment"># Enter Export Password: weiyigeek</span></span><br><span class="line">  <span class="comment"># Verifying - Enter Export Password: weiyigeek</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Step 3.在Jenkins上集成 Kubernetes 首先需要将 cert.pfx 导入到<code>Jenkins Global Credential</code> 凭据中(注意输入密码)</p>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210204113516.png" target="_blank" title="WeiyiGeek.cert.pfx" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210204113516.png" alt="WeiyiGeek.cert.pfx" title="" class=""></a>
+                <p>WeiyiGeek.cert.pfx</p>
+            </figure>
+<p><br/></p>
+<p>Step 4.然后按照上面的方式在<code>Jenkins</code>上配置Kubernetes Cloud, 不同的是需要填入以下信息，最后点击“Test Connection”按钮测试Jenkins是否可以成功连接Kubernetes。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Kubernetes 名称 : kubernetes-external</span></span><br><span class="line"><span class="comment"># Kubernetes 地址 : https://192.168.12.110:16443    # 此处由于做了高可用所以不是master节点地址:6443</span></span><br><span class="line"><span class="comment"># Kubernetes 服务证书 key ：ca.crt 的内容</span></span><br><span class="line"><span class="comment"># Kubernetes 命名空间 : devops</span></span><br><span class="line"><span class="comment"># Jenkins 地址 ：http://jenkins.devops.svc.cluster.local:8080</span></span><br><span class="line"><span class="comment"># Jenkins 通道 ：jenkins.devops.svc.cluster.local:50000</span></span><br><span class="line"><span class="comment"># Tips : 注意勾选从 master 传递给 agent 的环境变量</span></span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210205094218.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210205094218.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>Tips ： 在进行第五步是建议在各个Work节点拉取<code>jenkins/inbound-agent:4.3-4</code>镜像</p>
+<p><br/></p>
+<ul>
+<li>Step 5.下面设置 Pod Templates 此处需添加一个Pod 模板名称等相关信息<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加 Pod 模板 </span></span><br><span class="line">Pod 模板名称: jenkins-agent-jnlp</span><br><span class="line">命名空间：devops                 <span class="comment"># 一定不要写错误了否则不能创建Pod</span></span><br><span class="line">标签列表: jenkins-agent-jnlp     <span class="comment"># 后续Job可以指定该标签进行运行</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加容器列表 (jenkins/inbound-agent:4.3-4)  # 差点把我坑哭了 (测试时候可以先不加容器，默认是jnlp容器)</span></span><br><span class="line"><span class="comment"># 名称 ：       maven</span></span><br><span class="line"><span class="comment"># Docker 镜像 : maven:3.6-jdk-8-alpine  </span></span><br><span class="line"><span class="comment"># 工作目录 : /home/jenkins/</span></span><br><span class="line"><span class="comment"># 运行的命令 : sleep 9000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 挂载到 Pod 代理中的卷列表</span></span><br><span class="line"><span class="comment"># 选择 Host Path Volume 将maven进行持久化存储（此处路径与您setting配置有关默认是运行用户家目录中）</span></span><br><span class="line"><span class="comment"># Maven 持久化目录 : /home/jenkins/.m2  # 此处应该是您各个K8s的Work节点上NFS目录;</span></span><br><span class="line">/nfsdisk-31/appstorage/mavenRepo <span class="comment"># 主机目录（root@weiyigeek-107 ）NFS目录</span></span><br><span class="line">/home/jenkins/.m2                <span class="comment"># Pod挂载目录</span></span><br><span class="line"><span class="comment"># docker socket 目录: </span></span><br><span class="line">/var/run/docker.sock    <span class="comment"># 主机目录(由于各个节点都安装docker)</span></span><br><span class="line">/var/run/docker.sock    <span class="comment"># Pod挂载目录</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Service Account 账户权限</span></span><br><span class="line">Service Account ：jenkins-sa   <span class="comment"># 前面创建的ServiceAccount</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210204203103.png" target="_blank" title="WeiyiGeek.Slave Pod 模板" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210204203103.png" alt="WeiyiGeek.Slave Pod 模板" title="" class=""></a>
+                <p>WeiyiGeek.Slave Pod 模板</p>
+            </figure>
+<p>Tips : 警告如果要为JNLP代理提供自己的Docker映像则必须将容器命名为jnlp，以便它覆盖默认容器否则，将导致两个代理尝试同时连接到主服务器</p>
+<p>Tips : Kubernetes 默认的jnlp容器是<code>&quot;jenkins/inbound-agent:4.3-4&quot;, name: &quot;jnlp&quot;</code>，我们可以自定义容器进行覆盖只需将容器名称更改为jnlp即可(一般情况下不建议更改);</p>
+<p>Tips ：镜像的选择就是一个坑开始使用的是<code>jenkins/inbound-agent:alpine</code>然后容器名称并未设置为jnlp覆盖默认的<code>&quot;jenkins/inbound-agent:4.3-4&quot;</code>容器，根本都没有执行节点加入命令, 此处凸显出官网的重要性，发现官网采用的是<code>jenkins/jnlp-slave:latest</code>(<a href="https://hub.docker.com/r/jenkins/jnlp-slave" target="_blank" rel="noopener">https://hub.docker.com/r/jenkins/jnlp-slave</a>) 或者不加镜像容器信息 最后完满解决;</p>
+<p><br></p>
+<ul>
+<li>Step 6.创建一个Job Pipeline 验证测试环境;<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// <span class="comment"># scripted Pipeline </span></span><br><span class="line">def podTemplates = <span class="string">'jenkins-slave'</span></span><br><span class="line">podTemplate(label: podTemplates, cloud: <span class="string">'kubernetes'</span>)</span><br><span class="line">&#123;</span><br><span class="line">    node (podTemplates) &#123;</span><br><span class="line">        stage(<span class="string">'init'</span>) &#123;</span><br><span class="line">            <span class="built_in">echo</span> <span class="string">"Hello world, Kubernetes Jenkins Slave"</span></span><br><span class="line">            sh <span class="string">"hostname &amp;&amp; ls /home/jenkins/.m2 &amp;&amp; sleep 300"</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>输出结果:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">// <span class="comment"># scripted Pipeline </span></span><br><span class="line">podTemplate(name: <span class="string">'jenkins-slave'</span>, label: <span class="string">'jenkins-slave'</span>, cloud: <span class="string">'kubernetes'</span>,containers: [</span><br><span class="line">    containerTemplate(name: <span class="string">'maven'</span>, image: <span class="string">'maven:3.6-jdk-8-alpine'</span>, ttyEnabled: <span class="literal">true</span>, <span class="built_in">command</span>: <span class="string">'sleep'</span>, args: <span class="string">'30'</span>)</span><br><span class="line">])&#123;</span><br><span class="line">    node (podTemplates) &#123;</span><br><span class="line">        stage(<span class="string">'init'</span>) &#123;</span><br><span class="line">            container (<span class="string">'maven'</span>) &#123;</span><br><span class="line">                <span class="built_in">echo</span> <span class="string">"Hello world, Kubernetes Jenkins Slave"</span></span><br><span class="line">                sh <span class="string">'mvn -version'</span></span><br><span class="line">                sh <span class="string">"hostname &amp;&amp; ls /home/jenkins/.m2 &amp;&amp; pwd"</span></span><br><span class="line">                sh <span class="string">"env"</span></span><br><span class="line">                sh <span class="string">"pwd &amp;&amp; ls"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210205152239.png" target="_blank" title="WeiyiGeek.result" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210205152239.png" alt="WeiyiGeek.result" title="" class=""></a>
+                <p>WeiyiGeek.result</p>
+            </figure>
+<hr>
+<h2 id="0x03-补充说明"><a href="#0x03-补充说明" class="headerlink" title="0x03 补充说明"></a>0x03 补充说明</h2><h3 id="1-K8s-集群中对搭建的Jenkins进行版本升级"><a href="#1-K8s-集群中对搭建的Jenkins进行版本升级" class="headerlink" title="(1) K8s 集群中对搭建的Jenkins进行版本升级"></a>(1) K8s 集群中对搭建的Jenkins进行版本升级</h3><p>描述: 在 K8s 中对Jenkins 升级是非常的简单只需要把image键中版本值进行改变，从而拉取新的镜像运行即可。（注意此处做了PVC持久化如果未作持久化的童鞋需要注意数据的保存, 其次是拉取的版本的Jenkins镜像必须存在）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ grep <span class="string">"jenkins:2.277-alpine"</span> jenkins-deployment.yaml</span><br><span class="line">  <span class="comment"># image: jenkins/jenkins:2.277-alpine</span></span><br><span class="line">  <span class="comment"># https://updates.jenkins.io/download/war/2.277/jenkins.war</span></span><br><span class="line">$ kubectl apply -f jenkins-deployment.yaml</span><br><span class="line">$ kubectl get pod -n devops</span><br><span class="line">  <span class="comment"># NAME                       READY   STATUS              RESTARTS   AGE</span></span><br><span class="line">  <span class="comment"># jenkins-5df679b7ff-5r8d4   0/1     ContainerCreating   0          24s</span></span><br><span class="line">  <span class="comment"># jenkins-7db7878f8f-78tmk   1/1     Running             2          18d  # 原版本等待新版本的Pod启动完毕后自动销毁;</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips: 对于Jenkins版本在生产环境中不建议冒冒失失进行升级其中原因你我心知，但是针对于出现严重漏洞不得不修复时，建议构建新的环境再依次迁移（同时注意备份），确定无任何问题后再关闭下线并进行切换</p>
+<p>Tips : 此处为测试学习环境，看到这个提示我的强迫症就上来了;</p>
+<figure class="image-box">
+                <a rel=Jenkins进阶之分布式服务器环境配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210202163113.png" target="_blank" title="WeiyiGeek.K8s集群中对Jenkins进行升级" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210202163113.png" alt="WeiyiGeek.K8s集群中对Jenkins进行升级" title="" class=""></a>
+                <p>WeiyiGeek.K8s集群中对Jenkins进行升级</p>
+            </figure>
+<p><br></p>
+<h3 id="2-移植其他Jenkins机器上的插件到Kubernetes安装的Jenkins中然后进行重新Jenkins-需要非常注意版本问题"><a href="#2-移植其他Jenkins机器上的插件到Kubernetes安装的Jenkins中然后进行重新Jenkins-需要非常注意版本问题" class="headerlink" title="(2) 移植其他Jenkins机器上的插件到Kubernetes安装的Jenkins中然后进行重新Jenkins(需要非常注意版本问题-)"></a>(2) 移植其他Jenkins机器上的插件到Kubernetes安装的Jenkins中然后进行重新Jenkins(需要非常注意版本问题-)</h3><p>简单操作流程:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ tar -zxvf jenkins_2.272.x_plugins.tar.gz -C ./jenkins/</span><br><span class="line"></span><br><span class="line">~/jenkins$ <span class="built_in">cd</span> var/lib/jenkins/plugins/</span><br><span class="line"></span><br><span class="line">~/jenkins/var/lib/jenkins/plugins$ cp -a . /nfsdisk-31/devops-jenkins-pvc-pvc-3cd916df-91cb-470d-b9ef-e9b4f115223d/plugins/</span><br><span class="line"></span><br><span class="line">$ chown -R jenkins:jenkins /nfsdisk-31/devops-jenkins-pvc-pvc-3cd916df-91cb-470d-b9ef-e9b4f115223d/plugins</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<hr>
+<h2 id="0x04-入坑出坑"><a href="#0x04-入坑出坑" class="headerlink" title="0x04 入坑出坑"></a>0x04 入坑出坑</h2><h3 id="问题1-在K8s中安装Jenkins时报错从logs日志显示Can-not-write-to-var-jenkins-home-copy-reference-file-log-Wrong-volume-permissions-错误"><a href="#问题1-在K8s中安装Jenkins时报错从logs日志显示Can-not-write-to-var-jenkins-home-copy-reference-file-log-Wrong-volume-permissions-错误" class="headerlink" title="问题1.在K8s中安装Jenkins时报错从logs日志显示Can not write to /var/jenkins_home/copy_reference_file.log. Wrong volume permissions?错误"></a>问题1.在K8s中安装Jenkins时报错从logs日志显示<code>Can not write to /var/jenkins_home/copy_reference_file.log. Wrong volume permissions?</code>错误</h3><ul>
+<li>错误信息: 没有权限在 jenkins 的 home 目录下面创建文件;<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n kube-ops logs jenkins2-59764f8f65-rcvh5</span><br><span class="line">Can not write to /var/jenkins_home/copy_reference_file.log. Wrong volume permissions?</span><br><span class="line">touch: cannot touch <span class="string">'/var/jenkins_home/copy_reference_file.log'</span>: Permission denied</span><br></pre></td></tr></table></figure></li>
+<li>错误原因: 因为默认的镜像使用的是 jenkins 这个用户，而我们通过 PVC 挂载到 nfs 服务器的共享数据目录下面却是 root 用户的，所以没有权限访问该目录</li>
+<li>问题解决: 只需要在 nfs 共享数据目录下面把我们的目录权限重新分配下即可：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chown -R 1000 /data/k8s/jenkins2</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">2021-02-02 15:26:04.943+0000 [id=1817]  WARNING o.c.j.p.k.KubernetesLauncher<span class="comment">#launch: Error in provisioning; agent=KubernetesSlave name: jenkins-jnlp-dt7ln, template=PodTemplate&#123;id='214e2b88-0661-48c9-911a-5462c907512f', name='jenkins-jnlp', namespace='kube-ops', label='jenkinsjnlp', serviceAccount='jenkins-sa', volumes=[HostPathVolume [mountPath=/var/run/docker.sock, hostPath=/var/run/docker.sock], HostPathVolume [mountPath=/root/.kube, hostPath=/root/.kube]], containers=[ContainerTemplate&#123;name='jenkins-jnlp6', image='cnych/jenkins:jnlp6', workingDir='/home/jenkins/', command='sleep', args='9999999', resourceRequestCpu='', resourceRequestMemory='', resourceRequestEphemeralStorage='', resourceLimitCpu='', resourceLimitMemory='', resourceLimitEphemeralStorage='', livenessProbe=ContainerLivenessProbe&#123;execArgs='', timeoutSeconds=0, initialDelaySeconds=0, failureThreshold=0, periodSeconds=0, successThreshold=0&#125;&#125;]&#125;</span></span><br><span class="line">java.lang.NullPointerException</span><br><span class="line">        at org.csanchez.jenkins.plugins.kubernetes.PodUtils.cancelQueueItemFor(PodUtils.java:76)</span><br><span class="line">        at org.csanchez.jenkins.plugins.kubernetes.KubernetesLauncher.launch(KubernetesLauncher.java:152)</span><br><span class="line">        at hudson.slaves.SlaveComputer.lambda<span class="variable">$_connect</span><span class="variable">$0</span>(SlaveComputer.java:294)</span><br><span class="line">        at jenkins.util.ContextResettingExecutorService<span class="variable">$2</span>.call(ContextResettingExecutorService.java:46)</span><br><span class="line">        at jenkins.security.ImpersonatingExecutorService<span class="variable">$2</span>.call(ImpersonatingExecutorService.java:80)</span><br><span class="line">        at java.util.concurrent.FutureTask.run(FutureTask.java:266)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor<span class="variable">$Worker</span>.run(ThreadPoolExecutor.java:624)</span><br><span class="line">        at java.lang.Thread.run(Thread.java:748)</span><br><span class="line">2021-02-02 15:26:04.943+0000 [id=1817]  INFO    o.c.j.p.k.KubernetesSlave<span class="comment">#_terminate: Terminating Kubernetes instance for agent jenkins-jnlp-dt7ln</span></span><br><span class="line">2021-02-02 15:26:04.950+0000 [id=1817]  WARNING o.c.j.p.k.KubernetesSlave<span class="comment">#deleteSlavePod: Failed to delete pod for agent kube-ops/jenkins-jnlp-dt7ln: not found</span></span><br><span class="line">2021-02-02 15:26:04.951+0000 [id=1817]  INFO    o.c.j.p.k.KubernetesSlave<span class="comment">#_terminate: Disconnected computer jenkins-jnlp-dt7ln</span></span><br><span class="line">ERROR: Failed to delete pod <span class="keyword">for</span> agent kube-ops/jenkins-jnlp-dt7ln: not found</span><br><span class="line">Disconnected computer jenkins-jnlp-dt7ln</span><br></pre></td></tr></table></figure>
+<p><a href="https://blog.csdn.net/qianghaohao/article/details/83046459" target="_blank" rel="noopener">https://blog.csdn.net/qianghaohao/article/details/83046459</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">2021-02-04 05:37:46.886+0000 [id=1985]  WARNING o.c.j.p.k.KubernetesLauncher<span class="comment">#launch: Error in provisioning; agent=KubernetesSlave name: jenkins-agent-jnlp-b63kv, template=PodTemplate&#123;id='83f07044-1633-468a-91c8-e05ffb924303', name='jenkins-agent-jnlp', namespace='devops', label='jenkins-agent-jnlp', serviceAccount='jenkins-sa', volumes=[HostPathVolume [mountPath=/home/jenkins/.m2, hostPath=/tmp/.m2]], containers=[ContainerTemplate&#123;name='jnlp', image='jenkins/inbound-agent:alpine', workingDir='/home/jenkins', command='sleep', args='9999999', resourceRequestCpu='', resourceRequestMemory='', resourceRequestEphemeralStorage='', resourceLimitCpu='', resourceLimitMemory='', resourceLimitEphemeralStorage='', livenessProbe=ContainerLivenessProbe&#123;execArgs='', timeoutSeconds=0, initialDelaySeconds=0, failureThreshold=0, periodSeconds=0, successThreshold=0&#125;&#125;]&#125;</span></span><br><span class="line">java.lang.IllegalStateException: Agent is not connected after 100 seconds, status: Running</span><br><span class="line">        at org.csanchez.jenkins.plugins.kubernetes.KubernetesLauncher.launch(KubernetesLauncher.java:244)</span><br><span class="line">        at hudson.slaves.SlaveComputer.lambda<span class="variable">$_connect</span><span class="variable">$0</span>(SlaveComputer.java:294)</span><br><span class="line">        at jenkins.util.ContextResettingExecutorService<span class="variable">$2</span>.call(ContextResettingExecutorService.java:46)</span><br><span class="line">        at jenkins.security.ImpersonatingExecutorService<span class="variable">$2</span>.call(ImpersonatingExecutorService.java:80)</span><br><span class="line">        at java.util.concurrent.FutureTask.run(FutureTask.java:266)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)</span><br><span class="line">        at java.util.concurrent.ThreadPoolExecutor<span class="variable">$Worker</span>.run(ThreadPoolExecutor.java:624)</span><br><span class="line">        at java.lang.Thread.run(Thread.java:748)</span><br><span class="line">2021-02-04 05:37:46.886+0000 [id=1985]  INFO    o.c.j.p.k.KubernetesSlave<span class="comment">#_terminate: Terminating Kubernetes instance for agent jenkins-agent-jnlp-b63kv</span></span><br><span class="line">2021-02-04 05:37:46.900+0000 [id=1985]  INFO    o.c.j.p.k.KubernetesSlave<span class="comment">#deleteSlavePod: Terminated Kubernetes instance for agent devops/jenkins-agent-jnlp-b63kv</span></span><br><span class="line">2021-02-04 05:37:46.901+0000 [id=1985]  INFO    o.c.j.p.k.KubernetesSlave<span class="comment">#_terminate: Disconnected computer jenkins-agent-jnlp-b63kv</span></span><br><span class="line">Terminated Kubernetes instance <span class="keyword">for</span> agent devops/jenkins-agent-jnlp-b63kv</span><br><span class="line">Disconnected computer jenkins-agent-jnlp-b63kv</span><br></pre></td></tr></table></figure>
+<p>‘Jenkins’ doesn’t have label ‘jenkins-jnlp-slave’</p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-03-16T01:39:53.375Z" itemprop="dateUpdated">2021-03-16 09:39:53</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2020/12/531.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/12/531.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jenkins/" rel="tag">Jenkins</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/12/531.html&title=《Jenkins进阶之分布式服务器环境配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/12/531.html&title=《Jenkins进阶之分布式服务器环境配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/12/523.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">3.Jenkins进阶之流水线pipeline基础使用实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/12/519.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">2.Jenkins进阶之流水线pipeline语法入门学习</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-节点说明"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">1.节点说明</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-节点管理"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">2.节点管理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#SSH-方式"><span class="post-toc-number">1.2.1.</span> <span class="post-toc-text">SSH 方式</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#JNLP-方式"><span class="post-toc-number">1.2.2.</span> <span class="post-toc-text">JNLP 方式</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-点明主题"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">3.点明主题</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-知识扩展"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">4.知识扩展</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-安装部署"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 安装部署</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-单主机部署配置固定-agent"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">(1) 单主机部署配置固定 agent</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Java-Web-启动-Agent-方式"><span class="post-toc-number">2.1.1.</span> <span class="post-toc-text">Java Web 启动 Agent 方式</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Launch-agents-via-SSH-启动-Agent-方式"><span class="post-toc-number">2.1.2.</span> <span class="post-toc-text">Launch agents via SSH 启动 Agent 方式</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-集群搭建Jenkins-Master-节点"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">(2) 集群搭建Jenkins Master 节点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-1-基础环境"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">2.1) 基础环境</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-2-搭建流程"><span class="post-toc-number">2.2.2.</span> <span class="post-toc-text">2.2) 搭建流程</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-集群动态创建-Agent-节点-Slave-节点"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">(3) 集群动态创建 Agent 节点 - Slave 节点</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#内置-Jenkins-Master-接入内部-K8s-集群"><span class="post-toc-number">2.3.1.</span> <span class="post-toc-text">内置 Jenkins Master 接入内部 K8s 集群</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#独立Jenkins-Master节点接入外部K8s集群"><span class="post-toc-number">2.3.2.</span> <span class="post-toc-text">独立Jenkins Master节点接入外部K8s集群</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-补充说明"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x03 补充说明</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-K8s-集群中对搭建的Jenkins进行版本升级"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">(1) K8s 集群中对搭建的Jenkins进行版本升级</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-移植其他Jenkins机器上的插件到Kubernetes安装的Jenkins中然后进行重新Jenkins-需要非常注意版本问题"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">(2) 移植其他Jenkins机器上的插件到Kubernetes安装的Jenkins中然后进行重新Jenkins(需要非常注意版本问题-)</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x04-入坑出坑"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x04 入坑出坑</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题1-在K8s中安装Jenkins时报错从logs日志显示Can-not-write-to-var-jenkins-home-copy-reference-file-log-Wrong-volume-permissions-错误"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">问题1.在K8s中安装Jenkins时报错从logs日志显示Can not write to &#x2F;var&#x2F;jenkins_home&#x2F;copy_reference_file.log. Wrong volume permissions?错误</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2021
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/12/531.html&title=《Jenkins进阶之分布式服务器环境配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/12/531.html&title=《Jenkins进阶之分布式服务器环境配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACHklEQVR42u3ay26DQAwF0Pz/T6dSV5Ui4NombTNzWCHCYw4Lx8Z+POLt+b393H89cvTr632Ozj+/9oYNAwPjYxnP0+1ooa/75/dMnnj+Ui6oGBgYGzCSIJsE0Oo5eSi/WDMGBgbGaXDsBej568PAwMColqm9RDApcTEwMDDyIjZZUPXIH9TiGBgYH8joNQZ+Z//t/Q0MDIx/z3i2tihRKwb00XowMDCWZuQf95P25GShk4IWAwNjbcZdZWr+ay9AX9wHAwNjaUa1fVhdYjXRTNoPhf8QDAyMpRlJ8tfDJ4lgtTmKgYGxNiO/oJca9toASen7yC/AwMBYiNEj9RK7apC9CP0YGBgbMKrjVr3Q2WsARI0HDAyMbRhJ0LyXWi2YD18KBgbG0oxkeKK33Or956MeGBgYazOqD+4tKG9YzqkYGBgrMaodzt75veM3TOBiYGAsykgSxOpHuslobPRCMTAwNmZUB8Kq8w9V9uFKMDAwlmb0gmP+Wa16t/zFXWAwMDCWY0wCbj4WlofmKgwDA2M3xiRFm6SAVTwGBsZujCSc9QbIeg3RKhsDA2NtxrvLzvMSdDJ4gYGBsQ+jmnHlKWM+FpaQMDAwMOZBdj4QVu1gXOS2GBgYizJ6AxPVErQZ75MnYmBgYMSf0kZtyElDFAMDAyNO1yYfzkaVNwYGxgaMfLSi93G/1wzAwMDA6DUGesXqXYuuFs8YGBgfzvgCcapLqcTp03YAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

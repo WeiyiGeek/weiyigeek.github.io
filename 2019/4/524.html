@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>Redis在K8s中的单实例搭建以及主从同步实践 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="Redis">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Redis在K8s中的单实例搭建以及主从同步实践</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">Redis在K8s中的单实例搭建以及主从同步实践</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-04-17T12:35:30.000Z" itemprop="datePublished" class="page-time">
+  2019-04-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/Database-运维/Redis/Redis在K8s中的单实例搭建以及主从同步实践"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Redis在K8s中的单实例搭建以及主从同步实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-04-17 20:35:30" datetime="2019-04-17T12:35:30.000Z"  itemprop="datePublished">2019-04-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><p>描述: 在Kubernetes中可以非常方便的进行应用的扩容缩,也能非常方便的进行业务的迭代，此处由于开发测试的需求则在Kubernetes搭建了单实例和Redis集群主从同步的环境;</p>
+<hr>
+<h2 id="0x01-Redis-单实例实践"><a href="#0x01-Redis-单实例实践" class="headerlink" title="0x01 Redis 单实例实践"></a>0x01 Redis 单实例实践</h2><p><strong>(1) 配置准备</strong><br>配置文件: Redis.conf<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /nfsdisk/datastore/redis/single/Redis.conf</span></span><br><span class="line"><span class="comment"># 开启的端口</span></span><br><span class="line">port 6379</span><br><span class="line"><span class="comment"># 密码设置</span></span><br><span class="line">requirepass weiyigeek.top</span><br><span class="line"><span class="comment"># 开启Redis的AOF持久化 &amp;&amp; appendonly日志文件</span></span><br><span class="line">appendonly yes</span><br><span class="line">appendfsync everysec</span><br><span class="line">appendfilename appendonly.aof</span><br><span class="line"><span class="comment"># AOF持久化文件存在的位置及文件名称</span></span><br><span class="line">dir /data</span><br><span class="line">dbfilename dump.rdb</span><br><span class="line"><span class="comment"># 备份进程出错时，主进程停止接受写入操作，默认yes</span></span><br><span class="line">stop-writes-on-bgsave-error yes</span><br><span class="line"><span class="comment"># 是否压缩，会占用部分cpu资源，默认yes</span></span><br><span class="line">rdbcompression yes</span><br><span class="line"><span class="comment"># RDB自动触发策略是否启用，默认为yes</span></span><br><span class="line">rdb-save-incremental-fsync yes</span><br><span class="line"><span class="comment"># 写入频率</span></span><br><span class="line">save 300 10</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>Redis single 资源清单文件:<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cat Redis-single.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redis-single</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">database</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  serviceName:</span> <span class="string">redis-single</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">redis-single</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">redis-single</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">        image:</span> <span class="attr">redis:5.0.10-alpine</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">6379</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">        command:</span> <span class="string">[</span> <span class="string">"redis-server"</span><span class="string">,</span> <span class="string">"/conf/redis.conf"</span><span class="string">]</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">conf</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/conf</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">data</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/data</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">timezone</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/etc/localtime</span>                <span class="comment"># 时区设置</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">conf</span></span><br><span class="line"><span class="attr">        hostPath:</span>                                            <span class="comment"># 采用hostPath卷</span></span><br><span class="line"><span class="attr">          type:</span> <span class="string">DirectoryOrCreate</span>                            <span class="comment"># 卷类型此处选择如果DirectoryOrCreate如何子节点上没有该目录便会进行创建</span></span><br><span class="line"><span class="attr">          path:</span> <span class="string">/nfsdisk/datastore/redis/single</span>           <span class="comment"># 各主机节点上已存在的目录</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">timezone</span>                             <span class="comment"># 时区定义</span></span><br><span class="line"><span class="attr">        hostPath:</span></span><br><span class="line"><span class="attr">          path:</span> <span class="string">/usr/share/zoneinfo/Asia/Shanghai</span></span><br><span class="line"><span class="attr">  volumeClaimTemplates:</span></span><br><span class="line"><span class="attr">  - metadata:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">data</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      accessModes:</span> <span class="string">[</span> <span class="string">"ReadWriteOnce"</span> <span class="string">]</span></span><br><span class="line"><span class="attr">      storageClassName:</span> <span class="string">"managed-nfs-storage"</span></span><br><span class="line"><span class="attr">      resources:</span></span><br><span class="line"><span class="attr">        requests:</span></span><br><span class="line"><span class="attr">          storage:</span> <span class="number">5</span><span class="string">Gi</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redis-single</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">database</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">6379</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">6379</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">redis-single</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>操作流程：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 名称空间的创建 （PS:非常注意在删除名称空间时需要查看是否有存在Pod）</span></span><br><span class="line">kubectl create namespace database</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 按照资源清单构建Pod</span></span><br><span class="line">kubectl create -f Redis-single.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 查看部署结果(Pod以及SVC)</span></span><br><span class="line">$ kubectl get pod -n database -l app=redis-single -o wide</span><br><span class="line">  <span class="comment"># NAME             READY   STATUS    RESTARTS   AGE     IP               NODE       NOMINATED NODE   READINESS GATES</span></span><br><span class="line">  <span class="comment"># redis-single-0   1/1     Running   0          2d17h   172.16.182.221   weiyigeek-226   &lt;none&gt;           &lt;none&gt;</span></span><br><span class="line"></span><br><span class="line">$ kubectl get svc -n database</span><br><span class="line">  <span class="comment"># NAME           TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE</span></span><br><span class="line">  <span class="comment"># redis-single   NodePort   10.109.0.159   &lt;none&gt;        6379:31001/TCP   2d17h</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 查看Pod运行描述容器及其挂载信息</span></span><br><span class="line">~$ kubectl describe pod -n database redis-single</span><br><span class="line"><span class="comment"># Status:       Running</span></span><br><span class="line"><span class="comment"># IP:           172.16.182.221</span></span><br><span class="line"><span class="comment"># IPs:</span></span><br><span class="line"><span class="comment">#   IP:           172.16.182.221</span></span><br><span class="line"><span class="comment"># Controlled By:  StatefulSet/redis-single</span></span><br><span class="line"><span class="comment"># Containers:</span></span><br><span class="line"><span class="comment">#   redis:</span></span><br><span class="line"><span class="comment">#     Container ID:  docker://c94f83f88e3a2cba36f6139b69746387981d0d6d0a3c44b72c0a21a91f977ad8</span></span><br><span class="line"><span class="comment">#     Image:         redis:5.0.10-alpine</span></span><br><span class="line"><span class="comment">#     Image ID:      docker-pullable://redis@sha256:cab1de051c243a956749397af796d50bf235c7183e88bc4667259f66cad4f748</span></span><br><span class="line"><span class="comment">#     Port:          6379/TCP</span></span><br><span class="line"><span class="comment">#     Host Port:     0/TCP</span></span><br><span class="line"><span class="comment">#     Command:</span></span><br><span class="line"><span class="comment">#       redis-server</span></span><br><span class="line"><span class="comment">#       /conf/redis.conf</span></span><br><span class="line"><span class="comment">#     State:          Running</span></span><br><span class="line"><span class="comment">#       Started:      Fri, 15 Jan 2021 09:48:39 +0000</span></span><br><span class="line"><span class="comment">#     Ready:          True</span></span><br><span class="line"><span class="comment">#     Restart Count:  0</span></span><br><span class="line"><span class="comment">#     Environment:    &lt;none&gt;</span></span><br><span class="line"><span class="comment">#     Mounts:</span></span><br><span class="line"><span class="comment">#       /conf from conf (rw)</span></span><br><span class="line"><span class="comment">#       /data from data (rw)</span></span><br><span class="line"><span class="comment">#       /etc/localtime from timezone (rw)</span></span><br><span class="line"><span class="comment">#       /var/run/secrets/kubernetes.io/serviceaccount from default-token-mhbbf (ro)</span></span><br><span class="line"><span class="comment"># Volumes:</span></span><br><span class="line"><span class="comment">#   data:</span></span><br><span class="line"><span class="comment">#     Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)</span></span><br><span class="line"><span class="comment">#     ClaimName:  data-redis-single-0</span></span><br><span class="line"><span class="comment">#     ReadOnly:   false</span></span><br><span class="line"><span class="comment">#   conf:</span></span><br><span class="line"><span class="comment">#     Type:          HostPath (bare host directory volume)</span></span><br><span class="line"><span class="comment">#     Path:          /nfsdisk-31/datastore/redis/single</span></span><br><span class="line"><span class="comment">#     HostPathType:  DirectoryOrCreate</span></span><br><span class="line"><span class="comment">#   timezone:</span></span><br><span class="line"><span class="comment">#     Type:          HostPath (bare host directory volume)</span></span><br><span class="line"><span class="comment">#     Path:          /usr/share/zoneinfo/Asia/Shanghai</span></span><br><span class="line"><span class="comment">#     HostPathType:</span></span><br><span class="line"><span class="comment">#   default-token-mhbbf:</span></span><br><span class="line"><span class="comment">#     Type:        Secret (a volume populated by a Secret)</span></span><br><span class="line"><span class="comment">#     SecretName:  default-token-mhbbf</span></span><br><span class="line"><span class="comment">#     Optional:    false</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) Redis 连接测试</span></span><br><span class="line">~$ kubectl <span class="built_in">exec</span> -it -n database redis-single-0 sh</span><br><span class="line">  <span class="comment"># /data # redis-c</span></span><br><span class="line">  <span class="comment"># redis-check-aof  redis-check-rdb  redis-cli</span></span><br><span class="line">  <span class="comment"># /data # redis-cli</span></span><br><span class="line">  <span class="comment"># 127.0.0.1:6379&gt; auth weiyigeek.top</span></span><br><span class="line">  <span class="comment"># OK</span></span><br><span class="line">  <span class="comment"># 127.0.0.1:6379&gt; ping</span></span><br><span class="line">  <span class="comment"># PONG</span></span><br><span class="line">  <span class="comment"># 127.0.0.1:6379&gt; info</span></span><br><span class="line">  <span class="comment"># # Server</span></span><br><span class="line">  <span class="comment"># redis_version:5.0.10</span></span><br><span class="line">  <span class="comment"># redis_git_sha1:00000000</span></span><br><span class="line">  <span class="comment"># redis_git_dirty:0</span></span><br><span class="line">  <span class="comment"># redis_build_id:e19997e81345d7a5</span></span><br><span class="line">  <span class="comment"># redis_mode:standalone</span></span><br><span class="line">  <span class="comment"># os:Linux 5.4.0-42-generic x86_64</span></span><br><span class="line">  <span class="comment"># arch_bits:64</span></span><br><span class="line">  <span class="comment"># multiplexing_api:epoll</span></span><br><span class="line">  <span class="comment"># atomicvar_api:atomic-builtin</span></span><br><span class="line">  <span class="comment"># gcc_version:9.3.0</span></span><br><span class="line">  <span class="comment"># process_id:1</span></span><br><span class="line">  <span class="comment"># run_id:efc925af95781045bed44686f30a6e78190e0e66</span></span><br><span class="line">  <span class="comment"># tcp_port:6379</span></span><br><span class="line">  <span class="comment"># uptime_in_seconds:235758</span></span><br><span class="line">  <span class="comment"># uptime_in_days:2</span></span><br><span class="line">  <span class="comment"># hz:10</span></span><br><span class="line">  <span class="comment"># configured_hz:10</span></span><br><span class="line">  <span class="comment"># lru_clock:327141</span></span><br><span class="line">  <span class="comment"># executable:/data/redis-server</span></span><br><span class="line">  <span class="comment"># config_file:/conf/redis.conf</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="0x02-Redis-集群主从实践"><a href="#0x02-Redis-集群主从实践" class="headerlink" title="0x02 Redis 集群主从实践"></a>0x02 Redis 集群主从实践</h2><h3 id="1-自定义集群构建"><a href="#1-自定义集群构建" class="headerlink" title="(1) 自定义集群构建"></a>(1) 自定义集群构建</h3><p><strong>配置文件说明:</strong><br>redis 配置文件的使用方式</p>
+<ul>
+<li>(1) 方式1.创建 Configmap <code>kubectl create configmap redis-conf --from-file=redis.conf</code></li>
+<li>(2) 方式2.利用 Hostpath Volumes 卷挂载该配置文件<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; redis.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># 监听端口</span></span><br><span class="line">port 6379</span><br><span class="line"><span class="comment"># 启用外部连接关闭安全模式</span></span><br><span class="line">protected-mode no</span><br><span class="line">masterauth weiyigeek.top</span><br><span class="line">requirepass weiyigeek.top</span><br><span class="line"><span class="comment"># 开启Redis的AOF持久化 &amp;&amp; 日志文件</span></span><br><span class="line">appendonly yes </span><br><span class="line">appendfilename appendonly.aof </span><br><span class="line"><span class="comment"># AOF持久化文件存在的位置以及其文件名称</span></span><br><span class="line">dir /data</span><br><span class="line">dbfilename dump.rdb</span><br><span class="line">slave-read-only yes</span><br><span class="line"><span class="comment"># 每秒钟同步一次折中的方案</span></span><br><span class="line">appendfsync everysec</span><br><span class="line">no-appendfsync-on-rewrite no</span><br><span class="line">auto-aof-rewrite-percentage 100</span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br><span class="line"><span class="comment"># 集群模式打开</span></span><br><span class="line">cluster-enabled yes </span><br><span class="line">cluster-config-file  /data/nodes.conf</span><br><span class="line">cluster-node-timeout 5000</span><br><span class="line"><span class="comment"># 当负责一个插槽的主库下线且没有相应的从库进行故障恢复时集群仍然可用</span></span><br><span class="line">cluster-require-full-coverage no</span><br><span class="line"><span class="comment"># 只有当一个主节点至少拥有其他给定数量个处于正常工作中的从节点的时候，才会分配从节点给集群中孤立的主节点</span></span><br><span class="line">cluster-migration-barrier 1</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>补充说明:</strong></p>
+<ul>
+<li>Redis 配置文件: /conf/redis.conf</li>
+<li>集群配置更新文件: /conf/update-node.sh</li>
+<li>数据存储目录：/data</li>
+<li>集群节点配置文件: /data/nodes.conf</li>
+</ul>
+<p><br></p>
+<p>Redis-cluster 资源清单:<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; Redis-cluster-5.0.10.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">database</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="comment"># 外部命令参数传递执行, 精妙之处值得学习</span></span><br><span class="line">  <span class="string">update-node.sh:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    #!/bin/sh</span></span><br><span class="line"><span class="string">    REDIS_NODES="/data/nodes.conf"</span></span><br><span class="line"><span class="string">    sed -i -e "/myself/ s/[0-9]\&#123;1,3\&#125;\.[0-9]\&#123;1,3\&#125;\.[0-9]\&#123;1,3\&#125;\.[0-9]\&#123;1,3\&#125;/$&#123;POD_IP&#125;/" $&#123;REDIS_NODES&#125;</span></span><br><span class="line"><span class="string">    exec "$@"</span></span><br><span class="line"><span class="string">  redis.conf: |+</span></span><br><span class="line"><span class="string">    # 监听端口</span></span><br><span class="line"><span class="string">    port 6379</span></span><br><span class="line"><span class="string">    # 启用外部连接关闭安全模式</span></span><br><span class="line"><span class="string">    protected-mode no</span></span><br><span class="line"><span class="string">    masterauth weiyigeek.top</span></span><br><span class="line"><span class="string">    requirepass weiyigeek.top</span></span><br><span class="line"><span class="string">    # 开启Redis的AOF持久化 &amp;&amp; 日志文件</span></span><br><span class="line"><span class="string">    appendonly yes </span></span><br><span class="line"><span class="string">    appendfilename appendonly.aof </span></span><br><span class="line"><span class="string">    # AOF持久化文件存在的位置以及其文件名称</span></span><br><span class="line"><span class="string">    dir /data</span></span><br><span class="line"><span class="string">    dbfilename dump.rdb</span></span><br><span class="line"><span class="string">    slave-read-only yes</span></span><br><span class="line"><span class="string">    # 每秒钟同步一次折中的方案</span></span><br><span class="line"><span class="string">    appendfsync everysec</span></span><br><span class="line"><span class="string">    no-appendfsync-on-rewrite no</span></span><br><span class="line"><span class="string">    auto-aof-rewrite-percentage 100</span></span><br><span class="line"><span class="string">    auto-aof-rewrite-min-size 64mb</span></span><br><span class="line"><span class="string">    # 集群模式打开</span></span><br><span class="line"><span class="string">    cluster-enabled yes </span></span><br><span class="line"><span class="string">    cluster-config-file /data/nodes.conf</span></span><br><span class="line"><span class="string">    cluster-node-timeout 5000</span></span><br><span class="line"><span class="string">    # 当负责一个插槽的主库下线且没有相应的从库进行故障恢复时集群仍然可用</span></span><br><span class="line"><span class="string">    cluster-require-full-coverage no</span></span><br><span class="line"><span class="string">    # 只有当一个主节点至少拥有其他给定数量个处于正常工作中的从节点的时候，才会分配从节点给集群中孤立的主节点</span></span><br><span class="line"><span class="string">    cluster-migration-barrier 1</span></span><br><span class="line"><span class="string">---</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">database</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  serviceName:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">6</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">        image:</span> <span class="attr">redis:5.0.10-alpine</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">6379</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">16379</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">gossip</span></span><br><span class="line"><span class="attr">        command:</span> <span class="string">["/conf/update-node.sh",</span> <span class="string">"redis-server"</span><span class="string">,</span> <span class="string">"/conf/redis.conf"</span><span class="string">]</span></span><br><span class="line"><span class="attr">        env:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">POD_IP</span></span><br><span class="line"><span class="attr">          valueFrom:</span></span><br><span class="line"><span class="attr">            fieldRef:</span></span><br><span class="line"><span class="attr">              fieldPath:</span> <span class="string">status.podIP</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">conf</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/conf</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">data</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/data</span></span><br><span class="line"><span class="attr">          readOnly:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">timezone</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/etc/localtime</span>                <span class="comment"># 在Pod中时区设置(挂载主机的时区)</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">conf</span></span><br><span class="line"><span class="attr">        configMap:</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">          defaultMode:</span> <span class="number">0755</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">timezone</span> </span><br><span class="line"><span class="attr">        hostPath:</span></span><br><span class="line"><span class="attr">          path:</span> <span class="string">/usr/share/zoneinfo/Asia/Shanghai</span></span><br><span class="line"><span class="attr">  volumeClaimTemplates:</span></span><br><span class="line"><span class="attr">  - metadata:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">data</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      accessModes:</span> <span class="string">[</span> <span class="string">"ReadWriteOnce"</span> <span class="string">]</span></span><br><span class="line"><span class="attr">      storageClassName:</span> <span class="string">"managed-nfs-storage"</span></span><br><span class="line"><span class="attr">      resources:</span></span><br><span class="line"><span class="attr">        requests:</span></span><br><span class="line"><span class="attr">          storage:</span> <span class="number">5</span><span class="string">Gi</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># headless Service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">database</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">"None"</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">6379</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">6379</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">client</span></span><br><span class="line"><span class="attr">  - port:</span> <span class="number">16379</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">16379</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">gossip</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>Redis 资源清单构建:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 名称空间创建</span></span><br><span class="line">$ kubectl create namespace database</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 按照资源清单StatefulSet控制器创建Pod</span></span><br><span class="line">$ kubectl create -f Redis-cluster-5.0.10.yaml</span><br><span class="line">configmap/redis-cluster created</span><br><span class="line">statefulset.apps/redis-cluster created</span><br><span class="line">service/redis-cluster created</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 查看应用的 statefulsets,pod,svc 等信息</span></span><br><span class="line">$ kubectl get statefulsets,pod,svc -n database -o wide --show-labels | grep -v <span class="string">"redis-single"</span></span><br><span class="line">  <span class="comment"># NAME                             READY   AGE     CONTAINERS   IMAGES                LABELS</span></span><br><span class="line">  <span class="comment"># statefulset.apps/redis-cluster   6/6     27m     redis        redis:5.0.10-alpine   &lt;none&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># NAME                  READY   STATUS    RESTARTS   AGE     IP               NODE      LABELS</span></span><br><span class="line">  <span class="comment"># pod/redis-cluster-0   1/1     Running   0          27m     172.16.183.81    weiyigeek-225  app=redis-cluster,controller-revision-hash=redis-cluster-6bf876ccf9,statefulset.kubernetes.io/pod-name=redis-cluster-0</span></span><br><span class="line">  <span class="comment"># pod/redis-cluster-1   1/1     Running   0          26m     172.16.182.226   weiyigeek-226  app=redis-cluster,controller-revision-hash=redis-cluster-6bf876ccf9,statefulset.kubernetes.io/pod-name=redis-cluster-1</span></span><br><span class="line">  <span class="comment"># pod/redis-cluster-2   1/1     Running   0          26m     172.16.24.204    weiyigeek-223  app=redis-cluster,controller-revision-hash=redis-cluster-6bf876ccf9,statefulset.kubernetes.io/pod-name=redis-cluster-2</span></span><br><span class="line">  <span class="comment"># pod/redis-cluster-3   1/1     Running   0          26m     172.16.100.67    weiyigeek-224  app=redis-cluster,controller-revision-hash=redis-cluster-6bf876ccf9,statefulset.kubernetes.io/pod-name=redis-cluster-3</span></span><br><span class="line">  <span class="comment"># pod/redis-cluster-4   1/1     Running   0          26m     172.16.243.67    weiyigeek-109  app=redis-cluster,controller-revision-hash=redis-cluster-6bf876ccf9,statefulset.kubernetes.io/pod-name=redis-cluster-4</span></span><br><span class="line">  <span class="comment"># pod/redis-cluster-5   1/1     Running   0          26m     172.16.135.195   weiyigeek-108  app=redis-cluster,controller-revision-hash=redis-cluster-6bf876ccf9,statefulset.kubernetes.io/pod-name=redis-cluster-5</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># NAME                    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)              AGE     SELECTOR            LABELS</span></span><br><span class="line">  <span class="comment"># service/redis-cluster   ClusterIP   None           &lt;none&gt;        6379/TCP,16379/TCP   25m     app=redis-cluster   &lt;none&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>Redis 集群配置:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 获取各个pod的IP地址</span></span><br><span class="line">kubectl get pod -n database -l app=redis-cluster -o jsonpath=<span class="string">'&#123; range.items [*]&#125;&#123;.status.podIP&#125;:6379 '</span>| sed <span class="string">"s# :6379 ##g"</span></span><br><span class="line"><span class="comment"># 172.16.182.219:6379 172.16.183.72:6379 172.16.24.202:6379 172.16.100.65:6379 172.16.135.193:6379 172.16.243.65:6379</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 进入redis-cluster-0 pod中的shell</span></span><br><span class="line">kubectl <span class="built_in">exec</span> -n database -it redis-cluster-0 sh </span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 为此让我们运行以下命令并输入'yes'接受配置。我们将看到前三个节点将被选择为主节点，后三个节点将被选择为从节点。</span></span><br><span class="line">/data $ redis-cli --cluster create --cluster-replicas 1 172.16.182.219:6379 172.16.183.72:6379 172.16.24.202:6379 172.16.100.65:6379 172.16.135.193:6379 172.16.243.65:6379</span><br><span class="line">  <span class="comment"># &gt;&gt;&gt; Performing hash slots allocation on 6 nodes...</span></span><br><span class="line">  <span class="comment"># Master[0] -&gt; Slots 0 - 5460</span></span><br><span class="line">  <span class="comment"># Master[1] -&gt; Slots 5461 - 10922</span></span><br><span class="line">  <span class="comment"># Master[2] -&gt; Slots 10923 - 16383</span></span><br><span class="line">  <span class="comment"># Adding replica 172.16.100.65:6379 to 172.16.182.219:6379</span></span><br><span class="line">  <span class="comment"># Adding replica 172.16.135.193:6379 to 172.16.183.72:6379</span></span><br><span class="line">  <span class="comment"># Adding replica 172.16.243.65:6379 to 172.16.24.202:6379</span></span><br><span class="line">  <span class="comment"># M: be20868bb9de5688d50c54d2654ffe1f11c28794 172.16.182.219:6379</span></span><br><span class="line">  <span class="comment">#    slots:[0-5460] (5461 slots) master</span></span><br><span class="line">  <span class="comment"># M: ba71016f951653985ff1ad42528f4c09bcf51ddb 172.16.183.72:6379</span></span><br><span class="line">  <span class="comment">#    slots:[5461-10922] (5462 slots) master</span></span><br><span class="line">  <span class="comment"># M: fb2f078d21d1efbcf93dc43cbead6aff9ea9eb76 172.16.24.202:6379</span></span><br><span class="line">  <span class="comment">#    slots:[10923-16383] (5461 slots) master</span></span><br><span class="line">  <span class="comment"># S: 17244c7a73416380f9ed254ee9d8b1b56836e0a0 172.16.100.65:6379</span></span><br><span class="line">  <span class="comment">#    replicates be20868bb9de5688d50c54d2654ffe1f11c28794</span></span><br><span class="line">  <span class="comment"># S: 677b964d754148db24e953bdd4e08de3a89c4eed 172.16.135.193:6379</span></span><br><span class="line">  <span class="comment">#    replicates ba71016f951653985ff1ad42528f4c09bcf51ddb</span></span><br><span class="line">  <span class="comment"># S: 200f775a8e0f83b9e39cd1bf597d65aba53d5f26 172.16.243.65:6379</span></span><br><span class="line">  <span class="comment">#    replicates fb2f078d21d1efbcf93dc43cbead6aff9ea9eb76</span></span><br><span class="line">  <span class="comment"># Can I set the above configuration? (type 'yes' to accept): yes</span></span><br><span class="line">  <span class="comment"># &gt;&gt;&gt; Nodes configuration updated</span></span><br><span class="line">  <span class="comment"># &gt;&gt;&gt; Assign a different config epoch to each node</span></span><br><span class="line">  <span class="comment"># &gt;&gt;&gt; Sending CLUSTER MEET messages to join the cluster</span></span><br><span class="line">  <span class="comment"># Waiting for the cluster to join</span></span><br><span class="line">  <span class="comment"># ....</span></span><br><span class="line">  <span class="comment"># &gt;&gt;&gt; Performing Cluster Check (using node 172.16.182.219:6379)</span></span><br><span class="line">  <span class="comment"># M: be20868bb9de5688d50c54d2654ffe1f11c28794 172.16.182.219:6379</span></span><br><span class="line">  <span class="comment">#    slots:[0-5460] (5461 slots) master</span></span><br><span class="line">  <span class="comment">#    1 additional replica(s)</span></span><br><span class="line">  <span class="comment"># M: fb2f078d21d1efbcf93dc43cbead6aff9ea9eb76 172.16.24.202:6379</span></span><br><span class="line">  <span class="comment">#    slots:[10923-16383] (5461 slots) master</span></span><br><span class="line">  <span class="comment">#    1 additional replica(s)</span></span><br><span class="line">  <span class="comment"># S: 677b964d754148db24e953bdd4e08de3a89c4eed 172.16.135.193:6379</span></span><br><span class="line">  <span class="comment">#    slots: (0 slots) slave</span></span><br><span class="line">  <span class="comment">#    replicates ba71016f951653985ff1ad42528f4c09bcf51ddb</span></span><br><span class="line">  <span class="comment"># M: ba71016f951653985ff1ad42528f4c09bcf51ddb 172.16.183.72:6379</span></span><br><span class="line">  <span class="comment">#    slots:[5461-10922] (5462 slots) master</span></span><br><span class="line">  <span class="comment">#    1 additional replica(s)</span></span><br><span class="line">  <span class="comment"># S: 17244c7a73416380f9ed254ee9d8b1b56836e0a0 172.16.100.65:6379</span></span><br><span class="line">  <span class="comment">#    slots: (0 slots) slave</span></span><br><span class="line">  <span class="comment">#    replicates be20868bb9de5688d50c54d2654ffe1f11c28794</span></span><br><span class="line">  <span class="comment"># S: 200f775a8e0f83b9e39cd1bf597d65aba53d5f26 172.16.243.65:6379</span></span><br><span class="line">  <span class="comment">#    slots: (0 slots) slave</span></span><br><span class="line">  <span class="comment">#    replicates fb2f078d21d1efbcf93dc43cbead6aff9ea9eb76</span></span><br><span class="line">  <span class="comment"># [OK] All nodes agree about slots configuration.</span></span><br><span class="line">  <span class="comment"># &gt;&gt;&gt; Check for open slots...</span></span><br><span class="line">  <span class="comment"># &gt;&gt;&gt; Check slots coverage...</span></span><br><span class="line">  <span class="comment"># [OK] All 16384 slots covered.</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips: 也可以利用下面两条命令一步到位的方式:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> REDIS_POD_IP=$(kubectl get pod -n database -l app=redis-cluster -o jsonpath=<span class="string">'&#123; range.items [*]&#125;&#123;.status.podIP&#125;:6379 '</span>| sed <span class="string">"s# :6379 ##g"</span>)</span><br><span class="line">kubectl <span class="built_in">exec</span> -it -n database redis-cluster-0 -- sh -c <span class="string">"/usr/local/bin/redis-cli -a weiyigeek.top --cluster create --cluster-replicas 1 <span class="variable">$&#123;REDIS_POD_IP&#125;</span>"</span></span><br></pre></td></tr></table></figure><br>ps : 在集群中我们可以利用SVC服务发现的机制采用 <code>redis-cluster-1.redis-cluster.database.svc.cluster.local</code> 域名的方式访问Pod;</p>
+<p><br></p>
+<p><strong>Redis 集群访问验证：</strong></p>
+<ul>
+<li><p>1.先以单台为例查看集群状态</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">~/k8s/redis-master-slave$ kubectl <span class="built_in">exec</span> -it -n database redis-cluster-0 -- sh -c <span class="string">"redis-cli -a weiyigeek.top ping"</span></span><br><span class="line">  <span class="comment"># PONG</span></span><br><span class="line"></span><br><span class="line">~/k8s/redis-master-slave$ kubectl <span class="built_in">exec</span> -it -n database redis-cluster-0 -- sh -c <span class="string">"redis-cli -a weiyigeek.top cluster info"</span></span><br><span class="line">  <span class="comment"># cluster_state:ok</span></span><br><span class="line">  <span class="comment"># cluster_slots_assigned:16384</span></span><br><span class="line">  <span class="comment"># cluster_slots_ok:16384</span></span><br><span class="line">  <span class="comment"># cluster_slots_pfail:0</span></span><br><span class="line">  <span class="comment"># cluster_slots_fail:0</span></span><br><span class="line">  <span class="comment"># cluster_known_nodes:6</span></span><br><span class="line">  <span class="comment"># cluster_size:3</span></span><br><span class="line">  <span class="comment"># cluster_current_epoch:6</span></span><br><span class="line">  <span class="comment"># cluster_my_epoch:1</span></span><br><span class="line">  <span class="comment"># cluster_stats_messages_ping_sent:1735</span></span><br><span class="line">  <span class="comment"># cluster_stats_messages_pong_sent:1797</span></span><br><span class="line">  <span class="comment"># cluster_stats_messages_sent:3532</span></span><br><span class="line">  <span class="comment"># cluster_stats_messages_ping_received:1792</span></span><br><span class="line">  <span class="comment"># cluster_stats_messages_pong_received:1735</span></span><br><span class="line">  <span class="comment"># cluster_stats_messages_meet_received:5</span></span><br><span class="line">  <span class="comment"># cluster_stats_messages_received:3532</span></span><br><span class="line"></span><br><span class="line">~/k8s/redis-master-slave$ kubectl <span class="built_in">exec</span> -it -n database redis-cluster-0 -- sh -c <span class="string">"redis-cli -a weiyigeek.top role"</span></span><br><span class="line">  <span class="comment"># 1) "master"  # 当前主机角色</span></span><br><span class="line">  <span class="comment"># 2) (integer) 1288</span></span><br><span class="line">  <span class="comment"># 3) 1) 1) "172.16.243.67"  # Slave IP</span></span><br><span class="line">  <span class="comment">#       2) "6379"</span></span><br><span class="line">  <span class="comment">#       3) "1288"</span></span><br><span class="line"></span><br><span class="line">~/k8s/redis-master-slave$ kubectl <span class="built_in">exec</span> -it -n database redis-cluster-0 -- sh -c <span class="string">"redis-cli -a weiyigeek.top info replication"</span></span><br><span class="line"><span class="comment"># Replication</span></span><br><span class="line">  <span class="comment"># role:master</span></span><br><span class="line">  <span class="comment"># connected_slaves:1</span></span><br><span class="line">  <span class="comment"># slave0:ip=172.16.243.67,port=6379,state=online,offset=1372,lag=0</span></span><br><span class="line">  <span class="comment"># master_replid:222f4d18c5d0913cb367d8bff49edc717563a96d</span></span><br><span class="line">  <span class="comment"># master_replid2:0000000000000000000000000000000000000000</span></span><br><span class="line">  <span class="comment"># master_repl_offset:1372</span></span><br><span class="line">  <span class="comment"># second_repl_offset:-1</span></span><br><span class="line">  <span class="comment"># repl_backlog_active:1</span></span><br><span class="line">  <span class="comment"># repl_backlog_size:1048576</span></span><br><span class="line">  <span class="comment"># repl_backlog_first_byte_offset:1</span></span><br><span class="line">  <span class="comment"># repl_backlog_histlen:1372</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">~/k8s/redis-master-slave$ kubectl <span class="built_in">exec</span> -it -n database redis-cluster-0 -- sh -c <span class="string">"redis-cli -a weiyigeek.top cluster nodes"</span></span><br><span class="line">  <span class="comment"># ee0aa0c0742e6a9362a96f182d54483ec065fdba 172.16.182.226:6379@16379 master - 0 1611220585017 2 connected 5461-10922</span></span><br><span class="line">  <span class="comment"># 3324007374edeaf4bed02423148970ee8171a7cb 172.16.135.195:6379@16379 slave ee0aa0c0742e6a9362a96f182d54483ec065fdba 0 1611220583514 6 connected</span></span><br><span class="line">  <span class="comment"># f5a740fcbfdcd398da6e380f496fb5cb92236748 172.16.183.81:6379@16379 myself,master - 0 1611220583000 1 connected 0-5460</span></span><br><span class="line">  <span class="comment"># 7697cf77b6da8b58663d23e9ad8150f33a6ee9cd 172.16.24.204:6379@16379 master - 0 1611220583515 3 connected 10923-16383</span></span><br><span class="line">  <span class="comment"># 99509917de27b2f9ba02fb1b09d137014a0ae5f9 172.16.100.67:6379@16379 slave 7697cf77b6da8b58663d23e9ad8150f33a6ee9cd 0 1611220585016 4 connected</span></span><br><span class="line">  <span class="comment"># b5aa6a5f06f1ad2b9debccc6842bcc5f0d9ff732 172.16.243.67:6379@16379 slave f5a740fcbfdcd398da6e380f496fb5cb92236748 0 1611220584015 5 connected</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>2.查看各集群状态</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> pod_name <span class="keyword">in</span> $(kubectl get pod -n database -l app=redis-cluster -o jsonpath=<span class="string">'&#123; range.items [*]&#125;&#123;.spec.hostname&#125; '</span>);<span class="keyword">do</span></span><br><span class="line">  kubectl <span class="built_in">exec</span> -it -n database <span class="variable">$&#123;pod_name&#125;</span> -- sh -c <span class="string">"redis-cli -a weiyigeek.top cluster nodes"</span> | grep <span class="string">"myself"</span>;</span><br><span class="line">  kubectl <span class="built_in">exec</span> -it -n database <span class="variable">$&#123;pod_name&#125;</span> -- sh -c <span class="string">"redis-cli -a weiyigeek.top info replication"</span> | egrep <span class="string">"role|slave"</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 前三个为主-Master</span></span><br><span class="line"><span class="comment"># f5a740fcbfdcd398da6e380f496fb5cb92236748 172.16.183.81:6379@16379 myself,master - 0 1611221210000 1 connected 0-5460  # 注意槽的分配端</span></span><br><span class="line">role:master</span><br><span class="line">connected_slaves:1</span><br><span class="line">slave0:ip=172.16.243.67,port=6379,state=online,offset=2436,lag=1</span><br><span class="line"><span class="comment"># ee0aa0c0742e6a9362a96f182d54483ec065fdba 172.16.182.226:6379@16379 myself,master - 0 1611221211000 2 connected 5461-10922</span></span><br><span class="line">role:master</span><br><span class="line">connected_slaves:1</span><br><span class="line">slave0:ip=172.16.135.195,port=6379,state=online,offset=2436,lag=0</span><br><span class="line"><span class="comment"># 7697cf77b6da8b58663d23e9ad8150f33a6ee9cd 172.16.24.204:6379@16379 myself,master - 0 1611221209000 3 connected 10923-16383</span></span><br><span class="line">role:master</span><br><span class="line">connected_slaves:1</span><br><span class="line">slave0:ip=172.16.100.67,port=6379,state=online,offset=2436,lag=0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 后三个为从-Slave</span></span><br><span class="line"><span class="comment"># 99509917de27b2f9ba02fb1b09d137014a0ae5f9 172.16.100.67:6379@16379 myself,slave 7697cf77b6da8b58663d23e9ad8150f33a6ee9cd 0 1611221211000 4 connected</span></span><br><span class="line">role:slave</span><br><span class="line">slave_repl_offset:2436</span><br><span class="line">slave_priority:100</span><br><span class="line">slave_read_only:1</span><br><span class="line">connected_slaves:0</span><br><span class="line"><span class="comment"># b5aa6a5f06f1ad2b9debccc6842bcc5f0d9ff732 172.16.243.67:6379@16379 myself,slave f5a740fcbfdcd398da6e380f496fb5cb92236748 0 1611221211000 5 connected</span></span><br><span class="line">role:slave</span><br><span class="line">slave_repl_offset:2436</span><br><span class="line">slave_priority:100</span><br><span class="line">slave_read_only:1</span><br><span class="line">connected_slaves:0</span><br><span class="line"><span class="comment"># 3324007374edeaf4bed02423148970ee8171a7cb 172.16.135.195:6379@16379 myself,slave ee0aa0c0742e6a9362a96f182d54483ec065fdba 0 1611221209000 6 connected</span></span><br><span class="line">role:slave</span><br><span class="line">slave_repl_offset:2436</span><br><span class="line">slave_priority:100</span><br><span class="line">slave_read_only:1</span><br><span class="line">connected_slaves:0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>3.Redis 数据写入和查询</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">~/k8s/redis-master-slave$ kubectl <span class="built_in">exec</span> -it -n database redis-cluster-0 -- sh -c <span class="string">"redis-cli -h redis-cluster-0 -c -a weiyigeek.top"</span></span><br><span class="line">redis-cluster-0:6379&gt; <span class="built_in">set</span> name weiyigeek</span><br><span class="line">-&gt; Redirected to slot [5798] located at 172.16.182.226:6379</span><br><span class="line">OK</span><br><span class="line">172.16.182.226:6379&gt; <span class="built_in">set</span> demo Redis-Cluster</span><br><span class="line">-&gt; Redirected to slot [903] located at 172.16.183.81:6379</span><br><span class="line">OK</span><br><span class="line">172.16.183.81:6379&gt; <span class="built_in">set</span> time 2021年1月21日</span><br><span class="line">OK</span><br><span class="line">172.16.183.81:6379&gt; time</span><br><span class="line">1) <span class="string">"1611221505"</span></span><br><span class="line">2) <span class="string">"958367"</span></span><br><span class="line">172.16.183.81:6379&gt; <span class="built_in">set</span> time 2021年1月21日</span><br><span class="line">OK</span><br><span class="line">172.16.183.81:6379&gt; <span class="built_in">set</span> web www.weiyigeek.top</span><br><span class="line">-&gt; Redirected to slot [9635] located at 172.16.182.226:6379</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>4.利用客户端工具连接查看</p>
+</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; redis-StatefulSet.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redis-app</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">database</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  serviceName:</span> <span class="string">"redis-service"</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">      appCluster:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">        appCluster:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      terminationGracePeriodSeconds:</span> <span class="number">20</span></span><br><span class="line"><span class="attr">      affinity:</span></span><br><span class="line"><span class="attr">        podAntiAffinity:</span></span><br><span class="line"><span class="attr">          preferredDuringSchedulingIgnoredDuringExecution:</span></span><br><span class="line"><span class="attr">          - weight:</span> <span class="number">100</span></span><br><span class="line"><span class="attr">            podAffinityTerm:</span></span><br><span class="line"><span class="attr">              labelSelector:</span></span><br><span class="line"><span class="attr">                matchExpressions:</span></span><br><span class="line"><span class="attr">                - key:</span> <span class="string">app</span></span><br><span class="line"><span class="attr">                  operator:</span> <span class="string">In</span></span><br><span class="line"><span class="attr">                  values:</span></span><br><span class="line"><span class="bullet">                  -</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">              topologyKey:</span> <span class="string">kubernetes.io/hostname</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">"redis"</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">        command:</span></span><br><span class="line"><span class="bullet">          -</span> <span class="string">"redis-server"</span>                  <span class="comment">#redis启动命令</span></span><br><span class="line"><span class="attr">        args:</span></span><br><span class="line"><span class="bullet">          -</span> <span class="string">"/etc/redis/redis.conf"</span>         <span class="comment">#redis-server后面跟的参数,换行代表空格</span></span><br><span class="line"><span class="bullet">          -</span> <span class="string">"--protected-mode"</span>              <span class="comment">#允许外网访问</span></span><br><span class="line"><span class="bullet">          -</span> <span class="string">"no"</span></span><br><span class="line">        <span class="comment"># command: redis-server /etc/redis/redis.conf --protected-mode no</span></span><br><span class="line"><span class="attr">        resources:</span>                          <span class="comment">#资源</span></span><br><span class="line"><span class="attr">          requests:</span>                         <span class="comment">#请求的资源</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="string">"300m"</span>                     <span class="comment">#m代表千分之,相当于0.1 个cpu资源</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="string">"800Mi"</span>                 <span class="comment">#内存100m大小</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">            - name:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">              containerPort:</span> <span class="number">6379</span></span><br><span class="line"><span class="attr">              protocol:</span> <span class="string">"TCP"</span></span><br><span class="line"><span class="attr">            - name:</span> <span class="string">cluster</span></span><br><span class="line"><span class="attr">              containerPort:</span> <span class="number">16379</span></span><br><span class="line"><span class="attr">              protocol:</span> <span class="string">"TCP"</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">          - name:</span> <span class="string">"redis-conf"</span>              <span class="comment">#挂载configmap生成的文件</span></span><br><span class="line"><span class="attr">            mountPath:</span> <span class="string">"/etc/redis"</span>         <span class="comment">#挂载到哪个路径下</span></span><br><span class="line"><span class="attr">          - name:</span> <span class="string">"redis-data"</span>              <span class="comment">#挂载持久卷的路径</span></span><br><span class="line"><span class="attr">            mountPath:</span> <span class="string">"/var/lib/redis"</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">"redis-conf"</span>                  <span class="comment">#引用configMap卷</span></span><br><span class="line"><span class="attr">        configMap:</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">"redis-conf"</span></span><br><span class="line"><span class="attr">          items:</span></span><br><span class="line"><span class="attr">            - key:</span> <span class="string">"redis.conf"</span>             <span class="comment">#创建configMap指定的名称</span></span><br><span class="line"><span class="attr">              path:</span> <span class="string">"redis.conf"</span>            <span class="comment">#里面的那个文件--from-file参数后面的文件</span></span><br><span class="line"><span class="attr">  volumeClaimTemplates:</span>                     <span class="comment">#进行pvc持久卷声明,</span></span><br><span class="line"><span class="attr">  - metadata:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">redis-data</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      accessModes:</span> <span class="string">["ReadWriteMany"]</span></span><br><span class="line"><span class="attr">      storageClassName:</span> <span class="string">"managed-nfs-storage"</span></span><br><span class="line"><span class="attr">      resources:</span></span><br><span class="line"><span class="attr">        requests:</span></span><br><span class="line"><span class="attr">          storage:</span> <span class="number">10</span><span class="string">G</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; redis-headless-service.yml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redis-service</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">database</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">redis-port</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">6379</span></span><br><span class="line"><span class="attr">    nodePort:</span> <span class="number">31001</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">NodePort</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">    appCluster:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="string">kubectl</span> <span class="string">create</span> <span class="bullet">-f</span> <span class="string">redis-headless-service.yml</span></span><br></pre></td></tr></table></figure>
+<p><br></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; redis-cluster-5.0.10.yaml&lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Secret</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="comment"># if your operator run as cluster-scoped, add this annotations</span></span><br><span class="line">    <span class="string">redis.kun/scope:</span> <span class="string">cluster-scoped</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redis-secret</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">Opaque</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line"><span class="attr">  password:</span> <span class="string">Q3F6ay5jb20uY24K</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolumeClaim</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">  annotations:</span>   <span class="comment"># 空间标注</span></span><br><span class="line">    <span class="string">volume.beta.kubernetes.io/storage-class:</span> <span class="string">"managed-nfs-storage"</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  accessModes:</span> <span class="string">["ReadWriteMany"]</span></span><br><span class="line"><span class="attr">  resources:</span></span><br><span class="line"><span class="attr">    requests:</span></span><br><span class="line"><span class="attr">      storage:</span> <span class="number">1</span><span class="string">Gi</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">redis.kun/v1alpha1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">DistributedRedisCluster</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  annotations:</span></span><br><span class="line">    <span class="comment"># if your operator run as cluster-scoped, add this annotations</span></span><br><span class="line">    <span class="string">redis.kun/scope:</span> <span class="string">cluster-scoped</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">example-distributedrediscluster</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  image:</span> <span class="attr">redis:5.0.10-alpine</span></span><br><span class="line"><span class="attr">  masterSize:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">  clusterReplicas:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">  config:</span></span><br><span class="line"><span class="attr">    activerehashing:</span> <span class="string">"yes"</span></span><br><span class="line"><span class="attr">    appendfsync:</span> <span class="string">everysec</span></span><br><span class="line"><span class="attr">    appendonly:</span> <span class="string">"yes"</span></span><br><span class="line"><span class="attr">    hash-max-ziplist-entries:</span> <span class="string">"512"</span></span><br><span class="line"><span class="attr">    hash-max-ziplist-value:</span> <span class="string">"64"</span></span><br><span class="line"><span class="attr">    hll-sparse-max-bytes:</span> <span class="string">"3000"</span></span><br><span class="line"><span class="attr">    list-compress-depth:</span> <span class="string">"0"</span></span><br><span class="line"><span class="attr">    maxmemory-policy:</span> <span class="string">noeviction</span></span><br><span class="line"><span class="attr">    maxmemory-samples:</span> <span class="string">"5"</span></span><br><span class="line"><span class="attr">    no-appendfsync-on-rewrite:</span> <span class="string">"no"</span></span><br><span class="line"><span class="attr">    notify-keyspace-events:</span> <span class="string">""</span></span><br><span class="line"><span class="attr">    set-max-intset-entries:</span> <span class="string">"512"</span></span><br><span class="line"><span class="attr">    slowlog-log-slower-than:</span> <span class="string">"10000"</span></span><br><span class="line"><span class="attr">    slowlog-max-len:</span> <span class="string">"128"</span></span><br><span class="line"><span class="attr">    stop-writes-on-bgsave-error:</span> <span class="string">"yes"</span></span><br><span class="line"><span class="attr">    tcp-keepalive:</span> <span class="string">"0"</span></span><br><span class="line"><span class="attr">    timeout:</span> <span class="string">"0"</span></span><br><span class="line"><span class="attr">    zset-max-ziplist-entries:</span> <span class="string">"128"</span></span><br><span class="line"><span class="attr">    zset-max-ziplist-value:</span> <span class="string">"64"</span></span><br><span class="line"><span class="attr">  passwordSecret:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">redis-secret</span></span><br><span class="line"><span class="attr">  resources:</span></span><br><span class="line"><span class="attr">    limits:</span></span><br><span class="line"><span class="attr">      cpu:</span> <span class="number">500</span><span class="string">m</span></span><br><span class="line"><span class="attr">      memory:</span> <span class="number">500</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">    requests:</span></span><br><span class="line"><span class="attr">      cpu:</span> <span class="number">200</span><span class="string">m</span></span><br><span class="line"><span class="attr">      memory:</span> <span class="number">100</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">  serviceName:</span> <span class="string">redis-svc</span></span><br><span class="line"><span class="attr">  storage:</span></span><br><span class="line"><span class="attr">    type:</span> <span class="string">persistent-claim</span></span><br><span class="line"><span class="attr">    size:</span> <span class="number">1</span><span class="string">Gi</span></span><br><span class="line"><span class="attr">    class:</span> <span class="string">redis-cluster</span></span><br><span class="line"><span class="attr">    deleteClaim:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+<p>$ kubectl create -f redis-cluster-5.0.10.yaml -n redis-cluster<br>secret/redis-secret created<br>distributedrediscluster.redis.kun/example-distributedrediscluster created</p>
+<p><br></p>
+<h3 id="2-Redis-cluster-operator-集群构建"><a href="#2-Redis-cluster-operator-集群构建" class="headerlink" title="(2) Redis-cluster-operator 集群构建"></a>(2) Redis-cluster-operator 集群构建</h3><h2 id="0x03-Redis-集群连接"><a href="#0x03-Redis-集群连接" class="headerlink" title="0x03 Redis 集群连接"></a>0x03 Redis 集群连接</h2><h3 id="1-应用连接写入测试"><a href="#1-应用连接写入测试" class="headerlink" title="(1) 应用连接写入测试"></a>(1) 应用连接写入测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; redis-cluster-connect.yaml &lt;&lt;<span class="string">'END'</span></span><br><span class="line">apiVersion: v1 </span><br><span class="line">kind: Pod </span><br><span class="line">metadata:</span><br><span class="line"> name: redis-test</span><br><span class="line"> namespace: default </span><br><span class="line"> labels:</span><br><span class="line">  app: redis-test</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: redis-test</span><br><span class="line">    image: java:8</span><br><span class="line">    imagePullPolicy: IfNotPresent</span><br><span class="line">    <span class="built_in">command</span>:</span><br><span class="line">    - <span class="string">"java"</span></span><br><span class="line">    - <span class="string">"-jar"</span></span><br><span class="line">    - <span class="string">"/app/redis.jar"</span></span><br><span class="line">    volumeMounts:</span><br><span class="line">      - name: app</span><br><span class="line">        mountPath: /app</span><br><span class="line">      - name: timezone</span><br><span class="line">        mountPath: /etc/localtime       <span class="comment"># 在Pod中时区设置(挂载主机的时区)</span></span><br><span class="line">  volumes:</span><br><span class="line">    - name: app</span><br><span class="line">      hostPath:</span><br><span class="line">        path: /nfsdisk-31/<span class="built_in">test</span></span><br><span class="line">    - name: timezone </span><br><span class="line">      hostPath:</span><br><span class="line">        path: /usr/share/zoneinfo/Asia/Shanghai </span><br><span class="line">END</span><br></pre></td></tr></table></figure>
+<p>redis如何实现主从复制?以及数据同步机制?<br><a href="https://www.cnblogs.com/zhuifeng-mayi/p/9301574.html" target="_blank" rel="noopener">https://www.cnblogs.com/zhuifeng-mayi/p/9301574.html</a></p>
+<p>官网: <a href="https://redis.io/topics/benchmarks/" target="_blank" rel="noopener">https://redis.io/topics/benchmarks/</a></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-02-01T15:38:32.995Z" itemprop="dateUpdated">2021-02-01 23:38:32</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2019/4/524.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/4/524.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+var yzm = ["MjAyMA==","MjAxMQ=="];
+var flag = 0;
+var display_flag = 1;
+
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4/524.html&title=《Redis在K8s中的单实例搭建以及主从同步实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4/524.html&title=《Redis在K8s中的单实例搭建以及主从同步实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/4/285.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">JAVA入门学习一</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/4/97.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Redis安装与配置</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-Redis-单实例实践"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 Redis 单实例实践</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-Redis-集群主从实践"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 Redis 集群主从实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-自定义集群构建"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">(1) 自定义集群构建</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-Redis-cluster-operator-集群构建"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">(2) Redis-cluster-operator 集群构建</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-Redis-集群连接"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 Redis 集群连接</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-应用连接写入测试"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">(1) 应用连接写入测试</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2021
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4/524.html&title=《Redis在K8s中的单实例搭建以及主从同步实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4/524.html&title=《Redis在K8s中的单实例搭建以及主从同步实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABsklEQVR42u3aQY7DMAgF0N7/0p0DjBp9oCZR9byqIsd+6QIB9usVj/e/kT+/Xu11YuDi4o6578uRzPm0/fUH5Ovj4uLexf0UMZI5vc/I18fFxX0+N0lfktVwcXF/iXv97iQBwsXFfRo3KX6uib2WysFaDRcXd8DNu5Tnfh/p7+Li4ra47+Kohqq8iIp2x8XFXeHmAWWefPRWwMXFvZfba3wk4amXQkW1Gi4u7gFukrjMj1Tz45MoI8PFxT3M/W5Skl/qmjRicHFxN7m9oFZNg+ZXuHBxcTe51bSjGrzyo9lC4MPFxV3k9hofkwZKvgIuLu5p7uSQ9Tp45QGr8Gfh4uKucPOAUp05uVtVPmTFxcVd4eYNkW8dspZbpbi4uIvcpBRJypg8CFYLJFxc3E1uEpiqT6ppTaH4wcXFvZWbhKTenPw4p5xz4eLiDri9hmneyJisg4uLexd30uicb9lr0eLi4u5w86CT0/NWbPUtXFzcTW4eaKrbF+qwXq2Gi4v7AG4ys1r2lCs2XFzch3Hzw9fqZ0dCXFzcRe68uRlduCxezsDFxb2Lu9+L7bVgcHFxV7h/9QOaefeDohgAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

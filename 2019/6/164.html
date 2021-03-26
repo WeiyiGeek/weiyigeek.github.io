@@ -120,14 +120,20 @@
               </li>
             
               <li>
-                <a href="https://weibo.com/615643678" target="_blank">
-                  <i class="icon icon-lg icon-weibo"></i>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
                 </a>
               </li>
             
               <li>
-                <a href="https://t.me/WeiyiGeek" target="_blank">
-                  <i class="icon icon-lg icon-telegram"></i>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
                 </a>
               </li>
             
@@ -198,6 +204,13 @@
               <a href="https://github.com/weiyigeek" target="_blank" >
                 <i class="icon icon-lg icon-github"></i>
                 Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
               </a>
             </li>
         
@@ -378,6 +391,12 @@
             </figure>
 <p><strong>补充入坑</strong><br><em>问题1:crontab报错：errors in crontab file, can’t install</em><br>问题原因:采用Quartz生成或输入的crond表达式是错误的<br>问题解决:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#根据网站上的Cron表达式生成器生成的(巨坑)</span></span><br><span class="line">0/0 0/4 * * * ? 脚本</span><br><span class="line"><span class="comment">#修改后的Cron表达式即可完美解决问题</span></span><br><span class="line">* */4 * * * ? 脚本</span><br></pre></td></tr></table></figure></p>
 <p><em>问题2:crontab未按照定时任务报错 (mailed 58 bytes of output but got status 0x007f#012) 新手常遇到</em><br>问题描述:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#crond 日志查看</span></span><br><span class="line">cat /var/<span class="built_in">log</span>/cron</span><br><span class="line">Jun  8 16:25:01 node2 CROND[67651]: (root) CMD (sh /tmp/WebMonitor.sh)</span><br><span class="line">Jun  8 16:25:01 node2 CROND[67649]: (root) MAIL (mailed 58 bytes of output but got status 0x007f<span class="comment">#012)  #错误信息</span></span><br></pre></td></tr></table></figure><br>问题原因:脚本中的由于环境变量的原因未执行phantomjs脚本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#排错0.服务信息查看</span></span><br><span class="line"><span class="variable">$systemctl</span> status crond</span><br><span class="line">● crond.service - Command Scheduler</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/crond.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since 一 2020-06-08 15:48:58 CST; 53min ago</span><br><span class="line"> Main PID: 65217 (crond)</span><br><span class="line">    Tasks: 1</span><br><span class="line">   Memory: 672.0K</span><br><span class="line">   CGroup: /system.slice/crond.service</span><br><span class="line">           └─65217 /usr/sbin/crond -n</span><br><span class="line"></span><br><span class="line"><span class="comment">#排查1.查询sendmail发信的错误信息</span></span><br><span class="line">$ systemctl restart postfix</span><br><span class="line">$ cat /var/spool/mail/root</span><br><span class="line">From root@node2.localdomain  Mon Jun  8 16:37:18 2020</span><br><span class="line">Return-Path: &lt;root@node2.localdomain&gt;</span><br><span class="line">X-Original-To: root</span><br><span class="line">Delivered-To: root@node2.localdomain</span><br><span class="line">Received: by node2.localdomain (Postfix, from userid 0)</span><br><span class="line">        id 3D29166DC22A; Mon,  8 Jun 2020 16:30:02 +0800 (CST)</span><br><span class="line">[Error] Phantomjs NotFound,Please Install this!</span><br><span class="line">您在 /var/spool/mail/root 中有邮件</span><br><span class="line"></span><br><span class="line"><span class="comment">#排查2.利用脚本重定向错误输出</span></span><br><span class="line">$ crontab -e</span><br><span class="line">*/1 * * * * sh /tmp/WebMonitor.sh &gt;xxx.log 2&gt;&amp;1 <span class="comment">#默认路径是用户家/xxx.log</span></span><br></pre></td></tr></table></figure><br>问题解决:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 脚本中加上绝对路径</span></span><br><span class="line"><span class="comment"># phantomjs缩略图生成</span></span><br><span class="line">/usr/<span class="built_in">local</span>/src/phantomjs/bin/phantomjs -v &gt; /dev/null 2&gt;&amp;1</span><br><span class="line"><span class="keyword">if</span> [[ <span class="string">"$?"</span> != <span class="string">"0"</span> ]];<span class="keyword">then</span> <span class="built_in">echo</span> -e <span class="string">"\e[31m[Error] Phantomjs NotFound,Please Install this! \e[0m"</span>;<span class="built_in">exit</span> 0;<span class="keyword">fi</span></span><br></pre></td></tr></table></figure></p>
+<p><em>问题3. crontab 异常不运行、不报错、无日志？</em><br>描述: debug 终极大法还是得看日志, 通过以下方式进行开启日志记录;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误信息排查</span></span><br><span class="line">systemctl status cron.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ubuntu 开启crontab 日志记录</span></span><br><span class="line">$ vim /etc/rsyslog.d/50-default.conf</span><br><span class="line">cron.*   /var/<span class="built_in">log</span>/cron.log  <span class="comment"># 取消注释即可</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>问题4.当cron这样运行时它通常作为根用户运行，这样做会为该用户创建一个会话。由于大多数linice的默认设置被记录在auth.log中(<code>如果不是那么烦人的话这看起来是谨慎的</code>)。</p>
+<p>描述: Debian bug 跟踪器提供了一种不记录会话活动的解决方案，而只在cron运行时才记录。</p>
+<p>修改:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Go to the `/etc/pam.d` directory.</span><br><span class="line"></span><br><span class="line">Open the file `common-session-noninteractive` <span class="keyword">in</span> an editor.</span><br><span class="line"></span><br><span class="line">Look <span class="keyword">for</span> the following line:</span><br><span class="line">`session required        pam_unix.so`</span><br><span class="line"></span><br><span class="line">Above this line, add the following:</span><br><span class="line">`session     [success=1 default=ignore] pam_succeed_if.so service <span class="keyword">in</span> cron quiet use_uid`</span><br><span class="line"></span><br><span class="line">Save the file and exit.Restart crond using something like service cron restart.</span><br><span class="line">`systemctl restart cron.service`</span><br></pre></td></tr></table></figure></p>
+<p>结果:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">● cron.service - Regular background program processing daemon</span><br><span class="line">    Loaded: loaded (/lib/systemd/system/cron.service; enabled; vendor preset: enabled)</span><br><span class="line">    Active: active (running) since Fri 2021-02-26 15:23:25 CST; 6s ago</span><br><span class="line">      Docs: man:cron(8)</span><br><span class="line">  Main PID: 1266507 (cron)</span><br><span class="line">    Tasks: 1 (<span class="built_in">limit</span>: 19114)</span><br><span class="line">    Memory: 428.0K</span><br><span class="line">    CGroup: /system.slice/cron.service</span><br><span class="line">            └─1266507 /usr/sbin/cron -f</span><br><span class="line"></span><br><span class="line">Feb 26 15:23:25 gitlab-weiyigeek systemd[1]: Started Regular background program processing daemon.</span><br><span class="line">Feb 26 15:23:25 gitlab-weiyigeek cron[1266507]: (CRON) INFO (pidfile fd = 3)</span><br><span class="line">Feb 26 15:23:25 gitlab-weiyigeek cron[1266507]: (CRON) INFO (Skipping @reboot <span class="built_in">jobs</span> -- not system startup)</span><br></pre></td></tr></table></figure></p>
 <p>附录:在线Cron表达式生成器</p>
 <ul>
 <li><a href="http://www.toolzl.com/tools/croncreate.html" target="_blank" rel="noopener">http://www.toolzl.com/tools/croncreate.html</a></li>
@@ -433,7 +452,7 @@
         
         
 <span class="post-time">
-    最后更新时间：<time datetime="2020-10-10T02:37:45.256Z" itemprop="dateUpdated">2020-10-10 10:37:45</time>
+    最后更新时间：<time datetime="2021-03-16T14:39:35.599Z" itemprop="dateUpdated">2021-03-16 22:39:35</time>
 </span><br>
 
 
@@ -598,9 +617,9 @@ function yzm_vertify(){
 
   
     <div class="next">
-      <a href="/2019/6/174.html" id="post-next" class="post-nav-link">
+      <a href="/2019/6/165.html" id="post-next" class="post-nav-link">
         <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">网络连接配置查看</h4>
+        <h4 class="title">系统各类日志查看</h4>
       </a>
     </div>
   
@@ -677,7 +696,7 @@ function yzm_vertify(){
     <div class="bottom">
         <p>
             <span>
-                WeiyiGeek &copy; 2018 - 2020
+                WeiyiGeek &copy; 2018 - 2021
             </span>
         		
            	

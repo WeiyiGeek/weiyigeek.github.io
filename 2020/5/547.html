@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+    <meta name="author" content="WeiyiGeek" />
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="baidu-site-verification" content="code-l9AIoxE6wI" />
+    <meta name="360-site-verification" content="6087c88960fde83c4302ec2018369e9d" />
+    <meta name="sogou_site_verification" content="vLUmTfER0i"/>
+
+    
+    <title>🌐 FastDFS分布式的文件存储系统入门介绍与实践 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    
+
+    
+    <meta name="keywords" content="">
+    <meta name="Description" content="WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维,分享技术学习心得与入坑,提升自我网络安全技术与能力,立志维护大众网络安全为己任--中国梦,我的梦">
+
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="/css/style.css?v=1.4.4">
+    
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}'),
+            g: JSON.parse('{"enable":false,"lazy":true,"owner":"weiyigeek","repo":"gitment","oauth":{"client_id":"8d8e965cade8797026d3","client_secret":"a6fb1b118ae69f5d3b014862dbf8c01c0463c8a8"},"perPage":10}'),
+            d: JSON.parse('{"app_id":"6537ff7a"}')
+        };
+    </script>
+    <script type="text/javascript">
+        window.lazyScripts=[];
+    </script>
+    
+        <script type="text/javascript" src="/js/plugins/daovoice.js?v=1.4.4"></script>
+    
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.png">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            
+              <span>m</span>
+            
+              <span>a</span>
+            
+              <span>s</span>
+            
+              <span>t</span>
+            
+              <span>e</span>
+            
+              <span>r</span>
+            
+              <span>@</span>
+            
+              <span>w</span>
+            
+              <span>e</span>
+            
+              <span>i</span>
+            
+              <span>y</span>
+            
+              <span>i</span>
+            
+              <span>g</span>
+            
+              <span>e</span>
+            
+              <span>e</span>
+            
+              <span>k</span>
+            
+              <span>.</span>
+            
+              <span>t</span>
+            
+              <span>o</span>
+            
+              <span>p</span>
+            
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.gitee.io/img/wechatsoso.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>FastDFS分布式的文件存储系统入门介绍与实践</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="./atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg">
+    <div class="container fade-scale">
+        <h1 class="title">FastDFS分布式的文件存储系统入门介绍与实践</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-05-22T06:34:30.000Z" itemprop="datePublished" class="page-time">
+  2020-05-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/">系统架构</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E5%88%86%E5%B8%83%E5%BC%8F/Distributed/">Distributed</a></li></ul></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/系统架构/分布式/FastDFS/FastDFS分布式的文件存储系统入门介绍与实践"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">FastDFS分布式的文件存储系统入门介绍与实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-05-22 14:34:30" datetime="2020-05-22T06:34:30.000Z"  itemprop="datePublished">2020-05-22</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/">系统架构</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E5%88%86%E5%B8%83%E5%BC%8F/Distributed/">Distributed</a></li></ul></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1.概述"></a>1.概述</h3><p>描述: FastDFS 是用 C 语言编写的一款开源的分布式文件系统，它对文件进行管理。功能包括：<code>文件存储、文件同步、文件访问（文件上传、文件下载）</code>等，适合中小文件<code>（4KB &lt; file_size &lt;500MB）</code>存储，解决了<code>大容量文件存储</code>和<code>负载均衡</code>的问题。充分考虑了<code>冗余备份、负载均衡、线性扩容等机制，并注重高可用、高性能等指标</code>。</p>
+<p><strong>应用场景:</strong></p>
+<ul>
+<li>1.特别适合以文件为载体的在线服务，如相册网站、视频网站等等。</li>
+<li>2.​ 适合用来存储用户图片、视频、文档等文件。</li>
+</ul>
+<p>Tips: 支持Linux、FreeBSD等UNIX系统类 google FS，但不是通用的文件系统;</p>
+<p><br/></p>
+<h3 id="2-特性"><a href="#2-特性" class="headerlink" title="2.特性"></a>2.特性</h3><p><strong>简单描述:</strong></p>
+<ul>
+<li>(1) 支持在线扩容以及主从搭建文件</li>
+<li>(2) 文件不分块存储，上传的文件和 OS 文件系统中的文件一一对应</li>
+<li>(3) 支持相同内容的文件只保存一份，节约磁盘空间</li>
+<li>(4) 下载文件支持 HTTP 协议，可以使用内置 Web Server，也可以和其他 <code>Web Server</code> 配合使用</li>
+<li>(5) 存储服务器上可以<code>保存文件属性（meta-data）</code></li>
+<li>(6) V2.0网络通信采用 libevent，支持大并发访问，整体性能更好</li>
+</ul>
+<p><strong>优点:</strong></p>
+<ul>
+<li>1.适合中小文件存储（建议范围：<code>4KB &lt; file_size &lt; 500MB</code>）</li>
+<li>2.主备Tracker服务，增强系统的可用性</li>
+<li>3.系统不需要支持POSIX，这样的话就降低了系统的复杂度，使得处理的速度会更高</li>
+<li>4.支持主从文件，支持自定义扩展名</li>
+<li>5.支持在线扩容机制，增强了系统的可扩展性</li>
+<li>6.实现了软RAID，增强了系统的并发处理能力和数据容错恢复能力</li>
+</ul>
+<p><br/></p>
+<p><strong>缺点:</strong></p>
+<ul>
+<li>1.直接按文件存储，可直接读取文件内容，缺乏文件安全性</li>
+<li>2.通过API下载，存在单点的性能瓶颈</li>
+<li>3.不支持断点续传，对大文件将是噩梦</li>
+<li>4.同步机制不支持文件正确性校验，降低了系统的可用性</li>
+<li>5.不支持POSIX通用接口访问，通用性比较的低</li>
+<li>6.对跨公网的文件同步，存在着比较大的延迟，需要应用做相应的容错策略</li>
+</ul>
+<p>Tips : ​出于简洁考虑 FastDFS 没有对文件做分块存储，因此不太适合分布式计算场景。</p>
+<p><br/></p>
+<h3 id="3-架构"><a href="#3-架构" class="headerlink" title="3.架构"></a>3.架构</h3><p>描述: FastDFS 文件系统主要由 <code>Tracker server</code> 和 <code>Storage server</code> 组成。其中 Storage 负责存储文件，Tracker 负责存储文件所在地址，主要作用是负载均衡和资源调度。</p>
+<p><br/></p>
+<p><strong>原理流程</strong>: 客户端请求 Tracker server 进行文件上传、下载、删除文件， Tracker server 将客户端的请求调度到 Storage server 完成文件的上传和下载。</p>
+<p>从框架图中我们可以看到<code>FastDFS服务端</code>有三个角色, <code>跟踪服务器（tracker server）</code>、<code>存储服务器（storage server）</code>和<code>客户端（client）</code>。Tracker、Storage 都可以实现集群部署，Tracker的每个节点地位平等，而Storage可以分为多个组，每个组之间保存的文件是不同的，组内部分为多个成员且地位一致，<code>每个成员保存的内容是一样</code>，没有主从概念。</p>
+<figure class="image-box">
+                <a rel=FastDFS分布式的文件存储系统入门介绍与实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210414214129.png" target="_blank" title="WeiyiGeek.FastDFS架构" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210414214129.png" alt="WeiyiGeek.FastDFS架构" title="" class=""></a>
+                <p>WeiyiGeek.FastDFS架构</p>
+            </figure>
+<p>Tips : 使用FastDFS存储文件优点，可以应对互联网的海量文件存储，一旦文件较多，可以随时横向扩展，且集群的实现也使系统不存在单点故障问题，用户不会因为服务器宕机而无法访问文件资源。</p>
+<p><br/></p>
+<h4 id="Tracker-Server"><a href="#Tracker-Server" class="headerlink" title="Tracker Server"></a>Tracker Server</h4><p>描述: 跟踪服务器作为集群的中心节点，负责对客户端的请求进行<code>负载均衡和调度工作</code>,以及负责<code>管理所有的 storage server 和 group</code>，每个 storage 在启动后会连接 Tracker，告知自己所属 group 等信息，并保持周期性心跳。tracker 根据 storage 的心跳信息，建立 <code>group==&gt;[storage serverlist]</code> 的映射表。</p>
+<p>重点: Tracker 管理的元数据信息较少并且会全部存储在内存中，另外 tracker 上的元信息都是<code>由 storage 汇报的信息生成的，本身不需要持久化任何数据</code>，使得 tracker 非常容易扩展，<code>直接增加 tracker 机器即可扩展为 tracker cluster 来服务</code>，cluster 里每个 tracker 之间是完全对等的，所有的 tracker 都接受 stroage 的心跳信息，生成<code>元数据信息</code>来提供读写服务。</p>
+<p><br/></p>
+<h4 id="Storage-Server"><a href="#Storage-Server" class="headerlink" title="Storage Server"></a>Storage Server</h4><p>描述: 存储服务器(又称：<code>存储节点或数据服务器</code>)主要提供容量和备份服务。</p>
+<p>它以 group 为单位<code>每个 group 内</code>可以有多台 <code>storage server</code> 数据互为备份;</p>
+<p>它有如下优缺点：</p>
+<ul>
+<li>优点: 是将不同应用数据存到不同的Group就能隔离应用数据，同时还可根据应用的访问特性来将应用分配到不同的Group来做负载均衡。</li>
+<li>缺点: 是Group的容量受单机存储容量的限制，同时当Group内有机器坏掉时，数据恢复只能依赖group内的其他机器，使得恢复时间会很长。</li>
+</ul>
+<p>以 group 为单位<code>每个 group 内</code>可以有多台 <code>storage server</code> 数据互为备份; 以 group 为单位组织存储能方便的进行<code>应用隔离、负载均衡、副本数定制（group内storage server数量即为该group的副本数）</code>;</p>
+<p>Tips : group 组也可称为卷。同组内服务器上的文件是完全相同的,同一组内的storage server之间是对等的， 文件上传、 删除等操作可以在任意一台storage server上进行 。</p>
+<p>重点: group内每个storage的存储依赖于本地文件系统，storage可配置多个数据存储目录，比如有10块磁盘分别挂载在<code>/data/disk1-/data/disk10</code>，则可将这10个目录都配置为storage的数据存储目录。storage接受到写文件请求时，会根据配置好的规则选择其中一个存储目录来存储文件。为了避免单个目录下的文件数太多，在storage第一次启动时，会在每个数据存储目录里创建2级子目录，每级256个，总共<code>256^2=65536</code>个文件，新写的文件会以hash的方式被路由到其中某个子目录下，然后将文件数据（<code>文件和文件属性（meta data）键值对(Key Value Pair)方式，如：width=1024,heigth=768</code>）作为本地文件存储到该目录中, 即<code>Storage server</code>直接利用OS的文件系统调用管理文件。</p>
+<p><br/></p>
+<h4 id="Client"><a href="#Client" class="headerlink" title="Client"></a>Client</h4><p>描述: client(客户端) 作为业务请求的发起方，通过专有接口，使用TCP/IP协议与跟踪器服务器或存储节点进行数据交互。FastDFS向使用者提供基本文件访问接口，比如<code>upload、download、append、delete</code>等，以客户端库的方式提供给用户使用。</p>
+<p><br/></p>
+<h3 id="4-存储策略"><a href="#4-存储策略" class="headerlink" title="4.存储策略"></a>4.存储策略</h3><p>描述: 为了支持大容量存储节点（服务器）采用了<code>分卷（或分组）的组织方式</code>。存储系统由一个或多个卷组成，卷与卷之间的文件是相互独立的，所有卷的文件容量累加就是整个存储系统中的文件容量。一个卷可以由一台或多台存储服务器组成，一个卷下的存储服务器中的文件都是相同的，卷中的多台存储服务器起到了<code>冗余备份</code>和<code>负载均衡</code>的作用。</p>
+<p>Tips : 在卷中增加服务器时，同步已有的文件由系统自动完成，同步完成后，系统自动将新增服务器切换到线上提供服务。</p>
+<p>Tips : 当存储空间不足或即将耗尽时，可以动态添加卷, 只需要增加一台或多台服务器，并将它们配置为一个新的卷，这样就扩大了存储系统的容量。</p>
+<p><br/></p>
+<h3 id="5-过程剖析"><a href="#5-过程剖析" class="headerlink" title="5.过程剖析"></a>5.过程剖析</h3><h4 id="文件上传-upload"><a href="#文件上传-upload" class="headerlink" title="文件上传 - upload"></a>文件上传 - upload</h4><p>描述: 通过前面架构介绍我们知道向使用者提供基本文件访问接口，比如 <code>upload、download、append、delete</code> 等，以客户端库的方式提供给用户使用。</p>
+<p><strong>简单流程:</strong><br>描述: <code>Storage Server</code> 会定期的向 <code>Tracker Server</code> 发送自己的存储信息。当 <code>Tracker Server Cluster</code> 中的 <code>Tracker Server</code> 不止一个时，各个Tracker之间的关系是对等的，所以客户端上传时可以选择任意一个Tracker。 当Tracker收到客户端上传文件的请求时，会为该文件分配一个可用的 group (<code>Storage Server其中的组</code>)来进行存储文件的，当选定了group后就要决定给客户端分配group中的哪一个<code>storage server</code>。当分配好<code>storage server</code>后客户端向storage发送写文件请求，storage将会为文件分配一个数据存储目录，然后为文件分配一个fileid(<code>路径信息和文件名</code>)，最后根据以上的信息生成文件名并存储文件。</p>
+<figure class="image-box">
+                <a rel=FastDFS分布式的文件存储系统入门介绍与实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210414224032.png" target="_blank" title="WeiyiGeek.fdfs文件上传" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210414224032.png" alt="WeiyiGeek.fdfs文件上传" title="" class=""></a>
+                <p>WeiyiGeek.fdfs文件上传</p>
+            </figure>
+<p><br></p>
+<p><strong>内部机制</strong></p>
+<ul>
+<li><p>1) <strong>选择 tracker server</strong><br>描述: 当集群中不止一个tracker server时，由于tracker之间是完全对等的关系，客户端在upload文件时可以任意选择一个trakcer。 选择存储 <code>Storage</code> 的 group 当 tracker 接收到<code>upload file</code>的请求时，会为该文件分配一个可以存储该文件的group，支持如下选择group的规则: </p>
+<ul>
+<li>1、Round robin，所有的group间轮询</li>
+<li>2、Specified group，指定某一个确定的group</li>
+<li>3、Load balance，剩余存储空间多多group优先</li>
+</ul>
+</li>
+<li><p>2) <strong>选择 storage server</strong><br>描述: 当选定group后，tracker会在group内选择一个storage server给客户端，支持如下选择storage的规则：</p>
+<ul>
+<li>1、Round robin，在group内的所有storage间轮询</li>
+<li>2、First server ordered by ip，按ip排序</li>
+<li>3、First server ordered by priority，按优先级排序（优先级在storage上配置）</li>
+</ul>
+</li>
+<li><p>3) <strong>选择 storage path</strong><br>描述: 当分配好storage server后，客户端将向storage发送写文件请求，storage将会为文件分配一个数据存储目录，支持如下规则：</p>
+<ul>
+<li>1、Round robin，多个存储目录间轮询</li>
+<li>2、剩余存储空间最多的优先</li>
+</ul>
+</li>
+<li><p>4) <strong>生成 fileid</strong><br>描述: 选定存储目录之后storage会为文件生一个Fileid，由<code>storage server ip、文件创建时间、文件大小、文件crc32和一个随机数拼接而成</code>，然后将这个二进制串进行base64编码，转换为可打印的字符串。选择两级目录当选定存储目录之后，storage会为文件分配一个fileid，每个存储目录下有两级<code>256*256</code>的子目录，storage会按文件fileid进行两次hash（猜测），路由到其中一个子目录，然后将文件以fileid为文件名存储到该子目录下。</p>
+</li>
+<li><p>5) <strong>生成文件名</strong><br>描述: 当文件存储到某个子目录后，即认为该文件存储成功，接下来会为该文件生成一个文件名，文件名<code>由group、存储目录、两级子目录、fileid、文件后缀名</code>（由客户端指定，主要用于区分文件类型）拼接而成。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># fdfs_upload_file /etc/fdfs/storage.conf logo.jpg</span></span><br><span class="line">组名/磁盘/一级目录(2*Hex)/二级目录(2*Hex)/文件名称</span><br><span class="line">group1/M00/00/00/wKgMMmB2bmyAP9SWAAA_wvXjApM631.jpg</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=FastDFS分布式的文件存储系统入门介绍与实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210414225115.png" target="_blank" title="WeiyiGeek.fdfs文件名称说明" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210414225115.png" alt="WeiyiGeek.fdfs文件名称说明" title="" class=""></a>
+                <p>WeiyiGeek.fdfs文件名称说明</p>
+            </figure>
+</li>
+</ul>
+<p><br/></p>
+<h4 id="文件下载-Download"><a href="#文件下载-Download" class="headerlink" title="文件下载 - Download"></a>文件下载 - Download</h4><p>描述: 跟<code>upload file</code>一样在<code>download file</code>时客户端可以选择任意 tracker server。tracker发送download请求给某个tracker，必须带上文件名信息，tracke从文件名中解析出文件的<code>group、大小、创建时间</code>等信息，然后为该请求选择一个storage用来服务读请求。由于group内的文件同步时在后台异步进行的，所以有可能出现在读到时候，文件还没有同步到某些 storage server上，为了尽量避免访问到这样的storage，tracker 按照如下规则选择 group 内可读的 storage: </p>
+<ul>
+<li>1.该文件上传到的源头 storage, 只要源头 storage存活着就肯定包含这个文件，源头的地址被编码在文件名中。</li>
+<li>2.文件创建时间戳 == storage 被同步到的时间戳且(当前时间-文件创建时间戳) &gt; 文件同步最大时间（如5分钟) - 文件创建后认为经过最大同步时间后，肯定已经同步到其他storage了。</li>
+<li>3.文件创建时间戳 &lt; storage被同步到的时间戳。 - 同步时间戳之前的文件确定已经同步了</li>
+<li>4.(当前时间-文件创建时间戳) &gt; 同步延迟阀值（如一天）。 - 经过同步延迟阈值时间，认为文件肯定已经同步了。</li>
+</ul>
+<figure class="image-box">
+                <a rel=FastDFS分布式的文件存储系统入门介绍与实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210414230555.png" target="_blank" title="WeiyiGeek.fdfs文件下载" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210414230555.png" alt="WeiyiGeek.fdfs文件下载" title="" class=""></a>
+                <p>WeiyiGeek.fdfs文件下载</p>
+            </figure>
+<p><br/></p>
+<h3 id="6-功能比对"><a href="#6-功能比对" class="headerlink" title="6.功能比对"></a>6.功能比对</h3><p><strong>单机文件系统的对比</strong></p>
+<table>
+<thead>
+<tr>
+<th>文件系统</th>
+<th>高可用</th>
+<th>扩展</th>
+<th>部署复杂程度</th>
+<th>性能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单机文件系统</td>
+<td>低，依赖于单机服务器，只要服务器崩溃，完全不可用。</td>
+<td>低，要扩容只能停机增加硬盘。</td>
+<td>低</td>
+<td>当文件数量多到一定的程度，磁盘IO寻址操作将会成为瓶颈</td>
+</tr>
+<tr>
+<td>分布式文件系统</td>
+<td>高，一个group内的服务器崩溃后，group内的其他storage将接管服务。</td>
+<td>高，可以不停机增加group机器。</td>
+<td>高，部署较复杂</td>
+<td>高，通过集群或者分布式的方式分担服务器的压力。</td>
+</tr>
+</tbody>
+</table>
+<p><br/></p>
+<p><strong>其他文件系统的对比</strong></p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th style="text-align:center">适合类型</th>
+<th style="text-align:right">文件分布</th>
+<th>系统性能</th>
+<th style="text-align:center">复杂度</th>
+<th style="text-align:center">FUSE</th>
+<th style="text-align:center">POSIX</th>
+<th style="text-align:right">备份机制</th>
+<th>通讯协议接口</th>
+<th style="text-align:center">社区支持</th>
+<th style="text-align:center">开发语言</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FastDFS</td>
+<td style="text-align:center">4KB~500MB</td>
+<td style="text-align:right">小文件合并存储不分片处理</td>
+<td>很高</td>
+<td style="text-align:center">简单</td>
+<td style="text-align:center">不支持</td>
+<td style="text-align:center">不支持</td>
+<td style="text-align:right">组内冗余备份</td>
+<td>Api HTTP</td>
+<td style="text-align:center">国内用户群</td>
+<td style="text-align:center">C语言</td>
+</tr>
+<tr>
+<td>TFS</td>
+<td style="text-align:center">所有文件</td>
+<td style="text-align:right">小文件合并，以block组织分片</td>
+<td></td>
+<td style="text-align:center">复杂</td>
+<td style="text-align:center">不支持</td>
+<td style="text-align:center"></td>
+<td style="text-align:right">Block存储多份,主辅灾备</td>
+<td>API http</td>
+<td style="text-align:center">少</td>
+<td style="text-align:center">C++</td>
+</tr>
+<tr>
+<td>MFS</td>
+<td style="text-align:center">大于64K</td>
+<td style="text-align:right">分片存储</td>
+<td>Master占内存多</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">支持</td>
+<td style="text-align:center">支持</td>
+<td style="text-align:right">多点备份动态冗余</td>
+<td>使用fuse挂在</td>
+<td style="text-align:center">较多</td>
+<td style="text-align:center">Perl</td>
+</tr>
+<tr>
+<td>HDFS</td>
+<td style="text-align:center">大文件</td>
+<td style="text-align:right">大文件分片分块存储</td>
+<td></td>
+<td style="text-align:center">简单</td>
+<td style="text-align:center">支持</td>
+<td style="text-align:center">支持</td>
+<td style="text-align:right">多副本</td>
+<td>原生api</td>
+<td style="text-align:center">较多</td>
+<td style="text-align:center">Java</td>
+</tr>
+<tr>
+<td>Ceph</td>
+<td style="text-align:center">对象文件块</td>
+<td style="text-align:right">OSD一主多从</td>
+<td></td>
+<td style="text-align:center">复杂</td>
+<td style="text-align:center">支持</td>
+<td style="text-align:center">支持</td>
+<td style="text-align:right">多副本</td>
+<td>原生api</td>
+<td style="text-align:center">较少</td>
+<td style="text-align:center">C++</td>
+</tr>
+<tr>
+<td>MogileFS</td>
+<td style="text-align:center">海量小图片</td>
+<td style="text-align:right"></td>
+<td>高</td>
+<td style="text-align:center">复杂</td>
+<td style="text-align:center">可以支持</td>
+<td style="text-align:center">不支持</td>
+<td style="text-align:right">动态冗余</td>
+<td>原生api</td>
+<td style="text-align:center">文档少</td>
+<td style="text-align:center">Perl</td>
+</tr>
+<tr>
+<td>ClusterFS</td>
+<td style="text-align:center">大文件</td>
+<td style="text-align:right"></td>
+<td></td>
+<td style="text-align:center">简单</td>
+<td style="text-align:center">支持</td>
+<td style="text-align:center">支持</td>
+<td style="text-align:right"></td>
+<td></td>
+<td style="text-align:center">多</td>
+<td style="text-align:center">C</td>
+</tr>
+</tbody>
+</table>
+<p><br/></p>
+<h3 id="7-参考来源"><a href="#7-参考来源" class="headerlink" title="7.参考来源"></a>7.参考来源</h3><p>官方网站：<a href="https://github.com/happyfish100/" target="_blank" rel="noopener">https://github.com/happyfish100/</a><br>配置文档：<a href="https://github.com/happyfish100/fastdfs/wiki/" target="_blank" rel="noopener">https://github.com/happyfish100/fastdfs/wiki/</a><br>参考资料：<a href="https://www.oschina.net/question/tag/fastdfs" target="_blank" rel="noopener">https://www.oschina.net/question/tag/fastdfs</a><br>Java客户端：<a href="https://github.com/happyfish100/fastdfs-client-java" target="_blank" rel="noopener">https://github.com/happyfish100/fastdfs-client-java</a></p>
+
+        </div>
+        
+<blockquote class="post-copyright">
+    <div class="content">
+        
+            <span id="busuanzi_container_page_pv">
+                本文总阅读量：<span id="busuanzi_value_page_pv"></span>次 <br>
+            </span>
+        
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2021-04-15T07:05:38.630Z" itemprop="dateUpdated">2021-04-15 15:05:38</time>
+</span><br>
+
+
+        
+        转载注明出处，原文地址：<a href="/2020/5/547.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/5/547.html</a>
+        <br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a>
+        
+    </div>
+    <footer>
+        <a href="https://blog.weiyigeek.top">
+            <img src="/img/avatar.png" alt="WeiyiGeek">
+            WeiyiGeek
+        </a>
+    </footer>
+</blockquote>
+
+
+<!-- 微信公众号关注 -->
+<div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+  Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:none;">【My Twitter】</a></strong>. There is an article verification code in the homepage
+  <br>
+  方式2.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+<img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+<script type="text/javascript">
+eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('1 0=["2==","4==","3=="];',5,5,'yzm|var|MjAyMA|MjAyMQ|MjAxMQ'.split('|'),0,{}))
+
+var flag = 0;
+var display_flag = 1;
+window.onload=function(){
+  var cookie = document.cookie.split(";");
+  for (let index = 0; index < cookie.length; index++) {
+    var element = cookie[index].trim();
+    if (element.indexOf("unlock") == 0) {
+      yzm_cookie = element.substring(7,element.length);
+      if (yzm_cookie == yzm[0] || yzm_cookie == yzm[1]){
+        display_flag = 0;
+        break;
+      }
+    }
+  }
+  if(display_flag != 0 ){
+    document.getElementById("btw-mask").style.display="";
+    document.getElementById("btw-modal").style.display="";
+  }
+}
+
+function yzm_vertify(){
+  var input_yzm = document.getElementById('btw-modal-input').value;
+  var reg = /[0-9]{0,4}/i;
+
+  function setCookie(cname,cvalue,exdays){
+  var d = new Date();
+  d.setTime(d.getTime()+(exdays*24*60*60*1000));
+  var expires = "expires="+d.toGMTString();
+  document.cookie = cname+"="+cvalue+"; "+expires+";path=/";
+  }
+
+  if ( input_yzm.length != 4 && reg.test(input_yzm)){
+    alert("验证码格式有误!");
+    return false;
+  }
+
+  var yzmencode = btoa(input_yzm);
+  for (let index = 0; index < yzm.length; index++) {
+    if ( yzmencode === yzm[index]){
+      flag = 1;
+      break;
+    }
+  }
+
+  if (flag == 1) {
+    flag = 0;
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    setCookie("unlock",yzmencode,3);
+    window.location.reload();
+  }else{
+    document.cookie='unlock=;expires=Thu,01 Jan 1970 00:00:00 GMT';
+    alert('验证码有误');
+  }
+}
+</script>
+
+
+        
+            <div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+            
+        
+        <div class="post-footer">
+            
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5/547.html&title=《FastDFS分布式的文件存储系统入门介绍与实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5/547.html&title=《FastDFS分布式的文件存储系统入门介绍与实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+            
+
+
+
+
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/5/204.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Snap容器基础入门使用</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/5/50.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Redis数据库补充学习</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-概述"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">1.概述</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-特性"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">2.特性</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-架构"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">3.架构</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Tracker-Server"><span class="post-toc-number">1.3.1.</span> <span class="post-toc-text">Tracker Server</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Storage-Server"><span class="post-toc-number">1.3.2.</span> <span class="post-toc-text">Storage Server</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Client"><span class="post-toc-number">1.3.3.</span> <span class="post-toc-text">Client</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-存储策略"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">4.存储策略</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-过程剖析"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">5.过程剖析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#文件上传-upload"><span class="post-toc-number">1.5.1.</span> <span class="post-toc-text">文件上传 - upload</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#文件下载-Download"><span class="post-toc-number">1.5.2.</span> <span class="post-toc-text">文件下载 - Download</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-功能比对"><span class="post-toc-number">1.6.</span> <span class="post-toc-text">6.功能比对</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#7-参考来源"><span class="post-toc-number">1.7.</span> <span class="post-toc-text">7.参考来源</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+    <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        感谢读者打赏，在未来的路我们一起前行!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/reward-wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check"
+                data-wechat="/img/reward-wechat.png" data-alipay="/img/reward-alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+    
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.gitee.io" target="_blank">https://weiyigeek.gitee.io</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+        <p>
+            <span>
+                WeiyiGeek &copy; 2018 - 2021
+            </span>
+        		
+           	
+            
+            
+            <span>
+	            Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/codefine/hexo-theme-mellow" target="_blank">mellow</a>
+            </span>
+            
+            
+            
+
+            
+                
+<span class="site-uv" title="总访客量">
+    <i class="icon icon-user"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_uv"></i>
+</span>
+
+
+<span class="site-pv" title="总访问量">
+    <i class="icon icon-eye"></i>
+    <i class="busuanzi-value" id="busuanzi_value_site_pv"></i>
+</span>
+
+            
+        </p>
+    </div>
+</footer>
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5/547.html&title=《FastDFS分布式的文件存储系统入门介绍与实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.png" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5/547.html&title=《FastDFS分布式的文件存储系统入门介绍与实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABxElEQVR42u3aS27DMAwFQN//0u42QGvhkfrULUarwHHsURaE9Kjrisf9bXxef/r8eeXpadeOgYuLO829h2PmBeMnPH37ZMDFxT3PTV72dH9Stsb357/FxcV9P7f3Ylxc3P/HHRevfLGCi4v7fm6y+RnT5yOVxXs1XFzcCW4v4Fj7eUu+i4uL2+LexZEXoHyqhbfj4uIe4eYFZb7F0lu+4OLinucmPx6XnnxivXbsD/8rLi7uL3GrBas6jSSEjVZkuLi4R7hJQVl1vRzE4OLivoY7X9qqIUhh84OLi7uBW22FjhurM0FqefuEi4u7mdt7UFRu4lZK4fgXLi7uZm5zfnmXplUKH1W4uLhHuHkhyw9VzJ+tWlB3cXFxl+YM1a3Iqni0/Efg4uJu5iZLkzwAzRdAvaAWFxf3PLeHzuOPmbYuLi7ueW4vBKlGJNUlTrQCwsXFXcq9i6MK7ZWtqUwFFxd3fSJRmFgSYSQT67V1cXFxd3Orxat6nKIaxZZPkOHi4m7jNjswxRo5v63CxcV9J7fXYqneg4uL+xe5ydKkGqlEQlxc3IPcXukZByLVxkwUuODi4h7hVkvJfNujGsHg4uIe5H4BtFGaee67Ax4AAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    <script type="text/javascript" src="/js/clicklove.js"></script>
+<script src="//code.tidio.co/mpu0bwolvjiokdywpzqyjgqfordnx7ee.js" async></script>
+    <!-- main-js -->
+<script type="text/javascript" src="//cdn.bootcss.com/jquery/2.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.4.4"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script type="text/javascript" src="/js/method.js?v=1.4.4"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.4.4"></script>
+
+<!-- third-party -->
+
+
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?0cb84866c605535668529a9d2981a013";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+  </script>
+  
+
+
+
+<script>
+  (function(){
+  var src = "https://jspassport.ssl.qhimg.com/11.0.1.js?d182b3f28525f2db83acfaaf6e696dba";
+  document.write('<script src="' + src + '" id="sozz"><\/script>');
+  })();
+</script>
+
+
+
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.4.4"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) {
+		search_path = "search.xml";
+	}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script>
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+    
+    
+
+
+
+
+
+    <!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+
+
+    <script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络运维-分享学习笔记与心得';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+
+
+
+
+    <script type="text/javascript">
+  daovoice('init', {
+    app_id: "6537ff7a"
+  });
+  daovoice('update');
+</script>
+
+
+    
+</body>
+</html>

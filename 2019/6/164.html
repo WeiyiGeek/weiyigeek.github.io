@@ -9,7 +9,7 @@
     <meta name="sogou_site_verification" content="vLUmTfER0i"/>
 
     
-    <title>程序计划任务管理 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
+    <title>🌐 程序计划任务管理 | WeiyiGeek Blog | 为了能到远方，脚下的每一步都不能少。</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
     
@@ -194,7 +194,7 @@
             </li>
         
             <li class="">
-              <a href="https://blog.weiyigeek.top/img/wechat-soso.png" target="_blank" >
+              <a href="https://weiyigeek.gitee.io/img/wechatsoso.png" target="_blank" >
                 <i class="icon icon-lg icon-wechat"></i>
                 公众账号
               </a>
@@ -394,8 +394,8 @@
 <p><em>问题3. crontab 异常不运行、不报错、无日志？</em><br>描述: debug 终极大法还是得看日志, 通过以下方式进行开启日志记录;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误信息排查</span></span><br><span class="line">systemctl status cron.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ubuntu 开启crontab 日志记录</span></span><br><span class="line">$ vim /etc/rsyslog.d/50-default.conf</span><br><span class="line">cron.*   /var/<span class="built_in">log</span>/cron.log  <span class="comment"># 取消注释即可</span></span><br></pre></td></tr></table></figure></p>
 <p><br></p>
 <p>问题4.当cron这样运行时它通常作为根用户运行，这样做会为该用户创建一个会话。由于大多数linice的默认设置被记录在auth.log中(<code>如果不是那么烦人的话这看起来是谨慎的</code>)。</p>
-<p>描述: Debian bug 跟踪器提供了一种不记录会话活动的解决方案，而只在cron运行时才记录。</p>
-<p>修改:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Go to the `/etc/pam.d` directory.</span><br><span class="line"></span><br><span class="line">Open the file `common-session-noninteractive` <span class="keyword">in</span> an editor.</span><br><span class="line"></span><br><span class="line">Look <span class="keyword">for</span> the following line:</span><br><span class="line">`session required        pam_unix.so`</span><br><span class="line"></span><br><span class="line">Above this line, add the following:</span><br><span class="line">`session     [success=1 default=ignore] pam_succeed_if.so service <span class="keyword">in</span> cron quiet use_uid`</span><br><span class="line"></span><br><span class="line">Save the file and exit.Restart crond using something like service cron restart.</span><br><span class="line">`systemctl restart cron.service`</span><br></pre></td></tr></table></figure></p>
+<p>描述: Debian bug 跟踪器提供了一种不记录会话活动的解决方案，而只在cron运行时才记录。auth.log 频繁出现<code>Cron: pam_unix (cron:session): session opened/closed for user root by (uid=0)</code><br>问题原因: </p>
+<p>解决方案:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 在Debian/Ubuntu上</span></span><br><span class="line">vim /etc/pam.d/common-session-noninteractive</span><br><span class="line">session [success=1 default=ignore] pam_succeed_if.so service <span class="keyword">in</span> cron quiet use_uid</span><br><span class="line">session required        pam_unix.so  <span class="comment"># Above this line, add the upper 在此行之上添加上面的这一行</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) Save the file and exit.Restart crond using something like service cron restart.</span></span><br><span class="line">systemctl restart cron.service</span><br></pre></td></tr></table></figure></p>
 <p>结果:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">● cron.service - Regular background program processing daemon</span><br><span class="line">    Loaded: loaded (/lib/systemd/system/cron.service; enabled; vendor preset: enabled)</span><br><span class="line">    Active: active (running) since Fri 2021-02-26 15:23:25 CST; 6s ago</span><br><span class="line">      Docs: man:cron(8)</span><br><span class="line">  Main PID: 1266507 (cron)</span><br><span class="line">    Tasks: 1 (<span class="built_in">limit</span>: 19114)</span><br><span class="line">    Memory: 428.0K</span><br><span class="line">    CGroup: /system.slice/cron.service</span><br><span class="line">            └─1266507 /usr/sbin/cron -f</span><br><span class="line"></span><br><span class="line">Feb 26 15:23:25 gitlab-weiyigeek systemd[1]: Started Regular background program processing daemon.</span><br><span class="line">Feb 26 15:23:25 gitlab-weiyigeek cron[1266507]: (CRON) INFO (pidfile fd = 3)</span><br><span class="line">Feb 26 15:23:25 gitlab-weiyigeek cron[1266507]: (CRON) INFO (Skipping @reboot <span class="built_in">jobs</span> -- not system startup)</span><br></pre></td></tr></table></figure></p>
 <p>附录:在线Cron表达式生成器</p>
 <ul>
@@ -452,7 +452,7 @@
         
         
 <span class="post-time">
-    最后更新时间：<time datetime="2021-03-16T14:39:35.599Z" itemprop="dateUpdated">2021-03-16 22:39:35</time>
+    最后更新时间：<time datetime="2021-04-26T01:50:30.943Z" itemprop="dateUpdated">2021-04-26 09:50:30</time>
 </span><br>
 
 
@@ -475,13 +475,14 @@
 <div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
 <!-- <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 34px; font-size: 34px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">×</span> -->
 <p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
-  扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+  Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:none;">【My Twitter】</a></strong>. There is an article verification code in the homepage
+  <br>
+  方式2.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
   回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
-  <br>获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
+获取<strong style="color: rgb(240, 65, 52);">永久解锁</strong>本站全部文章的验证码</p>
 <img src="/img/wechat-soso.png" style="width: 300px; margin-top: 10px;">
-
 <div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
-  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码"
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
     style="width: 160px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
   <button id="btw-submit-btn" onclick="yzm_vertify()"
     style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
@@ -491,10 +492,10 @@
 
 
 <script type="text/javascript">
-var yzm = ["MjAyMA==","MjAxMQ=="];
+eval(function(p,a,c,k,e,d){e=function(c){return(c<a?"":e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)d[e(c)]=k[c]||e(c);k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1;};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p;}('1 0=["2==","4==","3=="];',5,5,'yzm|var|MjAyMA|MjAyMQ|MjAxMQ'.split('|'),0,{}))
+
 var flag = 0;
 var display_flag = 1;
-
 window.onload=function(){
   var cookie = document.cookie.split(";");
   for (let index = 0; index < cookie.length; index++) {
@@ -608,9 +609,9 @@ function yzm_vertify(){
 <nav class="post-nav flex-row flex-justify-between">
   
     <div class="prev">
-      <a href="/2019/6/159.html" id="post-prev" class="post-nav-link">
+      <a href="/2019/6/143.html" id="post-prev" class="post-nav-link">
         <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">用户查询操作权限命令</h4>
+        <h4 class="title">编码加密核验类命令</h4>
       </a>
     </div>
   

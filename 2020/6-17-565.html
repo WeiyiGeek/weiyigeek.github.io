@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 Linux内核参数使用与优化介绍|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="kernel">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Linux内核参数使用与优化介绍</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">Linux内核参数使用与优化介绍</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-06-17T02:36:30.000Z" itemprop="datePublished" class="page-time">
+  2020-06-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux/">Linux</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-基础知识/操作系统/Linux底层/Linux内核参数使用与优化介绍"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Linux内核参数使用与优化介绍</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-06-17 10:36:30" datetime="2020-06-17T02:36:30.000Z"  itemprop="datePublished">2020-06-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Linux/">Linux</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><hr>
+<h2 id="0x01-Linux系统参数"><a href="#0x01-Linux系统参数" class="headerlink" title="0x01 Linux系统参数"></a>0x01 Linux系统参数</h2><h3 id="1-内核参数"><a href="#1-内核参数" class="headerlink" title="1.内核参数"></a>1.内核参数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sysctl -a | grep <span class="string">"sched_rt"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU</span></span><br><span class="line"><span class="comment"># 内核进程CPU调度设置(RT实时、CFS完全公平调度)</span></span><br><span class="line">kernel.sched_rt_period_us = 1000000</span><br><span class="line">kernel.sched_rt_runtime_us = 950000</span><br><span class="line">kernel.sched_cfs_bandwidth_slice_us = 5000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用用户名称空间</span></span><br><span class="line">kernel.unprivileged_userns_clone = 1</span><br></pre></td></tr></table></figure>
+<h4 id="vm-参数"><a href="#vm-参数" class="headerlink" title="vm 参数"></a>vm 参数</h4><ul>
+<li>vm.swappiness: 主要作用<code>在内存与交换分区之间</code>优化,该值的大小对如何使用swap分区是有着很大的联系的,并对系统使用效率有一定的影响，因为Swap分区数据存于磁盘性能会相对内存低，尤其是读写频繁的情绪IO消耗会更大 (注意具体环境具体分析);</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 参数值:</span></span><br><span class="line">swapniess	策略</span><br><span class="line">* 0	Linux3.5以及以上：宁愿OOM killer也不用swap,Linux3.4以及更早：宁愿swap也不要OOM killer</span><br><span class="line">* 1	Linux3.5以及以上：宁愿swap也不要OOM killer</span><br><span class="line">* 60	默认值</span><br><span class="line">* 100	操作系统会主动地使用swap</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 临时生效 (此参数值越低，就会让Linux系统尽量少用swap分区，多用内存；参数值越高就是反过来，使内核更多的去使用swap空间)</span></span><br><span class="line">sysctl -w vm.swappiness=0  <span class="comment"># 表示最大限度使用物理内存然后才再使用swap空间(优先使用物理内存-推荐值除非是VPS内存不够用的)</span></span><br><span class="line">sysctl -w vm.swappiness=100  <span class="comment"># 表示积极的使用swap分区并且把内存上的数据及时的搬运到swap空间里面；</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数路径</span></span><br><span class="line">cat /proc/sys/vm/swappiness</span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认值: 60</span></span><br><span class="line"><span class="comment"># 推荐值:</span></span><br></pre></td></tr></table></figure>
+<p>Tips : <code>OOM(Out Of Memory)</code> killer机制是指Linux操作系统发现可用内存不足时，强制杀死一些用户进程（非内核进程），来保证系统有足够的可用内存进行分配。<br>Tips : swappiness参数在Linux 3.5版本前后的表现并不完全相同，Redis运维人员在设置这个值需要关注当前操作系统的内核版本。</p>
+<p><br></p>
+<ul>
+<li><code>vm.max_map_count</code>: 限制一个进程可以拥有的VMA(虚拟内存区域)的数量。<br>描述: 此文件包含进程可能拥有的<code>最大内存映射区数</code>。内存映射区被用作调用malloc的副作用直接由mmap和mprotect调用，也可以在加载共享库时使用。虽然大多数应用程序只需要不到1000个映射，但某些程序特别是malloc调试器可能会消耗大量映射，例如每次分配最多一到两个映射。</li>
+</ul>
+<p>默认值: 65536<br>推荐值: 调整为默认的4倍即为: <code>sysctl -w vm.max_map_count=262144</code></p>
+<ul>
+<li><code>vm.overcommit_memory</code> : 用来设置内存分配策略(Redis 推荐配置为1)<br>参数说明:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">* 0	表示内核将检查是否有足够的可用内存。如果有足够的可用内存，内存申请通过，否则内存申请失败，并把错误返回给应用进程</span><br><span class="line">* 1	表示内核允许超量使用内存直到用完为止</span><br><span class="line">* 2	表示内核决不过量的(<span class="string">"never overcommit"</span>)使用内存，即系统整个内存地址空间不能超过swap+50%的RAM值，50%是overcommit_ratio默认值，此参数同样支持修改</span><br><span class="line">`</span><br></pre></td></tr></table></figure>
+默认值: 0<br>推荐值: 1 (针对于作为Redis内存数据库服务的机器)</li>
+</ul>
+<p>Tips:注意：本文的可用内存代表物理内存与swap之和。</p>
+<p><br></p>
+<h4 id="net-参数"><a href="#net-参数" class="headerlink" title="net 参数"></a>net 参数</h4><p>描述: Linux系统下TCP连接断开后，会以TIME_WAIT状态保留一定的时间，然后才会释放端口。当并发请求过多的时候，就会产生大量的TIME_WAIT状态的连接，无法及时断开的话，会占用大量的端口资源和服务器资源。此时我们可以优化TCP的内核参数，来及时将TIME_WAIT状态的端口清理掉。</p>
+<p><strong>实用示例1.提升服务器负载能力</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 查看当前TCP连接的状态和对应的连接数量：</span></span><br><span class="line">netstat -n | awk <span class="string">'/^tcp/ &#123;++S[$NF]&#125; END &#123;for(a in S) print a, S[a]&#125;'</span></span><br><span class="line">ESTABLISHED 229</span><br><span class="line">TIME_WAIT 18000  <span class="comment"># 占用18000个端口此时由于端游占用一个少一个，会严重的影响到后继的新连接，所以我们需要让系统更快的释放TIME_WAIT连接。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如下调整提升服务器负载能力之外,还能够防御小流量的Dos、CC和SYN攻击</span></span><br><span class="line">net.ipv4.tcp_syncookies = 1</span><br><span class="line">net.ipv4.tcp_tw_reuse = 1</span><br><span class="line">net.ipv4.tcp_tw_recycle = 1</span><br><span class="line">net.ipv4.tcp_fin_timeout = 30</span><br><span class="line">net.ipv4.tcp_synack_retries = 1</span><br><span class="line">net.ipv4.tcp_syn_retries = 1</span><br><span class="line">net.ipv4.tcp_fastopen = 3</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<ul>
+<li><p><code>net.ipv4.tcp_syncookies</code> : 表示开启SYNCookies 当出现SYN等待队列溢出时，启用cookies来处理，可防范少量SYN攻击<br>默认值: 0 (表示关闭)<br>推荐值: 1</p>
+</li>
+<li><p><code>net.ipv4.tcp_tw_reuse</code> : 表示开启重用允许将TIME-WAITsockets重新用于新的TCP连接<br>默认值: 0 (表示关闭)<br>推荐值: 1</p>
+</li>
+<li><p><code>net.ipv4.tcp_tw_recycle</code> : 表示开启TCP连接中TIME-WAITsockets的快速回收<br>默认值: 0 (表示关闭)<br>推荐值: 1</p>
+</li>
+<li><p><code>net.ipv4.tcp_fin_timeout</code> : 表示修改系統TCP默认的 TIMEOUT 时间。<br>默认值: 60<br>推荐值: 30</p>
+</li>
+<li><p><code>net.ipv4.tcp_synack_retries</code> : 为了打开对端的连接内核需要发送一个SYN并附带一个回应前面一个SYN的ACK(所谓三次握手中的第二次握手),该设置决定了内核放弃连接之前发送SYN+ACK包的数量。<br>默认值: 5<br>推荐值: 2|1</p>
+</li>
+<li><p><code>net.ipv4.tcp_syn_retries</code> : 在内核放弃建立连接之前发送SYN包的数量。<br>默认值: 6<br>推荐值: 2|1</p>
+</li>
+</ul>
+<ul>
+<li><p><code>net.ipv4.tcp_max_orphans</code> : 系统中最多有多少个TCP套接字不被关联到任何一个用户文件句柄上。<br>默认值: 65535 (缺省)<br>建议值: 一般缺省</p>
+</li>
+<li><p><code>net.ipv4.tcp_available_congestion_control</code> : TCP可用的拥塞算法</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo sysctl -a | grep <span class="string">"net.ipv4.tcp_available_congestion_control"</span></span><br><span class="line"><span class="comment"># 可用算法 : net.ipv4.tcp_available_congestion_control = reno cubic</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>net.ipv4.tcp_congestion_control</code> : 设置TCP 拥塞算法为cubic</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo sysctl -a | grep <span class="string">"net.ipv4.tcp_congestion_control"</span></span><br><span class="line"><span class="comment"># 默认值: net.ipv4.tcp_congestion_control = cubic</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>net.ipv4.tcp_fastopen</code> : 在Linux支持TFO的内核版本下用来加速连续TCP连接的数据交互的TCP协议扩展（Client内核版本为3.6；Server内核版本为3.7中使用）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo sysctl -a | grep <span class="string">"net.ipv4.tcp_fastopen"</span></span><br><span class="line">  <span class="comment"># net.ipv4.tcp_fastopen = 1</span></span><br><span class="line">  <span class="comment"># net.ipv4.tcp_fastopen_blackhole_timeout_sec = 3600</span></span><br><span class="line">  <span class="comment"># net.ipv4.tcp_fastopen_key = 00000000-00000000-00000000-00000000</span></span><br><span class="line"><span class="comment"># 缺省值: 1</span></span><br><span class="line"><span class="comment">#   其中1表示客户端开启，2表示服务端开启，3表示客户端和服务器同时开启</span></span><br><span class="line"><span class="comment"># 推荐值: 3 (未验证效果)</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><strong>实用示例2.优化TCP的可使用端口范围及提升服务器并发能力(注意一般流量小的服务器上没必要设置如下参数)</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.tcp_keepalive_time = 1200</span><br><span class="line">net.ipv4.tcp_max_syn_backlog = 8192</span><br><span class="line">net.ipv4.tcp_max_tw_buckets = 5000</span><br><span class="line">net.ipv4.ip_local_port_range = 1024 65535</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p><code>net.ipv4.tcp_keepalive_time</code> : 表示当keepalive启用的时候TCP发送keepalive消息的频度。<br>默认值: 7200 (2 Hour)<br>推荐值: 1200 (s)</p>
+</li>
+<li><p><code>net.ipv4.ip_local_port_range</code> : 表示用于向外连接的端口范围</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># sudo sysctl -a | grep "ip_local_port_range"</span></span><br><span class="line">默认值: net.ipv4.ip_local_port_range = 32768 60999</span><br><span class="line">推荐值: 1024 65535</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>net.ipv4.tcp_max_syn_backlog</code> : 表示SYN队列的长度设置此参数可以容纳更多等待连接的网络连接数。<br>默认值: 1024<br>推荐值: 8192</p>
+</li>
+<li><p><code>net.ipv4.tcp_max_tw_buckets</code> : 表示系统同时保持TIME_WAIT的最大数量，如果超过这个数字，TIME_WAIT将立刻被清除并打印警告信息。<br>默认值: 65536<br>推荐值: 5000</p>
+</li>
+</ul>
+<ul>
+<li><p><code>net.ipv4.tcp_mem</code> : TCP读写buffer</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sudo sysctl -a | grep <span class="string">"net.ipv4.tcp_mem"</span></span><br><span class="line"><span class="comment">#默认值(16G): net.ipv4.tcp_mem = 189924  253234  379848</span></span><br><span class="line"><span class="comment">#默认值(512G): net.ipv4.tcp_mem = 6171576 8228769 12343152</span></span><br><span class="line">net.ipv4.tcp_mem = 94500000 915000000 927000000   </span><br><span class="line"></span><br><span class="line"><span class="comment">#建议值: </span></span><br><span class="line"><span class="comment">#值含义: 上述内存单位是页，而不是字节</span></span><br><span class="line">net.ipv4.tcp_mem[0]:低于此值，TCP没有内存压力。</span><br><span class="line">net.ipv4.tcp_mem[1]:在此值下，进入内存压力阶段。</span><br><span class="line">net.ipv4.tcp_mem[2]:高于此值，TCP拒绝分配socket。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>net.ipv4.tcp_wmem</code> : TCP写buffer</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo sysctl -a | grep <span class="string">"net.ipv4.tcp_wmem"</span></span><br><span class="line"><span class="comment">#默认值: net.ipv4.tcp_wmem = 4096 16384  4194304</span></span><br><span class="line"><span class="comment">#建议值: net.ipv4.tcp_wmem = 8192 436600 873200</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>net.ipv4.tcp_rmem</code> : TCP读buffer</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo sysctl -a | grep <span class="string">"net.ipv4.tcp_rmem"</span></span><br><span class="line"><span class="comment">#默认值: net.ipv4.tcp_rmem = 4096  131072  6291456</span></span><br><span class="line"><span class="comment">#建议值:32768 436600 873200</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><strong>实用示例3.优化核套接字TCP的缓存区设置</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">net.core.netdev_max_backlog = 8192</span><br><span class="line">net.core.somaxconn = 32768</span><br><span class="line">net.core.rmem_max = 12582912</span><br><span class="line">net.core.rmem_default = 6291456</span><br><span class="line">net.core.wmem_max = 12582912</span><br><span class="line">net.core.wmem_default = 6291456</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p><code>net.core.netdev_max_backlog</code> :  每个网络接口接收数据包的速率比内核处理这些包的速率快时，允许送到队列的数据包的最大数目。<br>缺省值: 1000,对于512G的内存为262144（1G*512）<br>推荐值: 对于16G的内存设置为262114</p>
+</li>
+<li><p><code>net.core.somaxconn</code> : 记录的那些尚未收到客户端确认信息的连接请求的最大值(结合高并发请求数来调节此值;)。<br>默认值: 4096<br>推荐值: 16384</p>
+</li>
+<li><p><code>net.core.rmem_default</code> : 这个参数表示内核套接字<code>接收receive</code>缓存区默认的大小(通常小于等于rmem_max值);</p>
+</li>
+<li><code>net.core.rmem_max</code> : 这个参数表示内核套接字<code>接收receive</code>缓存区的最大大小;<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo sysctl -a | egrep <span class="string">"net.core.rmem_default|net.core.rmem_max"</span></span><br><span class="line">默认值:</span><br><span class="line">  <span class="comment"># net.core.rmem_default = 212992</span></span><br><span class="line">  <span class="comment"># net.core.rmem_max = 212992</span></span><br><span class="line">推荐值: 6291456 12582912</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li><code>net.core.wmem_default</code> : 这个参数表示内核套接字发送send缓存区默认的大小(通常小于等于wmem_max值);</li>
+<li><code>net.core.wmem_max</code> : 这个参数表示内核套接字发送send缓存区的最大大小;<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo sysctl -a | egrep <span class="string">"net.core.wmem_default|net.core.wmem_max"</span> | head -n5</span><br><span class="line">默认值:</span><br><span class="line">  <span class="comment"># net.core.wmem_default = 212992</span></span><br><span class="line">  <span class="comment"># net.core.wmem_max = 212992</span></span><br><span class="line">推荐值:  </span><br><span class="line">  <span class="comment"># net.core.wmem_default = 6291456 </span></span><br><span class="line">  <span class="comment"># net.core.wmem_max = 12582912</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<h4 id="fs-参数"><a href="#fs-参数" class="headerlink" title="fs 参数"></a>fs 参数</h4><p>描述: 该参数主要针对于文件描述符系统级别的资源进行限制。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fs.file-max = 1646839</span><br><span class="line">fs.aio-max-nr = 1048576</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p><code>fs.file-nr</code> : 表示进程当前打开的句柄数以及最大的句柄数;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cat /proc/sys/fs/file-nr</span><br><span class="line">  <span class="comment"># 16640   0       52698870</span></span><br><span class="line"></span><br><span class="line">$ sudo sysctl -a | egrep <span class="string">"fs.file-nr"</span></span><br><span class="line">  <span class="comment"># 16640   0       52698870</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>fs.file-max</code> : 表示进程<code>（比如一个worker进程）</code>可以同时打开的最大句柄数，这个参数直线限制最大并发连接数，需根据实际情况配置;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">默认值:</span><br><span class="line">  <span class="comment"># fs.file-max = 52698870 (512G)</span></span><br><span class="line">推荐值:</span><br><span class="line">  <span class="comment"># fs.file-max = 1646839 (16G)</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>fs.aio-max-nr</code> : 同时可以拥有的的异步IO请求数目。</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 默认值</span></span><br><span class="line">fs.aio-max-nr = 65536</span><br><span class="line"></span><br><span class="line"><span class="comment"># 推荐值(1024*1024 = 1024K)</span></span><br><span class="line">fs.aio-max-nr = 1048576</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="2-系统参数"><a href="#2-系统参数" class="headerlink" title="2.系统参数"></a>2.系统参数</h3><p>描述: 在对于Linux服务器系统参数调优时候往往需要修改以下相关参数;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">~$ <span class="built_in">ulimit</span> -a</span><br><span class="line">core file size          (blocks, -c) 0</span><br><span class="line">data seg size           (kbytes, -d) unlimited</span><br><span class="line">scheduling priority             (-e) 0</span><br><span class="line">file size               (blocks, -f) unlimited</span><br><span class="line">pending signals                 (-i) 63708</span><br><span class="line">max locked memory       (kbytes, -l) 65536</span><br><span class="line">max memory size         (kbytes, -m) unlimited</span><br><span class="line">open files                      (-n) 1024   <span class="comment"># 最大文件打开句柄数</span></span><br><span class="line">pipe size            (512 bytes, -p) 8</span><br><span class="line">POSIX message queues     (bytes, -q) 819200</span><br><span class="line">real-time priority              (-r) 0</span><br><span class="line">stack size              (kbytes, -s) 8192</span><br><span class="line">cpu time               (seconds, -t) unlimited</span><br><span class="line">max user processes              (-u) 63708</span><br><span class="line">virtual memory          (kbytes, -v) unlimited</span><br><span class="line">file locks                      (-x) unlimited</span><br><span class="line"></span><br><span class="line"><span class="comment"># 指标解释 - &lt;item&gt; can be one of the following:</span></span><br><span class="line"><span class="comment">#        - core - limits the core file size (KB)</span></span><br><span class="line"><span class="comment">#        - data - max data size (KB)</span></span><br><span class="line"><span class="comment">#        - fsize - maximum filesize (KB)</span></span><br><span class="line"><span class="comment">#        - memlock - max locked-in-memory address space (KB)</span></span><br><span class="line"><span class="comment">#        - nofile - max number of open file descriptors</span></span><br><span class="line"><span class="comment">#        - rss - max resident set size (KB)</span></span><br><span class="line"><span class="comment">#        - stack - max stack size (KB)</span></span><br><span class="line"><span class="comment">#        - cpu - max CPU time (MIN)</span></span><br><span class="line"><span class="comment">#        - nproc - max number of processes</span></span><br><span class="line"><span class="comment">#        - as - address space limit (KB)</span></span><br><span class="line"><span class="comment">#        - maxlogins - max number of logins for this user</span></span><br><span class="line"><span class="comment">#        - maxsyslogins - max number of logins on the system</span></span><br><span class="line"><span class="comment">#        - priority - the priority to run user process with</span></span><br><span class="line"><span class="comment">#        - locks - max number of file locks the user can hold</span></span><br><span class="line"><span class="comment">#        - sigpending - max number of pending signals</span></span><br><span class="line"><span class="comment">#        - msgqueue - max memory used by POSIX message queues (bytes)</span></span><br><span class="line"><span class="comment">#        - nice - max nice priority allowed to raise to values: [-20, 19]</span></span><br><span class="line"><span class="comment">#        - rtprio - max realtime priority</span></span><br><span class="line"><span class="comment">#        - chroot - change root to directory (Debian-specific)</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="open-files-参数"><a href="#open-files-参数" class="headerlink" title="open files 参数"></a>open files 参数</h4><p>描述: 该参数主要设置是单个进程能够设置Linux最大文件句柄数, 常常在调优时对其优化保证以后服务器在高并发下正常运行。否则在高并非的情况下很容报<code>Too many open files</code>错误。</p>
+<p>默认值: 1024<br>最大值: 65535 (不能超过2^16)</p>
+<p><strong>参数设置:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1</span></span><br><span class="line"><span class="built_in">ulimit</span> -HSn 65535</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2./etc/security/limits.conf  | 此方法需要重启系统</span></span><br><span class="line"><span class="comment"># 软限制（soft limit）：内核实际执行的限制，任何进程都可以将软限制设置为小于或等于对进程限制的硬限制的值、最大线程数和文件数。</span></span><br><span class="line"><span class="comment"># 硬限制（hard limit）：可以在任何时候任何进程中设置，但硬限制需要由超级用户修改。</span></span><br><span class="line"><span class="comment"># soft nofile ：可打开的文件描述符的最大数(超过会警告);</span></span><br><span class="line">*  soft    nofile          65535</span><br><span class="line"><span class="comment"># hard nofile ：可打开的文件描述符的最大数(超过会报错)</span></span><br><span class="line">*  hard    nofile          65535</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="max-user-processes-参数"><a href="#max-user-processes-参数" class="headerlink" title="max user processes 参数"></a>max user processes 参数</h4><p>描述: 该参数主要设置是单个用户最大进程数。</p>
+<p>默认值: 63708<br>最大值: 65535 (不能超过2^16)</p>
+<p><strong>参数设置</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1</span></span><br><span class="line"><span class="built_in">ulimit</span> -HSu 65535</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2./etc/security/limits.conf | 此方法需要同样也需要重启系统</span></span><br><span class="line"><span class="comment"># 单个用户可用的最大进程数量(超过会警告);</span></span><br><span class="line">*  soft    nproc           65535</span><br><span class="line"><span class="comment"># 单个用户可用的最大进程数量(超过会报错);</span></span><br><span class="line">*  hard    nproc           65535</span><br></pre></td></tr></table></figure></p>
+<p>Tips : 用户可用的最大进程数量以及打开的文件描述符的最大数设置与下述两个内核参数有关。</p>
+<ul>
+<li>(1) 所有进程打开的文件描述符数不能超过它<code>/proc/sys/fs/file-max</code>内核可分配的所有进程最大文件数。</li>
+<li>(2) 单个进程打开的文件描述符数不能超过它<code>/proc/sys/fs/nr_open</code>内核可分配的单个进程最大文件数。</li>
+</ul>
+<p>/proc/sys/fs/file-handle</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-02-21T00:50:16.667Z" itemprop="dateUpdated">2022-02-21 08:50:16</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/基础知识/操作系统/Linux底层/Linux内核参数使用与优化介绍.md" target="_blank" rel="noopener noreferrer">_posts/基础知识/操作系统/Linux底层/Linux内核参数使用与优化介绍.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/6-17-565.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/6-17-565.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kernel/" rel="tag">kernel</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/6-17-565.html&title=《Linux内核参数使用与优化介绍》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/6-17-565.html&title=《Linux内核参数使用与优化介绍》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/6-17-565.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Linux内核参数使用与优化介绍》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/6-17-565.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/6-17-565.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/6-22-510.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Harbor之企业级私有镜像存储仓库入门实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/6-1-279.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Google扩展开发入门实践(暂定)</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-Linux系统参数"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 Linux系统参数</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-内核参数"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.内核参数</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#vm-参数"><span class="post-toc-number">2.1.1.</span> <span class="post-toc-text">vm 参数</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#net-参数"><span class="post-toc-number">2.1.2.</span> <span class="post-toc-text">net 参数</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#fs-参数"><span class="post-toc-number">2.1.3.</span> <span class="post-toc-text">fs 参数</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-系统参数"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.系统参数</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#open-files-参数"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">open files 参数</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#max-user-processes-参数"><span class="post-toc-number">2.2.2.</span> <span class="post-toc-text">max user processes 参数</span></a></li></ol></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/6-17-565.html&title=《Linux内核参数使用与优化介绍》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/6-17-565.html&title=《Linux内核参数使用与优化介绍》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/6-17-565.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Linux内核参数使用与优化介绍》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/6-17-565.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/6-17-565.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACNklEQVR42u3a0W7DIAxG4b7/S2e3k7qQ8xtaDXO4mrI08KWSa2xeLzyut3H3X3L/73vGz1k8ZMiQsS3jGo7xPRxzt/T362TeP54jQ4aMAxjpo9NAPL5nhi1DhgwZJI0jYZovVIYMGTJWBdzxlfEe8x/9bsiQIWMrBgmdZDJeaCOf+sheXIYMGRsyeNX9+39/pL8hQ4aMrRhXONLn1BLHeFUyZMhozeABjqSD8xvamfXIkCGjKyPdavLJVhXg0BUZMmS0ZpBSFw+7ZOs702x4COsyZMhoyuDF/dpyaw3LuIUpQ4aM1oy1CR9JMfnBDv4iZMiQcQJj1eEJ8rZ42a74DciQIaMdIz3WkCZ2a4P17adkyJBxAIMfGE1L9pxKrj+U22TIkNGUUUvyeCNhvCCSRNaaozJkyOjESAtkPLzy1gIPx3EbQIYMGS0Y8wU1nt6RAlztlcmQIeMERprM8ZFOyRPNYMiQIWNzRpqK8aIYJ6XH0W5bmDJkyGjK4OkaWVatuJ++puDIhQwZMpoy0hZjmlCmbc7giIYMGTKOYaTl/lpgnWmdypAhQwYPc7UwGpf1cdtVhgwZXRnzhf6ZhfKi20PwlSFDRmtGrZ1ZS+Z4ylh7mgwZMnozagWydOL5RsJD+U+GDBkHMGYOacVT8h023kLLkCFDRm0R6TGO9NXEi5AhQ8ZhjLRhOV5u7Z4FAVeGDBlbMdJmwPieVeH1I+U2GTJkbMiYOqlRai2kad/MgTMZMmRszvgBZTNBzwXeY3gAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

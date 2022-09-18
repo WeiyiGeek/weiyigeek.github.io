@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 HTTPS原理介绍以及证书签名的申请配置|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="SSL-TLS,HTTPS">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>HTTPS原理介绍以及证书签名的申请配置</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">HTTPS原理介绍以及证书签名的申请配置</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-10-21T02:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-10-21
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Web%E5%8D%8F%E8%AE%AE/">Web协议</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-基础知识/Web原理/Web协议/HTTPS原理介绍以及证书签名的申请配置"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">HTTPS原理介绍以及证书签名的申请配置</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-10-21 10:34:30" datetime="2019-10-21T02:34:30.000Z"  itemprop="datePublished">2019-10-21</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Web%E5%8D%8F%E8%AE%AE/">Web协议</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<p>原文地址: HTTPS原理介绍以及证书签名的申请配置 (<a href="https://mp.weixin.qq.com/s/S-ZgJ3tFhmU4qvt80QwKqw" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/S-ZgJ3tFhmU4qvt80QwKqw</a>)</p>
+<a id="more"></a>
+<h4 id="0x00-前言介绍"><a href="#0x00-前言介绍" class="headerlink" title="0x00 前言介绍"></a>0x00 前言介绍</h4><p><strong>什么是 HTTP/HTTPS 协议？</strong></p>
+<ul>
+<li>HTTP协议全称Hyper Text Transfer Protocol-超文本传输协议，位于TCP/IP四层模型当中的应用层。<ul>
+<li>HTTP协议通过请求/响应的方式，在客户端和服务端之间进行通信。</li>
+<li>缺点:传输不够安全容易被拦截和篡改(HTTP协议的信息传输完全以明文方式，不做任何加密，相当于是在网络上“裸奔”)容易导致中间人攻击;</li>
+</ul>
+</li>
+<li>HTTPS协议全称Hypertext Transfer Protocol Secure，超文本传输安全协议,实际上是在HTTP协议的基础之上增加了SSL安全层（下面介绍的一系列认证流程就是在SSL层中完成）,这是一套使用公钥/私钥机制的加密系统<ul>
+<li>保护了交换数据隐私和完整性，提供对网站服务器身份认证的功能，简单来说它就是安全版的 HTTP。</li>
+<li>最新推出的TLS协议是SSL 3.0协议的升级版，和SSL协议的大体原理是相同的(简单的记就是TLS是SSL的升级版本)</li>
+</ul>
+</li>
+</ul>
+<p><strong>HTTP/HTTPS处于层次</strong><br>TCP/IP层次 | 说明<br>—|—<br>应用层(HTTP[HTTPS]/FTP) | HTTPS在HTTP基础上构建 SSL安全层,经过发展已经推出了TLS协议；<br>传输层(TCP/UDP) |<br>网络层(IP/ARP) |<br>数据链路层 |</p>
+<figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926092153.png" target="_blank" title="WeiyiGeek.层次" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926092153.png" alt="WeiyiGeek.层次" title="" class=""></a>
+                <p>WeiyiGeek.层次</p>
+            </figure>
+<p><br></p>
+<p><em>HTTPS 主要用途有三个：</em></p>
+<ul>
+<li>一是通过证书等信息确认网站的真实性；</li>
+<li>二是建立加密的信息通道；</li>
+<li>三是数据内容的完整性。</li>
+</ul>
+<p>HTTPS相比较于HTTP协议的一些关键点:</p>
+<ul>
+<li>成本问题:HTTPS要比HTTP更加消耗资源，SSL握手需要更多的数据包，加密解密也需要额外的运算。</li>
+<li>HTTPS的证书需要专门的机构颁发，大机构颁发的证书不是免费的每年都得交几百几千块钱才能申请到证书</li>
+<li>因为某些颁发证书的机构会滥发证书，甚至会制造假证书，假证书可以用来进行中间人攻击;</li>
+</ul>
+<hr>
+<h4 id="0x01-HTTPS原理"><a href="#0x01-HTTPS原理" class="headerlink" title="0x01 HTTPS原理"></a>0x01 HTTPS原理</h4><p>描述:在讲解HTTPS原理前面先来听听一个小故事；<br>在读小学的时候那时候不懂什么叫爱只知道喜欢和不喜欢,某一天上课我给我喜欢的女生写了一封告白信给她,不想在传递的过程之中被老师拦截并当场叫我宣读了,当时那是很尴尬也亲手藏送了我的爱情;<br>我当时在想如果上天愿意给我一个机会,我会将这封信加密后给她(并附上密码本),这样才凸显情调即使被老师拦截也不怕(因为她看不懂),说不定还能成功呢;</p>
+<p><em>为什么要出现HTTPS协议?</em><br>答:打个比方小灰是客户端，小灰的同事小红是服务端，有一天小灰试图给小红发送请求,但是由于传输信息是明文，这个信息有可能被某个中间人恶意截获甚至篡改<br><figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926105051.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926105051.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>所以为了解决这个问题我们提出了对数据进行加密传输处理,但是如何进行加密呢？以及如何选用加密方式?</p>
+<p><em>常见的对称加密与非对称加密方式:</em><br>对称加密:对称加密是指加密与解密的使用同一个密钥的加密算法。比如上面案例的(密码本)使用了同一套加密密码，所以我用的加密算法就是对称加密算法。</p>
+<ul>
+<li>目前常见的加密算法有：DES、AES、IDEA 等</li>
+</ul>
+<p>非对称加密使用的是两个密钥，公钥与私钥，我们会使用公钥对网站账号密码等数据进行加密，再用私钥对数据进行解密。<code>公钥会发给查看网站的所有人，而私钥是只有网站服务器自己拥有的</code>。</p>
+<ul>
+<li>目前常见非对称加密算法：RSA，DSA，DH等。</li>
+</ul>
+<p><br></p>
+<p><em>通过下面的方式的演变可以看到HTTPS协议的发展扩充</em></p>
+<p><strong>方式1:采用对称加密方式</strong><br>描述:小灰和小红可以事先约定一种对称加密方式，并且约定一个随机生成的密钥。<br>后续的通信中，信息发送方都使用密钥对信息加密，而信息接收方通过同样的密钥对信息解密。<br>该种方式缺陷: 因为第一次约定加密方式和密钥的通信仍然是明文，如果第一次通信就已经被拦截了，那么密钥就会泄露给中间人中间人仍然可以解密后续所有的通信内容。<br><figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926111522.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926111522.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>为了解决这种方式我们<code>采用非对称加密</code>，为密钥的传输做一层额外的保护。</p>
+<p><br></p>
+<p><strong>方式2：采用非对称加密</strong><br>描述:非对称加密的一组秘钥对中包含一个公钥public和一个私钥private。<br>原理:明文既可以用<code>公钥加密，用私钥解密</code>；也可以用私钥加密，用公钥解密。在通信过程中，即使中间人在一开始就截获了公钥Key1，由于不知道私钥是什么也无从解密(但也不是绝对安全)。</p>
+<p><em>步骤流程:</em></p>
+<ul>
+<li>1.在小灰和小红建立通信的时候，小红首先把自己的公钥Key1发给小灰：</li>
+<li>2.收到小红的公钥以后，小灰自己生成一个用于对称加密的密钥Key2，并且用刚才接收的公钥Key1对Key2进行加密（这里有点绕）发送给小红：</li>
+<li>3.小红利用自己非对称加密的私钥，解开了公钥Key1的加密，获得了Key2的内容。从此以后两人就可以利用Key2进行对称加密的通信了。</li>
+</ul>
+<p><em>但是这时候攻击手法又发生了更新,是什么坏主意呢？</em></p>
+<ul>
+<li>中间人虽然不知道小红的私钥是什么，但是第一次通讯中截获了小红的公钥Key1之后，却可以偷天换日，自己另外生成一对公钥私钥把自己的公钥Key3发送给小灰。</li>
+<li>通信再次被中间人截获，中间人先用自己的私钥解开了Key3的加密，获得Key2然后再用当初小红发来的Key1重新加密再发给小红。</li>
+<li>两个人后续的通信尽管用Key2做了对称加密，但是中间人已经掌握了Key2所以可以轻松进行解密。</li>
+</ul>
+<figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926114558.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926114558.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>又为了解决这样的攻击方式,我们有必要引入第三方，一个权威的证书颁发机构（CA）来解决。</p>
+<p><br></p>
+<p><strong>方式3：证书颁发机构(CA)</strong><br>描述:签发证书的 CA 中心会发布一种权威性的电子文档—数字证书，它可以通过加密技术（对称加密与非对称加密）对我们在网上传输的信息进行加密,使用了SSL证书保证了网站的唯一性与真实性。<br>比如我在 github 上输入：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">账号：cbssfaw</span><br><span class="line">密码：123djaosid</span><br><span class="line"></span><br><span class="line"><span class="comment">#可是这个数据被黑客拦截盗窃了，那么加密后，黑客得到的数据可能就是这样的：</span></span><br><span class="line">账号：çµø…≤¥ƒ∂ø†®∂˙∆¬</span><br><span class="line">密码：∆ø¥§®†ƒ©®†©˚¬</span><br></pre></td></tr></table></figure><br>最后一个就是验证数据的完整性，当数据包经过无数次路由器转发后会发生数据劫持，黑客将数据劫持后进行篡改比如植入羞羞的小广告。开启HTTPS后黑客就无法对数据进行篡改，就算真的被篡改了我们也可以检测出问题。</p>
+<p>那到底什么是证书呢？<br>基于证书系统的公钥</p>
+<ul>
+<li>一方面保证用户连接的是正确的网站，</li>
+<li>另一方面结合私钥，可以保证网络数据不会被窃听。</li>
+</ul>
+<figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926115157.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926115157.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>流程如下：</p>
+<ol>
+<li>作为服务端的小红，首先把自己的公钥发给证书颁发机构，向证书颁发机构申请证书。</li>
+<li>证书颁发机构自己也有一对公钥私钥。机构利用自己的私钥来加密Key1，并且通过服务端网址等信息生成一个证书签名同样经过机构的<code>私钥加密</code>。证书制作完成后机构把证书发送给了服务端小红。</li>
+<li>当小灰向小红请求通信的时候，小红不再直接返回自己的公钥，而是把自己申请的证书返回给小灰。</li>
+<li>小灰收到证书以后验证证书的真伪。需要说明的是各大浏览器和操作系统已经维护了所有权威证书机构的名称和公钥。所以小灰只需要知道是<code>哪个机构颁布的证书，就可以从本地找到对应的机构公钥，解密出证书签名</code>。</li>
+<li>接下来小灰按照同样的签名规则，自己也生成一个证书签名，如果两个签名一致，说明证书是有效的。验证成功后小灰就可以放心地再次利用机构公钥，解密出服务端小红的公钥Key1。</li>
+<li>小灰利用服务端公钥Key1生成自己的对称加密密钥Key2，并且用服务端公钥Key1加密Key2发送给小红。</li>
+<li>最后小红用自己的私钥解开加密，得到对称加密密钥Key2。于是两人开始用Key2进行对称加密的通信。</li>
+</ol>
+<figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926124122.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190926124122.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>这时候就算中间人自己也向权威机构申请一个证书,并把小红发的证书偷偷换成自己的证书也没什么用;因为证书的签名是又服务端网址等信息生成的，并且经过权威机构(CA)私钥加密, 中间人也无法篡改，所以发给小灰的假证书是无法通过验证的（但是需要防止某些CA滥发证书，甚至会制造假证书，假证书可以用来进行钓鱼攻击）;</p>
+<p>各大浏览器例如Chrome、Firefox等，会时不时宣布吊销某些机构证书的决定,所以对付假证书的最好办法，就是把颁发假证书的机构删掉。</p>
+<hr>
+
+<h4 id="0x02-证书申请配置"><a href="#0x02-证书申请配置" class="headerlink" title="0x02 证书申请配置"></a>0x02 证书申请配置</h4><p>首先了解一下SSL证书：<br>SSL证书用于加密HTTP协议也就是HTTPS。它分为三种类型，<code>域名型SSL证书（DV SSL）、企业型SSL证书（OVSSL）、增强型SSL证书（EVSSL）</code>。</p>
+<p><strong>1.SSL证书三种类型</strong><br>1.1 域名型 SSL 证书（DV SSL - Domain Validation SSL）</p>
+<ul>
+<li>即证书颁布机构只对域名的所有者进行在线检查，通常是验证域名下某个指定文件的内容，或者验证与域名相关的某条 TXT 记录；<br>比如访问 [http|https]://<a href="http://www.weiyigeek.top/.../test.txt，文件内容：" target="_blank" rel="noopener">www.weiyigeek.top/.../test.txt，文件内容：</a> 2016082xxxxxmimvpcom2016<br>或添加一条 TXT 记录：<a href="http://www.weiyigeek.top" target="_blank" rel="noopener">www.weiyigeek.top</a> –&gt; TXT –&gt; 20170xxxxxmimvpcom2066</li>
+</ul>
+<p>1.2 企业型 SSL 证书（OV SSL - Organization Validation SSL）</p>
+<ul>
+<li>是要购买者提交组织机构资料和单位授权信等在官方注册的凭证，证书颁发机构在签发 SSL 证书前，不仅仅要检验域名所有权，还必须对这些资料的真实合法性进行多方查验，只有通过验证的才能颁发 SSL 证书。</li>
+</ul>
+<p>1.3 增强型 SSL 证书（EV SSL - Extended Validation SSL）</p>
+<ul>
+<li>与其他 SSL 证书一样，都是基于 SSL/TLS 安全协议，但是验证流程更加具体详细，验证步骤更多，这样一来证书所绑定的网站就更加的可靠、可信。它跟普通 SSL 证书的区别也是明显的，安全浏览器的地址栏变绿，如果是不受信的 SSL 证书则拒绝显示，如果是钓鱼网站，地址栏则会变成红色，以警示用户。</li>
+</ul>
+<p><br></p>
+<p><strong>2.推荐申请的SSL证书的网站：</strong></p>
+<ul>
+<li>2.1.腾讯云的SSL证书申请地址（推荐）<a href="https://cloud.tencent.com/product/ssl" target="_blank" rel="noopener">https://cloud.tencent.com/product/ssl</a> </li>
+<li>2.2.Let’s Encrypt是国外一个公共的免费SSL项目（推荐）<a href="https://letsencrypt.org" target="_blank" rel="noopener">https://letsencrypt.org</a></li>
+<li>2.3.CloudFlare SSL <a href="https://www.cloudflare.com/ssl/" target="_blank" rel="noopener">https://www.cloudflare.com/ssl/</a></li>
+<li>2.4.sslforfree <a href="https://www.sslforfree.com/" target="_blank" rel="noopener">https://www.sslforfree.com/</a></li>
+</ul>
+<p><br></p>
+<p><strong>3.为网站配置SSL证书</strong><br>描述:在腾讯云申请后就能下载到一个压缩文件，里面存放了各个WEB应用服务器如何进行配置SSL；<br>也可以参考：<a href="https://cloud.tencent.com/doc/product/400/%E8%AF%81%E4%B9%A6%E5%AE%89%E8%A3%85%E6%8C%87%E5%BC%95" target="_blank" rel="noopener">https://cloud.tencent.com/doc/product/400/%E8%AF%81%E4%B9%A6%E5%AE%89%E8%A3%85%E6%8C%87%E5%BC%95</a></p>
+<p><em>(1) nginx为服务的配置方法，</em></p>
+<ul>
+<li><p>首先你需要将解压出来的Nginx下的两个文件拷贝到你nginx.conf的目录下(例如:/usr/local/nginx/conf目录下)，然后为nginx.conf添加以下的配置(如果已经有监听443端口的server则作出对应的修改即可)，443端口跟80端口一样，只是80被http使用，443是https使用，当然这只是我的理解。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  listen 443 ssl http2;</span><br><span class="line">  listen [::]:443 ssl http2;</span><br><span class="line">  server_name weiyigeek.top;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># HSTS (ngx_http_headers_module is required) 应该只使用 HTTPS 而不是使用 HTTP 通信</span></span><br><span class="line">  add_header Strict-Transport-Security <span class="string">"max-age=31536000;includeSubDomains;preload"</span> always;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># XXS-Protection</span></span><br><span class="line">  add_header X-XSS-Protection <span class="string">"1; mode=block"</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># MIME 模拟探测</span></span><br><span class="line">  add_header X-Content-Type-Options nosniff;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># Frame 安全控制</span></span><br><span class="line">  add_header X-Frame-Options ALLOW-FROM music.163.com;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># Spider Robots 爬取策略限制</span></span><br><span class="line">  add_header X-Robots-Tag none;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 开启 SSL ，如果想http 与 https 公用一个配置则可以将其注释( the "ssl" directive is deprecated )</span></span><br><span class="line">  <span class="comment"># ssl on;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 配置证书链与证书密钥</span></span><br><span class="line">  ssl_certificate      /etc/nginx/ssl/fullchain.cer;</span><br><span class="line">  ssl_certificate_key  /etc/nginx/ssl/weiyigeek.top.key;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># ssl会话复用超时时间以及会话复用缓存大小</span></span><br><span class="line">  ssl_session_timeout 1d;</span><br><span class="line">  ssl_session_cache shared:MozSSL:10m;  <span class="comment"># about 40000 sessions</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 配置双证书时开启否则应该关闭</span></span><br><span class="line">  ssl_session_tickets off;  </span><br><span class="line"></span><br><span class="line">  <span class="comment">## OCSP stapling</span></span><br><span class="line">  ssl_stapling on;</span><br><span class="line">  ssl_stapling_verify on;</span><br><span class="line">  <span class="comment"># 使用根 CA 和中间证书验证 OCSP 响应的信任链</span></span><br><span class="line">  ssl_trusted_certificate /etc/nginx/ssl/ca.cer;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 仅使用ECDH是不用配置ssl_dhparam的否则你应该为它配置上 </span></span><br><span class="line">  <span class="comment"># curl https://ssl-config.mozilla.org/ffdhe2048.txt &gt; /path/to/dhparam</span></span><br><span class="line">  ssl_dhparam /path/to/dhparam;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 兼容性较为通用的SSL协议与加密算法套件</span></span><br><span class="line">  ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;</span><br><span class="line">  ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE:ECDH:AES:HIGH:EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:!NULL:!aNULL:!eNULL:!EXPORT:!PSK:!ADH:!DH:!DES:!MD5:!RC4;</span><br><span class="line">  <span class="comment"># 安全配置: ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4:!DH:!DHE;</span></span><br><span class="line">  <span class="comment"># 证书常规握手加密算法方式共十八个，ECDHE、DHE、AES开头分别6个</span></span><br><span class="line">  ; ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:HIGH:!NULL:!aNULL:!eNULL:!EXPORT:!PSK:!ADH:!DES:!MD5:!RC4;</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 为了兼容性推荐服务器自动选择要使用的算法套件</span></span><br><span class="line">  ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># replace with the IP address of your resolver</span></span><br><span class="line">  resolver 223.6.6.6 8.8.8.8 192.168.12.254;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置完成后重启你的nginx服务，你就可以在浏览器上使用https访问你的网站了，浏览器会识别你的网站为安全网站，效果如下</p>
+<figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190922224235.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190922224235.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+</ul>
+<p><em>(2) Apache 2.x 证书部署</em><br>2.1 获取证书:</p>
+<ul>
+<li>Apache文件夹内获得证书文件<code>1_root_bundle.crt，2_www.domain.com_cert.crt 和私钥文件 3_www.domain.com.key</code>。</li>
+</ul>
+<ul>
+<li>1_root_bundle.crt 文件包括一段证书代码 “—–BEGIN CERTIFICATE—–” 和 “—–END CERTIFICATE—–”,</li>
+<li>2_<a href="http://www.domain.com_cert.crt" target="_blank" rel="noopener">www.domain.com_cert.crt</a> 文件包括一段证书代码 “—–BEGIN CERTIFICATE—–” 和 “—–END CERTIFICATE—–”,</li>
+<li>3_<a href="http://www.domain.com.key" target="_blank" rel="noopener">www.domain.com.key</a> 文件包括一段私钥代码 “—–BEGIN RSA PRIVATE KEY—–” 和 “—–END RSA PRIVATE KEY—–”。</li>
+</ul>
+<p>2.2 编辑 Apache 根目录下 conf/httpd-ssl.conf 文件，修改成如下内容：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;VirtualHost _default_:443&gt;</span><br><span class="line">DocumentRoot &quot;&#x2F;var&#x2F;www&#x2F;html&quot;</span><br><span class="line">ServerName www.weiyi.top:443</span><br><span class="line">ErrorLog logs&#x2F;ssl_error_log</span><br><span class="line">TransferLog logs&#x2F;ssl_access_log</span><br><span class="line">LogLevel warn</span><br><span class="line">SSLEngine on</span><br><span class="line">SSLProtocol all -SSLv2 -SSLv3</span><br><span class="line">SSLCipherSuite HIGH:3DES:!aNULL:!MD5:!SEED:!IDEA:!RC4:!DH4</span><br><span class="line">SSLCertificateFile &#x2F;usr&#x2F;local&#x2F;httpd&#x2F;cert&#x2F;2_sss.club.crt</span><br><span class="line">SSLCertificateKeyFile &#x2F;usr&#x2F;local&#x2F;httpd&#x2F;cert&#x2F;3_sss.club.key</span><br><span class="line">SSLCertificateChainFile &#x2F;usr&#x2F;local&#x2F;httpd&#x2F;cert&#x2F;1_root_bundle.crt</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190922224554.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190922224554.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>​最后查看网站的证书情况(以我的blog.weiyigeek.top网站为例), 下面club是我的旧域名<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ID:RrmgT13e</span><br><span class="line">证书类型：TrustAsia TLS RSA CA(1年)</span><br><span class="line">通用名称：weiyigeek.github.io</span><br><span class="line">证书密匙：weiyegeek.cTOP</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190922224457.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190922224457.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<hr>
+<h4 id="0x03-补充证书申请"><a href="#0x03-补充证书申请" class="headerlink" title="0x03 补充证书申请"></a>0x03 补充证书申请</h4><h5 id="1-SSL-FOR-FREE"><a href="#1-SSL-FOR-FREE" class="headerlink" title="1.SSL-FOR-FREE"></a>1.SSL-FOR-FREE</h5><p>Let’s Encrypt 宣称将继续清除 Web 上采用 HTTPS 的障碍，让每个网站轻松获取管理证书。<br>网站地址:<a href="https://www.sslforfree.com/" target="_blank" rel="noopener">https://www.sslforfree.com/</a></p>
+<p>时间节点:<code>[2020年4月27日 16:41:33]</code><br>1.输入您需要申请通配符的免费证书,然后点击按钮 Create Free SSL Certificate<br>2.点击按钮进行DNS手动验证，按照要求在您的域名解析商后台进行设置txt记录<code>此处我采用的是cloudflare</code><br><figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200427160937.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200427160937.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure><br>3.认证之后您可以采用它给的CSR或者自己提供的CSR文件<code>证书签名请求文件</code>，然后点击下载即可；<br><figure class="image-box">
+                <a rel=HTTPS原理介绍以及证书签名的申请配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200427161322.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200427161322.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure><br>4.注意事项：</p>
+<ul>
+<li>(1) 输入自己提供的CSR文件的时候不带<code>-----BEGIN NEW CERTIFICATE REQUEST-----</code>以及<code>-----END NEW CERTIFICATE REQUEST-----</code>;</li>
+<li>(2) 如果是自己提供的证书则下载的时候不包括密钥，因为在您生成csr文件过程中就会产生密钥文件（<code>注意文件的保存</code>）</li>
+</ul>
+<hr>
+<h4 id="0x04-总结"><a href="#0x04-总结" class="headerlink" title="0x04 总结"></a>0x04 总结</h4><p>描述:通过上文我们已经知道，HTTPS 就是在 HTTP 传输协议的基础上对网站进行认证，给予它独一无二的身份证明再对网站数据进行加密，并对传输的数据进行完整性验证。HTTPS 作为一种加密手段不仅加密了数据，还给了网站一张身份证。</p>
+<ul>
+<li>HTTPS=数据加密+网站认证+完整性验证+HTTP</li>
+</ul>
+<p>后述：如果让我回到十年前，那么我一定会这样跟我的女朋友传纸条：<br>先准备一张独一无二的纸条，并在上面签上我的大名(CA颁发证书-确定是否是本人),然后用只有我女朋友可以解密的方式进行数据加密，最后写完后用胶水封起来(防篡改))，防止隔壁桌的小王偷看修改小纸条内容。</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-04-11T09:17:08.956Z" itemprop="dateUpdated">2022-04-11 17:17:08</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/基础知识/Web原理/Web协议/HTTPS原理介绍以及证书签名的申请配置.md" target="_blank" rel="noopener noreferrer">_posts/基础知识/Web原理/Web协议/HTTPS原理介绍以及证书签名的申请配置.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/10-21-10.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/10-21-10.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HTTPS/" rel="tag">HTTPS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SSL-TLS/" rel="tag">SSL-TLS</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/10-21-10.html&title=《HTTPS原理介绍以及证书签名的申请配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/10-21-10.html&title=《HTTPS原理介绍以及证书签名的申请配置》 — WeiyiGeek Blog&source=[TOC]
+原文地址: HTTPS原理介绍以及证书签名的申请配置 (https://mp.weixin.qq.com/s/S-ZgJ3tFhmU4qvt8..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/10-21-10.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《HTTPS原理介绍以及证书签名的申请配置》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/10-21-10.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/10-21-10.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/10-23-294.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">JAVA入门学习十一</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/10-21-12.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">SSL与TLS协议原理与证书签名多种生成方式实践指南</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言介绍</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-HTTPS原理"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 HTTPS原理</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-证书申请配置"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 证书申请配置</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-补充证书申请"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 补充证书申请</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-总结"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 总结</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/10-21-10.html&title=《HTTPS原理介绍以及证书签名的申请配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/10-21-10.html&title=《HTTPS原理介绍以及证书签名的申请配置》 — WeiyiGeek Blog&source=[TOC]
+原文地址: HTTPS原理介绍以及证书签名的申请配置 (https://mp.weixin.qq.com/s/S-ZgJ3tFhmU4qvt8..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/10-21-10.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《HTTPS原理介绍以及证书签名的申请配置》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/10-21-10.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/10-21-10.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACMElEQVR42u3aQW7DMAxE0dz/0u42QBr5D2kXFf29KhLX0fNiIJF8vfB1vF3vn6y//fz885nrX7n4kiFDxraMY3mRhaafrEnr1/GVKkOGjAcw+KNJ4K4XwZ/Dw1qGDBky1vf0Y7r2uzJkyJCx3q6lh89/F7gyZMjYkEGik9zPC22kPHfLWVyGDBkbMnjV/e//vqW/IUOGjK0YtejkQVnbOMarkiFDxmgGD7hOQY0faGvrkSFDxmwGL6Klh9WrCnAIJkOGjNGMWsylCyVF/86WVIYMGbMZtb1kGtN92MlrkiFDxgMYvCjPx7k4jJfwvn4rQ4aM0YxrH0ReShrfPHxlyJAxm9EvexU7Eu2w/qW/IUOGjHGM2lFzXSAj8cobCUG5TYYMGaMZ6b+RQymJzvRIHAyEyZAhYxCDtwHS4QkO5nH84pcMGTIGMfoNyPSAmg6fIbAMGTJGM/gARNrmTMcm4s1fmtwyZMjYnJEOUnB2+lLSraQMGTKexrhvGCItsdUaFTJkyJjN4LFIwpEcSjuRHcyMyJAhYyiDh12tMNfZmJ40DGTIkPEABi+l1Xi1AlxwiJUhQ8ZQxhFeKeCql3LyumXIkDGaURsX403NWiuULL3VrZUhQ8aGjDRk+VGTD4HVRi5kyJDxNMZVwceLZfEIBWlhypAhQwZuGKSBm8a3DBkyZNTKYbWgJCdshJchQ8YDGOQQy0tm/Xi9sdwmQ4aMDRmtSQ18J29wphgZMmSMZvwAQVeJh2jrsDkAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 2.ElasticStack分布式数据采集搜索引擎集群搭建配置|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Elastic">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>2.ElasticStack分布式数据采集搜索引擎集群搭建配置</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">2.ElasticStack分布式数据采集搜索引擎集群搭建配置</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2021-08-02T01:34:30.000Z" itemprop="datePublished" class="page-time">
+  2021-08-02
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E5%AE%A1%E8%AE%A1/">日志审计</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E5%AE%A1%E8%AE%A1/%E5%AE%89%E5%85%A8%E5%BB%BA%E8%AE%BE/">安全建设</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安防御/安全建设/日志审计/ElasticStack/2.ElasticStack分布式数据采集搜索引擎集群搭建配置"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">2.ElasticStack分布式数据采集搜索引擎集群搭建配置</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2021-08-02 09:34:30" datetime="2021-08-02T01:34:30.000Z"  itemprop="datePublished">2021-08-02</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E5%AE%A1%E8%AE%A1/">日志审计</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E5%AE%A1%E8%AE%A1/%E5%AE%89%E5%85%A8%E5%BB%BA%E8%AE%BE/">安全建设</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x01-ES集群搭建实践"><a href="#0x01-ES集群搭建实践" class="headerlink" title="0x01 ES集群搭建实践"></a>0x01 ES集群搭建实践</h2><h3 id="1-宿主机安装"><a href="#1-宿主机安装" class="headerlink" title="1.宿主机安装"></a>1.宿主机安装</h3><h4 id="1-1-节点环境"><a href="#1-1-节点环境" class="headerlink" title="(1.1) 节点环境"></a>(1.1) 节点环境</h4><p>描述: 此处系统的环境设置请参考上一章的<code>重要系统配置</code>章节。</p>
+<p><strong>操作环境说明:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">elk1 Master 2C 4G - Ubuntu 20.04.2 LTS  5.4.0-86-generic  </span><br><span class="line">elk2 Slave  2C 2G - Ubuntu 20.04.2 LTS  5.4.0-86-generic </span><br><span class="line">elk3 Slave  2C 2G - Ubuntu 20.04.2 LTS  5.4.0-86-generic</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>节点信息：</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Role</th>
+<th>IP</th>
+<th>HTTP PORT</th>
+<th>Cluster TCP PORT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>es01</td>
+<td>MASTER</td>
+<td>10.10.107.225</td>
+<td>9200</td>
+<td>9300</td>
+</tr>
+<tr>
+<td>es02</td>
+<td>SLAVE</td>
+<td>10.10.107.226</td>
+<td>9200</td>
+<td>9300</td>
+</tr>
+<tr>
+<td>es03</td>
+<td>SLAVE</td>
+<td>10.10.107.227</td>
+<td>9200</td>
+<td>9300</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<p><strong>基础环境设置</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 系统启动配置</span></span><br><span class="line"><span class="keyword">if</span> [[ $(grep -c <span class="string">"ulimit"</span> /etc/profile) -ne 2 ]];<span class="keyword">then</span></span><br><span class="line">tee -a /etc/profile &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">swapoff -a</span><br><span class="line"><span class="built_in">ulimit</span> -HSn 65535</span><br><span class="line"><span class="comment">#ulimit -HSu 65535</span></span><br><span class="line">EOF</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment"># 系统资源限制配置</span></span><br><span class="line"><span class="keyword">if</span> [[ $(grep -E -c <span class="string">"^elk"</span> /etc/security/limits.conf) -eq 0 ]];<span class="keyword">then</span></span><br><span class="line">tee -a /etc/security/limits.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># 在启动 Elasticsearch 之前将 memlock 设置为无限制</span></span><br><span class="line">elk soft memlock unlimited</span><br><span class="line">elk hard memlock unlimited</span><br><span class="line"><span class="comment"># 文件描述符数量与线程数</span></span><br><span class="line">elk soft nofile 65535</span><br><span class="line">elk hard nofile 65535</span><br><span class="line">elk soft nproc 65535</span><br><span class="line">elk hard nproc 65535</span><br><span class="line">EOF</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="comment"># 系统内核参数配置&amp;生效设置</span></span><br><span class="line">tee -a /etc/sysctl.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># 禁用 swap</span></span><br><span class="line">vm.swappiness=1</span><br><span class="line"><span class="comment"># 确保足够的虚拟内存 </span></span><br><span class="line">vm.max_map_count=262144</span><br><span class="line"><span class="comment"># TCP重传超时次数</span></span><br><span class="line">net.ipv4.tcp_retries2=5</span><br><span class="line">EOF</span><br><span class="line">sysctl -p</span><br><span class="line"></span><br><span class="line"><span class="comment"># 系统主机名称解析配置</span></span><br><span class="line">tee -a /etc/hosts &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">10.10.107.225 es01</span><br><span class="line">10.10.107.226 es02</span><br><span class="line">10.10.107.227 es03</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h4 id="1-2-实践流程"><a href="#1-2-实践流程" class="headerlink" title="(1.2) 实践流程"></a>(1.2) 实践流程</h4><ul>
+<li>Step 1.三台主机分别进行ES Linux Tar 安装包下载解压到/usr/local/目录中。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> ES_VERSION=<span class="string">"7.15.0"</span></span><br><span class="line"><span class="built_in">export</span> ES_DIR=<span class="string">"/usr/local/elasticsearch-<span class="variable">$&#123;ES_VERSION&#125;</span>"</span></span><br><span class="line">wget -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-<span class="variable">$&#123;ES_VERSION&#125;</span>-linux-x86_64.tar.gz</span><br><span class="line">wget -L https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-<span class="variable">$&#123;ES_VERSION&#125;</span>-linux-x86_64.tar.gz.sha512</span><br><span class="line">shasum -a 512 -c elasticsearch-<span class="variable">$&#123;ES_VERSION&#125;</span>-linux-x86_64.tar.gz.sha512 </span><br><span class="line"><span class="keyword">if</span> [ $? -eq 0 ];<span class="keyword">then</span></span><br><span class="line">  sudo tar -xzf elasticsearch-<span class="variable">$&#123;ES_VERSION&#125;</span>-linux-x86_64.tar.gz -C /usr/<span class="built_in">local</span></span><br><span class="line">  <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/elasticsearch-<span class="variable">$&#123;ES_VERSION&#125;</span>/</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">"\e[31m[*] check shasum elasticsearch-<span class="variable">$&#123;ES_VERSION&#125;</span>-linux-x86_64.tar.gz failed! \e[0m"</span></span><br><span class="line">  <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 2.环境变量设置(ES/JAVA)以及ES运行账户创建<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ES_HOME / JAVA 的环境变量配置</span></span><br><span class="line"><span class="keyword">if</span> [[ $(grep -c <span class="string">"ES_HOME"</span> /etc/profile) -eq 0 ]];<span class="keyword">then</span></span><br><span class="line">tee -a /etc/profile &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">ES_VERSION=<span class="string">"7.15.0"</span></span><br><span class="line">ES_HOME=<span class="string">"/usr/local/elasticsearch-<span class="variable">$&#123;ES_VERSION&#125;</span>"</span></span><br><span class="line">ES_JAVA_HOME=<span class="string">"<span class="variable">$&#123;ES_HOME&#125;</span>/jdk"</span></span><br><span class="line">PATH=<span class="variable">$&#123;ES_JAVA_HOME&#125;</span>/bin:<span class="variable">$&#123;ES_HOME&#125;</span>/bin:<span class="variable">$PATH</span></span><br><span class="line"><span class="built_in">export</span> ES_VERSION ES_HOME ES_JAVA_HOME PATH</span><br><span class="line">EOF</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">"\e[31[*] melasticsearch environment failed! \e[0m"</span></span><br><span class="line">  <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"><span class="built_in">source</span> /etc/profile</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$PATH</span></span><br><span class="line">  <span class="comment"># /usr/usr/local/elasticsearch-7.15.0/jdk/bin:/usr/usr/local/elasticsearch-7.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#创建运行 elasticsearch 用户与权限设置</span></span><br><span class="line">groupadd elk &amp;&amp; useradd -s /bin/bash -U elk -g elk</span><br><span class="line">chown -R elk:elk <span class="variable">$&#123;ES_HOME&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 3.创建 ES 集群的PKCS#12证书和安全配置，通过查看官网证书的创建(（<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.15/certutil.html)方式分为两种：一是通过" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/reference/7.15/certutil.html)方式分为两种：一是通过</a> elasticsearch-certutil 命令逐一创建证书，二是使用 elasticsearch-certutil 的 Silent Mode 创建。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.在instances.yml中记录集群的节点名称和IP实例信息</span></span><br><span class="line">cat &gt; <span class="variable">$&#123;ES_HOME&#125;</span>/instances.yml&lt;&lt;EOF</span><br><span class="line">instances:</span><br><span class="line">  - name: <span class="string">"es01"</span> </span><br><span class="line">    ip: </span><br><span class="line">      - <span class="string">"10.10.107.225"</span></span><br><span class="line">  - name: <span class="string">"es02"</span></span><br><span class="line">    ip:</span><br><span class="line">      - <span class="string">"10.10.107.226"</span></span><br><span class="line">  - name: <span class="string">"es03"</span></span><br><span class="line">    ip:</span><br><span class="line">      - <span class="string">"10.10.107.227"</span></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.此处使用静默模式(Silent Mode)一键创建</span></span><br><span class="line">bin/elasticsearch-certutil cert --silent --<span class="keyword">in</span> instances.yml --out ./config/cert.zip --pass testpassword</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.进入config目录并解压证书文件</span></span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/elasticsearch-7.15.0/config &amp;&amp; unzip cert.zip</span><br><span class="line">Archive:  cert.zip</span><br><span class="line">   creating: es01/</span><br><span class="line">  inflating: es01/es01.p12</span><br><span class="line">   creating: es02/</span><br><span class="line">  inflating: es02/es02.p12</span><br><span class="line">   creating: es03/</span><br><span class="line">  inflating: es03/es03.p12</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.将此处zip分别拷贝到ES02/ES03机器的/usr/usr/local/elasticsearch-7.15.0/config目录下。</span></span><br><span class="line">scp -P 20211 cert.zip weiyigeek@10.10.107.226:/tmp</span><br><span class="line">scp -P 20211 cert.zip weiyigeek@10.10.107.227:/tmp</span><br><span class="line">unzip /tmp/cert.zip -d <span class="variable">$&#123;ES_HOME&#125;</span>/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.所有节点存入 PKCS#12 秘钥的密码,所有节点都需要运行下面的命令，</span></span><br><span class="line"><span class="comment"># 生成 keystore 文件</span></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$&#123;ES_HOME&#125;</span> &amp;&amp; ./bin/elasticsearch-keystore create</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面两个命令，均需要 输入 在 生成 PKCS#12 秘钥 时的密码(testpassword)</span></span><br><span class="line">./bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password</span><br><span class="line">./bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.查看添加的密钥</span></span><br><span class="line">./bin/elasticsearch-keystore list</span><br><span class="line">  <span class="comment"># keystore.seed</span></span><br><span class="line">  <span class="comment"># xpack.security.transport.ssl.keystore.secure_password</span></span><br><span class="line">  <span class="comment"># xpack.security.transport.ssl.truststore.secure_password</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 7.elastic 认证之配置内置用户的密码(集群启动后将会自动同步)</span></span><br><span class="line"><span class="variable">$&#123;ES_HOME&#125;</span>/bin/elasticsearch-setup-passwords interactive</span><br><span class="line">  <span class="comment"># Enter password for [elastic]: weiyi123456</span></span><br><span class="line">  <span class="comment"># Reenter password for [elastic]: weiyi123456</span></span><br><span class="line"> ....</span><br><span class="line">  <span class="comment"># Enter password for [remote_monitoring_user]:</span></span><br><span class="line">  <span class="comment"># Reenter password for [remote_monitoring_user]:</span></span><br><span class="line">  <span class="comment"># Changed password for user [apm_system]</span></span><br><span class="line">  <span class="comment"># Changed password for user [kibana_system] weiyigeek</span></span><br><span class="line">  <span class="comment"># Changed password for user [kibana]        weiyigeek</span></span><br><span class="line">  <span class="comment"># Changed password for user [logstash_system]</span></span><br><span class="line">  <span class="comment"># Changed password for user [beats_system]</span></span><br><span class="line">  <span class="comment"># Changed password for user [remote_monitoring_user]</span></span><br><span class="line">  <span class="comment"># Changed password for user [elastic]</span></span><br><span class="line"><span class="comment"># 上面过程中我们需要设置多个默认用户的信息，每个内置用户负责不同的内容。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 8.如果你不想使用上面内置的用户，您也可以创建自己指定的用户名称</span></span><br><span class="line"><span class="variable">$&#123;ES_HOME&#125;</span>/bin/elasticsearch-users useradd weiyigeek -p password -r superuser</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 4.配置三台主机中ES的systemd来管理它。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 0.创建Systemctl在进行ES启动时的环境变量，此种方法可以解析变量</span></span><br><span class="line">cat &lt;&lt; EOF &gt; <span class="variable">$&#123;ES_HOME&#125;</span>/es.env </span><br><span class="line">ES_HOME=<span class="variable">$&#123;ES_HOME&#125;</span></span><br><span class="line">ES_PATH_CONF=<span class="variable">$&#123;ES_HOME&#125;</span>/config/</span><br><span class="line">PID_DIR=/var/run</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1.采用 systemd 进行ES服务管理的service文件创建。</span></span><br><span class="line">sudo tee /usr/lib/systemd/system/elasticsearch.service &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=Elasticsearch Services Manager</span><br><span class="line">Documentation=http://www.elastic.co</span><br><span class="line">Wants=network-online.target</span><br><span class="line">After=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">User=elk</span><br><span class="line">Group=elk</span><br><span class="line">RuntimeDirectory=elk</span><br><span class="line">EnvironmentFile=-/usr/<span class="built_in">local</span>/elasticsearch-7.15.0/es.env</span><br><span class="line">WorkingDirectory=/usr/<span class="built_in">local</span>/elasticsearch-7.15.0/</span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/elasticsearch-7.15.0/bin/elasticsearch -p /usr/<span class="built_in">local</span>/elasticsearch-7.15.0/elasticsearch.pid --quiet</span><br><span class="line"></span><br><span class="line"><span class="comment"># StandardOutput配置为错误重定向到journalctl，如果您还想启用journalctl记录日志时只需从ExecStart中删除quiet选项即可。</span></span><br><span class="line">StandardOutput=journal</span><br><span class="line">StandardError=inherit</span><br><span class="line"></span><br><span class="line"><span class="comment"># Specifies the maximum file descriptor number that can be opened by this process</span></span><br><span class="line">LimitNOFILE=65536</span><br><span class="line"></span><br><span class="line"><span class="comment"># Specifies the maximum number of processes</span></span><br><span class="line">LimitNPROC=4096</span><br><span class="line"></span><br><span class="line"><span class="comment"># Specifies the maximum size of virtual memory</span></span><br><span class="line">LimitAS=infinity</span><br><span class="line"></span><br><span class="line"><span class="comment"># Specifies the maximum file size</span></span><br><span class="line">LimitFSIZE=infinity</span><br><span class="line"></span><br><span class="line"><span class="comment"># Disable timeout logic and wait until process is stopped</span></span><br><span class="line">TimeoutStopSec=0</span><br><span class="line"></span><br><span class="line"><span class="comment"># SIGTERM signal is used to stop the Java process</span></span><br><span class="line">KillSignal=SIGTERM</span><br><span class="line"></span><br><span class="line"><span class="comment"># Send the signal only to the JVM rather than its control group</span></span><br><span class="line">KillMode=process</span><br><span class="line"></span><br><span class="line"><span class="comment"># Java process is never killed</span></span><br><span class="line">SendSIGKILL=no</span><br><span class="line"></span><br><span class="line"><span class="comment"># When a JVM receives a SIGTERM signal it exits with code 143</span></span><br><span class="line">SuccessExitStatus=143</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.重载 systemd 后台守护进程</span></span><br><span class="line">systemctl daemon-reload</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<ul>
+<li>Step 5.ES集群配置文件（三台机器）<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># （1）Master - es01</span></span><br><span class="line"><span class="string">tee</span> <span class="string">$&#123;ES_HOME&#125;/config/elasticsearch.yml</span> <span class="string">&lt;&lt;'EOF'</span></span><br><span class="line"><span class="comment">#------- 集群Cluster -------</span></span><br><span class="line"><span class="comment">#- 集群名称</span></span><br><span class="line"><span class="string">cluster.name:</span> <span class="string">es-cluster</span></span><br><span class="line"><span class="comment">#- 集群初始化时指定的Master节点。</span></span><br><span class="line"><span class="string">cluster.initial_master_nodes:</span> <span class="string">["es01"]</span></span><br><span class="line"><span class="comment">#- 集群节点列表</span></span><br><span class="line"><span class="string">discovery.seed_hosts:</span> <span class="string">["10.10.107.225","10.10.107.226","10.10.107.227"]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#------- 节点Node -------</span></span><br><span class="line"><span class="string">node.name:</span> <span class="string">es01</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#--------网络Network -------</span></span><br><span class="line"><span class="comment"># 监听接口</span></span><br><span class="line"><span class="string">network.host:</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"><span class="comment"># ES的HTTP服务端口</span></span><br><span class="line"><span class="string">http.port:</span> <span class="number">9200</span></span><br><span class="line"><span class="comment"># ES的TCP服务端口(集群使用)</span></span><br><span class="line"><span class="string">transport.tcp.port:</span> <span class="number">9300</span></span><br><span class="line"><span class="comment"># ES的TCP服务端口(压缩传输)</span></span><br><span class="line"><span class="string">transport.tcp.compress:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#--------数据与日志存储目录--------</span></span><br><span class="line"><span class="string">path.data:</span> <span class="string">/usr/local/elasticsearch-7.15.0/data</span></span><br><span class="line"><span class="string">path.logs:</span> <span class="string">/usr/local/elasticsearch-7.15.0/logs</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#--------性能Perfece--------</span></span><br><span class="line"><span class="comment"># ARM CPU 才开启，试将进程地址空间锁定到 RAM 中以防止任何 Elasticsearch 堆内存被换出，但为了性能我们需要将其关闭。</span></span><br><span class="line"><span class="comment">#bootstrap.memory_lock: fasle</span></span><br><span class="line"><span class="comment">#bootstrap.system_call_filter: false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#--------插件跨域配置--------</span></span><br><span class="line"><span class="string">http.cors.enabled:</span> <span class="literal">true</span> </span><br><span class="line"><span class="string">http.cors.allow-origin:</span> <span class="string">"*"</span></span><br><span class="line"><span class="string">http.cors.allow-headers:</span> <span class="string">Authorization,X-Requested-With,Content-Type,Content-Length</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#--------证书安全配置----------</span></span><br><span class="line"><span class="string">xpack.security.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">xpack.security.transport.ssl.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">xpack.security.transport.ssl.keystore.path:</span> <span class="string">es01/es01.p12</span></span><br><span class="line"><span class="string">xpack.security.transport.ssl.truststore.path:</span> <span class="string">es01/es01.p12</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) node - es02</span></span><br><span class="line"><span class="string">sed</span> <span class="bullet">-i</span> <span class="bullet">-e</span> <span class="string">'s#es01#es02#g'</span> <span class="bullet">-e</span> <span class="string">'s#"es02"#"es01"#g'</span> <span class="string">$&#123;ES_HOME&#125;/config/elasticsearch.yml</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) node - es03</span></span><br><span class="line"><span class="string">sed</span> <span class="bullet">-i</span> <span class="bullet">-e</span> <span class="string">'s#es01#es03#g'</span> <span class="bullet">-e</span> <span class="string">'s#"es03"#"es01"#g'</span> <span class="string">$&#123;ES_HOME&#125;/config/elasticsearch.yml</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<ul>
+<li>Step 6.启动ES前的最后一次配置，然后依次启动elastic服务<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.根据节点机器的配置设置其jvm参数。（非常注意系统内存一定要大于设置）</span></span><br><span class="line"><span class="comment"># JVM heap size 默认为4G，其中最大值和最小值必须一致。</span></span><br><span class="line"><span class="comment"># sed -i -e 's|## -Xms4g|-Xms4g|g' -e  's|## -Xmx4g|-Xmx4g|g' $&#123;ES_HOME&#125;/config/jvm.options</span></span><br><span class="line"><span class="comment"># sed -i -e 's@## -Xmx4g@-Xmx2g@g' -e "s@## -Xms4g@-Xms2g@g" $&#123;ES_HOME&#125;/config/jvm.options</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.再次对 $&#123;ES_HOME&#125; 目录下的所有文件目录进行授权，防止elk用户没有访问权限。</span></span><br><span class="line">chown -R elk:elk <span class="variable">$&#123;ES_HOME&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.启动并查看ES服务</span></span><br><span class="line">systemctl start elasticsearch.service</span><br><span class="line">systemctl status elasticsearch.service</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=2.ElasticStack分布式数据采集搜索引擎集群搭建配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211006095342.png" target="_blank" title="WeiyiGeek.ES_CLUSTER_START" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211006095342.png" alt="WeiyiGeek.ES_CLUSTER_START" title="" class=""></a>
+                <p>WeiyiGeek.ES_CLUSTER_START</p>
+            </figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 7.验证ES集群服务是否正常工作。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.访问三台主机的ES服务，采用-u选择指定前面我们自己创建的用户。</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> &#123;225..227&#125;;<span class="keyword">do</span></span><br><span class="line">  curl -u weiyigeek:password 10.10.107.<span class="variable">$&#123;i&#125;</span>:9200</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "name" : "es01",</span></span><br><span class="line">  <span class="comment">#   "cluster_name" : "es-cluster",</span></span><br><span class="line">  <span class="comment">#   "cluster_uuid" : "f4MbDAeMReOH7XeGHr5irA",</span></span><br><span class="line">  <span class="comment">#   "version" : &#123;</span></span><br><span class="line">  <span class="comment">#     "number" : "7.15.0",</span></span><br><span class="line">  <span class="comment">#     "build_flavor" : "default",</span></span><br><span class="line">  <span class="comment">#     "build_type" : "tar",</span></span><br><span class="line">  <span class="comment">#     "build_hash" : "79d65f6e357953a5b3cbcc5e2c7c21073d89aa29",</span></span><br><span class="line">  <span class="comment">#     "build_date" : "2021-09-16T03:05:29.143308416Z",</span></span><br><span class="line">  <span class="comment">#     "build_snapshot" : false,</span></span><br><span class="line">  <span class="comment">#     "lucene_version" : "8.9.0",</span></span><br><span class="line">  <span class="comment">#     "minimum_wire_compatibility_version" : "6.8.0",</span></span><br><span class="line">  <span class="comment">#     "minimum_index_compatibility_version" : "6.0.0-beta1"</span></span><br><span class="line">  <span class="comment">#   &#125;,</span></span><br><span class="line">  <span class="comment">#   "tagline" : "You Know, for Search"</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "name" : "es02",</span></span><br><span class="line">  <span class="comment">#   "cluster_name" : "es-cluster",</span></span><br><span class="line">  <span class="comment">#   "cluster_uuid" : "f4MbDAeMReOH7XeGHr5irA",</span></span><br><span class="line">  <span class="comment">#   "version" : &#123;</span></span><br><span class="line">  <span class="comment">#     "number" : "7.15.0",</span></span><br><span class="line">  <span class="comment">#     "build_flavor" : "default",</span></span><br><span class="line">  <span class="comment">#     "build_type" : "tar",</span></span><br><span class="line">  <span class="comment">#     "build_hash" : "79d65f6e357953a5b3cbcc5e2c7c21073d89aa29",</span></span><br><span class="line">  <span class="comment">#     "build_date" : "2021-09-16T03:05:29.143308416Z",</span></span><br><span class="line">  <span class="comment">#     "build_snapshot" : false,</span></span><br><span class="line">  <span class="comment">#     "lucene_version" : "8.9.0",</span></span><br><span class="line">  <span class="comment">#     "minimum_wire_compatibility_version" : "6.8.0",</span></span><br><span class="line">  <span class="comment">#     "minimum_index_compatibility_version" : "6.0.0-beta1"</span></span><br><span class="line">  <span class="comment">#   &#125;,</span></span><br><span class="line">  <span class="comment">#   "tagline" : "You Know, for Search"</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "name" : "es03",</span></span><br><span class="line">  <span class="comment">#   "cluster_name" : "es-cluster",</span></span><br><span class="line">  <span class="comment">#   "cluster_uuid" : "f4MbDAeMReOH7XeGHr5irA",</span></span><br><span class="line">  <span class="comment">#   "version" : &#123;</span></span><br><span class="line">  <span class="comment">#     "number" : "7.15.0",</span></span><br><span class="line">  <span class="comment">#     "build_flavor" : "default",</span></span><br><span class="line">  <span class="comment">#     "build_type" : "tar",</span></span><br><span class="line">  <span class="comment">#     "build_hash" : "79d65f6e357953a5b3cbcc5e2c7c21073d89aa29",</span></span><br><span class="line">  <span class="comment">#     "build_date" : "2021-09-16T03:05:29.143308416Z",</span></span><br><span class="line">  <span class="comment">#     "build_snapshot" : false,</span></span><br><span class="line">  <span class="comment">#     "lucene_version" : "8.9.0",</span></span><br><span class="line">  <span class="comment">#     "minimum_wire_compatibility_version" : "6.8.0",</span></span><br><span class="line">  <span class="comment">#     "minimum_index_compatibility_version" : "6.0.0-beta1"</span></span><br><span class="line">  <span class="comment">#   &#125;,</span></span><br><span class="line">  <span class="comment">#   "tagline" : "You Know, for Search"</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.查ES集群角色与节点信息</span></span><br><span class="line">$ curl -u weiyigeek:password 10.10.107.226:9200/_cat/nodes?v</span><br><span class="line">  <span class="comment"># ip            heap.percent ram.percent cpu load_1m load_5m load_15m node.role   master name</span></span><br><span class="line">  <span class="comment"># 10.10.107.226           17          93   1    0.00    0.03     0.04 cdfhilmrstw -      es02</span></span><br><span class="line">  <span class="comment"># 10.10.107.227           14          95   0    0.00    0.04     0.02 cdfhilmrstw -      es03</span></span><br><span class="line">  <span class="comment"># 10.10.107.225           23          97   0    0.00    0.02     0.01 cdfhilmrstw *      es01</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<ul>
+<li>Step 8.ES集群高可用验证<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.此时我们把10.10.107.225节点服务关闭</span></span><br><span class="line">systemctl stop elasticsearch.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.再次请求节点查看，发现es02已从slave变为了master</span></span><br><span class="line">curl -u weiyigeek:password 10.10.107.226:9200/_cat/nodes?v</span><br><span class="line">  <span class="comment"># ip            heap.percent ram.percent cpu load_1m load_5m load_15m node.role   master name</span></span><br><span class="line">  <span class="comment"># 10.10.107.227           47          96   0    0.00    0.00     0.00 cdfhilmrstw -      es03</span></span><br><span class="line">  <span class="comment"># 10.10.107.226           53          93   0    0.11    0.04     0.01 cdfhilmrstw *      es02</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.当把10.10.107.225节点的ES服务重启后，它会自动加入到集群之中，其角色变为slave。</span></span><br><span class="line">curl -u weiyigeek:password 10.10.107.226:9200/_cat/nodes?v</span><br><span class="line">  <span class="comment"># ip            heap.percent ram.percent cpu load_1m load_5m load_15m node.role   master name</span></span><br><span class="line">  <span class="comment"># 10.10.107.226           36          94   1    0.02    0.03     0.00 cdfhilmrstw *      es02</span></span><br><span class="line">  <span class="comment"># 10.10.107.227           34          96   0    0.01    0.02     0.00 cdfhilmrstw -      es03</span></span><br><span class="line">  <span class="comment"># 10.10.107.225           18          95   9    0.34    0.10     0.04 cdfhilmrstw -      es01</span></span><br></pre></td></tr></table></figure>
+<br/></li>
+</ul>
+<h3 id="2-docker-compose-安装"><a href="#2-docker-compose-安装" class="headerlink" title="2.docker-compose 安装"></a>2.docker-compose 安装</h3><p>描述: 要在 Docker 中启动并运行三节点 Elasticsearch 集群，您可以使用 Docker Compose：</p>
+<p>docker-compose.yml<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">'2.2'</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line"><span class="attr">  es01:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">docker.elastic.co/elasticsearch/elasticsearch:7.5.2</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">es01</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">node.name=es01</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">cluster.name=es-docker-cluster</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">discovery.seed_hosts=es02,es03</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">cluster.initial_master_nodes=es01,es02,es03</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">bootstrap.memory_lock=true</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span></span><br><span class="line"><span class="attr">    ulimits:</span></span><br><span class="line"><span class="attr">      memlock:</span></span><br><span class="line"><span class="attr">        soft:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">        hard:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="attr">      - data01:</span><span class="string">/usr/share/elasticsearch/data</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">9200</span><span class="string">:9200</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">elastic</span></span><br><span class="line"><span class="attr">  es02:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">docker.elastic.co/elasticsearch/elasticsearch:7.5.2</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">es02</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">node.name=es02</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">cluster.name=es-docker-cluster</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">discovery.seed_hosts=es01,es03</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">cluster.initial_master_nodes=es01,es02,es03</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">bootstrap.memory_lock=true</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span></span><br><span class="line"><span class="attr">    ulimits:</span></span><br><span class="line"><span class="attr">      memlock:</span></span><br><span class="line"><span class="attr">        soft:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">        hard:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="attr">      - data02:</span><span class="string">/usr/share/elasticsearch/data</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">elastic</span></span><br><span class="line"><span class="attr">  es03:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">docker.elastic.co/elasticsearch/elasticsearch:7.5.2</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">es03</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">node.name=es03</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">cluster.name=es-docker-cluster</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">discovery.seed_hosts=es01,es02</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">cluster.initial_master_nodes=es01,es02,es03</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">bootstrap.memory_lock=true</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span></span><br><span class="line"><span class="attr">    ulimits:</span></span><br><span class="line"><span class="attr">      memlock:</span></span><br><span class="line"><span class="attr">        soft:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">        hard:</span> <span class="bullet">-1</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="attr">      - data03:</span><span class="string">/usr/share/elasticsearch/data</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">elastic</span></span><br><span class="line"></span><br><span class="line"><span class="attr">volumes:</span></span><br><span class="line"><span class="attr">  data01:</span></span><br><span class="line"><span class="attr">    driver:</span> <span class="string">local</span></span><br><span class="line"><span class="attr">  data02:</span></span><br><span class="line"><span class="attr">    driver:</span> <span class="string">local</span></span><br><span class="line"><span class="attr">  data03:</span></span><br><span class="line"><span class="attr">    driver:</span> <span class="string">local</span></span><br><span class="line"></span><br><span class="line"><span class="attr">networks:</span></span><br><span class="line"><span class="attr">  elastic:</span></span><br><span class="line"><span class="attr">    driver:</span> <span class="string">bridge</span></span><br></pre></td></tr></table></figure></p>
+<p>执行部署命令<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d .</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="4-K8S-安装"><a href="#4-K8S-安装" class="headerlink" title="4.K8S 安装"></a>4.K8S 安装</h3><p>此处使用官方示例 Elasticsearch StatefulSet 将使用 EmptyDir 卷来存储数据,当 pod 终止时EmptyDir 将被擦除，如果想要数据持久化可将存储更改为永久卷声明。</p>
+<p>访问redhat 仓库查看 elasticsearch 可用版本(<a href="https://quay.io/repository/fluentd_elasticsearch/elasticsearch?tab=tags" target="_blank" rel="noopener">https://quay.io/repository/fluentd_elasticsearch/elasticsearch?tab=tags</a>)</p>
+<p>温馨提示: 建议提前拉取 <code>quay.io/fluentd_elasticsearch/elasticsearch:v7.16.2</code> 镜像到私有仓库之中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 此处利用skopeo镜像搬运工工具, 不知道如何安装使用的请参考，我的另外一篇文章（Skopeo如何优雅的做一个镜像搬运工）</span></span><br><span class="line">skopeo copy --insecure-policy --src-tls-verify=<span class="literal">false</span> --dest-tls-verify=<span class="literal">false</span> --dest-authfile /root/.docker/config.json docker://quay.io/fluentd_elasticsearch/elasticsearch:v7.16.2 docker://harbor.cloud/weiyigeek/elasticsearch:v7.16.2</span><br></pre></td></tr></table></figure></p>
+<p>安装ES集群的的配置清单yaml文件。<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">tee</span> <span class="string">es-statefulset.yml</span> <span class="string">&lt;&lt;'EOF'</span></span><br><span class="line"><span class="comment"># RBAC authn and authz</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line">    <span class="string">addonmanager.kubernetes.io/mode:</span> <span class="string">Reconcile</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line">    <span class="string">addonmanager.kubernetes.io/mode:</span> <span class="string">Reconcile</span></span><br><span class="line"><span class="attr">rules:</span></span><br><span class="line"><span class="attr">  - apiGroups:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">""</span></span><br><span class="line"><span class="attr">    resources:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"services"</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"namespaces"</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"endpoints"</span></span><br><span class="line"><span class="attr">    verbs:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"get"</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line">    <span class="string">addonmanager.kubernetes.io/mode:</span> <span class="string">Reconcile</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">  - kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">    name:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">    namespace:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">    apiGroup:</span> <span class="string">""</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">""</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># Elasticsearch deployment itself</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    k8s-app:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">    version:</span> <span class="string">v7.16.2</span></span><br><span class="line">    <span class="string">addonmanager.kubernetes.io/mode:</span> <span class="string">Reconcile</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  serviceName:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      k8s-app:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">      version:</span> <span class="string">v7.16.2</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        k8s-app:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">        version:</span> <span class="string">v7.16.2</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      serviceAccountName:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">        - image:</span> <span class="string">quay.io/fluentd_elasticsearch/elasticsearch:v7.16.2</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">          imagePullPolicy:</span> <span class="string">Always</span></span><br><span class="line"><span class="attr">          resources:</span></span><br><span class="line">            <span class="comment"># need more cpu upon initialization, therefore burstable class</span></span><br><span class="line"><span class="attr">            limits:</span></span><br><span class="line"><span class="attr">              cpu:</span> <span class="number">1000</span><span class="string">m</span></span><br><span class="line"><span class="attr">              memory:</span> <span class="number">3</span><span class="string">Gi</span></span><br><span class="line"><span class="attr">            requests:</span></span><br><span class="line"><span class="attr">              cpu:</span> <span class="number">100</span><span class="string">m</span></span><br><span class="line"><span class="attr">              memory:</span> <span class="number">3</span><span class="string">Gi</span></span><br><span class="line"><span class="attr">          ports:</span></span><br><span class="line"><span class="attr">            - containerPort:</span> <span class="number">9200</span></span><br><span class="line"><span class="attr">              name:</span> <span class="string">db</span></span><br><span class="line"><span class="attr">              protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">            - containerPort:</span> <span class="number">9300</span></span><br><span class="line"><span class="attr">              name:</span> <span class="string">transport</span></span><br><span class="line"><span class="attr">              protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">          livenessProbe:</span></span><br><span class="line"><span class="attr">            tcpSocket:</span></span><br><span class="line"><span class="attr">              port:</span> <span class="string">transport</span></span><br><span class="line"><span class="attr">            initialDelaySeconds:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">            timeoutSeconds:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">          readinessProbe:</span></span><br><span class="line"><span class="attr">            tcpSocket:</span></span><br><span class="line"><span class="attr">              port:</span> <span class="string">transport</span></span><br><span class="line"><span class="attr">            initialDelaySeconds:</span> <span class="number">5</span></span><br><span class="line"><span class="attr">            timeoutSeconds:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">          volumeMounts:</span></span><br><span class="line"><span class="attr">            - name:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">              mountPath:</span> <span class="string">/data</span></span><br><span class="line"><span class="attr">          env:</span></span><br><span class="line"><span class="attr">            - name:</span> <span class="string">"NAMESPACE"</span></span><br><span class="line"><span class="attr">              valueFrom:</span></span><br><span class="line"><span class="attr">                fieldRef:</span></span><br><span class="line"><span class="attr">                  fieldPath:</span> <span class="string">metadata.namespace</span></span><br><span class="line"><span class="attr">            - name:</span> <span class="string">"MINIMUM_MASTER_NODES"</span></span><br><span class="line"><span class="attr">              value:</span> <span class="string">"1"</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">elasticsearch-logging</span></span><br><span class="line"><span class="attr">          emptyDir:</span> <span class="string">&#123;&#125;</span></span><br><span class="line">      <span class="comment"># Elasticsearch requires vm.max_map_count to be at least 262144.</span></span><br><span class="line">      <span class="comment"># If your OS already sets up this number to a higher value, feel free</span></span><br><span class="line">      <span class="comment"># to remove this init container.</span></span><br><span class="line"><span class="attr">      initContainers:</span></span><br><span class="line"><span class="attr">        - image:</span> <span class="attr">alpine:3.15</span></span><br><span class="line"><span class="attr">          command:</span> <span class="string">["/sbin/sysctl",</span> <span class="string">"-w"</span><span class="string">,</span> <span class="string">"vm.max_map_count=262144"</span><span class="string">]</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">elasticsearch-logging-init</span></span><br><span class="line"><span class="attr">          securityContext:</span></span><br><span class="line"><span class="attr">            privileged:</span> <span class="literal">true</span> </span><br><span class="line">  <span class="comment"># volumeClaimTemplates:</span></span><br><span class="line">  <span class="comment"># - apiVersion: v1</span></span><br><span class="line">  <span class="comment">#   kind: PersistentVolumeClaim</span></span><br><span class="line">  <span class="comment">#   metadata:</span></span><br><span class="line">  <span class="comment">#     name: elasticsearch-logging</span></span><br><span class="line">  <span class="comment">#   spec:</span></span><br><span class="line">  <span class="comment">#     accessModes:</span></span><br><span class="line">  <span class="comment">#     - ReadWriteOnce</span></span><br><span class="line">  <span class="comment">#     resources:</span></span><br><span class="line">  <span class="comment">#       requests:</span></span><br><span class="line">  <span class="comment">#         storage: 5Gi</span></span><br><span class="line">  <span class="comment">#     storageClassName: managed-nfs-storage</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="4-Helm-安装"><a href="#4-Helm-安装" class="headerlink" title="4.Helm 安装"></a>4.Helm 安装</h3><p>官方项目地址: <a href="https://github.com/elastic/helm-charts" target="_blank" rel="noopener">https://github.com/elastic/helm-charts</a></p>
+<p><strong>安装流程</strong></p>
+<ul>
+<li><p>Step 1.安装环境以及Charts准备;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 添加 elastic 仓库</span></span><br><span class="line">~/K8s/Day11$ helm repo add elastic https://helm.elastic.co</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 拉取 elasticsearch / Filebeat / Kibana 等 Chart 到本地并解压</span></span><br><span class="line">~/K8s/Day11$ helm fetch elastic/elasticsearch --untar</span><br><span class="line">~/K8s/Day11$ helm fetch elastic/filebeat --untar</span><br><span class="line">~/K8s/Day11$ helm fetch elastic/kibana --untar</span><br><span class="line">~/K8s/Day11$ tree -d 1 .</span><br><span class="line">  <span class="comment"># ├── elasticsearch</span></span><br><span class="line">  <span class="comment"># │   ├── examples</span></span><br><span class="line">  <span class="comment"># │   │   ├── config</span></span><br><span class="line">  <span class="comment"># │   │   │   └── test</span></span><br><span class="line">  <span class="comment"># │   │   ├── default</span></span><br><span class="line">  <span class="comment"># │   │   │   └── test</span></span><br><span class="line">  <span class="comment"># │   │   ├── docker-for-mac</span></span><br><span class="line">  <span class="comment"># │   │   ├── kubernetes-kind</span></span><br><span class="line">  <span class="comment"># │   │   ├── microk8s</span></span><br><span class="line">  <span class="comment"># │   │   ├── migration</span></span><br><span class="line">  <span class="comment"># │   │   ├── minikube</span></span><br><span class="line">  <span class="comment"># │   │   ├── multi</span></span><br><span class="line">  <span class="comment"># │   │   │   └── test</span></span><br><span class="line">  <span class="comment"># │   │   ├── openshift</span></span><br><span class="line">  <span class="comment"># │   │   │   └── test</span></span><br><span class="line">  <span class="comment"># │   │   ├── oss</span></span><br><span class="line">  <span class="comment"># │   │   │   └── test</span></span><br><span class="line">  <span class="comment"># │   │   ├── security</span></span><br><span class="line">  <span class="comment"># │   │   │   └── test</span></span><br><span class="line">  <span class="comment"># │   │   └── upgrade</span></span><br><span class="line">  <span class="comment"># │   │       └── test</span></span><br><span class="line">  <span class="comment"># │   └── templates</span></span><br><span class="line">  <span class="comment"># │       └── test</span></span><br><span class="line">  <span class="comment"># ├── filebeat</span></span><br><span class="line">  <span class="comment"># │   ├── examples</span></span><br><span class="line">  <span class="comment"># │   │   ├── default</span></span><br><span class="line">  <span class="comment"># │   │   │   └── test</span></span><br><span class="line">  <span class="comment"># │   │   ├── oss</span></span><br><span class="line">  <span class="comment"># │   │   │   └── test</span></span><br><span class="line">  <span class="comment"># │   │   ├── security</span></span><br><span class="line">  <span class="comment"># │   │   │   └── test</span></span><br><span class="line">  <span class="comment"># │   │   └── upgrade</span></span><br><span class="line">  <span class="comment"># │   │       └── test</span></span><br><span class="line">  <span class="comment"># │   └── templates</span></span><br><span class="line">  <span class="comment"># └── kibana</span></span><br><span class="line">  <span class="comment">#     ├── examples</span></span><br><span class="line">  <span class="comment">#     │   ├── default</span></span><br><span class="line">  <span class="comment">#     │   │   └── test</span></span><br><span class="line">  <span class="comment">#     │   ├── openshift</span></span><br><span class="line">  <span class="comment">#     │   │   └── test</span></span><br><span class="line">  <span class="comment">#     │   ├── oss</span></span><br><span class="line">  <span class="comment">#     │   │   └── test</span></span><br><span class="line">  <span class="comment">#     │   ├── security</span></span><br><span class="line">  <span class="comment">#     │   │   └── test</span></span><br><span class="line">  <span class="comment">#     │   └── upgrade</span></span><br><span class="line">  <span class="comment">#     │       └── test</span></span><br><span class="line">  <span class="comment">#     └── templates</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 47 directories</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 2.名称空间创建(暂不使用)以及elasticsearch的安装部署</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 名称空间的创建 以及存储卷访问模式为 ReadWriteOnce - efk-pv</span></span><br><span class="line">~/K8s/Day11/elasticsearch$ kubectl create namespace <span class="built_in">log</span>-efk</span><br><span class="line"><span class="comment"># PS : 此处需要依赖于StorageName动态存储卷，所以您需要提前进行配置;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 由于测试环境资源有限我们将Charts中Values关于副本数以及最小master节点都该成(3Master节点~20G内存)</span></span><br><span class="line">~/K8s/Day11/elasticsearch$ vim values.yaml</span><br><span class="line"><span class="comment"># 修改点</span></span><br><span class="line">replicas: 1</span><br><span class="line">minimumMasterNodes: 1</span><br><span class="line"><span class="comment"># PS: 生产环境中推荐修改values.yaml文件中pv为storageClass动态分配</span></span><br><span class="line">volumeClaimTemplate:</span><br><span class="line">  accessModes: [ <span class="string">"ReadWriteOnce"</span> ]</span><br><span class="line">  storageClassName: <span class="string">"managed-nfs-storage"</span>   <span class="comment"># 非常重要 它是与 StorageClass 资源器绑定的名称要一致</span></span><br><span class="line">  resources:</span><br><span class="line">    requests:</span><br><span class="line">      storage: 20Gi</span><br><span class="line"><span class="comment"># PS :开启持久化</span></span><br><span class="line">persistence:     </span><br><span class="line">  enabled: <span class="literal">true</span></span><br><span class="line">  labels:</span><br><span class="line">    enabled: <span class="literal">true</span>   <span class="comment"># 为有状态集的volumeClaimTemplate添加默认标签 ( 坑 )</span></span><br><span class="line">  annotations: &#123;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 将elasticsearch进行安装部署 (-n log-efk) 不能正常部署 (坑)</span></span><br><span class="line">~/K8s/Day11/elasticsearch$ helm install elasticsearch . </span><br><span class="line">  <span class="comment"># NAME: elasticsearch</span></span><br><span class="line">  <span class="comment"># LAST DEPLOYED: Wed Dec  9 09:52:35 2020</span></span><br><span class="line">  <span class="comment"># NAMESPACE: log-efk</span></span><br><span class="line">  <span class="comment"># STATUS: deployed</span></span><br><span class="line">  <span class="comment"># REVISION: 1</span></span><br><span class="line">  <span class="comment"># NOTES:</span></span><br><span class="line">  <span class="comment"># 1. Watch all cluster members come up.</span></span><br><span class="line">  <span class="comment">#   $ kubectl get pods-l app=elasticsearch-master -w</span></span><br><span class="line">  <span class="comment"># 2. Test cluster health using Helm test.</span></span><br><span class="line">  <span class="comment">#   $ helm test elasticsearch</span></span><br><span class="line"><span class="comment"># * Install it:</span></span><br><span class="line"><span class="comment">#   - with Helm 3: `helm install elasticsearch --version &lt;version&gt; elastic/elasticsearch`</span></span><br><span class="line"><span class="comment">#   - with Helm 2 (deprecated): `helm install --name elasticsearch --version &lt;version&gt; elastic/elasticsearch`</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 3.查看StatefulSete资源控制器创建的elasticsearch以及PVC卷的绑定和SVC;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># StatefulSet</span></span><br><span class="line">~/K8s/Day11/elasticsearch$ kubectl get sts -o wide</span><br><span class="line">  <span class="comment"># NAME                   READY   AGE     CONTAINERS      IMAGES</span></span><br><span class="line">  <span class="comment"># elasticsearch-master   1/1     2m57s   elasticsearch   docker.elastic.co/elasticsearch/elasticsearch:7.10.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Pod</span></span><br><span class="line">~/K8s/Day11/elasticsearch$ kubectl get pod -o wide --show-labels | grep <span class="string">"elasticsearch"</span></span><br><span class="line">  <span class="comment"># elasticsearch-master-0   1/1     Running   0     3m30s   10.244.1.180   k8s-node-4 app=elasticsearch-master,chart=elasticsearch,controller-revision-hash=elasticsearch-master-76c48b9f74,release=elasticsearch,statefulset.kubernetes.io/pod-name=elasticsearch-master-0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Svc</span></span><br><span class="line">~/K8s/Day11/elasticsearch$ kubectl get svc -o wide</span><br><span class="line">  <span class="comment"># NAME                            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE     SELECTOR</span></span><br><span class="line">  <span class="comment"># elasticsearch-master            ClusterIP   10.104.178.144   &lt;none&gt;        9200/TCP,9300/TCP   9m49s   app=elasticsearch-master,chart=elasticsearch,release=elasticsearch</span></span><br><span class="line">  <span class="comment"># elasticsearch-master-headless   ClusterIP   None             &lt;none&gt;        9200/TCP,9300/TCP   9m49s   app=elasticsearch-master</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># StorageClass 动态存储卷查看</span></span><br><span class="line">~/K8s/Day11/elasticsearch$ kubectl get storageclass,pv,pvc</span><br><span class="line">  <span class="comment"># NAME                                                        PROVISIONER      RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE</span></span><br><span class="line">  <span class="comment"># storageclass.storage.k8s.io/managed-nfs-storage (default)   fuseim.pri/ifs   Delete          Immediate           false                  25h</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># NAME                                                        CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                                 STORAGECLASS          REASON   AGE</span></span><br><span class="line">  <span class="comment"># persistentvolume/pvc-8a991669-60c0-48c6-9879-5b4fa9d481c3   20Gi       RWO            Delete           Bound    default/elasticsearch-master-elasticsearch-master-0   managed-nfs-storage            2m6s</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># NAME                                                                STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          AGE</span></span><br><span class="line">  <span class="comment"># persistentvolumeclaim/elasticsearch-master-elasticsearch-master-0   Bound    pvc-8a991669-60c0-48c6-9879-5b4fa9d481c3   20Gi       RWO            managed-nfs-storage   2m6s</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 4.Helm安装filebeat查看并验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># vim filebeat/value.yaml</span></span><br><span class="line"><span class="comment"># Root directory where Filebeat will write data to in order to persist registry data across pod restarts (file position and other metadata).</span></span><br><span class="line"><span class="comment"># 默认读取的是节点/var/lib下的所有文件</span></span><br><span class="line">hostPathRoot: /var/lib</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 filbeat</span></span><br><span class="line">~/K8s/Day11/filebeat$ helm install filbeat .</span><br><span class="line">  <span class="comment"># NAME: filbeat</span></span><br><span class="line">  <span class="comment"># LAST DEPLOYED: Thu Dec 10 17:09:53 2020</span></span><br><span class="line">  <span class="comment"># NAMESPACE: default</span></span><br><span class="line">  <span class="comment"># STATUS: deployed</span></span><br><span class="line">  <span class="comment"># REVISION: 1</span></span><br><span class="line">  <span class="comment"># TEST SUITE: None</span></span><br><span class="line">  <span class="comment"># NOTES:</span></span><br><span class="line">  <span class="comment"># 1. Watch all containers come up.</span></span><br><span class="line">  <span class="comment"># $ kubectl get pods --namespace=default -l app=filbeat-filebeat -w</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看状态，因为是DaemonSet类型所以每台node都会装一个。</span></span><br><span class="line">~/K8s/Day11/filebeat$ kubectl get pods --namespace=default -l app=filbeat-filebeat -o wide</span><br><span class="line">  <span class="comment"># NAME                     READY   STATUS    RESTARTS   AGE     IP             NODE       </span></span><br><span class="line">  <span class="comment"># filbeat-filebeat-2dr52   1/1     Running   0          4h39m   10.244.2.78    k8s-node-5   </span></span><br><span class="line">  <span class="comment"># filbeat-filebeat-mgj5r   1/1     Running   0          58m     10.244.0.190   master  </span></span><br><span class="line">  <span class="comment"># filbeat-filebeat-qm7wt   1/1     Running   0          4h39m   10.244.1.181   k8s-node-4</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 5.Helm 安装 kibana 以及验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">vim kibana/values.yaml</span><br><span class="line"><span class="comment"># 修改values.yaml文件中service为nodePort类型</span></span><br><span class="line">service:</span><br><span class="line">  <span class="built_in">type</span>: NodePort   <span class="comment"># 修改点</span></span><br><span class="line">  loadBalancerIP: <span class="string">""</span></span><br><span class="line">  port: 5601</span><br><span class="line">  nodePort: 30002</span><br><span class="line">  labels: &#123;&#125;       <span class="comment"># 修改点</span></span><br><span class="line">  annotations: &#123;&#125;</span><br><span class="line">    <span class="comment"># cloud.google.com/load-balancer-type: "Internal"</span></span><br><span class="line">    <span class="comment"># service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0</span></span><br><span class="line">    <span class="comment"># service.beta.kubernetes.io/azure-load-balancer-internal: "true"</span></span><br><span class="line">    <span class="comment"># service.beta.kubernetes.io/openstack-internal-load-balancer: "true"</span></span><br><span class="line">    <span class="comment"># service.beta.kubernetes.io/cce-load-balancer-internal-vpc: "true"</span></span><br><span class="line">  loadBalancerSourceRanges: []</span><br><span class="line">    <span class="comment"># 0.0.0.0/0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 Kibana</span></span><br><span class="line">~/K8s/Day11/kibana$ helm install kibana .</span><br><span class="line">  <span class="comment"># NAME: kibana</span></span><br><span class="line">  <span class="comment"># LAST DEPLOYED: Thu Dec 10 20:16:13 2020</span></span><br><span class="line">  <span class="comment"># NAMESPACE: default</span></span><br><span class="line">  <span class="comment"># STATUS: deployed</span></span><br><span class="line">  <span class="comment"># REVISION: 1</span></span><br><span class="line">  <span class="comment"># TEST SUITE: None</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 deployment 和 Pod</span></span><br><span class="line">~/K8s/Day11/filebeat$ kubectl get deploy,pod -o wide -l app=kibana</span><br><span class="line">  <span class="comment"># NAME                            READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                   SELECTOR</span></span><br><span class="line">  <span class="comment"># deployment.apps/kibana-kibana   1/1     1            1           52m   kibana       docker.elastic.co/kibana/kibana:7.10.0   app=kibana,release=kibana</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># NAME                                 READY   STATUS    RESTARTS   AGE   IP             NODE         </span></span><br><span class="line">  <span class="comment"># pod/kibana-kibana-86d4cc75f7-gbmjt   1/1     Running   0          28m   10.244.0.192   master</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 svc</span></span><br><span class="line">~/K8s/Day11/filebeat$ kubectl get svc -l app=kibana</span><br><span class="line">  <span class="comment"># NAME            TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE</span></span><br><span class="line">  <span class="comment"># kibana-kibana   NodePort   10.110.225.148   &lt;none&gt;        5601:30002/TCP   54m</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 6.利用 Helm 查看安装的 EFK RELEASE，访问 kibana URL 并创建索引: <a href="http://10.10.107.202:30002/app/management/kibana/indexPatterns" target="_blank" rel="noopener">http://10.10.107.202:30002/app/management/kibana/indexPatterns</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">~/K8s/Day11/filebeat$ helm ls</span><br><span class="line">  <span class="comment"># NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION</span></span><br><span class="line">  <span class="comment"># elasticsearch   default         1               2020-12-10 16:51:42.74817589 +0800 CST  deployed        elasticsearch-7.10.0    7.10.0</span></span><br><span class="line">  <span class="comment"># filbeat         default         1               2020-12-10 17:09:53.872762268 +0800 CST deployed        filebeat-7.10.0         7.10.0</span></span><br><span class="line">  <span class="comment"># kibana          default         1               2020-12-10 21:01:17.44414926 +0800 CST  deployed        kibana-7.10.0           7.10.0</span></span><br><span class="line">``` </span><br><span class="line">Process : Stack Management &gt; Index patterns -&gt; Create  `创建索引` -&gt; Next Step -&gt; Time field `按照时间进行分片`</span><br><span class="line"></span><br><span class="line">![WeiyiGeek.索引创建](https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201210221822.png)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- Step 7.Elasticsearch 的 Kibana 的简单使用;</span><br><span class="line">例如: 按照Node节点查询`kubernetes.node.name : <span class="string">"k8s-node-4"</span> or kubernetes.pod.name : <span class="string">"nfs-client-provisioner-58b5dc958d-5fwl9"</span> `</span><br><span class="line">![WeiyiGeek.Kibana查询日志](https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201210222216.png)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&lt;br/&gt;</span><br><span class="line"></span><br><span class="line">**入坑&amp;出坑**</span><br><span class="line">- 问题1.Helm部署kibana无法正常Run显示`Readiness probe failed: Error: Got HTTP code 503 but expected a 200` (该问题把我心态搞得炸裂)</span><br><span class="line">错误信息: 学习排错也是一种学习;</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line"><span class="comment"># Pod 描述信息</span></span><br><span class="line">~/K8s/Day11/kibana$ kubectl describe pod kibana-kibana-86d4cc75f7-n7kxr</span><br><span class="line">  <span class="comment"># Normal   Started    3m43s                kubelet            Started container kibana</span></span><br><span class="line">  <span class="comment"># Warning  Unhealthy  0s (x22 over 3m30s)  kubelet            Readiness probe failed: Error: Got HTTP code 503 but expected a 200</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Pod 日志信息 (关键点) 发现 resource_already_exists_exception</span></span><br><span class="line">~/K8s/Day11/kibana$ kubectl logs kibana-kibana-86d4cc75f7-n7kxr</span><br><span class="line">  <span class="comment"># &#123;"type":"log","@timestamp":"2020-12-10T13:01:32Z","tags":["error","elasticsearch","data"],"pid":7,"message":"[resource_already_exists_exception]: index [.kibana_task_manager_1/WikBnfj8QjCVtpuit2NxwA] already exists"&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"type":"log","@timestamp":"2020-12-10T13:01:32Z","tags":["warning","savedobjects-service"],"pid":7,"message":"Unable to connect to Elasticsearch. Error: resource_already_exists_exception"&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>问题原因: 由于在elasticsearch中已经存在该<code>.kibana_task_manager_1/WikBnfj8QjCVtpuit2NxwA</code>索引导致错误,不能正常启动;</p>
+<p>解决方法: 在  elasticsearch 中 删除 Kibana 所有的Index;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">~/K8s/Day11/kibana$ curl <span class="string">"http://10.104.178.144:9200/_cat/indices/*?v&amp;s=index"</span></span><br><span class="line">  <span class="comment"># health status index                             uuid                   pri rep docs.count docs.deleted store.size pri.store.size</span></span><br><span class="line">  <span class="comment"># green  open   .kibana_1                         HiroxArKS3CO_j_cmiJXNg   1   0          0            0       208b           208b</span></span><br><span class="line">  <span class="comment"># green  open   .kibana_task_manager_1            WikBnfj8QjCVtpuit2NxwA   1   0          0            0       208b           208b</span></span><br><span class="line">  <span class="comment"># yellow open   filebeat-7.10.0-2020.12.10-000001 Vz2L-FXgQSKMuYMrBMum3w   1   1     238934            0     42.1mb         42.1mb</span></span><br><span class="line">~/K8s/Day11/kibana$ curl -XDELETE http://10.104.178.144:9200/.kibana*</span><br><span class="line">  <span class="comment"># &#123;"acknowledged":true&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新构建Pod一切正常</span></span><br><span class="line">~/K8s/Day11/kibana$ kubectl delete pod kibana-kibana-86d4cc75f7-n7kxr</span><br><span class="line">pod <span class="string">"kibana-kibana-86d4cc75f7-n7kxr"</span> deleted</span><br><span class="line">&#123;<span class="string">"type"</span>:<span class="string">"response"</span>,<span class="string">"@timestamp"</span>:<span class="string">"2020-12-10T13:26:19Z"</span>,<span class="string">"tags"</span>:[],<span class="string">"pid"</span>:6,<span class="string">"method"</span>:<span class="string">"get"</span>,<span class="string">"statusCode"</span>:200,<span class="string">"req"</span>:&#123;<span class="string">"url"</span>:<span class="string">"/app/kibana"</span>,<span class="string">"method"</span>:<span class="string">"get"</span>,<span class="string">"headers"</span>:&#123;<span class="string">"host"</span>:<span class="string">"localhost:5601"</span>,<span class="string">"user-agent"</span>:<span class="string">"curl/7.61.1"</span>,<span class="string">"accept"</span>:<span class="string">"*/*"</span>&#125;,<span class="string">"remoteAddress"</span>:<span class="string">"127.0.0.1"</span>,<span class="string">"userAgent"</span>:<span class="string">"curl/7.61.1"</span>&#125;,<span class="string">"res"</span>:&#123;<span class="string">"statusCode"</span>:200,<span class="string">"responseTime"</span>:19,<span class="string">"contentLength"</span>:9&#125;,<span class="string">"message"</span>:<span class="string">"GET /app/kibana 200 19ms - 9.0B"</span>&#125;</span><br></pre></td></tr></table></figure><br>参考地址: <a href="https://discuss.elastic.co/t/unable-to-connect-to-elasticsearch-error-resource-already-exists-exception-after-upgrade-elk/249998" target="_blank" rel="noopener">https://discuss.elastic.co/t/unable-to-connect-to-elasticsearch-error-resource-already-exists-exception-after-upgrade-elk/249998</a></p>
+<p><br/></p>
+<h2 id="0x02-ES集群连接实践"><a href="#0x02-ES集群连接实践" class="headerlink" title="0x02 ES集群连接实践"></a>0x02 ES集群连接实践</h2><h3 id="1-Elasticsearch-Head-连接集群"><a href="#1-Elasticsearch-Head-连接集群" class="headerlink" title="1.Elasticsearch-Head 连接集群"></a>1.Elasticsearch-Head 连接集群</h3><p>描述:同样我们可以使用<code>elasticsearch-head-master</code>连接到我们进行了安全配置的ES集群之中，便于我们对数据的进行查询和管理。</p>
+<p>使用浏览器访问elasticsearch-head插件如URL为，<a href="http://10.10.107.225:9100/?auth_user=weiyigeek&amp;auth_password=password" target="_blank" rel="noopener">http://10.10.107.225:9100/?auth_user=weiyigeek&amp;auth_password=password</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.采用head插件进行查询集群监控状态</span></span><br><span class="line">http://10.10.107.225:9200/_cluster/health</span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">#   "cluster_name": "es-cluster", 集群名称</span></span><br><span class="line">  <span class="comment">#   "status": "green",  监控状态</span></span><br><span class="line">  <span class="comment">#   "timed_out": false,</span></span><br><span class="line">  <span class="comment">#   "number_of_nodes": 3, 节点数量</span></span><br><span class="line">  <span class="comment">#   "number_of_data_nodes": 3, 数据节点的数量</span></span><br><span class="line">  <span class="comment">#   "active_primary_shards": 3, 活动的主分片数</span></span><br><span class="line">  <span class="comment">#   "active_shards": 6,  活动的从分片数</span></span><br><span class="line">  <span class="comment">#   "relocating_shards": 0, 重新定位_碎片</span></span><br><span class="line">  <span class="comment">#   "initializing_shards": 0, 初始化分片数</span></span><br><span class="line">  <span class="comment">#   "unassigned_shards": 0,  未分配的分片数</span></span><br><span class="line">  <span class="comment">#   "delayed_unassigned_shards": 0, 延迟未分配的分片数</span></span><br><span class="line">  <span class="comment">#   "number_of_pending_tasks": 0, 未决任务的数量</span></span><br><span class="line">  <span class="comment">#   "number_of_in_flight_fetch": 0, 迁移取件中的取件数量</span></span><br><span class="line">  <span class="comment">#   "task_max_waiting_in_queue_millis": 0,队列任务最大等待值</span></span><br><span class="line">  <span class="comment">#   "active_shards_percent_as_number": 100 活动分片百分比</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=2.ElasticStack分布式数据采集搜索引擎集群搭建配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211006104506.png" target="_blank" title="WeiyiGeek.elasticsearch-head" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211006104506.png" alt="WeiyiGeek.elasticsearch-head" title="" class=""></a>
+                <p>WeiyiGeek.elasticsearch-head</p>
+            </figure>
+<p><br></p>
+<h3 id="2-Kibana-连接集群"><a href="#2-Kibana-连接集群" class="headerlink" title="2.Kibana 连接集群"></a>2.Kibana 连接集群</h3><p>描述: 通常我们使用Kibana 连接到ES集群，对其中采集的指定数据进行展示化。</p>
+<p>此处我们需要对Kibana进行简单的认证配置,采用我们前面设置的内置专用用户kibana_system进行连接。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.Kibana 配置</span></span><br><span class="line">elk@elk1:/usr/<span class="built_in">local</span>/kibana-7.15.0/config$ grep -E -v <span class="string">"^#|^$"</span> kibana.yml</span><br><span class="line">server.port: 5601</span><br><span class="line">server.host: <span class="string">"0.0.0.0"</span></span><br><span class="line">server.name: <span class="string">"ES-kibana"</span></span><br><span class="line">elasticsearch.hosts: [<span class="string">"http://10.10.107.225:9200"</span>]</span><br><span class="line">kibana.index: <span class="string">".kibana"</span></span><br><span class="line">elasticsearch.username: <span class="string">"kibana_system"</span></span><br><span class="line">elasticsearch.password: <span class="string">"weiyigeek"</span></span><br><span class="line">elasticsearch.pingTimeout: 1500</span><br><span class="line">i18n.locale: <span class="string">"zh-CN"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.Kibana 启动</span></span><br><span class="line">sudo tee /usr/lib/systemd/system/kibana.service &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=kibana <span class="keyword">in</span> ElasticStack</span><br><span class="line">Documentation=https://elastic.co</span><br><span class="line">After=network.target</span><br><span class="line">Wants=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">User=elk</span><br><span class="line">Group=elk</span><br><span class="line">LimitNOFILE=65536</span><br><span class="line">LimitNPROC=65536</span><br><span class="line">LimitMEMLOCK=infinity</span><br><span class="line">WorkingDirectory=/usr/<span class="built_in">local</span>/kibana-7.15.0/</span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/kibana-7.15.0/bin/kibana</span><br><span class="line">ExecReload=/bin/<span class="built_in">kill</span> -HUP <span class="variable">$MAINPID</span></span><br><span class="line">KillMode=process</span><br><span class="line">Restart=no</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">EOF</span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart kibana.service</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.Kibana 状态查看&amp;登陆Kibana进行查询验证。</span></span><br><span class="line">systemctl status kibana.service</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=2.ElasticStack分布式数据采集搜索引擎集群搭建配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211006111043.png" target="_blank" title="WeiyiGeek.Kibana" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211006111043.png" alt="WeiyiGeek.Kibana" title="" class=""></a>
+                <p>WeiyiGeek.Kibana</p>
+            </figure>
+<hr>
+<h2 id="0x01-配置文件解析"><a href="#0x01-配置文件解析" class="headerlink" title="0x01 配置文件解析"></a>0x01 配置文件解析</h2><h3 id="kibana-yml"><a href="#kibana-yml" class="headerlink" title="kibana.yml"></a>kibana.yml</h3><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - 服务监控地址与服务名称</span></span><br><span class="line"><span class="string">server.host:</span> <span class="string">"0.0.0.0"</span></span><br><span class="line"><span class="string">server.name:</span> <span class="string">"kibana01"</span></span><br><span class="line"><span class="comment"># - 配置kibana启用SSL</span></span><br><span class="line"><span class="string">server.ssl.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="string">server.ssl.certificate:</span> <span class="string">$&#123;CERTS_DIR_KIBANA&#125;/kibana01/kibana01.crt</span></span><br><span class="line"><span class="string">server.ssl.key:</span> <span class="string">$&#123;CERTS_DIR_KIBANA&#125;/kibana01/kibana01.key</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - 绑定es主机地址,注意配置ssl认证后此处需用https请求</span></span><br><span class="line"><span class="string">elasticsearch.hosts:</span> <span class="string">["https://elasticsearch:9200"]</span></span><br><span class="line"><span class="comment"># - es主机地址认证账号密码设置</span></span><br><span class="line"><span class="string">elasticsearch.username:</span> <span class="string">"elastic"</span></span><br><span class="line"><span class="string">elasticsearch.password:</span> <span class="string">"123456"</span></span><br><span class="line"><span class="comment"># - es配置了ssl认证后需指定证书路径，此处指定用于 Elasticsearch 实例的 PEM 证书文件路径</span></span><br><span class="line"><span class="string">elasticsearch.ssl.certificateAuthorities:</span> <span class="string">["$&#123;CERTS_DIR_KIBANA&#125;/ca/ca.crt"]</span></span><br></pre></td></tr></table></figure>
+<h3 id="ES-常用配置"><a href="#ES-常用配置" class="headerlink" title="ES 常用配置"></a>ES 常用配置</h3><p>问题1.设置-Xms与-Xmx的内存比系统可用内存大<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Oct 06 09:46:01 elk2 elasticsearch[366853]: OpenJDK 64-Bit Server VM warning: INFO: os::commit_memory(0x0000000080000000, 2147483648, 0) failed; error=<span class="string">'Not enough space'</span> (errno=12)</span><br><span class="line">Oct 06 09:46:01 elk2 elasticsearch[366853]:         at org.elasticsearch.tools.launchers.JvmOption.flagsFinal(JvmOption.java:119)</span><br><span class="line">Oct 06 09:46:01 elk2 elasticsearch[366853]:         at org.elasticsearch.tools.launchers.JvmOption.findFinalOptions(JvmOption.java:81)</span><br><span class="line">Oct 06 09:46:01 elk2 elasticsearch[366853]:         at org.elasticsearch.tools.launchers.JvmErgonomics.choose(JvmErgonomics.java:38)</span><br><span class="line">Oct 06 09:46:01 elk2 elasticsearch[366853]:         at org.elasticsearch.tools.launchers.JvmOptionsParser.jvmOptions(JvmOptionsParser.java:135)</span><br><span class="line">Oct 06 09:46:01 elk2 elasticsearch[366853]:         at org.elasticsearch.tools.launchers.JvmOptionsParser.main(JvmOptionsParser.java:86)</span><br><span class="line">Oct 06 09:46:01 elk2 systemd[1]: elasticsearch.service: Main process exited, code=exited, status=1/FAILURE</span><br><span class="line">Oct 06 09:46:01 elk2 systemd[1]: elasticsearch.service: Failed with result <span class="string">'exit-code'</span>.</span><br></pre></td></tr></table></figure></p>
+<p>问题2<a href="http://10.10.107.225:9100/?auth_user=weiyigeek&amp;auth_password=password" target="_blank" rel="noopener">http://10.10.107.225:9100/?auth_user=weiyigeek&amp;auth_password=password</a><br>已拦截跨源请求：同源策略禁止读取位于 <a href="http://10.10.107.225:9200/_all" target="_blank" rel="noopener">http://10.10.107.225:9200/_all</a> 的远程资源。（原因：CORS 预检响应的 ‘Access-Control-Allow-Headers’，不允许使用头 ‘authorization’）。</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># 使用 mlockall 用于  Linux/Unix 系统，或 虚拟锁 用于 Windows ，尝</span></span><br></pre></td></tr></table></figure>
+<p>Elasticsearch安全策略-开启密码账号访问</p>
+<p><a href="https://blog.csdn.net/qq330983778/article/details/103537252" target="_blank" rel="noopener">https://blog.csdn.net/qq330983778/article/details/103537252</a></p>
+<p>curl -L -O <a href="https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.13.1-amd64.deb" target="_blank" rel="noopener">https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.13.1-amd64.deb</a><br>sudo dpkg -i filebeat-7.13.1-amd64.deb</p>
+<p>Windows 事件日志</p>
+<p>从 Windows 事件日志提取日志。<br> 1.从下载页面下载 Winlogbeat Windows zip 文件。 2.将该 zip 文件的内容解压缩到 C:\Program Files。 3.将 winlogbeat-7.13.1-windows 目录重命名为 Winlogbeat。 4.以管理员身份打开 PowerShell 提示符 (右键单击 PowerShell 图标，然后选择以管理员身份运行) 。如果运行的是 Windows XP，则可能需要下载并安装 PowerShell。 5.从 PowerShell 提示符处，运行以下命令以将 Winlogbeat 安装为 Windows 服务。</p>
+<p><a href="http://192.168.12.111:5601/app/home#/tutorial/windowsEventLogs" target="_blank" rel="noopener">http://192.168.12.111:5601/app/home#/tutorial/windowsEventLogs</a></p>
+<p>version: ‘3.2’<br>services:<br>  es01:<br>    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1<br>    container_name: elastic-single<br>    environment:</p>
+<pre><code>  - node.name=elastic-single
+  - discovery.type=single-node
+  - &quot;ES_JAVA_OPTS=-Xms1024m -Xmx1024m&quot;
+ulimits:
+  memlock:
+    soft: -1
+    hard: -1
+volumes:
+  - data01:/usr/share/elasticsearch/data
+ports:
+  - 9200:9200
+networks:
+  - elastic
+</code></pre><p>network:<br>  elastic<br><code>`</code></p>
+<p>回到顶部<br>一、filebeat是什么<br>1.1、filebeat和beats的关系</p>
+<p>　　首先filebeat是Beats中的一员。<br>　　Beats在是一个轻量级日志采集器，其实Beats家族有6个成员，早期的ELK架构中使用Logstash收集、解析日志，但是Logstash对内存、cpu、io等资源消耗比较高。相比Logstash，Beats所占系统的CPU和内存几乎可以忽略不计。<br>目前Beats包含六种工具：</p>
+<pre><code>Packetbeat：网络数据（收集网络流量数据）
+Metricbeat：指标（收集系统、进程和文件系统级别的CPU和内存使用情况等数据）
+Filebeat：日志文件（收集文件数据）
+Winlogbeat：windows事件日志（收集Windows事件日志数据）
+Auditbeat：审计数据（收集审计日志）
+Heartbeat：运行时间监控（收集系统运行时的数据）
+</code></pre><p>1.2、filebeat是什么</p>
+<p>　　Filebeat是用于转发和集中日志数据的轻量级传送工具。Filebeat监视您指定的日志文件或位置，收集日志事件，并将它们转发到Elasticsearch或 Logstash进行索引。</p>
+<p>　　Filebeat的工作方式如下：启动Filebeat时，它将启动一个或多个输入，这些输入将在为日志数据指定的位置中查找。对于Filebeat所找到的每个日志，Filebeat都会启动收集器。每个收集器都读取单个日志以获取新内容，并将新日志数据发送到libbeat，libbeat将聚集事件，并将聚集的数据发送到为Filebeat配置的输出。</p>
+<pre><code>工作的流程图如下：
+</code></pre><p>1.3、filebeat和logstash的关系</p>
+<p>　　因为logstash是jvm跑的，资源消耗比较大，所以后来作者又用golang写了一个功能较少但是资源消耗也小的轻量级的logstash-forwarder。不过作者只是一个人，加入<a href="http://elastic.co公司以后，因为es公司本身还收购了另一个开源项目packetbeat，而这个项目专门就是用golang的，有整个团队，所以es公司干脆把logstash-forwarder的开发工作也合并到同一个golang团队来搞，于是新的项目就叫filebeat了。" target="_blank" rel="noopener">http://elastic.co公司以后，因为es公司本身还收购了另一个开源项目packetbeat，而这个项目专门就是用golang的，有整个团队，所以es公司干脆把logstash-forwarder的开发工作也合并到同一个golang团队来搞，于是新的项目就叫filebeat了。</a></p>
+<p>回到顶部<br>二、filebeat原理是什么<br>2.1、filebeat的构成</p>
+<p>　　filebeat结构：由两个组件构成，分别是inputs（输入）和harvesters（收集器），这些组件一起工作来跟踪文件并将事件数据发送到您指定的输出，harvester负责读取单个文件的内容。harvester逐行读取每个文件，并将内容发送到输出。为每个文件启动一个harvester。harvester负责打开和关闭文件，这意味着文件描述符在harvester运行时保持打开状态。如果在收集文件时删除或重命名文件，Filebeat将继续读取该文件。这样做的副作用是，磁盘上的空间一直保留到harvester关闭。默认情况下，Filebeat保持文件打开，直到达到close_inactive</p>
+<p>关闭harvester可以会产生的结果：</p>
+<pre><code>文件处理程序关闭，如果harvester仍在读取文件时被删除，则释放底层资源。
+只有在scan_frequency结束之后，才会再次启动文件的收集。
+如果该文件在harvester关闭时被移动或删除，该文件的收集将不会继续
+</code></pre><p>　　一个input负责管理harvesters和寻找所有来源读取。如果input类型是log，则input将查找驱动器上与定义的路径匹配的所有文件，并为每个文件启动一个harvester。每个input在它自己的Go进程中运行，Filebeat当前支持多种输入类型。每个输入类型可以定义多次。日志输入检查每个文件，以查看是否需要启动harvester、是否已经在运行harvester或是否可以忽略该文件<br>2.2、filebeat如何保存文件的状态</p>
+<p>　　Filebeat保留每个文件的状态，并经常将状态刷新到磁盘中的注册表文件中。该状态用于记住harvester读取的最后一个偏移量，并确保发送所有日志行。如果无法访问输出（如Elasticsearch或Logstash），Filebeat将跟踪最后发送的行，并在输出再次可用时继续读取文件。当Filebeat运行时，每个输入的状态信息也保存在内存中。当Filebeat重新启动时，来自注册表文件的数据用于重建状态，Filebeat在最后一个已知位置继续每个harvester。对于每个输入，Filebeat都会保留它找到的每个文件的状态。由于文件可以重命名或移动，文件名和路径不足以标识文件。对于每个文件，Filebeat存储唯一的标识符，以检测文件是否以前被捕获。<br>2.3、filebeat何如保证至少一次数据消费</p>
+<p>　　Filebeat保证事件将至少传递到配置的输出一次，并且不会丢失数据。是因为它将每个事件的传递状态存储在注册表文件中。在已定义的输出被阻止且未确认所有事件的情况下，Filebeat将继续尝试发送事件，直到输出确认已接收到事件为止。如果Filebeat在发送事件的过程中关闭，它不会等待输出确认所有事件后再关闭。当Filebeat重新启动时，将再次将Filebeat关闭前未确认的所有事件发送到输出。这样可以确保每个事件至少发送一次，但最终可能会有重复的事件发送到输出。通过设置shutdown_timeout选项，可以将Filebeat配置为在关机前等待特定时间</p>
+<p>日志主要包括系统日志、应用程序日志和安全日志。系统运维和开发可以通过日志了解服务器软硬件信息、检查配置过程中的错误及错误发生的原因。经常分析日志可以了解服务器的负荷，性能安全，从而及时采取措施纠正错误。</p>
+<p>Beats 是数据采集的得力工具。将 Beats 和您的容器一起置于服务器上，或者将 Beats 作为函数加以部署，然后便可在 Elastisearch 中集中处理数据。如果需要更加强大的处理性能，Beats 还能将数据输送到 Logstash 进行转换和解析。</p>
+<p>Elasticsearch 通常与 Kibana 一起部署，Kibana 是 Elasticsearch 的一个功能强大的数据可视化 Dashboard，Kibana 允许你通过 web 界面来浏览 Elasticsearch 日志数据。</p>
+<p>EFK 架构图：</p>
+<figure class="image-box">
+                <a rel=2.ElasticStack分布式数据采集搜索引擎集群搭建配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201209091315.png" target="_blank" title="WeiyiGeek.ELK架构" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201209091315.png" alt="WeiyiGeek.ELK架构" title="" class=""></a>
+                <p>WeiyiGeek.ELK架构</p>
+            </figure>
+<p>EFK(Elasticsearch+Filebeat+Kibana)收集容器日志 </p>
+<p><a href="https://blog.csdn.net/qq_25934401/article/details/83345144" target="_blank" rel="noopener">https://blog.csdn.net/qq_25934401/article/details/83345144</a><br><a href="https://www.cnblogs.com/zsql/p/13137833.html" target="_blank" rel="noopener">https://www.cnblogs.com/zsql/p/13137833.html</a></p>
+<p>【摘要】 ELK在运维监控领域使用非常广泛，日志采集通常依靠Logstash，但是通常来讲Logstash架构比较重载，一个安装包由几百MB，相比之下Elastic还提供另一种更轻量的采集工具Beats。Beats 平台集合了多种单一用途数据采集器。这些采集器安装后可用作轻量型代理，从成百上千或成千上万台机器向 Logstash 或 Elasticsearch 发送数据。</p>
+<p>ELK在运维监控领域使用非常广泛，日志采集通常依靠Logstash，但是通常来讲Logstash架构比较重载，一个安装包由几百MB，相比之下Elastic还提供另一种更轻量的采集工具Beats。Beats 平台集合了多种单一用途数据采集器。这些采集器安装后可用作轻量型代理，从成百上千或成千上万台机器向 Logstash 或 Elasticsearch 发送数据。本文简要介绍一下使用Winlogbeat收集Windows日志，并用ES + Kibana检索的配置方法。</p>
+<pre><code>elfk 的搭建
+filebeat 读取多日志，并打上不同的 tag 来进行区分
+logstash 过滤日志，创建不同的动态索引，邮件报警等
+elasticsearch 的索引生命周期管理，索引的删除，及我遇见的问题
+kibana 的简单使用，包括查询、创建可视图、一些简单的设置
+</code></pre><p>​当然了，elfk 的水太深，研究了将近一个月也就是简单的入门，还有更多的设置但入门足以。当然了，要是感觉写的还凑合，微信搜索 苦逼小码农 关注我的微信公众号。</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:02.682Z" itemprop="dateUpdated">2022-03-29 13:39:02</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/网安防御/安全建设/日志审计/ElasticStack/2.ElasticStack分布式数据采集搜索引擎集群搭建配置.md" target="_blank" rel="noopener noreferrer">_posts/网安防御/安全建设/日志审计/ElasticStack/2.ElasticStack分布式数据采集搜索引擎集群搭建配置.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2021/8-2-613.html" target="_blank" rel="external">https://blog.weiyigeek.top/2021/8-2-613.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Elastic/" rel="tag">Elastic</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/8-2-613.html&title=《2.ElasticStack分布式数据采集搜索引擎集群搭建配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/8-2-613.html&title=《2.ElasticStack分布式数据采集搜索引擎集群搭建配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/8-2-613.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《2.ElasticStack分布式数据采集搜索引擎集群搭建配置》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/8-2-613.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/8-2-613.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2021/8-2-614.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">3.ElasticSearch分布式数据分析引擎基础概念与使用</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2021/7-30-623.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">4.最新实践基于Containerd安装部署高可用Kubernetes集群</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-ES集群搭建实践"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x01 ES集群搭建实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-宿主机安装"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">1.宿主机安装</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-1-节点环境"><span class="post-toc-number">1.1.1.</span> <span class="post-toc-text">(1.1) 节点环境</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-2-实践流程"><span class="post-toc-number">1.1.2.</span> <span class="post-toc-text">(1.2) 实践流程</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-docker-compose-安装"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">2.docker-compose 安装</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-K8S-安装"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">4.K8S 安装</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-Helm-安装"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">4.Helm 安装</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-ES集群连接实践"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x02 ES集群连接实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-Elasticsearch-Head-连接集群"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.Elasticsearch-Head 连接集群</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-Kibana-连接集群"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.Kibana 连接集群</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-配置文件解析"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x01 配置文件解析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#kibana-yml"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">kibana.yml</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ES-常用配置"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">ES 常用配置</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/8-2-613.html&title=《2.ElasticStack分布式数据采集搜索引擎集群搭建配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/8-2-613.html&title=《2.ElasticStack分布式数据采集搜索引擎集群搭建配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/8-2-613.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《2.ElasticStack分布式数据采集搜索引擎集群搭建配置》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/8-2-613.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/8-2-613.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACL0lEQVR42u3a0W6DMAwF0P7/T7PXThPhOl4rYU6eEKIhh0lebOf1isfxNv7eeb9/9vzZnNVftQYGBsZtGcdyrJ9JZl5/iOQ6ejsGBsYDGMkiEtLZdQ5bz3B6HwMDA2O5jVuH4H6YxsDAwOgz8nBZ/RUGBgZGNYnNq17VYPrVXBwDA+OGjOrivnn9kf4GBgbGrRhHcfTbnEnLs7wqDAyM0Yw8wCWtzXxrmJTnqp8MAwNjKqM6abVM1jkcVriDgYHxAMZesvqJVkH1GMevgIuBgTGUcbFn3DpU0SnoJ6EWAwPjaYz10vv5cf9OEtYxMDBmM6rHI/rBdO+ZqJyHgYExmlGdqEpNllIOr8lfBgMDYyij9ehWUzNfblRuw8DAGMfoJLF7yWd1mxiBMTAwHsDYS1n7YTf/b3DxRgwMjNGMTrDrl9s6ITj6oBgYGCMYe8cjqsW1TsuzHFgxMDDGMTrT7QXHfInlbSIGBsZoRrIdTBLavSNfeRLbOjmCgYFxc0b++jUvL9h1im6n78LAwHgAo1O+z4toyRKTbeVFIxMDA2M0I+8nVAtzyaZwL63FwMCYzTiKo1qqqx7OSILsxd4WAwNjHGOvP5gHzWoynKfHrZ4tBgbGDRnVJeZtxWr4rrY8MTAwnsZItmv51i0/MNE5hIGBgYHxX03Kajuh2sjEwMDA2MuJq23OPED/QwsTAwPjtowkif10ha9zjAMDA2M2I08d91qP1UXsBWsMDIyhjB9ppgPxg88gMQAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

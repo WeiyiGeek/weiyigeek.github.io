@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 8.Redis数据库客户端操作实践及入坑出坑|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Redis">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>8.Redis数据库客户端操作实践及入坑出坑</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">8.Redis数据库客户端操作实践及入坑出坑</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-04-17T14:35:30.000Z" itemprop="datePublished" class="page-time">
+  2019-04-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-数据存储/Redis/8.Redis数据库客户端操作实践及入坑出坑"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">8.Redis数据库客户端操作实践及入坑出坑</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-04-17 22:35:30" datetime="2019-04-17T14:35:30.000Z"  itemprop="datePublished">2019-04-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<hr>
+<p><strong>前置知识学习补充</strong><br>Redis数据库基础入门介绍与安装 - <a href="https://blog.weiyigeek.top/2019/4-17-49.html">https://blog.weiyigeek.top/2019/4-17-49.html</a></p>
+<p>Redis数据库基础数据类型介绍与使用 - <a href="https://blog.weiyigeek.top/2020/5-17-50.html">https://blog.weiyigeek.top/2020/5-17-50.html</a></p>
+<p>Redis基础运维之原理介绍和主从配置 - <a href="https://blog.weiyigeek.top/2019/4-17-97.html">https://blog.weiyigeek.top/2019/4-17-97.html</a></p>
+<p>Redis基础运维之哨兵和集群安装配置 - <a href="https://blog.weiyigeek.top/2019/4-17-576.html">https://blog.weiyigeek.top/2019/4-17-576.html</a></p>
+<p>Redis基础运维之在K8S中的安装与配置 - <a href="https://blog.weiyigeek.top/2019/4-17-524.html">https://blog.weiyigeek.top/2019/4-17-524.html</a></p>
+<p>Redis数据库性能测试及优化配置 - <a href="https://blog.weiyigeek.top/2019/4-17-527.html">https://blog.weiyigeek.top/2019/4-17-527.html</a></p>
+<hr>
+<h2 id="0x00-Redis-管理工具"><a href="#0x00-Redis-管理工具" class="headerlink" title="0x00 Redis 管理工具"></a>0x00 Redis 管理工具</h2><h3 id="AnotherRedisDesktopManage"><a href="#AnotherRedisDesktopManage" class="headerlink" title="AnotherRedisDesktopManage"></a>AnotherRedisDesktopManage</h3><p>描述: 一个更快更好更稳定的redis桌面管理器，兼容Linux、windows、mac。更重要的是，加载大量密钥时不会崩溃。<br>项目地址: <a href="https://github.com/qishibo/AnotherRedisDesktopManager/releases" target="_blank" rel="noopener">https://github.com/qishibo/AnotherRedisDesktopManager/releases</a></p>
+<p><br></p>
+<h3 id="PhpRedisAdmin"><a href="#PhpRedisAdmin" class="headerlink" title="PhpRedisAdmin"></a>PhpRedisAdmin</h3><p>描述: phpRedisAdmin是一个简单的web界面，用于管理Redis数据库。它是根据知识共享署名3.0许可证发布的。此代码由Erik Duckerlboer开发和维护。<br>项目地址: <a href="https://github.com/erikdubbelboer/phpRedisAdmin" target="_blank" rel="noopener">https://github.com/erikdubbelboer/phpRedisAdmin</a></p>
+<p>例如，以docker方式进行部署PhpRedisAdmin<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 示例</span></span><br><span class="line">  docker run --rm -it -e REDIS_1_HOST=myredis.host -e REDIS_1_NAME=MyRedis -p 80:80 erikdubbelboer/phpredisadmin</span><br><span class="line"></span><br><span class="line"><span class="comment"># Environment variables summary</span></span><br><span class="line">  REDIS_1_HOST - define host of the Redis server</span><br><span class="line">  REDIS_1_NAME - define name of the Redis server</span><br><span class="line">  REDIS_1_PORT - define port of the Redis server</span><br><span class="line">  REDIS_1_AUTH - define password of the Redis server</span><br><span class="line">  ADMIN_USER - define username <span class="keyword">for</span> user-facing Basic Auth</span><br><span class="line">  ADMIN_PASS - define password <span class="keyword">for</span> user-facing Basic Auth</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="redis-manager"><a href="#redis-manager" class="headerlink" title="redis-manager"></a>redis-manager</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$sudo</span> docker run -d --net=host --name redis-manager  \</span><br><span class="line">-e DATASOURCE_DATABASE=<span class="string">'redis_manager'</span> \</span><br><span class="line">-e DATASOURCE_URL=<span class="string">'jdbc:mysql://192.168.12.215:32106/redis_manager?useUnicode=true&amp;characterEncoding=utf-8&amp;serverTimezone=GMT%2b8'</span> \</span><br><span class="line">-e DATASOURCE_USERNAME=<span class="string">'root'</span> \</span><br><span class="line">-e DATASOURCE_PASSWORD=<span class="string">'weiyigeek.top'</span> \</span><br><span class="line">reasonduan/redis-manager</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="0x01-客户端脚本连接"><a href="#0x01-客户端脚本连接" class="headerlink" title="0x01 客户端脚本连接"></a>0x01 客户端脚本连接</h2><h3 id="0-Redis-Lua-脚本连接示例"><a href="#0-Redis-Lua-脚本连接示例" class="headerlink" title="(0) Redis Lua 脚本连接示例"></a>(0) Redis Lua 脚本连接示例</h3><p>Redis 脚本使用 Lua 解释器来执行脚本,通过内嵌支持 Lua 环境,执行脚本的常用命令为 EVAL。 </p>
+<ol>
+<li>EVAL script numkeys key [key …] arg [arg …]  #执行 Lua 脚本。<ul>
+<li>script：Lua 脚本程序</li>
+<li>numkeys：用于指定键名参数的个数。</li>
+<li>key [key …]：从 EVAL 的第三个参数开始算起,表示在脚本中所用到的那些 Redis 键(key),这些键名参数可以在 Lua 中通过全局变量 KEYS 数组,用 1 为基址的形式访问( KEYS[1] , KEYS[2] ,以此类推)。</li>
+<li>arg [arg …]： 附加参数</li>
+</ul>
+</li>
+<li>EVALSHA sha1 numkeys key [key …] arg [arg …] #根据给定的 sha1 校验码，执行缓存在服务器中的脚本<ul>
+<li>sha1:通过 SCRIPT LOAD 生成的 sha1 校验码。</li>
+</ul>
+</li>
+<li>SCRIPT EXISTS script [script …] 查看指定的脚本是否已经被保存在缓存当中。</li>
+<li>SCRIPT FLUSH 从脚本缓存中移除所有脚本。</li>
+<li>SCRIPT KILL 杀死运行的Lua脚本,主要用于终止运行时间过长的脚本，比如一个因为 BUG 而发生无限循环的脚本</li>
+<li>SCRIPT LOAD script 将脚本 script 添加到脚本缓存中,但并不立即执行这个脚本。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">192.168.1.100:6379[7]&gt;  EVAL <span class="string">"return &#123;KEYS[1],KEYS[2],ARGV[1],ARGV[2]&#125;"</span> 2 key1 key2 first second</span><br><span class="line">1) <span class="string">"key1"</span></span><br><span class="line">2) <span class="string">"key2"</span></span><br><span class="line">3) <span class="string">"first"</span></span><br><span class="line">4) <span class="string">"second"</span></span><br><span class="line"></span><br><span class="line">&gt; SCRIPT LOAD <span class="string">"return 'hello moto'"</span> <span class="comment">#将脚本 script 添加到脚本缓存中，但并不立即执行这个脚本</span></span><br><span class="line"><span class="string">"232fd51614574cf0867b83d384a5e898cfd24e5a"</span>  <span class="comment">#给定脚本的 SHA1 校验和 </span></span><br><span class="line"></span><br><span class="line">&gt; SCRIPT EXISTS 232fd51614574cf0867b83d384a5e898cfd24e5a <span class="comment">#校验指定的脚本是否已经被保存在缓存当</span></span><br><span class="line">1) (<span class="built_in">integer</span>) 1</span><br><span class="line"></span><br><span class="line">&gt; EVALSHA <span class="string">"232fd51614574cf0867b83d384a5e898cfd24e5a"</span> 0</span><br><span class="line"><span class="string">"hello moto"</span></span><br><span class="line"></span><br><span class="line">&gt; SCRIPT FLUSH     <span class="comment"># 清空缓存OK</span></span><br><span class="line">&gt; SCRIPT Kill     <span class="comment"># 杀死当前正在运行的 Lua 脚本</span></span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h3 id="1-PHP-脚本连接使用-redis-示例"><a href="#1-PHP-脚本连接使用-redis-示例" class="headerlink" title="(1) PHP 脚本连接使用 redis 示例"></a>(1) PHP 脚本连接使用 redis 示例</h3><p>扩展官网：<a href="https://pecl.php.net/package/redis" target="_blank" rel="noopener">https://pecl.php.net/package/redis</a>  //下载与php对应得版本(非常注意操作系统得位数)<br>环境：WINDOW7/XMAPP/PHP7.2<br>安装扩展：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#Step1.下载TS版本且32位系统</span><br><span class="line">PHP 7.2 Thread Safe (TS) x86</span><br><span class="line">#Step2.解压php_redis.dll到php根目录中ext目录中</span><br><span class="line">#Step3.在php.ini配置启用redis扩展;extension &#x3D; php_redis</span><br><span class="line">#Step4.执行php -m 查看是否有该模块</span><br><span class="line"></span><br><span class="line">@Linux下安装redis(百度即可)</span><br><span class="line">PHP redis 驱动：下载地址为:https:&#x2F;&#x2F;github.com&#x2F;phpredis&#x2F;phpredis&#x2F;releases</span><br><span class="line">pipize&#x2F;php-config</span><br></pre></td></tr></table></figure></p>
+<p>php连接使用redis案例：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="comment">/***</span></span><br><span class="line"><span class="comment"> * 功能：实现redis连接以及5种数据类型元素建立</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"> <span class="comment">//Step1.实例化redis对象设置连接参数</span></span><br><span class="line">$redis = <span class="keyword">new</span> \Redis();</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">    $link = $redis-&gt;pconnect(<span class="string">'127.0.0.1'</span>,<span class="number">6379</span>,<span class="number">1</span>,<span class="keyword">NULL</span>,<span class="number">100</span>); <span class="comment">#设置超时时间并且重试（返回Boolean）</span></span><br><span class="line">    <span class="keyword">if</span>(!$link)&#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="keyword">Exception</span>(<span class="string">"!Redis服务器连接失败"</span>); <span class="comment">//抛出异常</span></span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"Redis连接成功!&lt;br&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">catch</span>(<span class="keyword">Exception</span> $e)&#123;</span><br><span class="line">    print_r($e);</span><br><span class="line">    <span class="keyword">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Step2.进行redis认证</span></span><br><span class="line"><span class="keyword">if</span>($redis-&gt;auth(<span class="string">'weiyigeek'</span>))</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"Redis AUTH 认证成功!&lt;br&gt;"</span>;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">"Redis AUTH 认证失败!"</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Step3.String 类型</span></span><br><span class="line">$redis-&gt;set(<span class="string">'name'</span>,<span class="string">'Weiyigeek'</span>);        <span class="comment">//设置String类型键值</span></span><br><span class="line">$redis-&gt;mSet([<span class="string">'id'</span>=&gt;<span class="string">'Weiyi'</span>,<span class="string">'age'</span>=&gt;<span class="number">22</span>]); </span><br><span class="line">$redis-&gt;setEx(<span class="string">'key'</span>,<span class="number">120</span>,<span class="string">'value'</span>);  <span class="comment">//存活2分钟</span></span><br><span class="line"></span><br><span class="line">$strLen = $redis-&gt;strlen(<span class="string">'name'</span>);  <span class="comment">//获取字符串长度</span></span><br><span class="line">$type = $redis-&gt;type(<span class="string">'age'</span>);     <span class="comment">//返回其类型</span></span><br><span class="line">$redis-&gt;incrBy(<span class="string">'age'</span>,<span class="number">8</span>);    <span class="comment">//String类型进行计算</span></span><br><span class="line">$getValue = $redis-&gt;mGet([<span class="string">'name'</span>,<span class="string">'id'</span>,<span class="string">'age'</span>]); <span class="comment">//获取String</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"name键的字符串长度："</span>.$strLen.<span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($type);</span><br><span class="line">var_dump($getValue);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt; &lt;br&gt;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">##### 执行结果 #######</span></span><br><span class="line"><span class="comment">// Redis连接成功!</span></span><br><span class="line"><span class="comment">// Redis AUTH 认证成功!</span></span><br><span class="line"><span class="comment">// name键的字符串长度：9</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// int(1)</span></span><br><span class="line"><span class="comment">// array(3) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(9) "Weiyigeek"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(5) "Weiyi"</span></span><br><span class="line"><span class="comment">//   [2]=&gt;</span></span><br><span class="line"><span class="comment">//   string(2) "30"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//Step2.List 类型</span></span><br><span class="line">$redis-&gt;delete(<span class="string">'list1'</span>); </span><br><span class="line">$redis-&gt;lpush(<span class="string">'list1'</span>,<span class="string">'A'</span>,<span class="string">'C'</span>); <span class="comment">//直接插入多个元素 从左边开始插入 -&gt;</span></span><br><span class="line">$redis-&gt;rpush(<span class="string">'list1'</span>,<span class="string">'B'</span>);</span><br><span class="line"></span><br><span class="line">$redis-&gt;delete(<span class="string">'key1'</span>);</span><br><span class="line">$redis-&gt;rPush(<span class="string">'key1'</span>, <span class="string">'A'</span>,<span class="string">'B'</span>,<span class="string">'C'</span>,<span class="string">'D'</span>); <span class="comment">// returns 3 从右边开始插&lt;-</span></span><br><span class="line"></span><br><span class="line">$lcount = $redis-&gt;lLen(<span class="string">'key1'</span>); <span class="comment">//元素个数</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"key1元素个数:"</span>.$lcount.<span class="string">"&lt;br&gt;"</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($redis-&gt;lRange(<span class="string">'list1'</span>, <span class="number">0</span>, <span class="number">-1</span>));</span><br><span class="line">var_dump($redis-&gt;lRange(<span class="string">'key1'</span>, <span class="number">0</span>, <span class="number">-1</span>));</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt; &lt;br&gt;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">##### 执行结果 #######</span></span><br><span class="line"><span class="comment">// key1元素个数:4</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// array(3) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "C"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "A"</span></span><br><span class="line"><span class="comment">//   [2]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "B"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"><span class="comment">// array(4) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "A"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "B"</span></span><br><span class="line"><span class="comment">//   [2]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "C"</span></span><br><span class="line"><span class="comment">//   [3]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "D"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//Step3.Hash 类型</span></span><br><span class="line">$redis-&gt;delete(<span class="string">'driver1'</span>);</span><br><span class="line">$redis-&gt;hSet(<span class="string">'driver1'</span>,<span class="string">'name'</span>,<span class="string">'张伟'</span>);</span><br><span class="line">$redis-&gt;hSet(<span class="string">'driver1'</span>,<span class="string">'age'</span>,<span class="string">'22'</span>);</span><br><span class="line">$redis-&gt;hSet(<span class="string">'driver1'</span>,<span class="string">'gender'</span>,<span class="number">0</span>);</span><br><span class="line">$redis-&gt;hSet(<span class="string">'driver1'</span>,<span class="string">'love'</span>,<span class="string">'Play Computer!'</span>);</span><br><span class="line"></span><br><span class="line">$hcount = $redis-&gt;hLen(<span class="string">'driver1'</span>);  <span class="comment">//散列个数</span></span><br><span class="line">$hlen = $redis-&gt;hStrLen(<span class="string">'driver1'</span>,<span class="string">'love'</span>); <span class="comment">//散列种键值的长度</span></span><br><span class="line">$var = $redis-&gt;hGet(<span class="string">'driver1'</span>,<span class="string">'name'</span>);  <span class="comment">//获取HASH种的键值</span></span><br><span class="line">$var1 = $redis-&gt;hMGet(<span class="string">'driver1'</span>,<span class="keyword">array</span>(<span class="string">'age'</span>,<span class="string">'gender'</span>,<span class="string">'love'</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"散列driver1的长度为："</span>.$hcount.<span class="string">", Love字段值的长度："</span>.$hlen.<span class="string">"&lt;br&gt;&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($var);</span><br><span class="line">var_dump($var1);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt;&lt;br&gt;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">##### 执行结果 #######</span></span><br><span class="line"><span class="comment">// 散列driver1的长度为：4, Love字段值的长度：14</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// string(6) "张伟"</span></span><br><span class="line"><span class="comment">// array(3) &#123;</span></span><br><span class="line"><span class="comment">//   ["age"]=&gt;</span></span><br><span class="line"><span class="comment">//   string(2) "22"</span></span><br><span class="line"><span class="comment">//   ["gender"]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "0"</span></span><br><span class="line"><span class="comment">//   ["love"]=&gt;</span></span><br><span class="line"><span class="comment">//   string(14) "Play Computer!"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//Step4.set类型</span></span><br><span class="line">$redis-&gt;sRem(<span class="string">'set1'</span>,<span class="string">'A'</span>,<span class="string">'B'</span>,<span class="string">'C'</span>,<span class="string">'D'</span>);  <span class="comment">//删除集合种的元素</span></span><br><span class="line">$redis-&gt;sAdd(<span class="string">'set1'</span>,<span class="string">'B'</span>,<span class="string">'A'</span>,<span class="string">'C'</span>,<span class="string">'D'</span>);  <span class="comment">//添加集合元素</span></span><br><span class="line">$redis-&gt;sAdd(<span class="string">'set2'</span>,<span class="string">'B'</span>,<span class="string">'D'</span>,<span class="string">'E'</span>,<span class="string">'F'</span>);</span><br><span class="line"></span><br><span class="line">$sCount = $redis-&gt;sCard(<span class="string">'set1'</span>);  <span class="comment">//获取集合种的值</span></span><br><span class="line">$sinter = $redis-&gt;sInter(<span class="string">'set1'</span>,<span class="string">'set2'</span>); <span class="comment">//集合set1与set2的交集</span></span><br><span class="line"></span><br><span class="line">$diffCount = $redis-&gt;sDiffStore(<span class="string">'set3'</span>, <span class="string">'set1'</span>, <span class="string">'set2'</span>); <span class="comment">//将集合set1 - set2的差集存(A,C)入set3种</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"集合set1的长度为："</span>.$sCount.<span class="string">", set1与set2差集元素的个数为："</span>.$diffCount.<span class="string">"&lt;br&gt;&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($sinter);  <span class="comment">//交</span></span><br><span class="line">var_dump($redis-&gt;sMembers(<span class="string">'set3'</span>)); <span class="comment">//差集</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt;&lt;br&gt;"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">##### 执行结果 #######</span></span><br><span class="line"><span class="comment">// 集合set1的长度为：4, set1与set2差集元素的个数为：2</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// array(2) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "B"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "D"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"><span class="comment">// array(2) &#123;</span></span><br><span class="line"><span class="comment">//   [0]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "C"</span></span><br><span class="line"><span class="comment">//   [1]=&gt;</span></span><br><span class="line"><span class="comment">//   string(1) "A"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//Step5.sort set 有序集合类型</span></span><br><span class="line">$redis-&gt;delete(<span class="string">'zset1'</span>);</span><br><span class="line">$redis-&gt;zAdd(<span class="string">'zset1'</span>,<span class="number">1.0</span>,<span class="string">'zhanghai'</span>);</span><br><span class="line">$redis-&gt;zAdd(<span class="string">'zset1'</span>,<span class="number">3.0</span>,<span class="string">'Weiyigeek'</span>);</span><br><span class="line">$redis-&gt;zAdd(<span class="string">'zset1'</span>,<span class="number">7.5</span>,<span class="string">'Chenghuiming'</span>);</span><br><span class="line">$redis-&gt;zAdd(<span class="string">'zset1'</span>,<span class="number">8.6</span>,<span class="string">'Kangkang'</span>);</span><br><span class="line"></span><br><span class="line">$zCount = $redis-&gt;zCard(<span class="string">'zset1'</span>); <span class="comment">//有序集合键里有多个元素</span></span><br><span class="line">$zCount1 = $redis-&gt;zCount(<span class="string">'zset1'</span>,<span class="number">0</span>,<span class="number">5.0</span>);  <span class="comment">//score在0~5之间的个数</span></span><br><span class="line">$desc = $redis-&gt;zRange(<span class="string">'zset1'</span>,<span class="number">0</span>,<span class="number">-1</span>,<span class="keyword">true</span>); <span class="comment">//分数从小到大排列 （最后一个参数是显示分数）</span></span><br><span class="line">$asc = $redis-&gt;zRevRange(<span class="string">'zset1'</span>,<span class="number">0</span>,<span class="number">-1</span>,<span class="keyword">true</span>); <span class="comment">//分数从大到小排列</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> <span class="string">"有序集合zset1有 "</span>.$zCount.<span class="string">"个元素,且score分数在0~5之间的个数："</span>.$zCount1.<span class="string">"&lt;br&gt;&lt;pre&gt;"</span>;</span><br><span class="line">var_dump($desc);</span><br><span class="line">var_dump($asc);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">"&lt;/pre&gt;"</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##### 执行结果 #######</span></span><br><span class="line"><span class="comment">// 有序集合zset1有 4个元素,且score分数在0~5之间的个数：2</span></span><br><span class="line"><span class="comment">// array(4) &#123;</span></span><br><span class="line"><span class="comment">//   ["zhanghai"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(1)</span></span><br><span class="line"><span class="comment">//   ["Weiyigeek"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(3)</span></span><br><span class="line"><span class="comment">//   ["Chenghuiming"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(7.5)</span></span><br><span class="line"><span class="comment">//   ["Kangkang"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(8.6)</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"><span class="comment">// array(4) &#123;</span></span><br><span class="line"><span class="comment">//   ["Kangkang"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(8.6)</span></span><br><span class="line"><span class="comment">//   ["Chenghuiming"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(7.5)</span></span><br><span class="line"><span class="comment">//   ["Weiyigeek"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(3)</span></span><br><span class="line"><span class="comment">//   ["zhanghai"]=&gt;</span></span><br><span class="line"><span class="comment">//   float(1)</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="2-C-连接使用redis"><a href="#2-C-连接使用redis" class="headerlink" title="(2) C# 连接使用redis"></a>(2) C# 连接使用redis</h3><p>高性能Redis协议封装，支持.Net Core，经过一年多日均80亿调用量验证<br>项目地址：<a href="http://git.newlifex.com/NewLife/NewLife.Redis" target="_blank" rel="noopener">http://git.newlifex.com/NewLife/NewLife.Redis</a></p>
+<p><strong>1)基础 Redis</strong><br>Redis实现标准协议以及基础字符串操作，完整实现由独立开源项目NewLife.Redis提供;采取连接池加同步阻塞架构，具有超低延迟（200~600us）以及超高吞吐量的特点。<br>在物流行业大数据实时计算中广泛应有，经过日均100亿次调用量验证。 </p>
+<p>NewLife.Redis 一个完整的Redis协议的功能的实现，但是redis的核心功能并没有在这里面，Redis的核心功能的实现是在NewLife.Core里面,Redis的核心功能就是有这两个类实现：</p>
+<ul>
+<li>有一个NewLife.Caching的命名空间，里面有一个Redis类里面实现了Redis的基本功能</li>
+<li>另一个类是RedisClient是Redis的客户端(代表对服务器的一个连接)</li>
+</ul>
+<p>Redis的封装有两层:</p>
+<ul>
+<li>一层是NewLife.Core里面的Redis以及RedisClient</li>
+<li>另一层就是NewLife.Redis，这里面的FullRedis是对Redis的实现了Redis的所有的高级功能(是Redis的一个扩展)</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 实例化Redis，默认端口6379可以省略，密码有两种写法</span><br><span class="line">&#x2F;&#x2F;var rds &#x3D; Redis.Create(&quot;127.0.0.1&quot;, 7);</span><br><span class="line">var rds &#x3D; Redis.Create(&quot;pass@&quot;, 7);</span><br><span class="line">&#x2F;&#x2F;var rds &#x3D; Redis.Create(&quot;server&#x3D;;password&#x3D;pass&quot;, 7);</span><br><span class="line">rds.Log &#x3D; XTrace.Log; &#x2F;&#x2F; 调试日志。正式使用时注释</span><br></pre></td></tr></table></figure>
+<p><strong>2)C#案例</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;**打开Program.css**&#x2F;</span><br><span class="line">using NewLife.Threading;</span><br><span class="line">namespace Test</span><br><span class="line">&#123;</span><br><span class="line">  class Program</span><br><span class="line">  &#123;</span><br><span class="line">    static void Main(String[] args)</span><br><span class="line">    &#123;</span><br><span class="line">      Xtrace.UseConsole(); &#x2F;&#x2F;向控制台输出日志，方便调试使用查看结果</span><br><span class="line">      FullRedis.Register(); &#x2F;&#x2F;集合FULLREDIS，否则Redis.create会得到默认的redis对象</span><br><span class="line">      Test1(); &#x2F;&#x2F;调用静态方法</span><br><span class="line">      Console.ReadKey()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static void Test1()</span><br><span class="line">&#123;</span><br><span class="line">    var ic &#x3D; Redis.Create(&quot;pass@&quot;, 7);&#x2F;&#x2F;创建Redis实例，得到FullRedis对象</span><br><span class="line">    &#x2F;&#x2F;var ic &#x3D; new FullRedis();&#x2F;&#x2F;另一种实例化的方式</span><br><span class="line">    &#x2F;&#x2F;ic.Server &#x3D; &quot;&quot;;</span><br><span class="line">    &#x2F;&#x2F;ic.Db &#x3D; 3;      &#x2F;&#x2F;Redis中数据库</span><br><span class="line">    ic.Log &#x3D; XTrace.Log;&#x2F;&#x2F;显示日志，进行Redis操作把日志输出，生产环境不用输出日志</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 简单操作</span><br><span class="line">    Console.WriteLine(&quot;共有缓存对象 &#123;0&#125; 个&quot;, ic.Count);&#x2F;&#x2F;缓存对象数量</span><br><span class="line"></span><br><span class="line">    ic.Set(&quot;name&quot;, &quot;大石头&quot;);&#x2F;&#x2F;Set K-V结构，Set第二个参数可以是任何类型</span><br><span class="line">    Console.WriteLine(ic.Get&lt;String&gt;(&quot;name&quot;));&#x2F;&#x2F;Get泛型，指定获取的类型</span><br><span class="line"></span><br><span class="line">    ic.Set(&quot;time&quot;, DateTime.Now, 1);&#x2F;&#x2F;过期时间秒</span><br><span class="line">    Console.WriteLine(ic.Get&lt;DateTime&gt;(&quot;time&quot;).ToFullString());</span><br><span class="line">    Thread.Sleep(1100);</span><br><span class="line">    Console.WriteLine(ic.Get&lt;DateTime&gt;(&quot;time&quot;).ToFullString());</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 列表</span><br><span class="line">    var list &#x3D; ic.GetList&lt;DateTime&gt;(&quot;list&quot;);</span><br><span class="line">    list.Add(DateTime.Now);</span><br><span class="line">    list.Add(DateTime.Now.Date);</span><br><span class="line">    list.RemoveAt(1);</span><br><span class="line">    Console.WriteLine(list[list.Count - 1].ToFullString());</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 字典</span><br><span class="line">    var dic &#x3D; ic.GetDictionary&lt;DateTime&gt;(&quot;dic&quot;);</span><br><span class="line">    dic.Add(&quot;xxx&quot;, DateTime.Now);</span><br><span class="line">    Console.WriteLine(dic[&quot;xxx&quot;].ToFullString());</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 队列</span><br><span class="line">    var mq &#x3D; ic.GetQueue&lt;String&gt;(&quot;queue&quot;);</span><br><span class="line">    mq.Add(new[] &#123; &quot;abc&quot;, &quot;g&quot;, &quot;e&quot;, &quot;m&quot; &#125;);</span><br><span class="line">    var arr &#x3D; mq.Take(3);</span><br><span class="line">    Console.WriteLine(arr.Join(&quot;,&quot;));</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F; 集合</span><br><span class="line">    var set &#x3D; ic.GetSet&lt;String&gt;(&quot;181110_1234&quot;);</span><br><span class="line">    set.Add(&quot;xx1&quot;);</span><br><span class="line">    set.Add(&quot;xx2&quot;);</span><br><span class="line">    set.Add(&quot;xx3&quot;);</span><br><span class="line">    Console.WriteLine(set.Count);</span><br><span class="line">    Console.WriteLine(set.Contains(&quot;xx2&quot;));</span><br><span class="line"></span><br><span class="line">    Console.WriteLine(&quot;共有缓存对象 &#123;0&#125; 个&quot;, ic.Count);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=8.Redis数据库客户端操作实践及入坑出坑 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190419082712.png" target="_blank" title="WeiyiGeek.C#案例" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190419082712.png" alt="WeiyiGeek.C#案例" title="" class=""></a>
+                <p>WeiyiGeek.C#案例</p>
+            </figure></p>
+<p><em>总结：</em></p>
+<ul>
+<li>数据库中不合法的时间处理,习惯大于小于号不习惯用等于号，这样可以处理很多意外的数据</li>
+<li>Set的时候最好指定过期时间防止有些需要删除的数据</li>
+<li>Redis异步尽量不用，因为Redis延迟本身很小，大概在100us-200us，再一个就是Redis本身是单线程的，异步任务切换的耗时比网络耗时还要大</li>
+</ul>
+<p><br></p>
+<p><strong>3) Redis简单案例</strong><br>网站搜索的热搜词,用.NET Core和StackExchange.Redis以及Jquery-ui    主要是用了里面的autocomplete;</p>
+<p>搜索关键字的时候不存在则添加,存在则将利用有序集合中的zincrby进行分数排序;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line">#AutoController</span><br><span class="line">using AutoCompleteDemo.Common;</span><br><span class="line">using Microsoft.AspNetCore.Mvc;</span><br><span class="line">using System;</span><br><span class="line">using System.Collections.Generic;</span><br><span class="line">using System.Linq;</span><br><span class="line"></span><br><span class="line">namespace AutoCompleteDemo.Controllers</span><br><span class="line">&#123;</span><br><span class="line">    public class AutoController : Controller</span><br><span class="line">    &#123;</span><br><span class="line">        private readonly IRedis _redis;</span><br><span class="line">        private readonly string _searchKey &#x3D; &quot;search&quot;;        </span><br><span class="line">        public AutoController(IRedis redis)</span><br><span class="line">        &#123;</span><br><span class="line">            _redis &#x3D; redis;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public IActionResult Index()</span><br><span class="line">        &#123;</span><br><span class="line">            &#x2F;&#x2F;keys</span><br><span class="line">            IList&lt;string&gt; keys &#x3D; new List&lt;string&gt;()</span><br><span class="line">            &#123;</span><br><span class="line">                &quot;kobe&quot;,&quot;johnson&quot;,&quot;jabbar&quot;,&quot;west&quot;,&quot;o&#39;neal&quot;,&quot;baylor&quot;,&quot;mccann&quot;,&quot;worthy&quot;,&quot;gasol&quot;,&quot;chamberlain&quot;,</span><br><span class="line">                &quot;fisher&quot;,&quot;odom&quot;,&quot;bynum&quot;,&quot;horry&quot;,&quot;rambis&quot;,&quot;riley&quot;,&quot;clarkson&quot;,&quot;Williams&quot;,&quot;young&quot;,&quot;Russell&quot;,</span><br><span class="line">                &quot;ingram&quot;,&quot;randle&quot;,&quot;nance&quot;,&quot;brown&quot;,&quot;deng&quot;,&quot;yi&quot;,&quot;ariza&quot;,&quot;artest&quot;,&quot;walton&quot;,&quot;vujacic&quot;,</span><br><span class="line">                &quot;james&quot;,&quot;paul&quot;,&quot;curry&quot;,&quot;park&quot;,&quot;yao&quot;,&quot;kevin&quot;,&quot;wade&quot;,&quot;rose&quot;,&quot;popovich&quot;,&quot;leonard&quot;,</span><br><span class="line">                &quot;aldridge&quot;,&quot;ginobili&quot;,&quot;duncan&quot;,&quot;lavine&quot;,&quot;rubio&quot;,&quot;garnett&quot;,&quot;wiggins&quot;,&quot;westbrook&quot;,&quot;durant&quot;,&quot;ibaka&quot;,</span><br><span class="line">                &quot;nowitzki&quot;,&quot;pierce&quot;,&quot;crawford&quot;,&quot;love&quot;,&quot;smith&quot;,&quot;iguodala&quot;,&quot;barnes&quot;,&quot;green&quot;,&quot;thompson&quot;,&quot;harden&quot;,</span><br><span class="line">                &quot;lillard&quot;,&quot;mccollum&quot;,&quot;lin&quot;,&quot;jackson&quot;,&quot;nash&quot;,&quot;stoudemire&quot;,&quot;whiteside&quot;,&quot;dragic&quot;,&quot;Howard&quot;,&quot;batum&quot;</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line">            &#x2F;&#x2F;init</span><br><span class="line">            Random random &#x3D; new Random();</span><br><span class="line">            var tran &#x3D; _redis.GetTransaction();</span><br><span class="line">            for (int i &#x3D; 0; i &lt; 2000000; i++)</span><br><span class="line">            &#123;</span><br><span class="line">                tran.SortedSetIncrementAsync(_searchKey, keys[random.Next(0, 70)], 1);</span><br><span class="line">            &#125;</span><br><span class="line">            tran.ExecuteAsync();</span><br><span class="line"></span><br><span class="line">            return View();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        public IActionResult GetHotKey(string key&#x3D;&quot;&quot;)</span><br><span class="line">        &#123;</span><br><span class="line">            if (string.IsNullOrEmpty(key))</span><br><span class="line">            &#123;&#x2F;&#x2F;default</span><br><span class="line">                var res &#x3D; _redis.ZRevRange(_searchKey, 0, 9);   &#x2F;&#x2F;将分数从高到低排序 desc</span><br><span class="line">                var list &#x3D; (from i in res select i.ToString());</span><br><span class="line">                return Json(list);</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;&#x2F;&#x2F;by user input</span><br><span class="line">                var res &#x3D; _redis.ZRevRange(_searchKey, 0, -1);</span><br><span class="line">                var list &#x3D; (from i in res select i.ToString()).Where(x &#x3D;&gt; x.Contains(key)).Take(10).ToList();</span><br><span class="line">                return Json(list);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        [HttpPost]</span><br><span class="line">        public IActionResult SetHotKey(string key)</span><br><span class="line">        &#123;</span><br><span class="line">            if (!string.IsNullOrWhiteSpace(key))</span><br><span class="line">            &#123;</span><br><span class="line">                _redis.ZIncrby(_searchKey,key);</span><br><span class="line">                &#x2F;&#x2F;other </span><br><span class="line">                &#x2F;&#x2F;...</span><br><span class="line">                return Json(new &#123; code &#x3D; &quot;000&quot;, msg &#x3D; &quot;OK&quot; &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;</span><br><span class="line">                return Json(new &#123; code &#x3D; &quot;999&quot;, msg &#x3D; &quot;keyword can not be empty!&quot; &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#Index.cshtml</span><br><span class="line">@&#123;</span><br><span class="line">    ViewData[&quot;Title&quot;] &#x3D; &quot;Auto Complete&quot;;</span><br><span class="line">&#125;</span><br><span class="line">&lt;div class&#x3D;&quot;row&quot;&gt;</span><br><span class="line">    &lt;div class&#x3D;&quot;col-md-6 col-md-offset-4&quot; style&#x3D;&quot;padding-top:50px;&quot;&gt;</span><br><span class="line">        &lt;input id&#x3D;&quot;key&quot; name&#x3D;&quot;key&quot; placeholder&#x3D;&quot;search&quot; class&#x3D;&quot;form-control col-md-4&quot;&gt;</span><br><span class="line">        &lt;button class&#x3D;&quot;btn btn-primary&quot; type&#x3D;&quot;button&quot; id&#x3D;&quot;searchSubmit&quot;&gt;Search&lt;&#x2F;button&gt;</span><br><span class="line">        &lt;div id&#x3D;&quot;result&quot;&gt;&lt;&#x2F;div&gt;</span><br><span class="line">    &lt;&#x2F;div&gt;</span><br><span class="line">&lt;&#x2F;div&gt;</span><br><span class="line">@section scripts&#123;</span><br><span class="line">    &lt;script type&#x3D;&quot;text&#x2F;javascript&quot;&gt;</span><br><span class="line">        $(function () &#123;</span><br><span class="line">            &#x2F;&#x2F;show hot keyword</span><br><span class="line">            $(&quot;#key&quot;).autocomplete(&#123;                </span><br><span class="line">                source: function (request, response) &#123;                    </span><br><span class="line">                    $.ajax(&#123;</span><br><span class="line">                        url: &quot;@Url.Action(&quot;GetHotKey&quot;, &quot;Auto&quot;)&quot;,  &#x2F;&#x2F;关联上面的方法</span><br><span class="line">                        dataType: &quot;json&quot;,</span><br><span class="line">                        data: &#123;</span><br><span class="line">                            key: request.term</span><br><span class="line">                        &#125;,</span><br><span class="line">                        success: function (data) &#123;</span><br><span class="line">                            response(data);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line">                &#125;,</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            &#x2F;&#x2F;search</span><br><span class="line">            $(&quot;#searchSubmit&quot;).click(function () &#123;</span><br><span class="line">                $.ajax(&#123;</span><br><span class="line">                    url: &quot;@Url.Action(&quot;SetHotKey&quot;, &quot;Auto&quot;)&quot;,</span><br><span class="line">                    dataType: &quot;json&quot;,</span><br><span class="line">                    type: &quot;POST&quot;,</span><br><span class="line">                    data: &#123; key: $(&quot;#key&quot;).val() &#125;,</span><br><span class="line">                    success: function (data) &#123;</span><br><span class="line">                        if (data.code &#x3D;&#x3D; &quot;000&quot;) &#123;</span><br><span class="line">                            $(&quot;&lt;p&gt;search successful!&lt;&#x2F;p&gt;&quot;).appendTo(&quot;#result&quot;);</span><br><span class="line">                        &#125; else &#123;</span><br><span class="line">                            $(&quot;&lt;p&gt;&quot;+data.msg+&quot;&lt;&#x2F;p&gt;&quot;).appendTo(&quot;#result&quot;);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &lt;&#x2F;script&gt;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=8.Redis数据库客户端操作实践及入坑出坑 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190419083237.png" target="_blank" title="WeiyiGeek.搜索热词" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190419083237.png" alt="WeiyiGeek.搜索热词" title="" class=""></a>
+                <p>WeiyiGeek.搜索热词</p>
+            </figure>
+<p><br></p>
+<h3 id="3-JAVA-连接操作-redis-示例"><a href="#3-JAVA-连接操作-redis-示例" class="headerlink" title="(3) JAVA 连接操作 redis 示例"></a>(3) JAVA 连接操作 redis 示例</h3><p>描述：采用Jedis jar包进行利用java操作Redis，所以必须将其导入工程的lib中，下面简单演示一下使用;</p>
+<p>config.properties<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Connection Redis Configure</span></span><br><span class="line">RedisUrl=10.20.10.248:6379</span><br><span class="line">RedisAuth=weiyigeek.top</span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> redis.clients.jedis.Jedis;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 采用 Java 进行 Redis 连接使用测试</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> WeiyiGeek</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisDemo1</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        String[] RedisUrl=<span class="keyword">null</span>;</span><br><span class="line">        String RedisAuth=<span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//1.创建一个属性配置对象并打开配置文件</span></span><br><span class="line">            Properties prop = <span class="keyword">new</span> Properties();</span><br><span class="line">            InputStream ins = RedisDemo1.class.getClassLoader().getResourceAsStream(<span class="string">"config.properties"</span>);</span><br><span class="line">            prop.load(ins);</span><br><span class="line">            RedisUrl=prop.getProperty(<span class="string">"RedisUrl"</span>).split(<span class="string">":"</span>);</span><br><span class="line">            RedisAuth=prop.getProperty(<span class="string">"RedisAuth"</span>);</span><br><span class="line">            System.out.println(<span class="string">"RedisServer:"</span>+ prop.getProperty(<span class="string">"RedisUrl"</span>) + <span class="string">"\nPassword:"</span> + RedisAuth );</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//2.连接到 redis 服务</span></span><br><span class="line">            Jedis jedis = <span class="keyword">new</span> Jedis(RedisUrl[<span class="number">0</span>],Integer.parseInt(RedisUrl[<span class="number">1</span>]));</span><br><span class="line">            System.out.println(<span class="string">"正在Redis认证连接..."</span>);</span><br><span class="line">            jedis.auth(RedisAuth);</span><br><span class="line">   </span><br><span class="line">            <span class="comment">//3.查看链接是否成功并且服务是否运行</span></span><br><span class="line">            System.out.println(<span class="string">"服务正在运行: "</span>+jedis.ping()+<span class="string">"\n"</span>);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//4.选择一号库</span></span><br><span class="line">            jedis.select(<span class="number">1</span>);</span><br><span class="line">             </span><br><span class="line">            <span class="comment">//5.设置 redis 字符串数据与 获取存储的数据并输出</span></span><br><span class="line">            String key = <span class="string">"WeiyiGeek"</span>;</span><br><span class="line">            jedis.set(key, <span class="string">"www.weiyigeek.top"</span>);</span><br><span class="line">            jedis.set(<span class="string">"count"</span>, <span class="string">"1"</span>);</span><br><span class="line">            jedis.setex(<span class="string">"Key"</span>, <span class="number">60</span>, <span class="string">"60 Sec"</span>);</span><br><span class="line">            System.out.println(<span class="string">"当前数据库总键数:"</span>+jedis.dbSize());</span><br><span class="line">            <span class="keyword">if</span>(jedis.exists(key)) &#123;</span><br><span class="line">                System.out.println(<span class="string">"Redis中WeyiGeek键存储的字符串为:"</span>+ jedis.get(key));</span><br><span class="line">                System.out.println(<span class="string">"其类型为 : "</span> + jedis.type(key));</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//value + 1 并返回其其值</span></span><br><span class="line">            System.out.println(<span class="string">"incr key = "</span> + jedis.incr(<span class="string">"count"</span>));</span><br><span class="line">            System.out.println(<span class="string">"incrby key 5 = "</span> + jedis.incrBy(<span class="string">"count"</span>, <span class="number">5</span>));</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//6.采用迭代器进行遍历所有键值</span></span><br><span class="line">            Set&lt;String&gt; keys = jedis.keys(<span class="string">"*"</span>); </span><br><span class="line">            <span class="keyword">for</span> (Iterator iterator = keys.iterator(); iterator.hasNext();) &#123;</span><br><span class="line">                String k = (String) iterator.next();</span><br><span class="line">                <span class="keyword">if</span> (jedis.type(k).equalsIgnoreCase(<span class="string">"string"</span>)) &#123;</span><br><span class="line">                    System.out.println(k + <span class="string">" - "</span> + jedis.get(k));</span><br><span class="line">                &#125;</span><br><span class="line">                    </span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">""</span>);  </span><br><span class="line">            <span class="comment">//清空所有的key</span></span><br><span class="line">            jedis.flushAll();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//关闭释放jedis连接资源</span></span><br><span class="line">            jedis.disconnect();</span><br><span class="line">            </span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            <span class="comment">// TODO Auto-generated catch block</span></span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>执行结果:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">RedisServer:10.20.10.248:6379</span><br><span class="line">Password:weiyigeek.top</span><br><span class="line">正在Redis认证连接...</span><br><span class="line">服务正在运行: PONG</span><br><span class="line"></span><br><span class="line">当前数据库总键数:3</span><br><span class="line">Redis中WeyiGeek键存储的字符串为:www.weiyigeek.top</span><br><span class="line">其类型为 : string</span><br><span class="line">incr key = 2</span><br><span class="line">incrby key 5 = 7</span><br><span class="line">count - 7</span><br><span class="line">WeiyiGeek - www.weiyigeek.top</span><br><span class="line">Key - 60 Sec</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="4-Python-连接Redis-Sentinel实例"><a href="#4-Python-连接Redis-Sentinel实例" class="headerlink" title="(4) Python 连接Redis Sentinel实例"></a>(4) Python 连接Redis Sentinel实例</h3><p>描述: 在客户端使用哨兵时，需要先先连接一个Sentinel实例，然后再使用 <code>SENTINEL get-master-addr-by-name master-name</code> 获取Redis地址信息。</p>
+<p>通过连接返回的Redis地址信息，通过ROLE命令查询是否是Master。如果是连接进入正常的服务环节。否则应该断开重新查询。</p>
+<p>当Sentinel发起failover后，切换了新的Master，Sentinel会发送 CLIENT KILL TYPE normal命令给客户端，客户端需要主动断开对老的Master的链接，然后重新查询新的Master地址，再重复走上面的流程。这样的方式仍然相对不够实时，可以通过Sentinel提供的<code>Pub/Sub</code>来更快地监听到failover事件加快重连。</p>
+<p>如果需要实现读写分离/读走Slave，那可以走<code>SENTINEL slaves</code>来查询Slave列表并连接。</p>
+<p>由于Redis是异步复制，所以Sentinel其实无法达到强一致性，它承诺的是最终一致性：最后一次failover的Redis Master赢者通吃，其他Slave的数据将被丢弃，重新从新的Master复制数据, 此外还有前面提到的分区带来的一致性问题。</p>
+<p>其次，Sentinel的选举算法依赖时间，因此要确保所有机器的时间同步，如果发现时间不一致，Sentinel实现了一个TITL模式来保护系统的可用性。</p>
+<p><strong>脚本实例:</strong><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> redis.sentinel <span class="keyword">import</span> Sentinel</span><br><span class="line">sentinel = Sentinel([(<span class="string">'localhost'</span>, <span class="number">26379</span>)], socket_timeout=<span class="number">0.1</span>) <span class="comment"># 连接到sentinel服务实例</span></span><br><span class="line">print(sentinel.discover_master(<span class="string">'mymaster'</span>))  <span class="comment"># master 实例发现</span></span><br><span class="line">print(sentinel.discover_slaves(<span class="string">'mymaster'</span>))  <span class="comment"># slave 实例发现</span></span><br><span class="line">master = sentinel.master_for(<span class="string">'mymaster'</span>, socket_timeout=<span class="number">0.1</span>)</span><br><span class="line">master.set(<span class="string">'foo'</span>, <span class="string">'bar'</span>)</span><br><span class="line">slave = sentinel.slave_for(<span class="string">'mymaster'</span>, socket_timeout=<span class="number">0.1</span>)</span><br><span class="line">slave.get(<span class="string">'foo'</span>)</span><br><span class="line"><span class="string">'bar'</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips : (可选) 客户端可以通过<code>SENTINEL sentinels</code>来更新自己的Sentinel实例列表。</p>
+<hr>
+<h2 id="0x0n-入坑出坑"><a href="#0x0n-入坑出坑" class="headerlink" title="0x0n 入坑出坑"></a>0x0n 入坑出坑</h2><h3 id="1-安装编译"><a href="#1-安装编译" class="headerlink" title="(1) 安装编译"></a>(1) 安装编译</h3><h4 id="问题1-Redis进行源码编译时显示zmalloc-h-50-10-fatal-error-jemalloc-jemalloc-h-No-such-file-or-directory错误"><a href="#问题1-Redis进行源码编译时显示zmalloc-h-50-10-fatal-error-jemalloc-jemalloc-h-No-such-file-or-directory错误" class="headerlink" title="问题1.Redis进行源码编译时显示zmalloc.h:50:10: fatal error: jemalloc/jemalloc.h: No such file or directory错误"></a>问题1.Redis进行源码编译时显示<code>zmalloc.h:50:10: fatal error: jemalloc/jemalloc.h: No such file or directory</code>错误</h4><p><strong>错误信息:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">/opt/soft/redis-6.2.5<span class="comment"># make PREFIX=$&#123;REDIS_DIR&#125; install</span></span><br><span class="line">  <span class="comment"># cd src &amp;&amp; make install</span></span><br><span class="line">  <span class="comment"># make[1]: Entering directory '/opt/soft/redis-6.2.5/src'</span></span><br><span class="line">  <span class="comment">#     CC adlist.o</span></span><br><span class="line">  <span class="comment"># In file included from adlist.c:34:</span></span><br><span class="line">  <span class="comment"># zmalloc.h:50:10: fatal error: jemalloc/jemalloc.h: No such file or directory</span></span><br><span class="line">  <span class="comment">#   50 | #include &lt;jemalloc/jemalloc.h&gt;</span></span><br><span class="line">  <span class="comment">#       |          ^~~~~~~~~~~~~~~~~~~~~</span></span><br><span class="line">  <span class="comment"># compilation terminated.</span></span><br><span class="line">  <span class="comment"># make[1]: *** [Makefile:368: adlist.o] Error 1</span></span><br><span class="line">  <span class="comment"># make[1]: Leaving directory '/opt/soft/redis-6.2.5/src'</span></span><br><span class="line">  <span class="comment"># make: *** [Makefile:9: install] Error 2</span></span><br></pre></td></tr></table></figure><br><strong>错误原因:</strong> 错误的本质是我们在开始执行 make 时遇到了错误（大部分是由于gcc未安装），然后我们安装好了gcc 后，我们再执行make ,这时就出现了<code>jemalloc/jemalloc.h: No such file or directory</code>。因为上次的编译失败有残留的文件，所以需要清理下然后重新编译就可以了。<br><strong>解决办法:</strong> 清理上次编译残留文件重新编译<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make distclean &amp;&amp; make</span><br></pre></td></tr></table></figure><br>Tips: 网上其它采用的方式是 <code>make MALLOC=libc</code> ，虽然该方法最后也是可以成功安装好 redis 但是有一些隐患的，首先我们要知道redis 需要使用内存分配器的， <code>make MALLOC=jemalloc</code> 就是指定内存分配器为 jemalloc ，<code>make MALLOC=libc</code> 就是指定内存分配器为 libc ，这个是有安全隐患的，jemalloc 内存分配器在实践中处理内存碎片是要比libc 好的，而且在README.md 文档也说明到了，jemalloc内存分配器也是包含在源码包里面的，可以在 deps 目录下看到 jemalloc 目录。</p>
+<p><br></p>
+<h3 id="2-运行使用"><a href="#2-运行使用" class="headerlink" title="(2) 运行使用"></a>(2) 运行使用</h3><h4 id="问题0-使用命令行-a-参数时会报Warning-Using-a-password-with-39-a-39-or-39-u-39-option-on-the-command-line-interface-may-not-be-safe-警告"><a href="#问题0-使用命令行-a-参数时会报Warning-Using-a-password-with-39-a-39-or-39-u-39-option-on-the-command-line-interface-may-not-be-safe-警告" class="headerlink" title="问题0.使用命令行-a 参数时会报Warning: Using a password with &#39;-a&#39; or &#39;-u&#39; option on the command line interface may not be safe.警告"></a>问题0.使用命令行-a 参数时会报<code>Warning: Using a password with &#39;-a&#39; or &#39;-u&#39; option on the command line interface may not be safe.</code>警告</h4><p><strong>解决办法:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -h 172.16.24.214 -a weiyigeek -c --no-auth-warning</span><br></pre></td></tr></table></figure></p>
+<h4 id="问题1-警告超委托内存设置为0后台保存可能在低内存条件下失败"><a href="#问题1-警告超委托内存设置为0后台保存可能在低内存条件下失败" class="headerlink" title="问题1.警告超委托内存设置为0后台保存可能在低内存条件下失败"></a>问题1.警告超委托内存设置为0后台保存可能在低内存条件下失败</h4><p><strong>报错信息:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">WARNING overcommit_memory is <span class="built_in">set</span> to 0! Background save may fail under low memory condition. To fix this issue add <span class="string">'vm.overcommit_memory = 1'</span> to /etc/sysctl.conf and <span class="keyword">then</span> reboot or run the <span class="built_in">command</span> <span class="string">'sysctl vm.overcommit_memory=1'</span> <span class="keyword">for</span> this to take effect.</span><br></pre></td></tr></table></figure></p>
+<p><strong>解决办法:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#方式1:root权限、临时生效不用重启Redis服务</span></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/vm/overcommit_memory</span><br><span class="line"></span><br><span class="line"><span class="comment">#方式2:永久生效但是需要重启redis服务</span></span><br><span class="line">vim /etc/sysctl.conf</span><br><span class="line">vm.overcommit_memory=1</span><br></pre></td></tr></table></figure></p>
+<p>Tips: 建议在配置文件中配置Redis错误日志文件而非直接打印: <code>logfile /var/log/redis/redis-server.log</code></p>
+<p><br></p>
+<h4 id="问题2-当创建redis集群时显示Either-the-node-already-knows-other-nodes-check-with-CLUSTER-NODES-or-contains-some-key-in-database-0-错误"><a href="#问题2-当创建redis集群时显示Either-the-node-already-knows-other-nodes-check-with-CLUSTER-NODES-or-contains-some-key-in-database-0-错误" class="headerlink" title="问题2.当创建redis集群时显示Either the node already knows other nodes (check with CLUSTER NODES) or contains some key in database 0.错误"></a>问题2.当创建redis集群时显示<code>Either the node already knows other nodes (check with CLUSTER NODES) or contains some key in database 0.</code>错误</h4><p><strong>错误信息:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ERR] Node 172.16.243.94:6379 is not empty. Either the node already knows other nodes (check with CLUSTER NODES) or contains some key <span class="keyword">in</span> database 0.</span><br></pre></td></tr></table></figure><br><strong>问题原因:</strong> 由于前面初始化集群时卡住，导致部分节点的nodes.conf文件中更新了新节点数据，需要删除数据，存在旧的集群相关配置未进行清理以及数据卡槽不为空。<br><strong>解决方法:</strong> 重置集群节点。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1.删除生成的配置文件 `/etc/redis/cluster/run/nodes_8000.conf`;如果不行则说明现在创建的结点包括了旧集群的结点信息,需要删除redis的持久化文件后再重启redis，比如:appendonly.aof、dump.rdb</span></span><br><span class="line">rm -rf appendonly.aof  dump.rdb  nodes.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2.在集群相关节点(登录每个redis节点重置)上执行如下redis子命令。</span></span><br><span class="line">redis-cli -p 7001 -c </span><br><span class="line">flushdb</span><br><span class="line">cluster reset</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="问题3-Redis集群启动报Node-172-16-24-214-6379-replied-with-error-ERR-Unknown-node错误。"><a href="#问题3-Redis集群启动报Node-172-16-24-214-6379-replied-with-error-ERR-Unknown-node错误。" class="headerlink" title="问题3.Redis集群启动报Node 172.16.24.214:6379 replied with error: ERR Unknown node错误。"></a>问题3.Redis集群启动报<code>Node 172.16.24.214:6379 replied with error: ERR Unknown node</code>错误。</h4><p><strong>错误信息:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Node 172.16.24.214:6379 replied with error:</span><br><span class="line">ERR Unknown node 436c6a1d7e4c5f782e1e0620b831211ebb0a41a4</span><br></pre></td></tr></table></figure><br><strong>问题原因:</strong> 节点地址与其在集群中ID不匹配。<br><strong>解决办法:</strong> 重新强制节点群集与制定节点握手使其加入到集群中。如<code>redis-cli -h 172.16.24.214 -a weiyigeek -c cluster meet 172.16.243.97 6379</code>命令</p>
+<p><br/></p>
+<h4 id="问题4-Redis集群进行卡槽迁移时报The-following-slots-are-open-xxxx-错误。"><a href="#问题4-Redis集群进行卡槽迁移时报The-following-slots-are-open-xxxx-错误。" class="headerlink" title="问题4.Redis集群进行卡槽迁移时报The following slots are open: xxxx.错误。"></a>问题4.Redis集群进行卡槽迁移时报<code>The following slots are open: xxxx.</code>错误。</h4><p><strong>错误信息:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[OK] All nodes agree about slots configuration.</span><br><span class="line">&gt;&gt;&gt; Check <span class="keyword">for</span> open slots...</span><br><span class="line">[WARNING] Node 192.168.1.100:7000 has slots <span class="keyword">in</span> importing state (5798,11479).</span><br><span class="line">[WARNING] Node 192.168.1.100:7001 has slots <span class="keyword">in</span> importing state (1734,5798).</span><br><span class="line">[WARNING] Node 192.168.1.101:7002 has slots <span class="keyword">in</span> importing state (11479).</span><br><span class="line">[WARNING] The following slots are open: 5798,11479,1734</span><br><span class="line">&gt;&gt;&gt; Check slots coverage...</span><br><span class="line">[OK] All 16379 slots covered.</span><br></pre></td></tr></table></figure><br><strong>解决办法:</strong> 取消对指定卡槽 slot 进行导入（import）或者迁移（migrate）。如<code>redis-cli -h 172.16.243.97 -a weiyigeek -c cluster setslot 5798 stable</code></p>
+<p><br/></p>
+<h4 id="问题5-集群初始化时一直等待-Waiting-for-the-cluster-to-join错误。"><a href="#问题5-集群初始化时一直等待-Waiting-for-the-cluster-to-join错误。" class="headerlink" title="问题5.集群初始化时一直等待 Waiting for the cluster to join错误。"></a>问题5.集群初始化时一直等待 <code>Waiting for the cluster to join</code>错误。</h4><p><strong>问题原因:</strong> 最开始部署时从使用docker-comopose部署的方法套用过来，由于redis.conf配置文件中参数<code>cluster-announce-ip</code>选项配置了宿主机的ip，当初始化时集群节点之间需要通讯，但是再k8s中宿主机ip已经不适用，导致无法通讯一致卡住在那个位置。<br><strong>解决办法:</strong> 配置中禁用 <code>cluster-announce-ip</code> 选项，采用上面的update脚本进行解决。</p>
+<p><br></p>
+<h4 id="问题6-当报无法连接的时候，通过-telnet192-168-1-13-6379-是无法连接通，则说明配置的哪里有问题导致的"><a href="#问题6-当报无法连接的时候，通过-telnet192-168-1-13-6379-是无法连接通，则说明配置的哪里有问题导致的" class="headerlink" title="问题6.当报无法连接的时候，通过 telnet192.168.1.13:6379 是无法连接通，则说明配置的哪里有问题导致的"></a>问题6.当报无法连接的时候，通过 telnet192.168.1.13:6379 是无法连接通，则说明配置的哪里有问题导致的</h4><p>错误信息: <code>【2】can&#39;t connect to node 192.168.1.1:6379</code><br>问题原因: redis的配置文件，发现，在配置文件中配置bind 127.0.0.1这个地址,修改指定的IP地址，可以同时指定127.0.0.1，这样本机和ip地址都可以访问<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1.指定接口</span></span><br><span class="line"><span class="built_in">bind</span> 192.168.1.13 127.0.0.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2.任意接口</span></span><br><span class="line"><span class="built_in">bind</span> 0.0.0.0</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="问题7-使用check进行检测集群运行状态时显示【4】-ERR-Not-all-16379-slots-are-covered-by-nodes错误。"><a href="#问题7-使用check进行检测集群运行状态时显示【4】-ERR-Not-all-16379-slots-are-covered-by-nodes错误。" class="headerlink" title="问题7.使用check进行检测集群运行状态时显示【4】[ERR] Not all 16379 slots are covered by nodes错误。"></a>问题7.使用check进行检测集群运行状态时显示<code>【4】[ERR] Not all 16379 slots are covered by nodes</code>错误。</h4><p><strong>错误原因:</strong> 由于redis clster集群节点宕机（或节点的redis服务重启），导致了部分slot数据分片丢失；在在删除节点的时候一定要注意删除的是否是Master主节点。<br><strong>解决办法:</strong> 官方是推荐使用fix 来修复集群,修复完成后检测下是否正确（查看别的节点）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修复集群和槽的重复分配问题（将所有slots迁移到一处）</span></span><br><span class="line">redis-cli -h 172.16.243.97 -a weiyigeek --cluster fix --cluster-fix-with-unreachable-masters 172.16.24.214:6379</span><br></pre></td></tr></table></figure><br><strong>特别注意:</strong> 在部分节点重启后重新回到集群中的过程期间，在check集群状态的时候会出现”[ERR] Not all 16379 slots are covered by nodes.”这个报错，<br>需要稍微等待一会，等重启节点完全回到集群中后，这个报错就会消失！</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-04-14T02:48:55.507Z" itemprop="dateUpdated">2022-04-14 10:48:55</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/数据存储/Redis/8.Redis数据库客户端操作实践及入坑出坑.md" target="_blank" rel="noopener noreferrer">_posts/数据存储/Redis/8.Redis数据库客户端操作实践及入坑出坑.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/4-17-577.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/4-17-577.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-17-577.html&title=《8.Redis数据库客户端操作实践及入坑出坑》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-17-577.html&title=《8.Redis数据库客户端操作实践及入坑出坑》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-17-577.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《8.Redis数据库客户端操作实践及入坑出坑》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-17-577.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-17-577.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/4-18-69.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">NetCore磊科路由器脆弱性一览</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/4-17-527.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">6.Redis数据库性能测试及优化配置</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-Redis-管理工具"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Redis 管理工具</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#AnotherRedisDesktopManage"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">AnotherRedisDesktopManage</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#PhpRedisAdmin"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">PhpRedisAdmin</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#redis-manager"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">redis-manager</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-客户端脚本连接"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 客户端脚本连接</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#0-Redis-Lua-脚本连接示例"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">(0) Redis Lua 脚本连接示例</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-PHP-脚本连接使用-redis-示例"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">(1) PHP 脚本连接使用 redis 示例</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-C-连接使用redis"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">(2) C# 连接使用redis</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-JAVA-连接操作-redis-示例"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">(3) JAVA 连接操作 redis 示例</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-Python-连接Redis-Sentinel实例"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">(4) Python 连接Redis Sentinel实例</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x0n-入坑出坑"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x0n 入坑出坑</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-安装编译"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">(1) 安装编译</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题1-Redis进行源码编译时显示zmalloc-h-50-10-fatal-error-jemalloc-jemalloc-h-No-such-file-or-directory错误"><span class="post-toc-number">3.1.1.</span> <span class="post-toc-text">问题1.Redis进行源码编译时显示zmalloc.h:50:10: fatal error: jemalloc&#x2F;jemalloc.h: No such file or directory错误</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-运行使用"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">(2) 运行使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题0-使用命令行-a-参数时会报Warning-Using-a-password-with-39-a-39-or-39-u-39-option-on-the-command-line-interface-may-not-be-safe-警告"><span class="post-toc-number">3.2.1.</span> <span class="post-toc-text">问题0.使用命令行-a 参数时会报Warning: Using a password with &#39;-a&#39; or &#39;-u&#39; option on the command line interface may not be safe.警告</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题1-警告超委托内存设置为0后台保存可能在低内存条件下失败"><span class="post-toc-number">3.2.2.</span> <span class="post-toc-text">问题1.警告超委托内存设置为0后台保存可能在低内存条件下失败</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题2-当创建redis集群时显示Either-the-node-already-knows-other-nodes-check-with-CLUSTER-NODES-or-contains-some-key-in-database-0-错误"><span class="post-toc-number">3.2.3.</span> <span class="post-toc-text">问题2.当创建redis集群时显示Either the node already knows other nodes (check with CLUSTER NODES) or contains some key in database 0.错误</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题3-Redis集群启动报Node-172-16-24-214-6379-replied-with-error-ERR-Unknown-node错误。"><span class="post-toc-number">3.2.4.</span> <span class="post-toc-text">问题3.Redis集群启动报Node 172.16.24.214:6379 replied with error: ERR Unknown node错误。</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题4-Redis集群进行卡槽迁移时报The-following-slots-are-open-xxxx-错误。"><span class="post-toc-number">3.2.5.</span> <span class="post-toc-text">问题4.Redis集群进行卡槽迁移时报The following slots are open: xxxx.错误。</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题5-集群初始化时一直等待-Waiting-for-the-cluster-to-join错误。"><span class="post-toc-number">3.2.6.</span> <span class="post-toc-text">问题5.集群初始化时一直等待 Waiting for the cluster to join错误。</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题6-当报无法连接的时候，通过-telnet192-168-1-13-6379-是无法连接通，则说明配置的哪里有问题导致的"><span class="post-toc-number">3.2.7.</span> <span class="post-toc-text">问题6.当报无法连接的时候，通过 telnet192.168.1.13:6379 是无法连接通，则说明配置的哪里有问题导致的</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题7-使用check进行检测集群运行状态时显示【4】-ERR-Not-all-16379-slots-are-covered-by-nodes错误。"><span class="post-toc-number">3.2.8.</span> <span class="post-toc-text">问题7.使用check进行检测集群运行状态时显示【4】[ERR] Not all 16379 slots are covered by nodes错误。</span></a></li></ol></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-17-577.html&title=《8.Redis数据库客户端操作实践及入坑出坑》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-17-577.html&title=《8.Redis数据库客户端操作实践及入坑出坑》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-17-577.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《8.Redis数据库客户端操作实践及入坑出坑》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-17-577.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-17-577.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLUlEQVR42u3aQY7CMBAEQP7/6ewVCRF6PGaR7coJZbNA5dA443484uN6Op7P3P/19fzre95/yuQDAwNjWcZ1eyRftHrmnnR/O95SMTAwDmBU3zoJyuTj+2wMDAyM6jX9CMbAwMCYFbh5OCah/LPfDQwMjKUYyUNscn0+aMtvzeRncQwMjAUZ+dT9/19/ZX8DAwNjKcZYdFaXiUlEXo0DAwNjb0YecJ3hfv5AO/Z9MDAwTmCMVRwSWH8Al5/BwMA4mdEP1mToX93sLAcuBgbGFoyxWEyqYJ0Ny3xrAQMD4xxGZ0CffGS1XjZWGsPAwNiVkTys3sdi9cr8xhVuLgYGxqaM/Ev06xrVzYDCf2FgYGzKGKtWVMdzY1cWfgYwMDAOYHSWgHko5zerHMEYGBjHMJKI7JdQ++2IaM6HgYGxHWOs7JVXH+aO6j6scDEwMLZjJNuHY2O4sQpXa8CHgYGxKaNaGO0XLPJaamGZiIGBsTUjX4RVR2mzqhj5KBADA+MERrIcTB53x7ZFq7EbdUYwMDC2ZlQLE7MiO3+NgYGB0R/MVUN2bLZWWJ9iYGAsy7iKR7/nkIdsYfyHgYGxNaMac2PbA4WRWXGZWMZgYGAsy5hbsKiWwPKNhGlTQwwMjGUZ/eDLl4+dQtjbd8PAwMD4cuDmxYtCZwQDA+NgxqyFY/6EHUU8BgbGAYy8FpZP7/rx+pVxGwYGxoKMTlPjQ1WrOGjLF5SDG5kYGBjrMf4APH0i4A8AMHQAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

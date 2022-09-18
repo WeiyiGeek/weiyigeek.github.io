@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 磁盘高可用解决方案(DBA).md|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="高可用服务">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>磁盘高可用解决方案(DBA).md</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">磁盘高可用解决方案(DBA).md</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-04-11T06:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-04-11
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/">系统架构</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E8%BF%90%E7%BB%B4%E5%9F%BA%E7%A1%80/">运维基础</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/系统架构/高可用/磁盘高可用解决方案"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">磁盘高可用解决方案(DBA).md</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-04-11 14:34:30" datetime="2019-04-11T06:34:30.000Z"  itemprop="datePublished">2019-04-11</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/">系统架构</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E8%BF%90%E7%BB%B4%E5%9F%BA%E7%A1%80/">运维基础</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <h4 id="文章目录"><a href="#文章目录" class="headerlink" title="文章目录"></a>文章目录</h4><p>[TOC]</p>
+<p>(1) drbd 高可用解决方案</p>
+<a id="more"></a>
+<h4 id="0x00-Drbd高可用"><a href="#0x00-Drbd高可用" class="headerlink" title="0x00 Drbd高可用"></a>0x00 Drbd高可用</h4><h5 id="1-drbd-介绍"><a href="#1-drbd-介绍" class="headerlink" title="(1) drbd 介绍"></a>(1) drbd 介绍</h5><p>官方网站：<br><em>Q:什么是Drbd？</em><br>答:分布式复制块设备(Drbd,Dirtributed Replicated Block Device)是基于软件的，无共享，复制的存储解决方案以及在块设备在不同高可用服务器对之间同步和镜像数据软件,解决磁盘单点故障(般情况下只支持2个节点),通过它可用实现在网络中两台服务器之间进行块设备级别的实时或异步镜像或者同步复制,类似rsync+inotify架构项目软件：</p>
+<p><em>他们之间的对比：</em></p>
+<ul>
+<li>inotify -&gt;  rsync：在文件系统之上的实际物理文件同步(磁盘IO效率低下);</li>
+<li>drbd：基于文件系统底层,block层级同步(效率更高),一个用软件实现的、无共享的、服务器之间镜像块设备内容的存储复制解决方案</li>
+</ul>
+<p>DRBD需构建在底层设备之上，然后构建出块设备。对用户来说DRBD设备就像是物理磁盘，可在其内创建文件系统；<br>Drbd支持的底层设备块设备分类：</p>
+<ul>
+<li>磁盘分区,整块磁盘</li>
+<li>LVM 逻辑卷</li>
+<li>soft raid设备</li>
+<li>EVMS（Enterprise Volume Management System，企业卷管理系统）的卷。</li>
+</ul>
+<p>数据镜像：实时、透明、同步（所有服务器都成功后返回）、异步（本地服务器成功后返回）。<br><br></p>
+<p><strong>1.Drbd工作原理</strong><br>drbd软件工作在文件系统层级以下,比文件系统更加靠近操作系统内核及IO栈,所以drbd是工作在系统内核之中的;但它不能神奇地添加上层的功能比如检测到EXT3文件系统的崩溃;<br>原理：基于DRBD的高可用(HA)两台服务器主机中,当我们将数据写入(主)磁盘中时候数据还将被发送到网络上的另外一台主机中(备);以相同的形式记录在磁盘之中,使得本地(Master)与远程主机(slave)的数据实时同步;drbd服务作用类似于磁盘阵列里的RAID1功能,就相当于把网络中两台服务器做成了类似于磁盘阵列里的RAID1一样;</p>
+<p>在高可用方案(HA)使用DRBD功能代替了共享盘阵(保存两份-冗余是50%),当Master出现故障时候,远程主机还会保留有一份和主节点相同的数据备份可以继续切换使用(直接接管提供服务,降低岩机修复时间),而不会发与故障前数据不一致的问题;</p>
+<p>工作原理图:<br><figure class="image-box">
+                <a rel=磁盘高可用解决方案(DBA).md href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411123732.png" target="_blank" title="WeiyiGeek.drbd工作原理图" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411123732.png" alt="WeiyiGeek.drbd工作原理图" title="" class=""></a>
+                <p>WeiyiGeek.drbd工作原理图</p>
+            </figure></p>
+<p><em>一般情况下文件写入磁盘的步骤是:</em><br>写操作 –&gt; 文件系统 –&gt; 内存缓存中 –&gt; 磁盘调度器 –&gt; 磁盘驱动器 –&gt; 写入磁盘 ; 而DRBD的工作机制如上图所示数据经过buffer cache后有内核中的DRBD模块(复制写入磁盘的数据)通过tcp/ip协议栈经过网卡和对方服务器DRBD服务建立数据同步。</p>
+<p><br></p>
+<p><strong>2.Drbd工作模式与协议</strong><br>当某一进程对某一文件执行了写操作时，写操作在上图执行到那个过程时就认为文件已经同步完成。</p>
+<p><em>Drbd的三种同步复制协议:</em><br>协议的选择将影响流量,从而影响网络延时;</p>
+<ul>
+<li>协议A：异步 asynchronous 复制协议(本地写入成功后立即返回,data放在发送的buffer中,可能会丢失)<br>  如上图文件写操作执行到A点是就认为写入磁盘成功(性能好/但是数据可靠性差)</li>
+<li>协议B：内存同步(半同步 Semi sync )复制协议(本地写入成功并将数据发送到对方后立即返回,如果双机掉电数据丢失)<br> 如上图文件写操作执行到B点是就认为写入磁盘成功。性能好，数据可靠性介于A和C之间。</li>
+<li>协议C：同步复制协议(sync),本地和对端服务器磁盘都写入成功确认后返回成功(如果单机电和单机磁盘损坏则数据不会丢失),drbd默认使用的复制协议;<br>  如上图文件写操作执行到C点是就认为写入磁盘成功。性能差，数据可靠性高。</li>
+</ul>
+<p><em>Drbd支持的两种模式：</em></p>
+<ol>
+<li>实时同步模式<br>当数据写入到本地磁盘和远端所有服务器磁盘都成功后才会返回成功写入;防止本地与远端的数据丢失不一致,生产环境中常用(DRBD服务协议C级别即该种同步模式)</li>
+<li>异步同步模式<br>当数据写入到本地服务器成功后就返回成功写入,不管远端服务死否写入成功;还可能是数据写入到本地服务器或远端的Buffer成功后返回;(DRBD服务协议a/b级别)</li>
+</ol>
+<p>提示：nfs网络系统文件也有类似的参数(sync/async)与功能;实时同步与异步同步;</p>
+<p><em>DRBD的工作模式:</em></p>
+<ol>
+<li>主从模型 master/slave（primary/secondary） | 单主模式<br>在某一时刻只允许有一个主节点,主节点的作用是可以挂在使用与写入数据等；从节点知识作为主节点的镜像是主节点的备份。</li>
+</ol>
+<ul>
+<li>优点：有效的避免磁盘出现单点故障,文件系统不会错乱</li>
+<li>缺点： 主节点读取/使用,而备节点只做备份使用(不能同上进行读取/写入)导致资源的浪费</li>
+</ul>
+<figure class="image-box">
+                <a rel=磁盘高可用解决方案(DBA).md href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411150931.png" target="_blank" title="WeiyiGeek.主备模式" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411150931.png" alt="WeiyiGeek.主备模式" title="" class=""></a>
+                <p>WeiyiGeek.主备模式</p>
+            </figure>
+<ol start="2">
+<li>双主模型 dula primary(primary/primary)[DRBD8.0之后的新特性]<br>所谓双主模型是2个节点都可以当做主节点来挂载使用;需要采用共享的cluster文件系统,如GFS和OCFS2用于需要从2个节点并发访问数据的场合,需要特别配置;</li>
+</ol>
+<figure class="image-box">
+                <a rel=磁盘高可用解决方案(DBA).md href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411151016.png" target="_blank" title="WeiyiGeek.主主模式" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411151016.png" alt="WeiyiGeek.主主模式" title="" class=""></a>
+                <p>WeiyiGeek.主主模式</p>
+            </figure>
+<p><em>那么思考当第一个主节点对某一文件正在执行写操作，此时另一个节点也正在对同一文件也要执行写操作，结果会如何呢？</em><br>答：一般这种情况会造成文件系统的错乱，导致数据不能正常使用。<br>原因是：对文件的加速机制是由操作系统内核所管理的，一个节点对文件加速之后，另一个节点并不知道对方的锁信息。<br>解决办法是：使用集群文件系统,集群文件系统使用分布式文件锁管理器，当一个节点对文件加锁之后会通过某种机制来通知其他节点锁信息，从而实现文件锁共享。</p>
+<p><em>补充知识点:</em><br>Oracle的dg服务模式分为两种</p>
+<ul>
+<li>一种是逻辑上如SQL语句执行方法,8i~10g 备节点不提供服务</li>
+<li>另一种就是物理的如block块级模式,Oracle 11g 支持主库写从库读的方式</li>
+</ul>
+<hr>
+
+<h5 id="2-drbd-应用场景"><a href="#2-drbd-应用场景" class="headerlink" title="(2) drbd 应用场景"></a>(2) drbd 应用场景</h5><p>生产环境中Drbd常用于高可用服务器之间的数据同步解决方案;<br>如Heartbeat + drbd  + nfs/mfs/gfs ; heartbeat + drbd + mysql/Oracle等等,实际上可以结合任意需要数据同步的所有服务的应用场景;</p>
+<p><em>相关数据同步工具介绍:</em><br>(1) rsync [实时同步工具,但效率不高]<br>(2) scp [实时同步工具,但效率不高]<br>(3) nc / nfs (网络文件系统)<br>(4) union 双机同步<br>(5) csync2 多机同步<br>(6) 软自身同步机制 (<code>mysql,oracle,mongdb,ttserver,redis</code>) 文件放到数据库,同步到从库再把文件拿出来;<br>(7) drbd 高可用</p>
+<hr>
+
+<h5 id="3-drbd的安装"><a href="#3-drbd的安装" class="headerlink" title="(3) drbd的安装"></a>(3) drbd的安装</h5><p>Drbd软件分类：</p>
+<ul>
+<li>Centos5.x 适合drbd 8.3 YUM</li>
+<li>Centos6.x 适合drbd 8.4 </li>
+<li>Centos7.x 适合源码编译安装</li>
+</ul>
+<p>配置目标：两台服务器分别配置号drbd服务,实现Master-data1机器上/dev/sdb/分区上写入数据,数据会实时同步到Master-data2j机器上;一旦服务器出现异常,瞬间接替损坏数据或宕机的机器,实现数据异机实时同步,达到数据高可用无业务影响的目的;</p>
+<p><em>配置提示：</em></p>
+<ul>
+<li>配置的是drbd主备模式,及应用时只在主的一端写入数据,备的一端仅处于数据热备状态;</li>
+<li>备节点drbd的分区是不可见的,也是处于非活动状态,不能人为写入数据; </li>
+<li>多drbd分区主主双向同步模式,在实际生产环境中配置成为主主模式即如上面图所示：</li>
+</ul>
+<p>drbd 服务网卡以及资源配置:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">##机器1 Master-data1 </span></span><br><span class="line">管理IP ：               ETH1:192.168.1.100/24</span><br><span class="line">DRBD管理名称与挂载目录:  data /data</span><br><span class="line">DRBD逻辑设备:           /dev/drbd0             <span class="comment">#关键点</span></span><br><span class="line">心跳连接以及数据同步：   ETH2:192.168.2.100/24  <span class="comment">#不要配网关/也不要与局域网内其他机器起冲突</span></span><br><span class="line">DRBD 存储设备：         /dev/sdb1</span><br><span class="line">DRBD Meta设备：         /dev/sdb2[0]</span><br><span class="line">虚拟IP(VIP) ：          ETH1:192.168.1.10</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##机器2 Master-data2 </span></span><br><span class="line">管理IP ：               ETH1:192.168.1.101/24</span><br><span class="line">DRBD管理名称与挂载目录:  data /data</span><br><span class="line">DRBD逻辑设备:           /dev/drbd0             <span class="comment">#关键点 通过 逻辑设备写到磁盘里面</span></span><br><span class="line">心跳连接以及数据同步：   ETH2:192.168.2.101/24  <span class="comment">#不要配网关/也不要与局域网内其他机器起冲突</span></span><br><span class="line">DRBD 存储设备：         /dev/sdb1</span><br><span class="line">DRBD Meta设备：         /dev/sdb2[0]</span><br><span class="line">虚拟IP(VIP) ：          ETH1:192.168.1.11</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#推荐操作【把心跳地址写入/etc/hosts文件中】</span></span><br><span class="line">192.168.2.100 Master-data1</span><br><span class="line">192.168.2.101 Master-data2</span><br></pre></td></tr></table></figure></p>
+<p>安装环境：CentOS release 6.10 (Final) - 基础环境操作参看<a href="./2019/04/09/%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9C%8D%E5%8A%A1%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-dba-md.html">高可用服务解决方案(DBA)</a></p>
+<p>DRBD 配置步骤：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">1. 安装drbd以及磁盘分区,加载modproed内核</span><br><span class="line">2. 配置资源文件（定义资料名称，磁盘，节点信息，同步限制等）</span><br><span class="line">3. 将drbd加入到系统服务chkconfig --add drbd </span><br><span class="line">4. 初始化资源组 drbdadm create-md resource_name</span><br><span class="line">5. 启动服务 service drbd start</span><br><span class="line">6. 设置primary主机并同步数据</span><br><span class="line">7. 分区、格式化&#x2F;dev&#x2F;drbd*</span><br><span class="line">8. 一个节点进行挂载</span><br><span class="line">9. 查看状态cat &#x2F;proc&#x2F;drbd</span><br></pre></td></tr></table></figure></p>
+<p>DRBD 安装流程：(跳过上面配置IP与hosts文件,添加主机路由)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">###### Step 1. 公共安装#########</span></span><br><span class="line">service iptables stop                       //关闭iptables</span><br><span class="line">setenforcing 0                                 //暂时关闭selinux</span><br><span class="line">sed -i <span class="string">'s/SELINUX=enforcing/SELINUX=disabled/'</span> /etc/sysconfig/selinux      //永久关闭selinux</span><br><span class="line">ntpdate -u asia.pool.ntp.org <span class="comment"># 时间同步</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###### Step 2. drbd服务安装 (编译安装/yum安装)########</span></span><br><span class="line"><span class="comment">#drbd共有两部分组成：内核模块和用户空间的管理工具。</span></span><br><span class="line"><span class="comment">#其中drbd内核模块代码已经整合进Linux内核2.6.33以后的版本中，因此如果内核版本高于此版本的话，只需要安装管理工具即可；否则您需要同时安装内核模块和管理工具两个软件包，并且此两者的版本号一定要保持对应。</span></span><br><span class="line"><span class="comment">#yum 安装需要找到相应的源 </span></span><br><span class="line">[root@Master-data1/2 drbd]$ rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org</span><br><span class="line">[root@Master-data1/2 drbd]$ yum install https://www.elrepo.org/elrepo-release-6-8.el6.elrepo.noarch.rpm</span><br><span class="line"><span class="comment">#yum install https://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm (external link)</span></span><br><span class="line"><span class="comment">#keepcache = 1 yum配置文件就会保存下载的rpm</span></span><br><span class="line">$ yum makecache</span><br><span class="line">$ yum install kernel-devel kernel-header flex drbd84-utils kmod-drbd84  parted -y</span><br><span class="line">Installed:</span><br><span class="line">  drbd84-utils.i686 0:9.5.0-1.el6.elrepo              flex.i686 0:2.5.35-9.el6</span><br><span class="line">  kernel-devel.i686 0:2.6.32-754.12.1.el6             kmod-drbd84.i686 0:8.4.11-1.el6_10.elrepo</span><br><span class="line">Complete!  <span class="comment">#表示安装成功</span></span><br><span class="line"><span class="comment">### 忽略以下内容</span></span><br><span class="line"><span class="comment"># 对应的内核模块的名字分别为 drbd-kmod</span></span><br><span class="line"><span class="comment"># 注意：drbd和drbd-kmdl的版本要对应；另一个是drbd-kmdl的版本要与当前系统的内核版本(uname -r)相对应。</span></span><br><span class="line"><span class="comment">#下载地址： http://www.rpmfind.net/linux/atrpms/el6-x86_64/atrpms/stable/</span></span><br><span class="line"><span class="comment">#          https://www.linbit.com/en/drbd-community/drbd-download/</span></span><br><span class="line"><span class="comment"># [root@Master-data2 drbd]# wget https://www.linbit.com/downloads/drbd/utils/drbd-utils-9.6.0.tar.gz</span></span><br><span class="line"></span><br><span class="line"><span class="comment">############ Step3. 加载模块到内核 ###########</span></span><br><span class="line">[root@Master-data1/2 ]$ modprobe drbd &amp;&amp; lsmod | grep drbd  <span class="comment">#临时生效,重启由需要添加 可用加入到 /etc/rc.local</span></span><br><span class="line">drbd                  485533  0</span><br><span class="line">libcrc32c                841  1 drbd</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"modprobe drbd"</span> &gt;&gt; /etc/rc.d/rc.local  <span class="comment">#加载drbd到内核</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"modprode drbd &gt; /dev/null 2&gt;&amp;1"</span> &gt; /etc/sysconfig/modules/drbd.modules</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">####### Step4. 建立一个磁盘分区  #######</span></span><br><span class="line"><span class="comment">#【重要】需要VirtualBox为虚拟机添加一块磁盘 选择磁盘格式为 SCSI 分配 0.5 GB</span></span><br><span class="line">主节点：512MB </span><br><span class="line">备节点：1024MB</span><br><span class="line"></span><br><span class="line">[root@Master-data1/data2 ~]$ fdisk -l</span><br><span class="line">Disk /dev/sda: 536 MB, 536870912 bytes</span><br><span class="line">Disk /dev/sda: 1073 MB, 1073741824 bytes</span><br><span class="line"></span><br><span class="line"><span class="comment"># drbd服务 需要创建两个分区</span></span><br><span class="line">/dev/sdb1  /data           存储数据目录           256MB / 768MB (数)</span><br><span class="line">/dev/sdb2  mete data分区   存储drbd同步信息    总大小减去上面的大小</span><br><span class="line"></span><br><span class="line"><span class="comment">#注意：</span></span><br><span class="line">1.这里的meta data 分区一定不能个数建立文件系统</span><br><span class="line">2.分浩的分区现在不能进行挂载(mount)</span><br><span class="line">3.生产环境中DRBD meta data 分区一般设置为1~2G</span><br><span class="line"></span><br><span class="line"><span class="comment">#【注意】 分区步骤 （注意如果 raid 磁盘阵列 超过2T 该命令不能使用 请是使用 parted）</span></span><br><span class="line">[root@Master-data1 ~]<span class="comment"># fdisk /dev/sda</span></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): p</span><br><span class="line">Disk /dev/sda: 536 MB, 536870912 bytes</span><br><span class="line">   Device Boot      Start         End      Blocks   Id  System</span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Command action</span><br><span class="line">   e   extended</span><br><span class="line">   p   primary partition (1-4)</span><br><span class="line">p</span><br><span class="line">Partition number (1-4): 1 <span class="comment">#注意分区编号1</span></span><br><span class="line">First cylinder (1-512, default 1): 1</span><br><span class="line">Last cylinder, +cylinders or +size&#123;K,M,G&#125; (1-512, default 512): +256M</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">Command action</span><br><span class="line">   e   extended</span><br><span class="line">   p   primary partition (1-4)</span><br><span class="line">p</span><br><span class="line">Partition number (1-4): 2  <span class="comment">#注意这里是2</span></span><br><span class="line">First cylinder (386-512, default 386): <span class="comment">#默认回车即可</span></span><br><span class="line">Last cylinder, +cylinders or +size&#123;K,M,G&#125; (386-512, default 512):</span><br><span class="line"></span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): p  <span class="comment">#显示分区信息</span></span><br><span class="line">   Device Boot      Start         End      Blocks   Id  System</span><br><span class="line">/dev/sdb1               1         385      394224   83  Linux   <span class="comment">#存储数据 256</span></span><br><span class="line">/dev/sdb2             386         512      130048   83  Linux   <span class="comment">#drbd状态信息</span></span><br><span class="line"></span><br><span class="line">w <span class="comment">#分区写入</span></span><br><span class="line"></span><br><span class="line">[root@Master-data2 ~]$ fdisk /dev/sda  <span class="comment">#同上</span></span><br><span class="line">Device Boot      Start         End      Blocks   Id  System</span><br><span class="line">/dev/sdb1               1          99      795186   83  Linux  <span class="comment">#768M</span></span><br><span class="line">/dev/sdb2             100         130      249007+  83  Linux  <span class="comment">#缺省就行(回车)</span></span><br><span class="line"></span><br><span class="line">$ partprobe <span class="comment">#执行写入分区表刷新磁盘</span></span><br><span class="line"></span><br><span class="line"><span class="comment">####### Step5.[分区完成后可能需要重启] 下面不需要操作 ##########</span></span><br><span class="line"><span class="comment"># 在两端主机内创建分区： 出现5月 14 14:57:19 Mzabbix drbd[4097]: adjust disk: data:failed(apply-al:1)错误时候方法</span></span><br><span class="line"><span class="comment"># 数据区：     parted /dev/sda mklabel gpt &amp;&amp; parted /dev/sdb mkpart logical ext4 700M 300M</span></span><br><span class="line"><span class="comment">#重读分区：  partprobe &amp;&amp; cat /proc/partions</span></span><br><span class="line"><span class="comment">#数据盘/dev/sdb1进行格式化  #meta盘/dev/sdb2不用进行格式化直接挂载</span></span><br><span class="line">[root@Master-data1/2 ~]$ mkfs.ext4 /dev/sda1   <span class="comment">#执行的时候注意自己的磁盘名称(巨坑)</span></span><br><span class="line"><span class="comment"># tune2fs -c -1 /dev/sdb1  #让磁盘被被检测</span></span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=磁盘高可用解决方案(DBA).md href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411153955.png" target="_blank" title="WeiyiGeek.建立一个磁盘分区" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411153955.png" alt="WeiyiGeek.建立一个磁盘分区" title="" class=""></a>
+                <p>WeiyiGeek.建立一个磁盘分区</p>
+            </figure></p>
+<p><br><br><strong>补充：drbd磁盘采用parted分区[master/slave都执行]</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#BACKUP 机器上,分区大小不同是有目的的，为后面的扩容做准备;</span></span><br><span class="line">[root@data2 ~]$ fdisk -l <span class="comment">#查看本地磁盘</span></span><br><span class="line">[root@data2 ~]$ parted /dev/sdb mkpart primary 0 600</span><br><span class="line">[root@data2 ~]$ parted /dev/sdb mkpart primary 600 1073</span><br><span class="line">[root@data2 ~]$ parted /dev/sdb p</span><br><span class="line">Number  Start   End     Size   File system  Name     Flags</span><br><span class="line"> 1      17.4kB  600MB   600MB               primary</span><br><span class="line"> 2      600MB   1073MB  473MB               primary</span><br><span class="line"></span><br><span class="line"><span class="comment">#对于新添加的磁盘快速分区方法</span></span><br><span class="line"><span class="comment"># echo -e "n\np\nl\n\n+600M\nn\np\n2\n\n+400M\nw" | fdisk /dev/sdb</span></span><br><span class="line">partprobe <span class="comment">#执行写入分区表刷新磁盘 #[重点]不重启系统添加磁盘并让kernel读取分区信息 yum -y install parted</span></span><br></pre></td></tr></table></figure></p>
+<h5 id="4-drbd的配置文件"><a href="#4-drbd的配置文件" class="headerlink" title="(4) drbd的配置文件"></a>(4) drbd的配置文件</h5><p>修改配置文件流程：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">########## Step 5. 默认配置文件与目录 ###############</span></span><br><span class="line">global &#123;</span><br><span class="line">    usage-count no;  <span class="comment">#是否参加DRBD使用者统计，默认是参加</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">common &#123;</span><br><span class="line">    protocol C;    </span><br><span class="line">    startup &#123;</span><br><span class="line">        degr-wfc-timeout 240;</span><br><span class="line">    &#125;</span><br><span class="line">    disk &#123;</span><br><span class="line">        on-io-error detach;</span><br><span class="line">    &#125;</span><br><span class="line">    net &#123; </span><br><span class="line">        cram-hmac-alg md5; <span class="comment">#DRBD同步时使用的验证方式和密码</span></span><br><span class="line">        shared-secret <span class="string">"testdrbd"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    syncer &#123;</span><br><span class="line">        rate 100M;      <span class="comment">#主节点和备用节点同步时最大的网络速率 工作中是100M~1000M</span></span><br><span class="line">        verify-alg crc32c; <span class="comment">#验证算法</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">#资源设置</span></span><br><span class="line">resource data&#123;</span><br><span class="line">    disk &#123;</span><br><span class="line">        on-io-error detach;  <span class="comment">#磁盘出现IO错误处理</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">#两台主备节点配置 (关键点)</span></span><br><span class="line">    on Mzabbix &#123;</span><br><span class="line">        device /dev/drbd0;  <span class="comment">#drbd写设备有自己对应的分区</span></span><br><span class="line">        disk /dev/sdb1;        <span class="comment">#本地数据分区1</span></span><br><span class="line">        address  192.168.56.103:7788;  <span class="comment">#心跳/数据传输接口 (建议把这个地址设置到hosts中改成心跳线的网卡)</span></span><br><span class="line">        meta-disk /dev/sdb2[0];  <span class="comment">#meta data数据分区2</span></span><br><span class="line">    &#125;</span><br><span class="line">    on data2 &#123;</span><br><span class="line">        device /dev/drbd0;</span><br><span class="line">        disk /dev/sdb1;</span><br><span class="line">        address  192.168.56.102:7788;</span><br><span class="line">        meta-disk /dev/sdb2[0];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>然后将上面的配置复制到 Master-data2 上的 /etc/drbd.conf 中即可;</p>
+<h5 id="5-drbd的启动运行"><a href="#5-drbd的启动运行" class="headerlink" title="(5) drbd的启动运行"></a>(5) drbd的启动运行</h5><p>Drbd高可用运行案例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">####### Step 6. 然后在两台机器都启动服务 ##########</span></span><br><span class="line"><span class="comment">#step0.建议先执行防止create-md失败</span></span><br><span class="line">dd <span class="keyword">if</span>=/dev/zero of=/dev/sdb&#123;1..2&#125; bs=1M count=100;sync</span><br><span class="line"></span><br><span class="line"><span class="comment">#Step1.初始化DRBD的metadat(Create Device metadata)</span></span><br><span class="line"><span class="comment">#创建提供DRBD记录的信息的metadata分区</span></span><br><span class="line">$ drbdadm create-md data</span><br><span class="line">New drbd meta data block successfully created. drbd</span><br><span class="line"><span class="comment">#也可单独创建resource资源名称直接用;drbdadm create-md all,其中all表示我们在drbd.conf里定义所有的资源名称;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Step2.启动DRBD</span></span><br><span class="line">/etc/init.d/drbd start</span><br><span class="line">$ drbdadm up data</span><br><span class="line"><span class="comment">#或者采用$ drbdadm up all</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Step3.查看drbd状态</span></span><br><span class="line">$ drbdadm status</span><br><span class="line">    data role:Secondary</span><br><span class="line">    disk:Inconsistent</span><br><span class="line">    peer connection:Connecting</span><br><span class="line"></span><br><span class="line">$ cat /proc/drbd</span><br><span class="line">version: 8.4.11-1 (api:1/proto:86-101)</span><br><span class="line">GIT-hash: 66145a308421e9c124ec391a7848ac20203bb03c build by mockbuild@Build64R6, 2018-09-28 19:36:27</span><br><span class="line"><span class="comment">#看到drbd状态已经变化,此时状态是正确的 ro：Secondary/Secondary表示两端都是从,处于无主primary状态</span></span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=磁盘高可用解决方案(DBA).md href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411231249.png" target="_blank" title="WeiyiGeek.drbd状态" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190411231249.png" alt="WeiyiGeek.drbd状态" title="" class=""></a>
+                <p>WeiyiGeek.drbd状态</p>
+            </figure></p>
+<p>同步drbd数据到对端Server使数据保持一致,指定一个要同步的资源同步数据到对端：<br>(1) 如果为空磁盘可以随意执行操作不需要考虑数据<br>(2) 如果两边数据不一样(注意同步数据的方向否则可能会丢失数据)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Step4.配置主从同步</span></span><br><span class="line"><span class="comment">#一个资源自能在一端执行同步数据到对端命令 ;将 Master-data1 服务同步到 Master-data2 分区中;</span></span><br><span class="line">$ drbdsetup /dev/drbd0 primary --force  <span class="comment">#设置主节点</span></span><br><span class="line"><span class="comment">#$ drbdadm  -- --overwrite-data-of-peer primary data</span></span><br><span class="line"><span class="comment"># 只是在Master-data1执行,如果从端为空数据直接执行</span></span><br><span class="line">$ drbdadm primary data   <span class="comment">#会自动开始同步数据 [主节点执行]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Step5.同步模式查看</span></span><br><span class="line">[root@Master-data1/2  ~]$ cat /proc/drbd</span><br><span class="line">version: 8.4.11-1 (api:1/proto:86-101)</span><br><span class="line"> 0: (连接状态)cs:Connected (角色)ro:Secondary/Primary ds(数据状态):UpToDate/UpToDate(同步状态) C r-----</span><br><span class="line">    ns(网络发送):0 nr(网络接收):292952 dw(磁盘写):292952 dr(磁盘读):0 al(活动日志):16 bm():0 lo():0 pe():0 ua:0 ap:0 ep:1 wo:f oos:0  <span class="comment">#正常情况下是一致的</span></span><br><span class="line"></span><br><span class="line">[root@Master-data1 ~]$ drbdadm status</span><br><span class="line">data role:Primary</span><br><span class="line">  disk:UpToDate</span><br><span class="line">  peer role:Secondary  <span class="comment">#对端角色name</span></span><br><span class="line">    replication:Established peer-disk:UpToDate</span><br><span class="line"></span><br><span class="line"><span class="comment">#Step6.创建同步文件夹及挂载drbd分区</span></span><br><span class="line"><span class="comment">#drbd实例利用主备模式进行实时同步数据到从服务器上面(Master-data2):</span></span><br><span class="line">[root@Master-data1 ~]$ mkfs -t ext4 -b 4096 /dev/drbd0 <span class="comment">#挂载前格式</span></span><br><span class="line">[root@Master-data1 ~]$ mkdir /drbddata</span><br><span class="line">[root@Master-data1 ~]$ mount /dev/drbd0 /drbddata/  <span class="comment">#注意这里是drbd逻辑分区</span></span><br><span class="line">[root@Master-data1 ~]$ df -h</span><br><span class="line">Filesystem            Size  Used Avail Use% Mounted on</span><br><span class="line">/dev/drbd0            256M  792K  709M   1% /drbddata  <span class="comment">#挂载成功</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#Step7. 测试是否能进行文件同步</span></span><br><span class="line">[root@Master-data1  ]$ touch `seq 0 10`  <span class="comment">#在主中进行建立文件测试</span></span><br><span class="line">[root@Master-data2 ~]$ drbdadm down data <span class="comment">#由于是主备模式,必须down才能让您挂载物理分区</span></span><br><span class="line">[root@Master-data2 ~]$ mount /dev/sdb1 /mnt/  <span class="comment">#注意从服务器上是挂载的sdb1</span></span><br><span class="line">[root@Master-data2 ~]$ ls /mnt/</span><br><span class="line">0  1  10  11  12  13  14  15  16  17  18  19  2  20  3  4  5  6  7  8  9  lost+found</span><br><span class="line">[root@Master-data2 ~]$ umount /mnt/  <span class="comment">#退出挂载</span></span><br><span class="line">[root@Master-data2 ~]$ drbdadm up data  <span class="comment">#启动资源池</span></span><br><span class="line">[root@Master-data2 ~]$ df -h  <span class="comment">#注意这里存在一个坑 明明有768但是只显示有256M可用（备节点-课后坐月）</span></span><br><span class="line">/dev/sdb1             256M  792K  709M   1% /mnt</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<p><strong>补充：CentOS7实例：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## MASTER 机器上</span></span><br><span class="line">[root@data1 ~]<span class="variable">$parted</span> /dev/sdb mkpart primary 0 300  <span class="comment">#300MB</span></span><br><span class="line">Warning: The resulting partition is not properly aligned <span class="keyword">for</span> best performance.</span><br><span class="line">Ignore/Cancel? ignore</span><br><span class="line">Information: You may need to update /etc/fstab.</span><br><span class="line"></span><br><span class="line">[root@data1 ~]<span class="variable">$parted</span> /dev/sdb mkpart primary 300 536  <span class="comment">#236MB</span></span><br><span class="line">Warning: The resulting partition is not properly aligned <span class="keyword">for</span> best performance.</span><br><span class="line">Ignore/Cancel? ignore</span><br><span class="line">Information: You may need to update /etc/fstab.</span><br><span class="line"></span><br><span class="line">[root@data1 ~]<span class="variable">$parted</span> /dev/sdb p</span><br><span class="line">Model: ATA VBOX HARDDISK (scsi)</span><br><span class="line">Disk /dev/sdb: 537MB</span><br><span class="line">Sector size (logical/physical): 512B/512B</span><br><span class="line">Partition Table: gpt</span><br><span class="line">Disk Flags:</span><br><span class="line"></span><br><span class="line">Number  Start   End    Size   File system  Name     Flags</span><br><span class="line"> 1      17.4kB  300MB  300MB               primary</span><br><span class="line"> 2      300MB   536MB  236MB               primary</span><br><span class="line"> </span><br><span class="line"><span class="comment">#(1) 建立数据存储m目录</span></span><br><span class="line"><span class="comment">##--overwrite-data-of-peer 覆盖对端的数据</span></span><br><span class="line">drbdadm  -- --overwrite-data-of-peer primary data  <span class="comment">#设置data1为主</span></span><br><span class="line"><span class="comment">#drbd配置完成并启动后的效果 （data1 == 主 primary/ data2 = 从 Secondary）</span></span><br><span class="line">$ cat /proc/drbd</span><br><span class="line">0: cs:Connected ro:Primary/Secondary ds:UpToDate/UpToDate C r-----</span><br><span class="line">[root@data1/2 ~]$ mkdir /data -p <span class="comment">#在启用drbd时候</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#使用/dev/drbd0分区必须格式化她drbd</span></span><br><span class="line"><span class="comment">#[root@data1 ~]$ mkfs -t ext4 -b 4096 /dev/drbd0</span></span><br><span class="line"><span class="comment">#[root@data1 ~]$ mount /dev/drbd0 /data  #挂载</span></span><br><span class="line">mkfs.ext4 /dev/drbd0 &amp;&amp; mount /dev/drbd0/data       <span class="comment">#只需将数据写入/dData，drbd即把其同步到backupNode的/dev/sda2（仅需挂载逻辑设备，不挂载其下层的分区而由DRBD后台挂载用）</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#(2) 从库查看同步的数据 （这时重启格式化/dev/drbd0就没有数据注意备份）</span></span><br><span class="line">[root@data2 ~]$ drbdadm down data      <span class="comment">#【备节点必须执行down数据名称】</span></span><br><span class="line">[root@data2 ~]$ mount /dev/sdb1 /mnt   <span class="comment">#【备节点挂载 sdb1 到/mnt中国】</span></span><br><span class="line">[root@data2 ~]$ ls  <span class="comment">#查看数据 （注意不能写入数据）</span></span><br><span class="line">[root@data2 ~]$ umount /mnt  <span class="comment">#取消挂载</span></span><br><span class="line">[root@data2 ~]$ drbdadm up data        <span class="comment">#启动drbd备节点(重新进行同步)</span></span><br><span class="line"><span class="comment"># 补充：drbd可以自启动而heartbeat不用进行自启动</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#（3）主备切换 （做HA高可用的时候）</span></span><br><span class="line">[root@Master-data1 ~]umount /mnt <span class="comment">#先将主上面的磁盘卸载掉并降级</span></span><br><span class="line">[root@Master-data1 ~]drbdadm secondary data</span><br><span class="line"></span><br><span class="line">[root@Master-data2 ~]drbdadm primary data  <span class="comment">#在备机上升级为主机</span></span><br><span class="line">[root@Master-data2 ~]mount /dev/drbd0 /mnt <span class="comment"># 挂载磁盘</span></span><br></pre></td></tr></table></figure></p>
+<h5 id="7-附录补充"><a href="#7-附录补充" class="headerlink" title="(7) 附录补充"></a>(7) 附录补充</h5><p>DRBD配置工具：</p>
+<ul>
+<li>drbdadm：  高级管理工具，管理/etc/drbd.conf，向drbdsetup和drbdmeta发送指令</li>
+<li>drbdsetup： 配置装载进kernel的DRBD模块，平时很少用</li>
+<li>drbdmeta： 管理META数据结构，平时很少用</li>
+</ul>
+<p><strong>6.1 drbd命令解析</strong><br><em>（1）drbdadm 命令:</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ drbdadm up all  <span class="comment">#相当于如下三个命令组合 all 代表所有的资源池</span></span><br><span class="line">drbdadm attach all</span><br><span class="line">drbdadm syncer all</span><br><span class="line">drbdadm connnect all</span><br><span class="line"></span><br><span class="line">$ drbdadm down all  <span class="comment">#down掉所有的资源同步</span></span><br><span class="line">$ drbdadm disconnect data  <span class="comment">#断开data资源池的同步</span></span><br><span class="line"></span><br><span class="line">$ drbdadm status  <span class="comment">#查看drbd状态</span></span><br><span class="line">$ drbdadm role 资源名   <span class="comment">#查看节点的角色：</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##--overwrite-data-of-peer 覆盖对端的数据</span></span><br><span class="line">$ drbdadm  -- --overwrite-data-of-peer primary data <span class="comment">#配置主从同步模式(主执行) </span></span><br><span class="line">$ drbdadm primary data <span class="comment">#会自动开始同步数据(主节点运行)</span></span><br><span class="line">$ drbdadm secondary data <span class="comment">#会自动开始同步数据(从节点运行)</span></span><br><span class="line"></span><br><span class="line">$ drbdadm -- --discard-my-data connect data  <span class="comment">#重新连接资源池</span></span><br><span class="line">$ drbd-overview   <span class="comment">#查看同步状态</span></span><br></pre></td></tr></table></figure><br><br></p>
+<p><em>drbdsetup 命令:</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">drbdsetup /dev/drbd0 primary --force <span class="comment">#将drbd1主机配置为主节点：(node1)</span></span><br></pre></td></tr></table></figure></p>
+<p><br><br><strong>6.2 drbd状态的意义</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">输出文件上面最开始是drbd的版本信息，然后就是数据同步的一些状态信息：</span><br><span class="line">cs — connection state</span><br><span class="line">st — node state (<span class="built_in">local</span>/remote)</span><br><span class="line">ld — <span class="built_in">local</span> data consistency</span><br><span class="line">ds — data consistency</span><br><span class="line">ns — network send</span><br><span class="line">nr — network receive</span><br><span class="line">dw — disk wr</span><br><span class="line">ite</span><br><span class="line">dr — disk <span class="built_in">read</span></span><br><span class="line">pe — pending (waiting <span class="keyword">for</span> ack)</span><br><span class="line">ua — unack’d (still need to send ack)</span><br><span class="line">al — access <span class="built_in">log</span> write count</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#资源的连接状态；一个资源可能有以下连接状态中的一种</span></span><br><span class="line">StandAlone 独立的：网络配置不可用；资源还没有被连接或是被管理断开（使用 drbdadm disconnect 命令），或是由于出现认证失败或是脑裂的情况</span><br><span class="line">Disconnecting 断开：断开只是临时状态，下一个状态是StandAlone独立的</span><br><span class="line">Unconnected 悬空：是尝试连接前的临时状态，可能下一个状态为WFconnection和WFReportParams</span><br><span class="line">Timeout 超时：与对等节点连接超时，也是临时状态，下一个状态为Unconected悬空</span><br><span class="line">BrokerPipe：与对等节点连接丢失，也是临时状态，下一个状态为Unconected悬空</span><br><span class="line">NetworkFailure：与对等节点推动连接后的临时状态，下一个状态为Unconected悬空</span><br><span class="line">ProtocolError：与对等节点推动连接后的临时状态，下一个状态为Unconected悬空</span><br><span class="line">TearDown 拆解：临时状态，对等节点关闭，下一个状态为Unconected悬空</span><br><span class="line">WFConnection：等待和对等节点建立网络连接</span><br><span class="line">WFReportParams：已经建立TCP连接，本节点等待从对等节点传来的第一个网络包</span><br><span class="line">Connected 连接：DRBD已经建立连接，数据镜像现在可用，节点处于正常状态</span><br><span class="line">StartingSyncS：完全同步，有管理员发起的刚刚开始同步，未来可能的状态为SyncSource或PausedSyncS</span><br><span class="line">StartingSyncT：完全同步，有管理员发起的刚刚开始同步，下一状态为WFSyncUUID</span><br><span class="line">WFBitMapS：部分同步刚刚开始，下一步可能的状态为SyncSource或PausedSyncS</span><br><span class="line">WFBitMapT：部分同步刚刚开始，下一步可能的状态为WFSyncUUID</span><br><span class="line">WFSyncUUID：同步即将开始，下一步可能的状态为SyncTarget或PausedSyncT</span><br><span class="line">SyncSource：以本节点为同步源的同步正在进行</span><br><span class="line">SyncTarget：以本节点为同步目标的同步正在进行</span><br><span class="line">PausedSyncS：以本地节点是一个持续同步的源，但是目前同步已经暂停，可能是因为另外一个同步正在进行或是使用命令(drbdadm pause-sync)暂停了同步</span><br><span class="line">PausedSyncT：以本地节点为持续同步的目标，但是目前同步已经暂停，这可以是因为另外一个同步正在进行或是使用命令(drbdadm pause-sync)暂停了同步</span><br><span class="line">VerifyS：以本地节点为验证源的线上设备验证正在执行</span><br><span class="line">VerifyT：以本地节点为验证目标的线上设备验证正在执行</span><br></pre></td></tr></table></figure><br><br></p>
+<p><strong>6.3 drbd配置文件</strong><br>DRBD配置文件：DRBD的主配置文件为/etc/drbd.conf<br>为了管理的便捷性通常会将些配置文件分多个部分，但都保存至/etc/drbd.d目录。主配置文件中仅使用”include”指令将这些配置文件片断整合。<br>通常/etc/drbd.d中的文件为global_common.conf和所有以.res结尾的文件。其中：</p>
+<ul>
+<li>global_common.conf中主要定义global段和common段</li>
+<li>每个.res文件用于定义一个资源</li>
+</ul>
+<p>一个DRBD设备(即/dev/drbdX),叫做一个”资源”。里面包含DRBD设备的主备节点的ip信息，底层存储设备名称及设备大小，meta信息存放方式,drbd对外提供的设备名等:<br>DRBD资源：</p>
+<ul>
+<li>Resource name：  除空白字符的任意的ACSII码字符</li>
+<li>DRBD device：  在双方节点上，此DRBD设备的设备文件；一般为/dev/drbdN，其主设备号147</li>
+<li>Disk configuration：  在双方节点上各自提供的存储设备</li>
+<li>Nerwork configuration：  双方数据同步时所使用的网络属性</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$vim</span> /etc/drbd.d/global_common.conf</span><br><span class="line"></span><br><span class="line"><span class="comment">#在配置文件中global段仅出现一次，且若所有配置信息都保存至同一个配置文件中而不分开为多个文件的话则global段必须位于配置文件最开始处</span></span><br><span class="line">    目前global段中可以定义的参数仅有minor-count, dialog-refresh, <span class="built_in">disable</span>-ip-verification和usage-count。</span><br><span class="line">global &#123;</span><br><span class="line">    usage-count no;  <span class="comment">#是否参加DRBD使用者统计，默认是参加</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#用于定义被每一个资源默认继承的参数，可在资源定义中使用的参数都可在common定义。实际应用中common段并非必须但建议将多个资源共享的参数定义在common段以降低配置复杂度</span></span><br><span class="line">common &#123;</span><br><span class="line">  protocol C; <span class="comment">#使用DRBD的第三种同步协议，表示收到远程主机的写入确认后认为写入完成 (重点)</span></span><br><span class="line">  handlers &#123;　　　</span><br><span class="line">    pri-on-incon-degr <span class="string">"/usr/lib/drbd/notify-pri-on-incon-degr.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &gt; /proc/sysrq-trigger ; reboot -f"</span>;</span><br><span class="line">    pri-lost-after-sb <span class="string">"/usr/lib/drbd/notify-pri-lost-after-sb.sh; /usr/lib/drbd/notify-emergency-reboot.sh; echo b &gt; /proc/sysrq-trigger ; reboot -f"</span>;</span><br><span class="line">    <span class="built_in">local</span>-io-error <span class="string">"/usr/lib/drbd/notify-io-error.sh; /usr/lib/drbd/notify-emergency-shutdown.sh; echo o &gt; /proc/sysrq-trigger ; halt -f"</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  startup &#123;</span><br><span class="line">    wfc-timeout          60;</span><br><span class="line">    degr-wfc-timeout     60; <span class="comment">#启动时连接资源的超时时间</span></span><br><span class="line">    outdated-wfc-timeout 06;</span><br><span class="line">  &#125;</span><br><span class="line">  disk &#123;</span><br><span class="line">    on-io-error detach; <span class="comment">#磁盘出现IO错误处理</span></span><br><span class="line">  &#125;</span><br><span class="line">  net &#123; </span><br><span class="line">    cram-hmac-alg sha1;    <span class="comment">#DRBD网络同步时使用的验证方式和密码</span></span><br><span class="line">    shared-secret <span class="string">"testdrbd"</span>;</span><br><span class="line">    max-buffers 2048;</span><br><span class="line">    max-epoch-size 2048; </span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">#同步时的速率限制及数据的验证算法   </span></span><br><span class="line">  syncer &#123;</span><br><span class="line">    rate 30M;      <span class="comment">#主节点和备用节点同步时最大的网络速率 工作中是100M~1000M</span></span><br><span class="line">    verify-alg crc32c; <span class="comment">#验证算法</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#资源设置|主从模式 一个资源 / 还能添加资源就是 data2 / data3</span></span><br><span class="line"><span class="comment">#资源在定义时必须为其命名每个资源段的定义中至少要包含两个host子段，以定义此资源关联至的节点，其它参数均可以从common段或drbd的默认中进行继承而无须定义</span></span><br><span class="line">resource data&#123;</span><br><span class="line">    meta-disk internal; <span class="comment">#meta-data和数据存放在同一个底层</span></span><br><span class="line">    <span class="comment">#两台主备节点配置 (关键点)</span></span><br><span class="line">    on data1 &#123;</span><br><span class="line">        device /dev/drbd0;  <span class="comment">#drbd写设备有自己对应的分区</span></span><br><span class="line">        disk /dev/sdb1;        <span class="comment">#本地数据分区1</span></span><br><span class="line">        address  192.168.2.100:7788;  <span class="comment">#心跳/数据传输接口 (建议把这个地址设置到hosts中改成心跳线的网卡)</span></span><br><span class="line">        meta-disk /dev/sdb2[0];  <span class="comment">#meta data数据分区2</span></span><br><span class="line">    &#125;</span><br><span class="line">    on data2 &#123;</span><br><span class="line">        device /dev/drbd0;  <span class="comment">#drbd写设备有自己对应的分区</span></span><br><span class="line">        disk /dev/sdb1;        <span class="comment">#数据</span></span><br><span class="line">        address  192.168.2.101:7788;  <span class="comment">#心跳/数据传输接口</span></span><br><span class="line">        meta-disk /dev/sdb2[0];  <span class="comment">#meta data数据分区</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用于定义drbd资源，每个资源通常定义在一个单独的位于/etc/drbd.d目录中的以.res结尾的文件中。</span></span><br><span class="line">cat /etc/drbd.d/nfsdrbd.res</span><br><span class="line">resource nfsdrbd &#123;</span><br><span class="line">       on pz142 &#123;</span><br><span class="line">              device /dev/drbd0;</span><br><span class="line">              disk   /dev/vg1/lv1;</span><br><span class="line">              address 192.168.1.142:7789;</span><br><span class="line">              meta-disk internal;</span><br><span class="line">       &#125;</span><br><span class="line">       on pz144 &#123;</span><br><span class="line">              device /dev/drbd0;</span><br><span class="line">              disk   /dev/vg1/lv1;</span><br><span class="line">              address 192.168.1.144:7789;</span><br><span class="line">              meta-disk internal;</span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>6.4 drbd入坑计</strong><br><em>Q:问题 drbdadm create-md data失败?</em><br>问题：/etc/drbd.conf:6: Parse error: ‘a syncer option keyword’ expected,but got ‘rate’<br>解决方法：yum install gcc gcc-c++ make glibc flex kernel kernel-devel kernel-headers</p>
+<p><br><br><em>Q:问题 drbdadm up all 失败?</em><br>问题:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0: Failure: (119) No valid meta-data signature found.</span><br><span class="line">        ==&gt; Use <span class="string">'drbdadm create-md res'</span> to initialize meta-data area. &lt;==</span><br><span class="line">Command <span class="string">'drbdsetup-84 attach 0 /dev/sdb1 /dev/sdb2 0 --on-io-error=detach --resync-rate=30M'</span> terminated with <span class="built_in">exit</span> code 10</span><br></pre></td></tr></table></figure><br>解决办法：查看分区是否错误,分区后重启系统再启动; dd if=/dev/zero bs=1M count=1 of=/dev/sdb{1..2};sync<br>dd if=/dev/zero bs=1M count=1 of=/dev/sda{1..2};sync<br><br></p>
+<p><em>Q:同步状态出现异常？</em><br>问题：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0: cs:WFConnection ro:Secondary(本端角色)/Unknown ds:Inconsistent/DUnknown(问题点) C r----s</span><br><span class="line">    ns:0 nr:0 dw:0 dr:0 al:8 bm:0 lo:0 pe:0 ua:0 ap:0 ep:1 wo:f oos:795188</span><br></pre></td></tr></table></figure><br>解决办法：</p>
+<ul>
+<li>检测两台drbd服务器物理网络链接或者IP及主机路由是否正确</li>
+<li>停止iptables防火墙或者放行drbd(指定IP形式)</li>
+<li>Secondary/Unkonwn 可能是发生裂脑导致的结果<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#在从节点执行：</span><br><span class="line">modprobe drbd</span><br><span class="line">drbdadm secondary data</span><br><span class="line">drbdadm up data</span><br><span class="line">drbdadm disconnect data</span><br><span class="line">drbdadm -- --discard-my-data connect data</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><em>Q：如何解决drbd裂脑问题？</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">##备用节点：</span></span><br><span class="line"><span class="comment">#b.主节点查看drbd状态如果 cs:WFConnection 不是该状态需要手动进行链接</span></span><br><span class="line">[root@ pz142 ~]<span class="comment"># drbdadm secondary r0</span></span><br><span class="line">[root@ pz142 ~]<span class="comment"># drbdadm disconnect all</span></span><br><span class="line">[root@ pz142 ~]<span class="comment"># drbdadm -- --discard-my-data connect r0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##主节点：</span></span><br><span class="line">[root@ pz144 ~]<span class="comment"># drbdadm disconnect al</span></span><br><span class="line">[root@ pz144 ~]<span class="comment"># drbdadm connect r0</span></span><br><span class="line">[root@ pz144 ~]<span class="comment"># drbdsetup /dev/drbd0 primary</span></span><br><span class="line">[root@ pz144 ~]<span class="comment"># mount /dev/drbd0 /data/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#c.cs:Connected ro:Secondary/Secondary ds:Inconsistent/Inconsistent C</span></span><br><span class="line">drbdadm -- --overwrite-data-of-peer primary drbd   <span class="comment">#</span></span><br></pre></td></tr></table></figure></p>
+<p><br><br><em>Q:drbd主节点无法进行挂载mount</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#原因由于/dev/drbd0 未进行初始</span></span><br><span class="line">[root@data1 <span class="built_in">log</span>]<span class="comment"># mount /dev/drbd0 /data</span></span><br><span class="line">mount: /dev/drbd0 is write-protected, mounting <span class="built_in">read</span>-only</span><br><span class="line">mount: unknown filesystem <span class="built_in">type</span> <span class="string">'(null)'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#解决方法</span></span><br><span class="line">mkfs -t ext4 -b 4096 /dev/drbd0</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:06.301Z" itemprop="dateUpdated">2022-03-29 13:39:06</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/系统运维/系统架构/高可用/磁盘高可用解决方案.md" target="_blank" rel="noopener noreferrer">_posts/系统运维/系统架构/高可用/磁盘高可用解决方案.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/4-11-263.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/4-11-263.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%AB%98%E5%8F%AF%E7%94%A8%E6%9C%8D%E5%8A%A1/" rel="tag">高可用服务</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-11-263.html&title=《磁盘高可用解决方案(DBA).md》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-11-263.html&title=《磁盘高可用解决方案(DBA).md》 — WeiyiGeek Blog&source=文章目录[TOC]
+(1) drbd 高可用解决方案" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-11-263.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《磁盘高可用解决方案(DBA).md》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-11-263.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-11-263.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/4-12-345.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Python3爬虫学习.md</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/4-11-315.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Nodejs入门学习1.md</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#文章目录"><span class="post-toc-number">1.</span> <span class="post-toc-text">文章目录</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-Drbd高可用"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x00 Drbd高可用</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-11-263.html&title=《磁盘高可用解决方案(DBA).md》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-11-263.html&title=《磁盘高可用解决方案(DBA).md》 — WeiyiGeek Blog&source=文章目录[TOC]
+(1) drbd 高可用解决方案" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-11-263.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《磁盘高可用解决方案(DBA).md》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-11-263.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-11-263.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACIUlEQVR42u3aQW7DMAwEwPz/0+kDCje7VF3U0uhUNIms8YGgSL5e8XpfrO+fXn3/as+rp7zuWBgYGI9lvH9cPx8rx1wd/Wqf/GwYGBjnMPKtE0ASpvMXkQRrDAwMjDYgroRgDAwMjLsZyR3zAQEXAwPjXzKS0LmeCLbluVvu4hgYGA9k5FX3v//7lv4GBgbGoxjvcq0cK08c61NhYGBszcgD3EpxP7/Qzs6DgYGxNyMp0LfjF+uY+j8YGBhbM1bCXH7QpOjfNjvr4TAMDIyHM9qw2IbpFpa3MDEwME5mFD8uf5UPduQvAgMDAyMfd0jCZRu+iwYnBgbGAYyVUbB2ImJWJfvwKwwMjE0ZLSAJpkl4bRsJH/bBwMA4gJEkYW1LoG0qLF2kMTAwtmbkF9rfGkJt25zDxBEDA2MjRlF2D8JxPnKR4yMwBgbGAYxZG6CtzOc7tEU3DAyMvRltY2BWIJuNpdZpIgYGxtaMdUxe9J+9mnywFQMDY1dGkg7OHjkb45iV6jAwME5grA9M5CW2/PtFmxMDA+MAxmww67eC7EqTFQMDY2/Gu1wtYBaU6+s0BgbG1oyV/uDswclR8jSxxmBgYDyWMSu3zdK4vEnZhmwMDIwTGLOSWV5KKw402w0DAwNjIXS2Dc68wIeBgYHRlsNmgTIfLPuwGwYGxgGMlYJa0vhsw+uN5TYMDIwHMlYmNZLgmKeSeUI5LAJiYGA8j/EFJogi4BTlfmIAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

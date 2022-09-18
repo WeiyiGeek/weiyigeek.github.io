@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Nginx,webp">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2022-07-03T07:34:30.000Z" itemprop="datePublished" class="page-time">
+  2022-07-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4%E5%AE%9E%E8%B7%B5/">运维实践</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/Web/WebApp/Nginx/9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问实践指南"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2022-07-03 15:34:30" datetime="2022-07-03T07:34:30.000Z"  itemprop="datePublished">2022-07-03</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4%E5%AE%9E%E8%B7%B5/">运维实践</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><strong>本章目录</strong></p>
+<p>[TOC]</p>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><p>描述: 为了实现根据访问者访问我们的网站时根据其IP显示其所属地，也为获取不同地区访问者的IP地址等相关信息为目的，所以在搜索引擎中查找解决方案，在网络上查询到如下几种方案<code>Nginx+GeoIP2、使用收费 IP 识别接口、DNS 根据地域解析</code>，然后经过多方面考究，最终还是使用Nginx+GeoIP2解决方案。</p>
+<a id="more"></a>
+<p><strong>三种解决方案优缺点</strong></p>
+<ul>
+<li><p>[x] Nginx + GeoIP2<br>可以拿到请求 IP 的国家和城市信息然后进行各种个性化 Nginx 配置<br>可以将请求 IP 的地理位置通过 php-fpm 传递 php 程序<br>定时更新 MaxMind 免费数据库（<code>GeoLite2-Country.mmdb + GeoLite2-City.mmdb</code>）完成完美闭环<br>maxmind 公司 2002 年成立至今，靠谱</p>
+</li>
+<li><p>[ ] 使用 IP 识别接口：稳定的需要收费（也不能保证 100% 高可用：限频、响应时间、接口异常等因素），免费的无法保证稳定性，接口远远没有将 GeoLite 数据放在本地稳定</p>
+</li>
+<li><p>[ ] DNS 根据地域解析：cloudflare 收费略贵，国内 cloudxns 已关闭免费服务（免费的东西说变就变，论 planB 的重要性）</p>
+</li>
+</ul>
+<p><br></p>
+<p>所有在本章中，我将向您展示如何搭建与配置一个有效的 Nginx 和 Max Mind GeoIP2/GeoLite2 设置。 从安装部署包的下载、编译安装步骤以及命令使用、包括安装过程中可能会遇到的坑，在最后博主也通过几个实践例子，展示如何使用 GeoIP2 按国家/地区限制对某些 URL 的访问。 </p>
+<p><br></p>
+<p><strong>TIPS:</strong> MaxMind GeoIP 已经被弃用了一段时间。 对于您最新的地理定位需求，请改用 MaxMind GeoIP2（或免费版本的 GeoLite2）。<br><strong>TIPS:</strong> 当前网上大部分Nginx + GeoIP 的教程都是 GeoIP 老版本的已经不适用了当前最新版本的Nginx二进制编译安装，你可参照本章更快的进行实践使用。</p>
+<p><strong>TIPS:</strong> GeoUP 依赖 MaxMind 的 IP 数据，需要频繁更新，所以我们在安装配置后也实现了使用<code>crontab</code>服务，针对其国家城市数据库进行自动化脚本定时更新配置。</p>
+<p>好了，不多说了，下面直接开始实践吧！</p>
+<hr>
+<h2 id="0x01-安装部署"><a href="#0x01-安装部署" class="headerlink" title="0x01 安装部署"></a>0x01 安装部署</h2><h3 id="环境说明"><a href="#环境说明" class="headerlink" title="环境说明"></a>环境说明</h3><p><strong>环境一览:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 宿主机系统</span></span><br><span class="line">$ uname -a</span><br><span class="line">113-Ubuntu SMP Thu Feb 3 18:43:29 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux</span><br><span class="line">$ cat /etc/issue.net</span><br><span class="line">Ubuntu 20.04.1 LTS</span><br><span class="line"></span><br><span class="line"><span class="comment"># 应用软件</span></span><br><span class="line">nginx-1.22.0.tar.gz</span><br><span class="line">libmaxminddb-1.6.0.tar.gz</span><br><span class="line">ngx_http_geoip2_module-3.4.tar.gz</span><br><span class="line">GeoLite2-City_20220802.tar.gz</span><br><span class="line">GeoLite2-Country_20220802.tar.gz</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: 此处使用的是 Ubuntu 20.04 操作系统, 该系统已做安全加固和内核优化符合等保2.0要求【<a href="https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh" target="_blank" rel="noopener">SecOpsDev/Ubuntu-InitializeSecurity.sh at master · WeiyiGeek/SecOpsDev</a> 】, 如你的Linux未进行相应配置环境可能与读者有些许差异, 如需要进行(windows server、Ubuntu、CentOS)安全加固请参照如下加固脚本进行加固, 请大家疯狂的 star 。<br>加固脚本地址:【 <a href="https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh" target="_blank" rel="noopener">https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh</a> 】</p>
+<p style='color:red'> 为了节省大家的实践时间，我已经把需要用到的源码包上传到空间中，有需要的朋友可以看一下，下载地址: <a href="http://share.weiyigeek.top/d/36158960-50338508-7c5982?p=2088（访问密码：2088）" target="_blank" rel="noopener">http://share.weiyigeek.top/d/36158960-50338508-7c5982?p=2088（访问密码：2088）</a><br><br/><br>温馨提示: 如提示证书不对，请点击高级继续访问即可.<br></p>
+
+<figure class="image-box">
+                <a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220806093220.png" target="_blank" title="WeiyiGeek.Nginx及其模块下载" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220806093220.png" alt="WeiyiGeek.Nginx及其模块下载" title="" class=""></a>
+                <p>WeiyiGeek.Nginx及其模块下载</p>
+            </figure>
+<p>原文地址: <a href="https://blog.weiyigeek.top">https://blog.weiyigeek.top</a></p>
+<p><br/></p>
+<h3 id="libmaxminddb-下载"><a href="#libmaxminddb-下载" class="headerlink" title="libmaxminddb 下载"></a>libmaxminddb 下载</h3><p>描述: 首先安装 libmaxminddb 库，其提供了一个用于读取<code>MaxMind DB</code>文件的C库，包括来自MaxMind的GeoIP2数据库。这是一种自定义二进制格式，旨在促进 IP 地址的快速查找，同时允许在与地址关联的数据类型方面具有极大的灵活性。</p>
+<p>项目地址: <a href="https://github.com/maxmind/libmaxminddb" target="_blank" rel="noopener">https://github.com/maxmind/libmaxminddb</a><br>下载构建:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">wget -c https://github.com/maxmind/libmaxminddb/releases/download/1.6.0/libmaxminddb-1.6.0.tar.gz</span><br><span class="line">tar -zxvf libmaxminddb-1.6.0.tar.gz &amp;&amp; <span class="built_in">cd</span> libmaxminddb-1.6.0</span><br><span class="line">./configure</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">tee -a /etc/ld.so.conf.d/libc.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># libc default configuration</span></span><br><span class="line">/usr/<span class="built_in">local</span>/lib</span><br><span class="line">EOF</span><br><span class="line">sudo ldconfig</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>或使用apt命令进行安装:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt install libmaxminddb0 libmaxminddb-dev mmdb-bin geoipupdate</span><br></pre></td></tr></table></figure></p>
+<p>上面安装的软件包是：</p>
+<ul>
+<li>libmaxminddb0 libmaxminddb-dev – MaxMind 地理定位数据库</li>
+<li>mmdb-bin – 二进制。 从命令行调用的程序。 使用此命令手动定位 IP。</li>
+<li>geoipupdate – 帮助配置和更新 GeoIP2 / GeoLite2 的软件包。 </li>
+</ul>
+<p><br/></p>
+<h3 id="ngx-http-geoip2-module-下载"><a href="#ngx-http-geoip2-module-下载" class="headerlink" title="ngx_http_geoip2_module 下载"></a>ngx_http_geoip2_module 下载</h3><p>描述: 下载 ngx_http_geoip2_module 使用基于客户端 IP（默认）或特定变量（同时支持 IPv4 和 IPv6）的 <code>maxmind geoip2</code> 数据库中的值创建变量，该模块现在支持nginx流，并且可以以与http模块相同的方式使用。</p>
+<p>项目地址: <a href="https://github.com/leev/ngx_http_geoip2_module/" target="_blank" rel="noopener">https://github.com/leev/ngx_http_geoip2_module/</a><br>下载构建:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget -c https://github.com/leev/ngx_http_geoip2_module/archive/refs/tags/3.4.tar.gz -O /usr/<span class="built_in">local</span>/src/ngx_http_geoip2_module-3.4.tar.gz</span><br><span class="line">tar -zxf ngx_http_geoip2_module-3.4.tar.gz &amp;&amp; ls ngx_http_geoip2_module-3.4/</span><br><span class="line">  <span class="comment"># config  LICENSE  ngx_http_geoip2_module.c  ngx_stream_geoip2_module.c  README.md</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>Geoip2 模块语法</strong><br>语法示例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># HTTP</span></span><br><span class="line">http &#123;</span><br><span class="line">  ...</span><br><span class="line">  geoip2 /etc/maxmind-country.mmdb &#123;</span><br><span class="line">    auto_reload 5m;</span><br><span class="line">    <span class="variable">$geoip2_data_country_code</span> default=US <span class="built_in">source</span>=<span class="variable">$variable_with_ip</span> country iso_code;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Stream</span></span><br><span class="line">stream &#123;</span><br><span class="line">  ...</span><br><span class="line">  geoip2 /etc/maxmind-country.mmdb &#123;</span><br><span class="line">    auto_reload 5m;</span><br><span class="line">    <span class="variable">$geoip2_data_country_code</span> default=US <span class="built_in">source</span>=<span class="variable">$remote_addr</span> country iso_code;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>参数说明: </p>
+<ul>
+<li><p><code>auto_reload &lt;interval&gt;</code>: 启用自动重新加载将使 nginx 以指定的时间间隔检查数据库的修改时间，如果发生更改则重新加载。</p>
+</li>
+<li><p><code>$variable_name [default=&lt;value] [source=$variable_with_ip] path ...</code>: 如果没有指定【default】参数，则如果未找到该变量将为空，如果没有指定【source】参数 $remote_addr 将用于执行查找。</p>
+</li>
+</ul>
+<p><br/></p>
+<p>从上面语法格式中您是否是一片茫然，不管你是不是反正我第一次看到就茫然了，那 <code>country iso_code</code> 关键字又是从何而来?</p>
+<p>为了解决上面这个疑问，我们在来看看如下操作。 </p>
+<p><br></p>
+<p><strong>mmdblookup 命令</strong><br>描述: 在前面编译安装<code>libmaxminddb</code>库后，我们便可以使用 mmdblookup 工具，查找所需数据的路径（例如：国家/地区名称），以JSON格式返回的，其中continent（洲） 、country (国家) 、registered_country（已注册的国家）对象包含了<code>code/geoname_id/names</code>键：</p>
+<p>GeoLite2-Country.mmdb 库只带有 country 相关数据样本输出<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line">$ mmdblookup --file ./GeoLite2-Country.mmdb --ip 223.6.6.6</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"continent"</span>:</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"code"</span>:</span><br><span class="line">        <span class="string">"AS"</span> &lt;utf8_string&gt;</span><br><span class="line">      <span class="string">"geoname_id"</span>:</span><br><span class="line">        <span class="number">6255147</span> &lt;uint32&gt;</span><br><span class="line">      <span class="string">"names"</span>:</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"de"</span>:</span><br><span class="line">            <span class="string">"Asien"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"en"</span>:</span><br><span class="line">            <span class="string">"Asia"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"es"</span>:</span><br><span class="line">            <span class="string">"Asia"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"fr"</span>:</span><br><span class="line">            <span class="string">"Asie"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"ja"</span>:</span><br><span class="line">            <span class="string">"アジア"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"pt-BR"</span>:</span><br><span class="line">            <span class="string">"Ásia"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"ru"</span>:</span><br><span class="line">            <span class="string">"Азия"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"zh-CN"</span>:</span><br><span class="line">            <span class="string">"亚洲"</span> &lt;utf8_string&gt;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="string">"country"</span>:</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"geoname_id"</span>:</span><br><span class="line">        <span class="number">1814991</span> &lt;uint32&gt;</span><br><span class="line">      <span class="string">"iso_code"</span>:</span><br><span class="line">        <span class="string">"CN"</span> &lt;utf8_string&gt;</span><br><span class="line">      <span class="string">"names"</span>:</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"de"</span>:</span><br><span class="line">            <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"en"</span>:</span><br><span class="line">            <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"es"</span>:</span><br><span class="line">            <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"fr"</span>:</span><br><span class="line">            <span class="string">"Chine"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"ja"</span>:</span><br><span class="line">            <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"pt-BR"</span>:</span><br><span class="line">            <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"ru"</span>:</span><br><span class="line">            <span class="string">"Китай"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"zh-CN"</span>:</span><br><span class="line">            <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="string">"registered_country"</span>:</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"geoname_id"</span>:</span><br><span class="line">        <span class="number">1814991</span> &lt;uint32&gt;</span><br><span class="line">      <span class="string">"iso_code"</span>:</span><br><span class="line">        <span class="string">"CN"</span> &lt;utf8_string&gt;</span><br><span class="line">      <span class="string">"names"</span>:</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"de"</span>:</span><br><span class="line">            <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"en"</span>:</span><br><span class="line">            <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"es"</span>:</span><br><span class="line">            <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"fr"</span>:</span><br><span class="line">            <span class="string">"Chine"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"ja"</span>:</span><br><span class="line">            <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"pt-BR"</span>:</span><br><span class="line">            <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"ru"</span>:</span><br><span class="line">            <span class="string">"Китай"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"zh-CN"</span>:</span><br><span class="line">            <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>GeoLite2-City.mmdb 库带有 country City 相关数据样本输出 (一般推荐使用该库)</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br></pre></td><td class="code"><pre><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6</span><br><span class="line"> &#123;</span><br><span class="line">    <span class="attr">"city"</span>:</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"geoname_id"</span>:</span><br><span class="line">          <span class="number">1808926</span> &lt;uint32&gt;</span><br><span class="line">        <span class="string">"names"</span>:</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">"de"</span>:</span><br><span class="line">              <span class="string">"Hangzhou"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"en"</span>:</span><br><span class="line">              <span class="string">"Hangzhou"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"es"</span>:</span><br><span class="line">              <span class="string">"Hangzhou"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"fr"</span>:</span><br><span class="line">              <span class="string">"Hangzhou"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"ja"</span>:</span><br><span class="line">              <span class="string">"杭州市"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"pt-BR"</span>:</span><br><span class="line">              <span class="string">"Hangzhou"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"ru"</span>:</span><br><span class="line">              <span class="string">"Ханчжоу"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"zh-CN"</span>:</span><br><span class="line">              <span class="string">"杭州"</span> &lt;utf8_string&gt;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="string">"continent"</span>:</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"code"</span>:</span><br><span class="line">          <span class="string">"AS"</span> &lt;utf8_string&gt;</span><br><span class="line">        <span class="string">"geoname_id"</span>:</span><br><span class="line">          <span class="number">6255147</span> &lt;uint32&gt;</span><br><span class="line">        <span class="string">"names"</span>:</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">"de"</span>:</span><br><span class="line">              <span class="string">"Asien"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"en"</span>:</span><br><span class="line">              <span class="string">"Asia"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"es"</span>:</span><br><span class="line">              <span class="string">"Asia"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"fr"</span>:</span><br><span class="line">              <span class="string">"Asie"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"ja"</span>:</span><br><span class="line">              <span class="string">"アジア"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"pt-BR"</span>:</span><br><span class="line">              <span class="string">"Ásia"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"ru"</span>:</span><br><span class="line">              <span class="string">"Азия"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"zh-CN"</span>:</span><br><span class="line">              <span class="string">"亚洲"</span> &lt;utf8_string&gt;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="string">"country"</span>:</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"geoname_id"</span>:</span><br><span class="line">          <span class="number">1814991</span> &lt;uint32&gt;</span><br><span class="line">        <span class="string">"iso_code"</span>:</span><br><span class="line">          <span class="string">"CN"</span> &lt;utf8_string&gt;</span><br><span class="line">        <span class="string">"names"</span>:</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">"de"</span>:</span><br><span class="line">              <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"en"</span>:</span><br><span class="line">              <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"es"</span>:</span><br><span class="line">              <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"fr"</span>:</span><br><span class="line">              <span class="string">"Chine"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"ja"</span>:</span><br><span class="line">              <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"pt-BR"</span>:</span><br><span class="line">              <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"ru"</span>:</span><br><span class="line">              <span class="string">"Китай"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"zh-CN"</span>:</span><br><span class="line">              <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="string">"location"</span>:</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"accuracy_radius"</span>:</span><br><span class="line">          <span class="number">1000</span> &lt;uint16&gt;</span><br><span class="line">        <span class="string">"latitude"</span>:</span><br><span class="line">          <span class="number">30.299400</span> &lt;double&gt;</span><br><span class="line">        <span class="string">"longitude"</span>:</span><br><span class="line">          <span class="number">120.161200</span> &lt;double&gt;</span><br><span class="line">        <span class="string">"time_zone"</span>:</span><br><span class="line">          <span class="string">"Asia/Shanghai"</span> &lt;utf8_string&gt;</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="string">"registered_country"</span>:</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">"geoname_id"</span>:</span><br><span class="line">          <span class="number">1814991</span> &lt;uint32&gt;</span><br><span class="line">        <span class="string">"iso_code"</span>:</span><br><span class="line">          <span class="string">"CN"</span> &lt;utf8_string&gt;</span><br><span class="line">        <span class="string">"names"</span>:</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="attr">"de"</span>:</span><br><span class="line">              <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"en"</span>:</span><br><span class="line">              <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"es"</span>:</span><br><span class="line">              <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"fr"</span>:</span><br><span class="line">              <span class="string">"Chine"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"ja"</span>:</span><br><span class="line">              <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"pt-BR"</span>:</span><br><span class="line">              <span class="string">"China"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"ru"</span>:</span><br><span class="line">              <span class="string">"Китай"</span> &lt;utf8_string&gt;</span><br><span class="line">            <span class="string">"zh-CN"</span>:</span><br><span class="line">              <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="string">"subdivisions"</span>:</span><br><span class="line">      [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">"geoname_id"</span>:</span><br><span class="line">            <span class="number">1784764</span> &lt;uint32&gt;</span><br><span class="line">          <span class="string">"iso_code"</span>:</span><br><span class="line">            <span class="string">"ZJ"</span> &lt;utf8_string&gt;</span><br><span class="line">          <span class="string">"names"</span>:</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="attr">"en"</span>:</span><br><span class="line">                <span class="string">"Zhejiang"</span> &lt;utf8_string&gt;</span><br><span class="line">              <span class="string">"fr"</span>:</span><br><span class="line">                <span class="string">"Province de Zhejiang"</span> &lt;utf8_string&gt;</span><br><span class="line">              <span class="string">"zh-CN"</span>:</span><br><span class="line">                <span class="string">"浙江省"</span> &lt;utf8_string&gt;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      ]</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>GeoLite2-Country.mmdb 与  GeoLite2-Country.mmdb 对比。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - 国家 ./GeoLite2-Country.mmdb 库</span></span><br><span class="line"><span class="comment"># 如果此时我只想获取 country 的名称可以这样。</span></span><br><span class="line">$ mmdblookup --file ./GeoLite2-Country.mmdb --ip 223.6.6.6 country names zh-CN</span><br><span class="line">  <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line"><span class="comment"># 当然如果你想获取国家的 iso_code 也是同样的。</span></span><br><span class="line">$ mmdblookup --file ./GeoLite2-Country.mmdb --ip 223.6.6.6 country iso_code</span><br><span class="line">  <span class="string">"CN"</span> &lt;utf8_string&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 国家、城市库 ./GeoLite2-Country.mmdb 库</span></span><br><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6 country names zh-CN</span><br><span class="line">  <span class="string">"中国"</span> &lt;utf8_string&gt;</span><br><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6 country iso_code</span><br><span class="line">  <span class="string">"CN"</span> &lt;utf8_string&gt;</span><br><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6 continent names zh-CN</span><br><span class="line">  <span class="string">"亚洲"</span> &lt;utf8_string&gt;</span><br><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6 subdivisions 0 names zh-CN</span><br><span class="line">  <span class="string">"浙江省"</span> &lt;utf8_string&gt;</span><br><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6 subdivisions 0 names iso_code</span><br><span class="line">  <span class="string">"ZJ"</span> &lt;utf8_string&gt;</span><br><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6 city names zh-CN</span><br><span class="line">  <span class="string">"杭州"</span> &lt;utf8_string&gt;</span><br><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6 location longitude <span class="comment"># 经度  </span></span><br><span class="line">  120.161200 &lt;double&gt;</span><br><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6 location latitude  <span class="comment"># 纬度</span></span><br><span class="line">  30.299400  &lt;double&gt;</span><br><span class="line">$ mmdblookup --file ./GeoLite2-City.mmdb --ip 223.6.6.6 location time_zone <span class="comment"># 时区</span></span><br><span class="line">  <span class="string">"Asia/Shanghai"</span> &lt;utf8_string&gt;</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803151840.png" target="_blank" title="WeiyiGeek.mmdblookup获取mmdb库信息" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803151840.png" alt="WeiyiGeek.mmdblookup获取mmdb库信息" title="" class=""></a>
+                <p>WeiyiGeek.mmdblookup获取mmdb库信息</p>
+            </figure>
+<p>上述的两个示例我们可以将其转换为 geoip2 模块定义的nginx变量。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如只需要国家信息建议使用该库</span></span><br><span class="line">geoip2 /usr/<span class="built_in">local</span>/GeoIP2/GeoLite2-Country.mmdb &#123;</span><br><span class="line">  <span class="variable">$geoip2_data_country</span> <span class="string">"default=China"</span> <span class="built_in">source</span>=<span class="variable">$remote_addr</span> country names en</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如需要获取国家以及省份信息建议使用该库，此处暂不演示使用，在后续实践中再进行介绍和使用。</span></span><br><span class="line">geoip2 /usr/<span class="built_in">local</span>/GeoIP2/GeoLite2-City.mmdb &#123;</span><br><span class="line">  <span class="variable">$geoip2_data_country</span> <span class="string">"default=中国"</span> <span class="built_in">source</span>=<span class="variable">$remote_addr</span> country names zh-CN;  <span class="comment"># 中国</span></span><br><span class="line">  <span class="variable">$geoip2_data_country_code</span> country iso_code;                  <span class="comment"># CN</span></span><br><span class="line">  <span class="variable">$geoip2_data_country_continent</span> continent names zh-CN;        <span class="comment"># 亚洲</span></span><br><span class="line">  <span class="variable">$geoip2_data_country_continent_code</span> continent code;          <span class="comment"># AS</span></span><br><span class="line">  <span class="variable">$geoip2_data_province_name</span> subdivisions 0 names zh-CN;       <span class="comment"># 浙江省</span></span><br><span class="line">  <span class="variable">$geoip2_data_province_isocode</span> subdivisions 0 names iso_code; <span class="comment"># "ZJ"</span></span><br><span class="line">  <span class="variable">$geoip2_data_city</span> city names zh-CN;                         <span class="comment"># 杭州</span></span><br><span class="line">  <span class="variable">$geoip2_data_city_longitude</span> location longitude;              <span class="comment"># 120.161200</span></span><br><span class="line">  <span class="variable">$geoip2_data_city_latitude</span> location latitude;                <span class="comment"># 30.299400</span></span><br><span class="line">  <span class="variable">$geoip2_data_city_time_zone</span> location time_zone;             <span class="comment"># "Asia/Shanghai"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>温馨提示: 当请求来自受信任的地址时，将使用“X-Forwarded-For”请求标头字段中的地址, 并且设置 <code>geoip2_proxy_recursive &lt; on | off &gt;</code> 指令。</p>
+<ul>
+<li>如果递归搜索被禁用，那么将使用“X-Forwarded-For”中发送的最后一个地址，而不是与一个受信任地址匹配的原始客户端地址。 </li>
+<li>如果启用了递归搜索，那么将使用“X-Forwarded-For”中发送的最后一个非信任地址，而不是与可信地址之一匹配的原始客户端地址。</li>
+</ul>
+<p>模块使用参考地址：<a href="https://github.com/leev/ngx_http_geoip2_module/#example-usage" target="_blank" rel="noopener">https://github.com/leev/ngx_http_geoip2_module/#example-usage</a></p>
+<p><br/></p>
+<h3 id="Geoip2-模块编译动态链接库"><a href="#Geoip2-模块编译动态链接库" class="headerlink" title="Geoip2 模块编译动态链接库"></a>Geoip2 模块编译动态链接库</h3><p>描述: 有可能此时你通过源码编译方式安装 Nginx 了 ，那如何加入新的Nginx模块呢? </p>
+<p>答: 那就是重新编译 Nginx 即可，我们不需要执行<code>make install</code>重新安装 Nginx 具体操作如下所示。</p>
+<p>Step 1.执行<code>nginx -v</code>获取原编译构建的参数。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">nginx version: nginx/1.22.0</span><br><span class="line">built by gcc 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.1)</span><br><span class="line">built with OpenSSL 1.1.1q  5 Jul 2022</span><br><span class="line">TLS SNI support enabled</span><br><span class="line">configure arguments: --prefix=/usr/<span class="built_in">local</span>/nginx --with-pcre=../pcre-8.45 ......  --with-ld-opt=-Wl,--as-needed,-O1,--sort-common</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>Step 2.此处补充一点，你完全可按照自身需求使用<code>--add-module</code>进行静态链接库安装，或者使用<code>--add-dynamic-module</code>进行动态链接库安装。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 动态链接库安装模块 （绝对或者相对路径）</span></span><br><span class="line">--add-dynamic-module=../ngx_http_geoip2_module-3.4</span><br><span class="line">--add-dynamic-module=/usr/<span class="built_in">local</span>/src/ngx_http_geoip2_module-3.4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 静态链接库生成模块</span></span><br><span class="line">--add-module=../ngx_http_geoip2_module-3.4</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<p>Step 3.将步骤1获取的参数加入到<code>./configure</code>, 并在末尾添加上<code>--add-dynamic-module=/usr/local/src/ngx_http_geoip2_module-3.4</code>, 以重新构建支持 geoip2 模块的 nginx 二进制文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/nginx-1.22.0/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 预编译参数</span></span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/nginx --user=nginx --group=nginx --with-pcre=../pcre-8.45 --with-zlib=../zlib-1.2.12 --with-openssl=../openssl-1.1.1q --sbin-path=/usr/sbin/nginx --conf-path=/usr/<span class="built_in">local</span>/nginx/nginx.conf --pid-path=/usr/<span class="built_in">local</span>/nginx/nginx.pid --error-log-path=/var/<span class="built_in">log</span>/nginx/error.log --http-log-path=/var/<span class="built_in">log</span>/nginx/access.log --lock-path=/var/run/nginx.lock --modules-path=/usr/<span class="built_in">local</span>/nginx/modules --http-client-body-temp-path=/var/cache/nginx/client_temp --http-proxy-temp-path=/var/cache/nginx/proxy_temp --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp --http-scgi-temp-path=/var/cache/nginx/scgi_temp --with-threads --with-http_sub_module --with-http_v2_module --with-http_auth_request_module --with-http_realip_module --with-http_secure_link_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_ssl_module --with-http_slice_module --with-http_stub_status_module --with-http_dav_module --with-http_flv_module --with-http_mp4_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-stream_geoip_module --with-mail --with-mail_ssl_module --with-http_addition_module --with-http_random_index_module --with-compat --with-file-aio --with-cc-opt=<span class="string">'-Os -fomit-frame-pointer -g'</span> --with-ld-opt=-Wl,-rpath,/usr/<span class="built_in">local</span>/luajit/lib,--as-needed,-O1,--sort-common --add-module=/usr/<span class="built_in">local</span>/src/ngx_devel_kit-0.3.1 --add-module=/usr/<span class="built_in">local</span>/src/lua-nginx-module-0.10.21 --add-dynamic-module=/usr/<span class="built_in">local</span>/src/<span class="built_in">echo</span>-nginx-module-0.62 --add-dynamic-module=/usr/<span class="built_in">local</span>/src/ngx_http_geoip2_module-3.4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译构建</span></span><br><span class="line">make</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译后将会在objs目录生成动态链接库，我们需复制到 /usr/local/nginx/modules</span></span><br><span class="line">$ ls objs/*.so</span><br><span class="line">  objs/ngx_http_geoip2_module.so  objs/ngx_stream_geoip2_module.so</span><br><span class="line">$ cp -a objs/*.so /usr/<span class="built_in">local</span>/nginx/modules</span><br><span class="line">$ ls /usr/<span class="built_in">local</span>/nginx/modules</span><br><span class="line">ngx_http_echo_module.so  ngx_http_geoip2_module.so  ngx_stream_geoip2_module.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 然后使用objs目录中生成的 nginx 二进制文件覆盖 /usr/sbin/nginx</span></span><br><span class="line">$ cp -a objs/nginx /usr/sbin/nginx</span><br><span class="line">$ make upgrade </span><br><span class="line"></span><br><span class="line"><span class="comment"># 最后执行此命令验证安装是否成功</span></span><br><span class="line">nginx -V</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h3 id="GeoLite2-数据库下载"><a href="#GeoLite2-数据库下载" class="headerlink" title="GeoLite2 数据库下载"></a>GeoLite2 数据库下载</h3><p>描述: Nginx 的 <code>ngx_*_geoip2_module</code> 模块依赖于 GeoLite2 数据库, 免费的 GeoLite2 数据库可从 Maxminds 网站获得（需要注册），GeoLite2 数据库基于 IP 地址的数据库和 Web 服务，提供有关地理位置、人口统计和用户以及匿名者的数据。</p>
+<p>如果你想下载与更新 GeoLite2 数据库,您需要拥有 MaxMind 帐户 ID 和许可证密钥, 并且当我们在 nginx 中使用则该 GeoIP2 模块，在我们请求时Nginx时根据IP地址来识别来源国家城市，但是我们需要提前下载载该数据库.</p>
+<p>简单流程: 首先访问 <code>Maxminds</code> 官网，然后注册登陆到用户后台，创建并获取 <code>License Key</code>, 最后下载 GeoLite2 数据库该压缩包，里面包含的是二进制mmdb格式的库文件。</p>
+<p>Maxminds 官网地址: <a href="https://maxmind.com" target="_blank" rel="noopener">https://maxmind.com</a><br>GeoIP2 Web 服务演示（每天25次限额）：<a href="https://www.maxmind.com/en/geoip2-precision-demo?ip_address=223.6.6.6" target="_blank" rel="noopener">https://www.maxmind.com/en/geoip2-precision-demo?ip_address=223.6.6.6</a><br>Locate My IP Address : <a href="https://www.maxmind.com/en/locate-my-ip-address" target="_blank" rel="noopener">https://www.maxmind.com/en/locate-my-ip-address</a></p>
+<p>如果无法登录官网或者你不想注册登陆，也可以下载博主已经从官网下载好的 GeoIP2 数据库。</p>
+<p style='color:red'> GeoLite2 数据库下载地址: <a href="http://share.weiyigeek.top/d/36158960-50280983-746907" target="_blank" rel="noopener">http://share.weiyigeek.top/d/36158960-50280983-746907</a><br>(访问密码: 2088)<br><br/><br>温馨提示: 如提示证书不对，请点击高级继续访问即可.<br></p>
+
+<p><br/></p>
+<p><strong>实践流程</strong></p>
+<p>Step 1.访问并登陆maxmind.com官网，此处我已经注册了账号，就不在演示如何注册了，如果没有注册的朋友可以安装如下提示进行注册(<a href="https://support.maxmind.com/hc/en-us/articles/4407099783707-Create-an-Account)，相信大家都没问题。" target="_blank" rel="noopener">https://support.maxmind.com/hc/en-us/articles/4407099783707-Create-an-Account)，相信大家都没问题。</a></p>
+<figure class="image-box">
+                <a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803111300.png" target="_blank" title="WeiyiGeek.maxmind注册" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803111300.png" alt="WeiyiGeek.maxmind注册" title="" class=""></a>
+                <p>WeiyiGeek.maxmind注册</p>
+            </figure>
+<p><br/></p>
+<p>Step 2.登陆后点击 Account 用户-&gt; Manage License Keys 管理许可 -&gt; 生成许可，然后将会看见 <code>New license key successfully created</code> 提示，其中请记录号 Account/User ID 与 License key ，以备后续使用。</p>
+<figure class="image-box">
+                <a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803111107.png" target="_blank" title="WeiyiGeek.Manage License Keys" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803111107.png" alt="WeiyiGeek.Manage License Keys" title="" class=""></a>
+                <p>WeiyiGeek.Manage License Keys</p>
+            </figure>
+<p><br/></p>
+<p>Step 3.随后点击右边的<code>GeoIP2</code>选项卡中的 <code>Download Files</code>, 你可安装需要下载 <code>Country 国家</code> 或者 <code>City 城市</code>的数据，上述下载连接中我们已经下载了如图中的两个压缩包。</p>
+<p>官方下载地址: <code>https://www.maxmind.com/en/accounts/&lt;your user account id&gt;/geoip/downloads</code></p>
+<figure class="image-box">
+                <a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803111528.png" target="_blank" title="WeiyiGeek.官方下载 GeoIP2 数据库" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803111528.png" alt="WeiyiGeek.官方下载 GeoIP2 数据库" title="" class=""></a>
+                <p>WeiyiGeek.官方下载 GeoIP2 数据库</p>
+            </figure>
+<p><br/></p>
+<p>Step 4.下载后上传到Nginx服务器并解压到 <code>/usr/local/GeoIP2</code> 目录之中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 若不存在该目录请创建</span></span><br><span class="line">mkdir -vp /usr/<span class="built_in">local</span>/GeoIP2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解压数据库</span></span><br><span class="line">ls ~</span><br><span class="line">GeoLite2-City_20220802.tar.gz  GeoLite2-Country_20220802.tar.gz</span><br><span class="line">tar -zxf GeoLite2-City_20220802.tar.gz</span><br><span class="line">tar -zxf GeoLite2-Country_20220802.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将 mmdb 文件复制到 /usr/local/GeoIP2 目录下</span></span><br><span class="line">mv GeoLite2-City_20220802/GeoLite2-City.mmdb /usr/<span class="built_in">local</span>/GeoIP2/</span><br><span class="line">mv GeoLite2-Country_20220802/GeoLite2-Country.mmdb /usr/<span class="built_in">local</span>/GeoIP2/</span><br><span class="line">rm -rf GeoLite2-City_20220802/ GeoLite2-Country_20220802/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看解压到 /usr/local/GeoIP2/ 后的 GeoIP2 数据库</span></span><br><span class="line">$ tree /usr/<span class="built_in">local</span>/GeoIP2/</span><br><span class="line">/usr/<span class="built_in">local</span>/GeoIP2/</span><br><span class="line">├── GeoLite2-City.mmdb</span><br><span class="line">└── GeoLite2-Country.mmdb</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Step 5.验证GeoIP模块部署环境,我们需要针对nginx相关配置文件进行如下配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.在 nginx.conf 中进行如下几个关键部分配置。</span></span><br><span class="line">$ vim nginx.conf</span><br><span class="line">worker_processes  auto;</span><br><span class="line"><span class="comment"># -- 关键点: 加载 geoip2 模块动态链接库</span></span><br><span class="line">load_module modules/ngx_http_geoip2_module.so;</span><br><span class="line">load_module modules/ngx_stream_geoip2_module.so;</span><br><span class="line">....</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment"># -- 关键点: 日志格式</span></span><br><span class="line">    log_format demo <span class="string">'$remote_addr - [ $geoip2_country_code $geoip2_data_city_name ] - $remote_user [$time_local] "$request" '</span></span><br><span class="line">                <span class="string">'$status $body_bytes_sent "$http_referer" '</span></span><br><span class="line">                <span class="string">'"$http_user_agent" "$http_x_forwarded_for" rt=$request_time urt=$upstream_response_time'</span>;</span><br><span class="line">    </span><br><span class="line">   <span class="comment"># -- 关键点: geoip 模块变量绑定</span></span><br><span class="line">    geoip2 /usr/<span class="built_in">local</span>/GeoIP2/GeoLite2-Country.mmdb &#123;</span><br><span class="line">      <span class="variable">$geoip2_country_code</span> country names en;</span><br><span class="line">    &#125;</span><br><span class="line">    geoip2 /usr/<span class="built_in">local</span>/GeoIP2/GeoLite2-City.mmdb &#123;</span><br><span class="line">      <span class="variable">$geoip2_data_country_name</span> country names en;</span><br><span class="line">      <span class="variable">$geoip2_data_country_code</span> default=China <span class="built_in">source</span>=<span class="variable">$remote_addr</span> country iso_code;</span><br><span class="line">      <span class="variable">$geoip2_data_city_name</span> city names en;</span><br><span class="line">      <span class="variable">$geoip2_data_province_name</span> subdivisions 0 names en;</span><br><span class="line">      <span class="variable">$geoip2_data_province_isocode</span> subdivisions 0 iso_code;</span><br><span class="line">      <span class="variable">$geoip2_continent_code</span> continent code;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.在 demo.conf 配置如下 location 以验证 GeoIP。</span></span><br><span class="line">server &#123;</span><br><span class="line">....</span><br><span class="line">  <span class="comment"># -- 关键点: 访问日志设置</span></span><br><span class="line">  access_log /var/<span class="built_in">log</span>/nginx/demo-<span class="variable">$&#123;logdate&#125;</span>.<span class="built_in">log</span> demo;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment"># -- 关键点: 该路径显示当前请求访问地址信息</span></span><br><span class="line">  location = /api/v1/info &#123;</span><br><span class="line">     default_type text/plain;</span><br><span class="line">     <span class="built_in">return</span> 200 <span class="string">"<span class="variable">$remote_addr</span>\n geoip2_country_code=<span class="variable">$geoip2_country_code</span>\n geoip2_data_country_name=<span class="variable">$geoip2_data_country_name</span> \n geoip2_data_country_code=<span class="variable">$geoip2_data_country_code</span> \n geoip2_data_city_name=<span class="variable">$geoip2_data_city_name</span> \n geoip2_continent_code=<span class="variable">$geoip2_continent_code</span> \n geoip2_data_province_name=<span class="variable">$geoip2_data_province_name</span> \n geoip2_data_province_isocode=<span class="variable">$geoip2_data_province_isocode</span>"</span>;</span><br><span class="line">   &#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>Step 6.配置完成后检查nginx配置并重载nginx执行如下命令即可 <code>nginx -t &amp;&amp; nginx -s reload</code>, 然后使用浏览器进行访问 <code>http://demo.weiyigeek.top/api/v1/info</code> 验证，将会输入如下信息。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">222.177.***.***</span><br><span class="line"> geoip2_country_code=China</span><br><span class="line"> geoip2_data_country_name=China </span><br><span class="line"> geoip2_data_country_code=CN </span><br><span class="line"> geoip2_data_city_name= </span><br><span class="line"> geoip2_continent_code=AS </span><br><span class="line"> geoip2_data_province_name= </span><br><span class="line"> geoip2_data_province_isocode=</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803131616.png" target="_blank" title="WeiyiGeek.nginx中使用geoip2模块验证" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220803131616.png" alt="WeiyiGeek.nginx中使用geoip2模块验证" title="" class=""></a>
+                <p>WeiyiGeek.nginx中使用geoip2模块验证</p>
+            </figure>
+<p>至此，GeoIP2 模块的所需环境的搭建就完毕了，更多模块示例请参考 <code>ngx_http_geoip2_module</code> 文档 , 下一章节将进行实战讲解该模块的使用。</p>
+<p><br/></p>
+<h3 id="GeoLite2-数据库自动更新"><a href="#GeoLite2-数据库自动更新" class="headerlink" title="GeoLite2 数据库自动更新"></a>GeoLite2 数据库自动更新</h3><p>描述: 为了保证数据库中国家与城市的准确性，我们需要设置cron定时任务来更新MaxMind提供的<code>GeoLite2-Country.mmdb</code>或者<code>GeoLite2-City.mmdb</code>数据库库, 以保证其数据库保持最新。</p>
+<p><br/></p>
+<p><strong>操作流程</strong></p>
+<p>Step 1.使用apt命令帮助配置和更新 GeoIP2 / GeoLite2 的软件包。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install -y geoipupdate</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Step 2.使用文本编辑器打开并编辑位于 <code>/etc/GeoIP.conf</code> 的 <code>MaxMind GeoIP conf</code> 文件, 使用上述步骤获取的 AccountID 和 LicenseKey 字段信息填入其文件中, 之后便可执行进行地理位置数据库，操作后如下图所示</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ tee /etc/GeoIP.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">AccountID 696302</span><br><span class="line">LicenseKey ycm3xq02oE7QXMOw</span><br><span class="line">EditionIDs GeoLite2-Country GeoLite2-City</span><br><span class="line">DatabaseDirectory /usr/<span class="built_in">local</span>/GeoIP2</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">ls -alh /usr/<span class="built_in">local</span>/GeoIP2  <span class="comment"># 手动更新前</span></span><br><span class="line">geoipupdate --stack-trace</span><br><span class="line">ls -alh /usr/<span class="built_in">local</span>/GeoIP2  <span class="comment"># 手动更新后</span></span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220805130137.png" target="_blank" title="WeiyiGeek.手动更新GeoLite2数据库" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220805130137.png" alt="WeiyiGeek.手动更新GeoLite2数据库" title="" class=""></a>
+                <p>WeiyiGeek.手动更新GeoLite2数据库</p>
+            </figure>
+<p><br/></p>
+<ul>
+<li>Step 3.为了方便运维管理我们可以创建定时任务自动更新，提高工作效率。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查询执行文件绝对路径</span></span><br><span class="line">$ <span class="built_in">which</span> geoipupdate</span><br><span class="line">/usr/bin/geoipupdate</span><br><span class="line"></span><br><span class="line"><span class="comment"># 每周天的凌晨更新数据库</span></span><br><span class="line">$ crontab -e</span><br><span class="line">0 * * * 6 /usr/<span class="built_in">local</span>/bin/geoipupdate &gt; /var/<span class="built_in">log</span>/geoipupdate.log 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+<p>官网更新参考地址: <a href="https://dev.maxmind.com/geoip/updating-databases?lang=en" target="_blank" rel="noopener">https://dev.maxmind.com/geoip/updating-databases?lang=en</a>.</p>
+<hr>
+<h2 id="0x02-实践使用"><a href="#0x02-实践使用" class="headerlink" title="0x02 实践使用"></a>0x02 实践使用</h2><h3 id="1-使用GeoIP2模块请求客户端的IP地址国家省份经纬度展示"><a href="#1-使用GeoIP2模块请求客户端的IP地址国家省份经纬度展示" class="headerlink" title="1.使用GeoIP2模块请求客户端的IP地址国家省份经纬度展示"></a>1.使用GeoIP2模块请求客户端的IP地址国家省份经纬度展示</h3><p>描述: 本次实践将根据请求者的国家显示中文或者英文的IP地址位置等相关信息在网页上，通过前面的学习，我们知道 geoip2 在检索有关 geoip 数据库的元数据时，其语法格式为 <code>$variable_name metadata &lt;field&gt;</code>, </p>
+<p><strong>实践流程</strong></p>
+<ul>
+<li>Step 1.编辑Nginx.conf主配置文件在 http 片段中，自定义定义访问日志格式后加入如下两个 geoip2 指令片段。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">  .....</span><br><span class="line">  geoip2 /usr/<span class="built_in">local</span>/GeoIP2/GeoLite2-Country.mmdb &#123;</span><br><span class="line">    <span class="comment"># 启用自动重新加载将使 nginx 以指定的时间间隔检查数据库的修改时间，如果发生更改则重新加载。</span></span><br><span class="line">    auto_reload 7d;</span><br><span class="line">    <span class="variable">$geoip2_country_code</span> country names en;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  geoip2 /usr/<span class="built_in">local</span>/GeoIP2/GeoLite2-City.mmdb &#123;</span><br><span class="line">    <span class="comment"># 中国IP访问都显示中文</span></span><br><span class="line">    <span class="variable">$geoip2_data_country</span> <span class="string">"default=中国"</span> <span class="built_in">source</span>=<span class="variable">$remote_addr</span> country names zh-CN;  <span class="comment"># 中国</span></span><br><span class="line">    <span class="variable">$geoip2_data_country_code</span> country iso_code;                  <span class="comment"># CN</span></span><br><span class="line">    <span class="variable">$geoip2_data_country_continent</span> continent names zh-CN;        <span class="comment"># 亚洲</span></span><br><span class="line">    <span class="variable">$geoip2_data_country_continent_code</span> continent code;          <span class="comment"># AS</span></span><br><span class="line">    <span class="variable">$geoip2_data_province_name</span> subdivisions 0 names zh-CN;       <span class="comment"># 浙江省</span></span><br><span class="line">    <span class="variable">$geoip2_data_province_isocode</span> subdivisions 0 names iso_code; <span class="comment"># "ZJ"</span></span><br><span class="line">    <span class="variable">$geoip2_data_city</span> city names zh-CN;                          <span class="comment"># 杭州</span></span><br><span class="line">    <span class="variable">$geoip2_data_city_longitude</span> location longitude;              <span class="comment"># 120.161200</span></span><br><span class="line">    <span class="variable">$geoip2_data_city_latitude</span> location latitude;                <span class="comment"># 30.299400</span></span><br><span class="line">    <span class="variable">$geoip2_data_city_time_zone</span> location time_zone;              <span class="comment"># "Asia/Shanghai"</span></span><br><span class="line">  </span><br><span class="line">    <span class="comment"># 中国以外的访问都是显示英文</span></span><br><span class="line">    <span class="variable">$geoip2_data_country_en</span> <span class="string">"default=United States"</span> <span class="built_in">source</span>=<span class="variable">$remote_addr</span> country names en;  <span class="comment"># United States</span></span><br><span class="line">    <span class="variable">$geoip2_data_country_code</span> country iso_code;                     <span class="comment"># US</span></span><br><span class="line">    <span class="variable">$geoip2_data_country_continent_en</span> continent names en;           <span class="comment"># North America</span></span><br><span class="line">    <span class="variable">$geoip2_data_country_continent_code</span> continent code;             <span class="comment"># NA</span></span><br><span class="line">    <span class="variable">$geoip2_data_province_name_en</span> subdivisions 0 names en;          <span class="comment"># ""</span></span><br><span class="line">    <span class="variable">$geoip2_data_province_isocode</span> subdivisions 0 names iso_code;    <span class="comment"># ""</span></span><br><span class="line">    <span class="variable">$geoip2_data_city</span> city names en;                                <span class="comment"># 杭州</span></span><br><span class="line">    <span class="variable">$geoip2_data_city_longitude</span> location longitude;                 <span class="comment"># 120.161200</span></span><br><span class="line">    <span class="variable">$geoip2_data_city_latitude</span> location latitude;                   <span class="comment"># 30.299400</span></span><br><span class="line">    <span class="variable">$geoip2_data_city_time_zone</span> location time_zone;                 <span class="comment"># "Asia/Shanghai"</span></span><br><span class="line">  &#125;</span><br><span class="line">  ....</span><br><span class="line">  </span><br><span class="line">  map <span class="variable">$geoip2_data_country_code</span> <span class="variable">$CN</span> &#123;</span><br><span class="line">    CN yes;</span><br><span class="line">    TW yes;</span><br><span class="line">    HK yes;</span><br><span class="line">    MO yes;</span><br><span class="line">    default no;       </span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>Step 2.同样编辑<code>conf.d/demo.conf</code>, 此处使用虚拟主机头(demo.weiyigeek.top)做演, 加入如下指令片段，其主要作用是根据区其地区，使用中英文显示请求者IP地理位置信息。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ vim conf.d/demo.conf</span><br><span class="line">server &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment"># 精准匹配</span></span><br><span class="line">  location = /api/v1/ip &#123;</span><br><span class="line">    <span class="comment"># 当访问者IP来自 `CN|TW|HK|MO` 时将会以json的形式进行返回中文的IP地址信息。</span></span><br><span class="line">    <span class="keyword">if</span> ( <span class="variable">$geoip2_data_country_code</span> ~* (CN|TW|HK|MO) )&#123;</span><br><span class="line">      rewrite (.*)  /api/v1/ip/cn last;</span><br><span class="line">    &#125;</span><br><span class="line">    rewrite (.*) /api/v1/ip/en last;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 中文显示</span></span><br><span class="line">  location /api/v1/ip/cn &#123;</span><br><span class="line">    default_type application/json;</span><br><span class="line">    <span class="built_in">return</span> 200 <span class="string">'&#123;"ip":"$remote_addr","country":&#123;"name": "$geoip2_data_country", "iso_code":  "$geoip2_data_country_code", "continent": "$geoip2_data_country_continent","continent_code": "$geoip2_data_country_continent_code"&#125;,"province":&#123;"name":"$geoip2_data_province_name","iso_code":"$geoip2_data_province_isocode"&#125;,"city":&#123;"name":"$geoip2_data_city","timezone":"$geoip2_data_city_time_zone"&#125;,"location":&#123;"longitude":"$geoip2_data_city_longitude","latitude":"$geoip2_data_city_latitude"&#125;&#125;'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 英文显示</span></span><br><span class="line">  location /api/v1/ip/en &#123;</span><br><span class="line">    default_type application/json;</span><br><span class="line">    <span class="built_in">return</span> 200 <span class="string">'&#123;"ip":"$remote_addr","country":&#123;"name": "$geoip2_data_country_en", "iso_code":  "$geoip2_data_country_code", "continent": "$geoip2_data_country_continent_en","continent_code": "$geoip2_data_country_continent_code"&#125;,"province":&#123;"name":"$geoip2_data_province_name_en","iso_code":"$geoip2_data_province_isocode"&#125;,"city":&#123;"name":"$geoip2_data_city","timezone":"$geoip2_data_city_time_zone"&#125;,"location":&#123;"longitude":"$geoip2_data_city_longitude","latitude":"$geoip2_data_city_latitude"&#125;&#125;'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>Step 3.配置 nginx 核验与重载 nginx 服务, 此处使用不同的网络使用浏览器进行访问<code>https://demo.weiyigeek.top/api/v1/ip</code>验证, 结果如下图所示:。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx -t &amp;&amp; nginx -s reload</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220804142610.png" target="_blank" title="WeiyiGeek.中英文显示IP地址信息" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220804142610.png" alt="WeiyiGeek.中英文显示IP地址信息" title="" class=""></a>
+                <p>WeiyiGeek.中英文显示IP地址信息</p>
+            </figure>
+<p><br/></p>
+<h3 id="2-使用GeoIP2模块静止某一国家地区的IP地址访问网站"><a href="#2-使用GeoIP2模块静止某一国家地区的IP地址访问网站" class="headerlink" title="2.使用GeoIP2模块静止某一国家地区的IP地址访问网站"></a>2.使用GeoIP2模块静止某一国家地区的IP地址访问网站</h3><p>描述: 为了减少国外的攻击，我们可以将指定的地区IP访问进行放行，除此之外的全部拒绝。</p>
+<p><strong>实际流程:</strong></p>
+<ul>
+<li>Step 1.在 nginx.conf 中添加 map 指令并进行如下配置, 预定义了可以访问网站的地区。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">....</span><br><span class="line">  map <span class="variable">$geoip2_data_country_code</span> <span class="variable">$allow_visit</span> &#123;</span><br><span class="line">    CN yes;</span><br><span class="line">    TW yes;</span><br><span class="line">    HK yes;</span><br><span class="line">    MO yes;</span><br><span class="line">    default no;</span><br><span class="line">  &#125;</span><br><span class="line">....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>温馨提示:<br>1) map 指令是由ngx_http_map_module模块提供的,默认情况下安装 nginx 都会安装该模块.<br>2) map 的主要作用是’创建自定义变量’,通过使用 nginx 的’内置’变量,去’匹配’某些特定规则; 如果匹配成功则设置某个值给自定义变量,而这个’自定义变量’又可以’用作他用’。</p>
+<p><br></p>
+<ul>
+<li>Step 2.在demo.conf配置文件中添加一个访问验证的示例。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 访问该页面如果$allow_visit变量不为yes则返回403页面,否则返回访问者的IP地区信息。</span></span><br><span class="line">location /allow/html &#123;</span><br><span class="line">  default_type text/html;</span><br><span class="line">  <span class="keyword">if</span> (<span class="variable">$allow_visit</span> != yes ) &#123;</span><br><span class="line">    <span class="built_in">return</span> 403 <span class="string">"IP [ <span class="variable">$remote_addr</span> ] 禁止访问! &lt;br&gt; <span class="variable">$remote_addr</span> - <span class="variable">$geoip2_data_country</span> - <span class="variable">$geoip2_data_country_code</span> - <span class="variable">$geoip2_data_country_continent</span>"</span>;</span><br><span class="line">  &#125; </span><br><span class="line">  <span class="built_in">return</span> 200 <span class="string">"欢迎IP为 [ <span class="variable">$remote_addr</span> ] 用户进行访问! &lt;br&gt; <span class="variable">$remote_addr</span> - <span class="variable">$geoip2_data_country</span> - <span class="variable">$geoip2_data_country_code</span> - <span class="variable">$geoip2_data_country_continent</span>"</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>Step 3.同样修改完成后，我们需要针对nginx配置核验与重新加载配置 <code>nginx -t &amp;&amp; nginx -s reload</code> （PS: 后续将不再提示了，想必大家都聊熟于心了）, ，之后分别使用工具进行访问验证，结果如下所示。</li>
+</ul>
+<figure class="image-box">
+                <a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220804150600.png" target="_blank" title="WeiyiGeek.allow ip visit" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220804150600.png" alt="WeiyiGeek.allow ip visit" title="" class=""></a>
+                <p>WeiyiGeek.allow ip visit</p>
+            </figure>
+<hr>
+<h3 id="3-使用GeoIP2模块实现不同国家访问进入不同目录页面"><a href="#3-使用GeoIP2模块实现不同国家访问进入不同目录页面" class="headerlink" title="3.使用GeoIP2模块实现不同国家访问进入不同目录页面"></a>3.使用GeoIP2模块实现不同国家访问进入不同目录页面</h3><p>描述: 在某些时刻我们可能会对不同地区来源访问的客户展示不同的页面，例如国内我就显示中文的页面，而新加坡我就显示英文的页面，这样一来就更加人性化一点。</p>
+<p><strong>示例演示</strong><br>在<code>/usr/local/nginx/html</code>目录中创建<code>ch/en</code>子目录，同时准备两个不同地区访问的测试页面:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ tree /usr/<span class="built_in">local</span>/nginx/html</span><br><span class="line">├── ch</span><br><span class="line">│   └── index.html</span><br><span class="line">├── en</span><br><span class="line">│   └── index.html</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">$ cat ch/index.html</span><br><span class="line">&lt;h1&gt;中文站点&lt;/h1&gt;</span><br><span class="line">&lt;iframe src=<span class="string">"https://blog.weiyigeek.top"</span> frameborder=<span class="string">"0"</span> width=<span class="string">"500"</span>&gt;&lt;/iframe&gt;</span><br></pre></td></tr></table></figure></p>
+<p>Nginx 配置中使用GeoIP处理访问请求。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">....</span><br><span class="line">  map <span class="variable">$geoip2_data_country_code</span> <span class="variable">$lang_ch</span> &#123;</span><br><span class="line">    CN yes;</span><br><span class="line">    TW yes;</span><br><span class="line">    HK yes;</span><br><span class="line">    MO yes;</span><br><span class="line">    default no;</span><br><span class="line">  &#125;</span><br><span class="line">....</span><br><span class="line"> server &#123;</span><br><span class="line">    listen       80;</span><br><span class="line">    server_name  demo.weiyigeek.top;</span><br><span class="line">    location / &#123;</span><br><span class="line">      <span class="built_in">set</span> <span class="variable">$rootpath</span> html/ch; <span class="comment"># 关键点设置一个根目录变量。</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="variable">$lang_ch</span> = no) &#123; </span><br><span class="line">        <span class="built_in">set</span> <span class="variable">$rootpath</span> html/en;</span><br><span class="line">      &#125;</span><br><span class="line">      add_header program-path <span class="variable">$rootpath</span>; <span class="comment"># 关键点写入到响应头中。</span></span><br><span class="line">      add_header country-code <span class="variable">$geoip2_data_country_code</span>;</span><br><span class="line">      root <span class="variable">$rootpath</span>;</span><br><span class="line">      index index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>访问结果: </p>
+<p><a rel=9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220804194143.png" target="_blank" title="WeiyiGeek.GeoIP2处理不同国家的请求" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220804194143.png" alt="WeiyiGeek.GeoIP2处理不同国家的请求"></a></p>
+<hr>
+<h2 id="0x0n-入坑出坑"><a href="#0x0n-入坑出坑" class="headerlink" title="0x0n 入坑出坑"></a>0x0n 入坑出坑</h2><h3 id="问题1-非二进制方式安装Nginx-GeoIP过程中可能会出现的错误问题如下，也帮大家列举出解决办法。"><a href="#问题1-非二进制方式安装Nginx-GeoIP过程中可能会出现的错误问题如下，也帮大家列举出解决办法。" class="headerlink" title="问题1.非二进制方式安装Nginx GeoIP过程中可能会出现的错误问题如下，也帮大家列举出解决办法。"></a>问题1.非二进制方式安装Nginx GeoIP过程中可能会出现的错误问题如下，也帮大家列举出解决办法。</h3><p>错误信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">错误1：./configure: error: C compiler cc is not found。</span><br><span class="line">错误2：./configure: error: the HTTP rewrite module requires the PCRE library.</span><br><span class="line">错误3：./configure: error: the HTTP gzip module requires the zlib library.</span><br><span class="line">错误4：./configure: error: the HTTP XSLT module requires the libxml2/libxslt。</span><br><span class="line">错误5：./configure: error: the HTTP image filter module requires the GD library.</span><br><span class="line">错误6：./configure: error: SSL modules require the OpenSSL library.</span><br></pre></td></tr></table></figure></p>
+<p>解决办法: <code>sudo apt install gcc libpcre3 libpcre3-dev zlib1g-dev libxslt-dev libgd-dev libssl-dev</code></p>
+<h3 id="问题2-如果在进行Nginx编译时出现-configure-error-the-GeoIP-module-requires-the-GeoIP-library-You-can-either-do-not-enable-the-module-or-install-the-library-问题提示时解决方法。"><a href="#问题2-如果在进行Nginx编译时出现-configure-error-the-GeoIP-module-requires-the-GeoIP-library-You-can-either-do-not-enable-the-module-or-install-the-library-问题提示时解决方法。" class="headerlink" title="问题2: 如果在进行Nginx编译时出现 ./configure: error: the GeoIP module requires the GeoIP library.You can either do not enable the module or install the library. 问题提示时解决方法。"></a>问题2: 如果在进行Nginx编译时出现 <code>./configure: error: the GeoIP module requires the GeoIP library.You can either do not enable the module or install the library.</code> 问题提示时解决方法。</h3><p>解决方式: 可以执行如下命令<code>apt install -y libgeoip-dev</code>命令进行解决。</p>
+<p>原文地址: <a href="https://blog.weiyigeek.top/2022/7-3-678.html">https://blog.weiyigeek.top/2022/7-3-678.html</a></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-08-12T02:38:24.410Z" itemprop="dateUpdated">2022-08-12 10:38:24</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/系统运维/Application/Web/WebApp/Nginx/9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问实践指南.md" target="_blank" rel="noopener noreferrer">_posts/系统运维/Application/Web/WebApp/Nginx/9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问实践指南.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2022/7-3-678.html" target="_blank" rel="external">https://blog.weiyigeek.top/2022/7-3-678.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webp/" rel="tag">webp</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/7-3-678.html&title=《9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/7-3-678.html&title=《9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南》 — WeiyiGeek Blog&source=本章目录
+[TOC]
+0x00 前言简述描述: 为了实现根据访问者访问我们的网站时根据其IP显示其所属地，也为获取不同地区访问者的IP地址等相关信息为目的..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/7-3-678.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/7-3-678.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/7-3-678.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2022/7-18-674.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">使用WebP-Server-Go无缝转换图片为Google的webp格式让你网站访问加载速度飞起来</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2022/7-3-677.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-安装部署"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 安装部署</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#环境说明"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">环境说明</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#libmaxminddb-下载"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">libmaxminddb 下载</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#ngx-http-geoip2-module-下载"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">ngx_http_geoip2_module 下载</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Geoip2-模块编译动态链接库"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">Geoip2 模块编译动态链接库</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#GeoLite2-数据库下载"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">GeoLite2 数据库下载</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#GeoLite2-数据库自动更新"><span class="post-toc-number">2.6.</span> <span class="post-toc-text">GeoLite2 数据库自动更新</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-实践使用"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 实践使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-使用GeoIP2模块请求客户端的IP地址国家省份经纬度展示"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">1.使用GeoIP2模块请求客户端的IP地址国家省份经纬度展示</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-使用GeoIP2模块静止某一国家地区的IP地址访问网站"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">2.使用GeoIP2模块静止某一国家地区的IP地址访问网站</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-使用GeoIP2模块实现不同国家访问进入不同目录页面"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">3.使用GeoIP2模块实现不同国家访问进入不同目录页面</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x0n-入坑出坑"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x0n 入坑出坑</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题1-非二进制方式安装Nginx-GeoIP过程中可能会出现的错误问题如下，也帮大家列举出解决办法。"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">问题1.非二进制方式安装Nginx GeoIP过程中可能会出现的错误问题如下，也帮大家列举出解决办法。</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题2-如果在进行Nginx编译时出现-configure-error-the-GeoIP-module-requires-the-GeoIP-library-You-can-either-do-not-enable-the-module-or-install-the-library-问题提示时解决方法。"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">问题2: 如果在进行Nginx编译时出现 .&#x2F;configure: error: the GeoIP module requires the GeoIP library.You can either do not enable the module or install the library. 问题提示时解决方法。</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/7-3-678.html&title=《9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/7-3-678.html&title=《9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南》 — WeiyiGeek Blog&source=本章目录
+[TOC]
+0x00 前言简述描述: 为了实现根据访问者访问我们的网站时根据其IP显示其所属地，也为获取不同地区访问者的IP地址等相关信息为目的..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/7-3-678.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/7-3-678.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/7-3-678.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACJElEQVR42u3aQW7DMAwEwP7/0+kHGnWXcgJYHp8Cw2Y4OTCiqJ+f+HoF17vn1zHbt7YuDAyM2zKS5JLU14m+i5l8jr4dAwPjAYwkiTU+f2sNW0d4ex8DAwNjWQSTODtlGgMDA2NWcNfp5m1qW7IxMDCezEia2HzXqy2mX+3FMTAwbshok/vm54/MNzAwMG7FeJXXbGnYjjzrrDAwMI5mzBrUZLt/FmenYcbAwDiV0Y4h80Y3L9brHyW6g4GBcTQjOQDRhm4PT7Q/TfS/gYGBcSgjby8T2KwZ3hoAYGBgHM2YLddy6s6dnYYZAwPjbEZbRltq+8wFc1oMDIyDGHkTO2to8+dn34uBgfEcRl7sWsCsQiYLSgwMjFMZs620fIu/nTAmxbQYCWBgYBzBaBd5+4dZ25HnsP/GwMA4iNEeIU0Gk3mh3CnBfywNMTAwjmYkVxK0rfR1h51PUDEwMA5izF5uB42zY171MhEDA+Noxk5Rbgtosqy8atiAgYFxEmP2Wt4A7+OjJSkGBsYDGNemNdv6Twp0NI/FwMB4DCNJaBbh2qNjGBgYZzNe5ZUnNzuckRTZfxaFGBgYxzH254M7ZTqPMDucgYGBcRJj57BXO7zMj3+1rTUGBsYTGMUWfFlM26LcjlQxMDAwWtI62ixmsemGgYGBUY4E8gizVvmygouBgXETRtLE7hTT2ZDyI9ttGBgYN2TkreOwvSyTmBVrDAyMQxm/Dirk86wAtoIAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

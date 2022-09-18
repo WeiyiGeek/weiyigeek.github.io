@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 CORS攻击原理介绍和使用|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="CORS">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>CORS攻击原理介绍和使用</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">CORS攻击原理介绍和使用</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-07-17T05:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-07-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E5%89%8D%E7%AB%AF%E6%BC%8F%E6%B4%9E/">前端漏洞</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/OWASPTOP/WebFrontEnd/CORS攻击原理介绍和利用"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">CORS攻击原理介绍和使用</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-07-17 13:36:30" datetime="2019-07-17T05:36:30.000Z"  itemprop="datePublished">2019-07-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E5%89%8D%E7%AB%AF%E6%BC%8F%E6%B4%9E/">前端漏洞</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><b style="color:red">注意：本文分享给安全从业人员、网站开发人员以及运维人员在日常工作防范恶意攻击,请勿恶意使用下面介绍技术进行非法攻击操作。。</b></p>
+<p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言介绍"><a href="#0x00-前言介绍" class="headerlink" title="0x00 前言介绍"></a>0x00 前言介绍</h4><p><em>什么是CORS?为什么要使用CORS机制?</em><br>答:CORS是一个W3C标准机制全称是”跨域资源共享”（Cross-origin resource sharing）</p>
+<ul>
+<li>它使用额外的 HTTP 头来告诉浏览器 让运行在一个 origin (domain) 上的Web应用被准许访问来自不同源服务器上的指定的资源。</li>
+<li>它允许浏览器向跨源(协议 + 域名 + 端口)服务器，发出XMLHttpRequest请求，从而克服了AJAX只能同源使用的限制<br><br></li>
+</ul>
+<p><em>那什么是同源?</em><br>答:如果看不懂下面英文解释的您可以这样理解,不同协议不同端口不同域名满足其中一个则是不同源的;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Two websites are said to have same origin <span class="keyword">if</span> both have following <span class="keyword">in</span> common:</span><br><span class="line">Scheme (http, https)</span><br><span class="line">Host name (google.com, facebook.com, securelayer7.net)</span><br><span class="line">Port number (80, 4567, 7777)</span><br><span class="line">So, sites http://example.com and http://example.com/settings have same origin.</span><br><span class="line">But https://example.com:4657 and http://example.com:8080/settings have different origins</span><br></pre></td></tr></table></figure><br>同源策略(same-origin policy)限制了从同一个源加载的文档或脚本如何与来自另一个源的资源进行交互。这是一个用于隔离潜在恶意文件的重要安全机制。</p>
+<p><br></p>
+<p>使用CORS好处:</p>
+<ul>
+<li>以降低跨域 HTTP 请求所带来的风险。</li>
+</ul>
+<p>必要条件：</p>
+<ul>
+<li>CORS需要浏览器和服务器同时支持，IE浏览器不能低于IE10。</li>
+</ul>
+<p><br></p>
+<h4 id="0x01-CORS-请求原理"><a href="#0x01-CORS-请求原理" class="headerlink" title="0x01 CORS 请求原理"></a>0x01 CORS 请求原理</h4><p>浏览器对于CORS两大请求处理是不一样的：</p>
+<ul>
+<li>1.简单请求（simple request）</li>
+<li>2.非简单请求（not-so-simple request）</li>
+</ul>
+<p>以简单请求为例，凡是不同时满足下面面两个条件，就属于非简单请求。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(1) 请求方法是以下三种方法之一：</span><br><span class="line">    HEAD</span><br><span class="line">    GET</span><br><span class="line">    POST</span><br><span class="line">(2) HTTP的请求头信息不超出以下几种字段：</span><br><span class="line">    Accept</span><br><span class="line">    Accept-Language</span><br><span class="line">    Content-Language</span><br><span class="line">    Last-Event-ID</span><br><span class="line">    Content-Type：只限于三个值application/x-www-form-urlencoded、multipart/form-data、text/plain</span><br></pre></td></tr></table></figure></p>
+<p>CORS 6个基本字段：</p>
+<ul>
+<li>Cache-Control、Content-Language、Content-Type、Expires、Last-Modified、Pragma,可利用XMLHttpRequest对象.getResponseHeader(‘FooBar’）获取设置的字段；<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Access-Control-Allow-Origin</span><br><span class="line">Access-Control-Allow-Credentials</span><br><span class="line">Access-Control-Allow-Methods</span><br><span class="line">Access-Control-Allow-Headers</span><br><span class="line">Access-Control-Max-Age</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>例子:浏览器发现这次跨源AJAX请求是一般请求，就自动在头信息之中添加一个Origin字段。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Origin字段用来说明本次请求来自哪个源（协议 + 域名 + 端口），服务器根据这个值，决定是否同意这次请求。</span></span><br><span class="line">GET /cors HTTP/1.1</span><br><span class="line">Origin: http://api.bob.com  <span class="comment">#判断是否存在CORS安全问题</span></span><br><span class="line">Host: api.alice.com</span><br><span class="line">Accept-Language: en-US</span><br><span class="line">Connection: keep-alive</span><br><span class="line">User-Agent: Mozilla/5.0</span><br></pre></td></tr></table></figure></p>
+<p>如果在B站请求A站，浏览器是不允许跨域获取数据的，如果在A站返回的数据加上一个Access-Control-Allow-Origin:* 的HTTP的头这时所有网站都能访问(但是有的浏览器默认会进行过滤))。<br>但是这并不是我们想要的，只需把 Access-Control-Allow-Origin: api.bob.com 修改成需要给权限的网站即可。</p>
+<p><br></p>
+<p><strong>simple request</strong><br>（1）简单请求直接发送CORS请求重要就是<code>Origin头与返回的Access-Control-Allow-Origin消息头</code>：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">##请求</span></span><br><span class="line">GET /cors HTTP/1.1</span><br><span class="line">Host: api.alice.com</span><br><span class="line">Origin: http://api.bob.com   <span class="comment">#本次请求来自哪个源（协议 + 域名 + 端口),服务器根据此值进行判断</span></span><br><span class="line">Connection: keep-alive</span><br><span class="line">User-Agent: Mozilla/5.0...</span><br><span class="line"></span><br><span class="line"><span class="comment">##响应</span></span><br><span class="line">Access-Control-Allow-Origin: http://api.bob.com   <span class="comment">#请求时Origin字段的值或者是一个*（表示接受任意域名的请求）</span></span><br><span class="line">Access-Control-Allow-Credentials: <span class="literal">true</span>    <span class="comment">#布尔值，表示是否允许发送Cookie（默认是否的）|浏览器不同则不同（有人说第一次请求都会发生），其次看服务器是否接收；</span></span><br><span class="line">Access-Control-Expose-Headers: FooBar     <span class="comment">#CORS请求时，XMLHttpRequest对象的getResponseHeader()方法只能拿到6个基本字段，为了能拿到字段就要设置</span></span><br><span class="line">Content-Type: text/html; charset=utf-8</span><br></pre></td></tr></table></figure></p>
+<p><em>withCredentials 属性的作用：</em><br>描述：CORS请求默认不发送Cookie和HTTP认证信息，如果要把Cookie发到服务器，一方面要服务器同意，另一方面是在编写AJAX请求的时候加上发送cookie的头；<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xhr.withCredentials &#x3D; true;  &#x2F;&#x2F;浏览器不同可能在未设置为true默认会上传cookie</span><br></pre></td></tr></table></figure><br>同时Cookie依然遵循同源政策，只有用服务器域名设置的Cookie才会上传，其他域名的Cookie并不会上传，且（跨源）原网页代码中的document.cookie也无法读取服务器域名下Cookie。</p>
+<p><br></p>
+<p><strong>not-so-simple request</strong><br>描述：非简单请求是那种对服务器有特殊要求的请求，比如请求方法是PUT或DELETE或者Content-Type字段的类型是application/json；</p>
+<p>比如JAVASCRIPT测试ajax：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> url = <span class="string">'http://api.alice.com/cors'</span>;</span><br><span class="line"><span class="keyword">var</span> xhr = <span class="keyword">new</span> XMLHttpRequest();</span><br><span class="line">xhr.open(<span class="string">'PUT'</span>, url, <span class="literal">true</span>);</span><br><span class="line">xhr.setRequestHeader(<span class="string">'X-Custom-Header'</span>, <span class="string">'value'</span>);  <span class="comment">//自定义头信息</span></span><br><span class="line">xhr.send();</span><br></pre></td></tr></table></figure></p>
+<p>非简单请求的CORS请求，会在正式通信之前增加一次HTTP查询请求，<code>称为&quot;预检&quot;请求（preflight）</code>;如果浏览器否定了”预检”请求，会返回一个正常的HTTP回应，但是没有任何CORS相关的头信息字段,可以<code>采用XMLHttpRequest对象的onerror回调函数捕获</code>；<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 预检请求  </span></span><br><span class="line">OPTIONS /cors HTTP/1.1                   <span class="comment">#"预检"请求用的请求方法是OPTIONS，表示这个请求是用来询问的</span></span><br><span class="line">Origin: http://api.bob.com</span><br><span class="line">Access-Control-Request-Method: PUT       <span class="comment">#列出浏览器的CORS请求会用到哪些HTTP方法</span></span><br><span class="line">Access-Control-Request-Headers: X-Custom-Header  <span class="comment">#逗号分隔的字符串，指定浏览器CORS请求会额外发送的头信息字段</span></span><br><span class="line">Host: api.alice.com</span><br><span class="line">Connection: keep-alive</span><br><span class="line">User-Agent: Mozilla/5.0...</span><br><span class="line"></span><br><span class="line"><span class="comment">#预检请求的回应</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Mon, 01 Dec 2008 01:15:39 GMT</span><br><span class="line">Server: Apache/2.0.61 (Unix)</span><br><span class="line">Access-Control-Allow-Origin: http://api.bob.com    <span class="comment">#关键点,该字段也可以设为星号，表示同意任意跨源请求。</span></span><br><span class="line">Access-Control-Allow-Methods: GET, POST, PUT       <span class="comment">#关键点，它也是一个逗号分隔的字符串，表明服务器支持的所有头信息字段，不限于浏览器在"预检"中请求的字段。</span></span><br><span class="line">Access-Control-Allow-Headers: X-Custom-Header      <span class="comment">#关键点，它也是一个逗号分隔的字符串，表明服务器支持的所有头信息字段，不限于浏览器在"预检"中请求的字段。</span></span><br><span class="line">Access-Control-Max-Age: 1728000                    <span class="comment">#关键点，用来指定本次预检请求的有效期，单位为秒。上面结果中，有效期是20天（1728000秒）</span></span><br><span class="line">Content-Type: text/html; charset=utf-8</span><br><span class="line">Content-Encoding: gzip</span><br><span class="line">Content-Length: 0</span><br><span class="line">Keep-Alive: timeout=2, max=100</span><br><span class="line">Connection: Keep-Alive</span><br><span class="line">Content-Type: text/plain</span><br></pre></td></tr></table></figure></p>
+<p>下面是”预检”请求之后浏览器的正常CORS请求，下面头信息中Access-Control-Allow-Origin字段是每次回应都必定包含的。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#浏览器的正常请求和回应</span></span><br><span class="line">PUT /cors HTTP/1.1</span><br><span class="line">Origin: http://api.bob.com   <span class="comment">#默认是浏览器自动添加的</span></span><br><span class="line">Host: api.alice.com</span><br><span class="line">X-Custom-Header: value</span><br><span class="line">Accept-Language: en-US</span><br><span class="line">Connection: keep-alive</span><br><span class="line">User-Agent: Mozilla/5.0...</span><br><span class="line">    </span><br><span class="line"><span class="comment">#服务器正常的回应。</span></span><br><span class="line">Access-Control-Allow-Origin: http://api.bob.com</span><br><span class="line">Content-Type: text/html; charset=utf-8</span><br></pre></td></tr></table></figure></p>
+<p><em>问：与JSONP的比较？</em></p>
+<ul>
+<li>1.CORS与JSONP的使用目的相同但是比JSONP更强大。</li>
+<li>2.JSONP只支持GET请求，CORS支持所有类型的HTTP请求。</li>
+<li>3.JSONP的优势在于支持老式浏览器，以及可以向不支持CORS的网站请求数据。</li>
+</ul>
+<hr>
+
+<h4 id="0x02-CORS-安全问题"><a href="#0x02-CORS-安全问题" class="headerlink" title="0x02 CORS 安全问题"></a>0x02 CORS 安全问题</h4><p>描述:CORS漏洞( Vulnerability)存在的原因主要在于Access-Control-Allow-Origin参数配置失误未严格验证，允许非同域站点访问本站资源从而造成跨域问题。</p>
+<p><em>问题1：如果Access-Control-Allow-Origin可控且Access-Control-Allow-Credentials为true，那么就可以利用一个可控的网站来窃取一个人的个人隐私信息</em></p>
+<ul>
+<li>（1）返回报文头部的Access-Control-Allow-Origin根据请求报文Origin ，Ps:只要页面产生跨域请求那浏览器就会在请求报文中自动；</li>
+<li>（2）返回报文头部的Access-Control-Allow-Credentials为true，这表明Cookie可以包含在请求中，一起发给服务器；</li>
+</ul>
+<p><br></p>
+<p><em>问题2：CORS的规范中还提到了“NULL”源，触发这个源是为了网页跳转或者是来自本地HTML文件。</em><br>目标应用可能会接收“null”源，并且这个可能被测试者（或者攻击者）利用，任何网站很容易使用沙盒iframe来获取”null“源；</p>
+<blockquote>
+<p>origin:null</p>
+</blockquote>
+<p><br></p>
+<p><strong>1)如何监测CORS漏洞</strong><br>答:可以采用BurpSuite进行测试CORS的origin返回响应头进行判断</p>
+<ul>
+<li>(1)设置为启用该请求头:Proxy-Options-Match and Replace</li>
+<li>(2)设置过滤请求:Proxy-HTTP history - Filter - Filter by seach term</li>
+</ul>
+<figure class="image-box">
+                <a rel=CORS攻击原理介绍和使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921212510.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921212510.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>对于请求页面响应如下则确认存在该漏洞：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Origin: foot.cors.org</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=CORS攻击原理介绍和使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190922134140.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190922134140.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure><br><figure class="image-box">
+                <a rel=CORS攻击原理介绍和使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921212734.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921212734.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<p><strong>补充知识点:</strong><br><em>1.CORS漏洞与CSRF漏洞的共同点与不同点？</em></p>
+<ul>
+<li>共同点：都要借助第三方网站，都要借助ajax的异步过程，一般都需要用户登陆。</li>
+<li>不同点：利用CORS漏洞读取到受害者的敏感信息，可以利用csrf漏洞可以替受害者完成诸如转账等敏感操作，一般有CORS漏洞的地方都有csrf漏洞；<figure class="image-box">
+                <a rel=CORS攻击原理介绍和使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921212916.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921212916.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+</ul>
+<p><em>2.如果服务器配置下面响应头不能证明漏洞存在，因为浏览器会自动拦截掉非认证域的请求。</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Access-Control-Allow-Origin: *  </span><br><span class="line">Access-Control-Allow-Credentials: <span class="literal">true</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+
+<h4 id="0x03-CORS-利用"><a href="#0x03-CORS-利用" class="headerlink" title="0x03 CORS 利用"></a>0x03 CORS 利用</h4><p>描述：CORS漏洞常常与低风险的反射类型的XSS漏洞联合使用(组合拳打法),来增加其鸡肋漏洞的危害性使之变废为宝;</p>
+<p>CORS 常见漏洞点：</p>
+<ul>
+<li>1.互联网厂商的api接口；</li>
+<li>2.聊天的程序的api接口；</li>
+<li>3.app的api &lt;不过有一些请求需要带有一些额外的请求头，利用起来比较困难&gt;;</li>
+<li>4.区块链厂商；</li>
+</ul>
+<p><em>案例1：</em></p>
+<ul>
+<li><p>攻击者拥有一个包含用于跨域交互的恶意脚本的网站：<code>http://127.0.0.1:4567</code>,受害者即内部网网站的管理员访问攻击者的网站访问后将会触发攻击载荷。</p>
+<figure class="image-box">
+                <a rel=CORS攻击原理介绍和使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921220400.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921220400.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+<li><p>一旦加载了web页面，就会调用“makeRequest”方法。该方法发起一个跨域请求来捕获该秘密，发送到位于 <code>http://127.0.0.1:80/bwapp/secret-cors-1.php</code>的脆弱内部网应用程序。进入翻译页面</p>
+</li>
+</ul>
+<p><br></p>
+<p><em>案例2：CORS 利用过程采用一个案例演示</em><br>描述:通过子域名的XSS结合CORS利用</p>
+<figure class="image-box">
+                <a rel=CORS攻击原理介绍和使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921213524.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921213524.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>重点:但是有时候需要注意到referer源 头对CORS的利用影响；<br><figure class="image-box">
+                <a rel=CORS攻击原理介绍和使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921213552.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921213552.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<p><em>案例3:利用特殊符号和浏览器的结合去绕过子域名的检查</em><br>描述:这个API端点返回用户的私有信息比如全名、电子邮件地址要滥用这种错误配置，以便我们可以执行攻击，比如泄漏用户的私有信息我们需要声明一个废弃的子域(子域接管)，或者在现有的子域中找到一个XSS。</p>
+<p>这个漏洞的利用条件需要一个XSS或者子域名接管<br><code>https://banques.redacted.com/choice-quiz?form_banque=&quot;&gt;&lt;script&gt;alert(document.domain)&lt;/script&gt;&amp;form_cartes=73&amp;iframestat=1</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">cors</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"><span class="keyword">var</span> xhttp = <span class="keyword">new</span> XMLHttpRequest();</span><br><span class="line">xhttp.onreadystatechange = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.status == <span class="number">200</span>) &#123;</span><br><span class="line">    alert(<span class="keyword">this</span>.responseText);</span><br><span class="line">    <span class="built_in">document</span>.getElementById(<span class="string">"demo"</span>).innerHTML = <span class="keyword">this</span>.responseText;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">xhttp.open(<span class="string">"GET"</span>, <span class="string">"https://www.redacted.com/api/return"</span>, <span class="literal">true</span>);</span><br><span class="line">xhttp.withCredentials = <span class="literal">true</span>;</span><br><span class="line">xhttp.send();</span><br><span class="line">&#125;</span><br><span class="line">cors();</span><br></pre></td></tr></table></figure>
+<p>关键点:主要是需要使用了FUZZ去尝试通过特殊字符来绕过验证了您的origin来源的网站,也就是说我们可以通过访问*.target.com.特殊字符.youdomain.com来绕过正则<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#特殊字符</span></span><br><span class="line">,</span><br><span class="line">&amp;</span><br><span class="line"><span class="string">'</span></span><br><span class="line"><span class="string">"</span></span><br><span class="line"><span class="string">;</span></span><br><span class="line"><span class="string">!</span></span><br><span class="line"><span class="string">$</span></span><br><span class="line"><span class="string">^</span></span><br><span class="line"><span class="string">*</span></span><br><span class="line"><span class="string">(</span></span><br><span class="line"><span class="string">)</span></span><br><span class="line"><span class="string">+</span></span><br><span class="line"><span class="string">=</span></span><br><span class="line"><span class="string">`</span></span><br><span class="line"><span class="string">~</span></span><br><span class="line"><span class="string">-</span></span><br><span class="line"><span class="string">_</span></span><br><span class="line"><span class="string">=</span></span><br><span class="line"><span class="string">|</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">%</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#最终如下域名可以绕过</span></span><br><span class="line"><span class="string">*.ubnt.com!.evil.com</span></span><br><span class="line"><span class="string">*.ubnt.com".evil.com</span></span><br><span class="line"><span class="string">*.ubnt.com$.evil.com</span></span><br><span class="line"><span class="string">*.ubnt.com%0b.evil.com</span></span><br><span class="line"><span class="string">*.ubnt.com%60.evil.com</span></span><br><span class="line"><span class="string">*.ubnt.com&amp;.evil.com</span></span><br><span class="line"><span class="string">*.ubnt.com'</span>.evil.com</span><br><span class="line">*.ubnt.com(.evil.com</span><br><span class="line">*.ubnt.com).evil.com</span><br><span class="line">*.ubnt.com*.evil.com</span><br><span class="line">*.ubnt.com,.evil.com</span><br><span class="line">*.ubnt.com;.evil.com</span><br><span class="line">*.ubnt.com=.evil.com</span><br><span class="line">*.ubnt.com^.evil.com</span><br><span class="line">*.ubnt.com`.evil.com</span><br><span class="line">*.ubnt.com&#123;.evil.com</span><br><span class="line">*.ubnt.com|.evil.com</span><br><span class="line">*.ubnt.com&#125;.evil.com</span><br><span class="line">*.ubnt.com~.evil.com</span><br></pre></td></tr></table></figure><br>用safari访问一下看支不支持之后注册这个子域名然后就可以利用了 <code>https://zzzz.ubnt.com=.evil.com/cors-poc</code> </p>
+<hr>
+
+<h4 id="0x04-安全防御"><a href="#0x04-安全防御" class="headerlink" title="0x04 安全防御"></a>0x04 安全防御</h4><p>1)不要配置“Access-Control-Allow-Origin”为通配符“*”，而且更重要的是，要严格效验来自请求数据包中的“Origin”的值。<br>     当收到跨域请求的时候，要检查“Origin”的值是否是一个可信的源，还要检查是否为null<br>2)避免使用“Access-Control-Allow-Credentials: true”<br>3)减少Access-Control-Allow-Methods所允许的方法</p>
+<p><em>问：怎么才能允许多域名跨域访问呢？</em><br>由于origin-list-or-null在产品实际中多用来做限制，不是一个空格分隔的origin的列表，而只能是单个origin或字符串”null”。<br><figure class="image-box">
+                <a rel=CORS攻击原理介绍和使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921213755.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921213755.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><em>解决办法1</em> 结合CORS on Nginx写成Nginx配置片段enable-cors.conf，使用的时候，只需如下这样：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">location &#x2F; &#123;</span><br><span class="line">    ... other config ...</span><br><span class="line">    include enable-cors.conf;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>完整的enable-cors.conf配置片段如下：（能解决很大一部分企业安全问题哟）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Wide-open CORS config for nginx</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># allow origin list</span></span><br><span class="line"><span class="built_in">set</span> <span class="variable">$ACAO</span> <span class="string">'http://www.test.com http://user.test.com'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment"># set single origin</span></span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$http_origin</span> ~* ^https?://(www|user)\.<span class="built_in">test</span>\.com$) &#123;</span><br><span class="line">    <span class="built_in">set</span> <span class="variable">$ACAO</span> <span class="variable">$http_origin</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$request_method</span> = <span class="string">'OPTIONS'</span>) &#123;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Origin'</span> <span class="string">'$ACAO'</span>;</span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="comment"># Om nom nom cookies</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Credentials'</span> <span class="string">'true'</span>;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Methods'</span> <span class="string">'GET, POST, OPTIONS'</span>;</span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="comment"># Custom headers and headers various browsers *should* be OK with but aren't</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Headers'</span> <span class="string">'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type'</span>;</span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="comment"># Tell client that this pre-flight info is valid for 20 days</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    add_header <span class="string">'Access-Control-Max-Age'</span> 1728000;</span><br><span class="line">    add_header <span class="string">'Content-Type'</span> <span class="string">'text/plain charset=UTF-8'</span>;</span><br><span class="line">    add_header <span class="string">'Content-Length'</span> 0;</span><br><span class="line">    <span class="built_in">return</span> 204;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$request_method</span> = <span class="string">'POST'</span>) &#123;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Origin'</span> <span class="string">'$ACAO'</span>;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Credentials'</span> <span class="string">'true'</span>;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Methods'</span> <span class="string">'GET, POST, OPTIONS'</span>;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Headers'</span> <span class="string">'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type'</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="variable">$request_method</span> = <span class="string">'GET'</span>) &#123;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Origin'</span> <span class="string">'$ACAO'</span>;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Credentials'</span> <span class="string">'true'</span>;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Methods'</span> <span class="string">'GET, POST, OPTIONS'</span>;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Headers'</span> <span class="string">'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type'</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><em>解决办法2：</em> 设置多个可跨域域名数组通过request的getHeader(“Origin”)获取origin 请求域名属于可跨域域名数组，将所取的orgin值设给Access-Control-Allow-Origin;<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//跨域域名设置</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String[] ALLOW_DOMAIN = &#123; <span class="string">"http://localhost:8000"</span>,<span class="string">"http://192.168.0.100"</span> &#125;;</span><br><span class="line"></span><br><span class="line">HttpServletRequest req = (HttpServletRequest) request; </span><br><span class="line">HttpServletResponse res = (HttpServletResponse) response; </span><br><span class="line">String originHeader = req.getHeader(<span class="string">"Origin"</span>); </span><br><span class="line"><span class="keyword">if</span> (Arrays.asList(Constants.ALLOW_DOMAIN).contains(originHeader)) </span><br><span class="line">&#123; </span><br><span class="line">    res.setHeader(<span class="string">"Access-Control-Allow-Origin"</span>, originHeader);</span><br><span class="line">    res.setHeader(<span class="string">"Allow"</span>, <span class="string">"*"</span>); </span><br><span class="line">    res.setHeader(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"POST, GET, PUT, DELETE, OPTIONS"</span>); </span><br><span class="line">    res.setHeader(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Origin, X-Requested-With, Content-Type, Accept, Referer, User-Agent, Authorization, X-Auth-Token"</span>);           </span><br><span class="line">    res.setHeader(<span class="string">"Access-Control-Max-Age"</span>, <span class="string">"3600"</span>); </span><br><span class="line">    <span class="comment">// 接收跨域的cookie </span></span><br><span class="line">    res.setHeader(<span class="string">"Access-Control-Allow-Credentials"</span>, <span class="string">"true"</span>); </span><br><span class="line">    <span class="keyword">if</span> (<span class="string">"IE"</span>.equals(req.getParameter(<span class="string">"type"</span>))) </span><br><span class="line">    &#123; </span><br><span class="line">        ((HttpServletResponse) response).setHeader( <span class="string">"XDomainRequestAllowed"</span>, <span class="string">"1"</span>); </span><br><span class="line">    &#125; </span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (req.getMethod().toLowerCase().equals(<span class="string">"options"</span>)) </span><br><span class="line">    &#123; </span><br><span class="line">        res.setHeader(<span class="string">"Content-type"</span>, <span class="string">"text/html"</span>); </span><br><span class="line">        res.getWriter().write(<span class="string">"options OK"</span>); </span><br><span class="line">        <span class="keyword">return</span>; </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<hr>
+
+<h4 id="0x05-补充附录"><a href="#0x05-补充附录" class="headerlink" title="0x05 补充附录"></a>0x05 补充附录</h4><p><strong>总结</strong></p>
+<ul>
+<li>反射XSS和CORS配合成功获取到用户敏感数据，虽然同样需要用户点击才能触发;</li>
+</ul>
+<p><br></p>
+<p><strong>附录</strong></p>
+<ul>
+<li>参考网址: <a href="http://evil.com" target="_blank" rel="noopener">http://evil.com</a></li>
+<li>在线测试网站：<a href="http://test-cors.org" target="_blank" rel="noopener">http://test-cors.org</a></li>
+<li>CORS漏洞开源工具 <code>CrossSiteContentHijacking</code> 验证</li>
+<li>下表包含特殊字符列表，其中包含每个测试浏览器的当前“兼容性”(注意:只包含至少一个浏览器允许的特殊字符)。<figure class="image-box">
+                <a rel=CORS攻击原理介绍和使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921224743.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921224743.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-08-16T08:44:33.332Z" itemprop="dateUpdated">2022-08-16 16:44:33</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/网安大类/OWASPTOP/WebFrontEnd/CORS攻击原理介绍和利用.md" target="_blank" rel="noopener noreferrer">_posts/网安大类/OWASPTOP/WebFrontEnd/CORS攻击原理介绍和利用.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/7-17-388.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/7-17-388.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CORS/" rel="tag">CORS</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/7-17-388.html&title=《CORS攻击原理介绍和使用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/7-17-388.html&title=《CORS攻击原理介绍和使用》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员、网站开发人员以及运维人员在日常工作防范恶意攻击,请勿恶意使用下面介绍技术进行非法攻击操作。。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/7-17-388.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《CORS攻击原理介绍和使用》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/7-17-388.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/7-17-388.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/7-17-392.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">安全之配置不当信息泄露</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/7-17-419.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Nginx脆弱性利用一览</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言介绍</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-CORS-请求原理"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 CORS 请求原理</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-CORS-安全问题"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 CORS 安全问题</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-CORS-利用"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 CORS 利用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-安全防御"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 安全防御</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x05-补充附录"><span class="post-toc-number">6.</span> <span class="post-toc-text">0x05 补充附录</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/7-17-388.html&title=《CORS攻击原理介绍和使用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/7-17-388.html&title=《CORS攻击原理介绍和使用》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员、网站开发人员以及运维人员在日常工作防范恶意攻击,请勿恶意使用下面介绍技术进行非法攻击操作。。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/7-17-388.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《CORS攻击原理介绍和使用》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/7-17-388.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/7-17-388.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACL0lEQVR42u3aS5KCQBAFwLn/pZ2tE474qrpRu0lWBhJIsijr9/MTH7e74/7M8beP5x/vefwrkw8MDIxlGbfDI3nQ6plj0vHreErFwMC4AKN66yRQJj8/zsbAwMDIH31WCMbAwMB4Z8DNg/JX/29gYGB8DSMpYpPr80Zb0p47pRbHwMBYkJF33d//+ZT5BgYGxlKMXugcae7PepI/98TAwNiakQe4keZ+XtD2ngcDA+MKjKSJVi1WZzXg8jMYGBi7MqrJXLXtlTf98zbfP3fDwMDYmpEUpXkTfzyJHBoAYGBgbMpI1rZ6wTSH5cH3aQjGwMDYmjF39SEZIeTJX/ToZ2xwYGBgfDFjfAzZbOXHgBffYmBgbMoYX62ojgd6g4QX98HAwLgAI8+vRrp6vSSyuS2CgYGxEWNk5SJ/0F6jrboohoGBcTXGeRXz+GuKwi4GBsZ2jN6qVi+trKaPzf8KDAyMjRjRaLA4jEyK1Wqp/CK4Y2BgbM0YCbu98UB1FSPBY2BgXIHRa/pXYXni2CtrMTAwrsCotsPyBC4vX/PPGBgYGPmP5bxeA64whMDAwNiUcSsevcRu7kCinNtiYGAsznjnnlXe+cvTxA+si2FgYHyIMSuxq7b+q4OECV1DDAyMxRm94ja/prrMUQ79GBgYGEHrP1nhqo4WCskoBgYGRmsZIl/O6F0zlBpiYGAsyEiK2Gqvbjy8ntJuw8DAWJAxtKlRHBIkryNvwGFgYFyA8QuJcfoINnaIVAAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

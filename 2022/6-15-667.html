@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 Grafana之Loki日志聚合系统入门介绍与企业实践|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Grafana">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Grafana之Loki日志聚合系统入门介绍与企业实践</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">Grafana之Loki日志聚合系统入门介绍与企业实践</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2022-06-15T11:34:30.000Z" itemprop="datePublished" class="page-time">
+  2022-06-15
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E8%81%9A%E5%90%88/">日志聚合</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-数据分析/可视化工具/Grafana之Loki日志聚合系统入门介绍与企业实践-cost"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Grafana之Loki日志聚合系统入门介绍与企业实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2022-06-15 19:34:30" datetime="2022-06-15T11:34:30.000Z"  itemprop="datePublished">2022-06-15</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E8%81%9A%E5%90%88/">日志聚合</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-快速入门"><a href="#0x00-快速入门" class="headerlink" title="0x00 快速入门"></a>0x00 快速入门</h2><h3 id="1-什么是-Loki"><a href="#1-什么是-Loki" class="headerlink" title="1.什么是 Loki ?"></a>1.什么是 Loki ?</h3><p>描述：在对公司容器的日志存储查询方案进行设计的时候，发现主流的 <code>ELK (Elasticsearch, Logstash, Kibana)</code> 或者 <code>EFK (Elasticsearch, Filebeat or Fluentd, Kibana)</code> 比较重，再加上现阶段对于 ES 复杂的搜索功能很多都用不上，最终选择了 Grafana 开源的 Loki 日志系统即 PLG 日志解决方案。</p>
+<p>本篇文章将主要介绍使用 Loki 实现 Kubernetes 容器日志监控的相关知识，感兴趣的朋友一起看看吧!</p>
+<p><strong>本章完整原文首发地址</strong>: <a href="https://mp.weixin.qq.com/s/zRg9ePFbVKyLxgy-K2TJHg" target="_blank" rel="noopener">如何使用Grafana+Loki+Promtail日志聚合系统针对Kubernetes集群中Pods应用日志采集搜索展示-https://mp.weixin.qq.com/s/zRg9ePFbVKyLxgy-K2TJHg</a></p>
+<p><br/></p>
+<p><strong>什么是 Grafana Loki?</strong></p>
+<blockquote>
+<p>官方介绍: Like Prometheus, but for logs.<br>Grafana Loki 是一个日志聚合系统，旨在存储和查询来自所有应用程序和基础架构的日志。<br>Grafana Loki 项目由 Grafana Labs 团队开发，并在 2018 年的 KubeCon 上发布 (在 AGPLv3 许可下发布), 其基于 Go 语言实现，它是一个受 Prometheus 启发的水平可扩展，高可用性，多租户的日志聚合系统, 其相对比于ELK更加轻量级，它的设计非常具有成本效益且易于操作。</p>
+</blockquote>
+<p><br/></p>
+<p><strong>那 Loki 与 Promethus 区别在什么地方呢?</strong></p>
+<blockquote>
+<p>答:Loki 与 Prometheus 的不同之处在于专注于日志而不是指标，并且通过推送而不是拉取来传递日志。 </p>
+</blockquote>
+<p>在生产实践环境中 Loki 常常与 Grafana 联合使用, 提供了一种界面化对 Loki 中存储的日志进行查询并可视化查询结果的方法，所以 Grafana Labs提供的另一个日志解决方案 PLG 目前也逐渐变得流行起来。</p>
+<p>PLG 架构为 <code>Promtail + Loki + Grafana</code> 的组合，整体架构图下所示：</p>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220715163301.png" target="_blank" title="WeiyiGeek.PLG" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220715163301.png" alt="WeiyiGeek.PLG" title="" class=""></a>
+                <p>WeiyiGeek.PLG</p>
+            </figure>
+<p>其中所有组件说明:</p>
+<ul>
+<li>Grafana 大家应该都比较熟悉，它是一款开源的可视化和分析软件，它允许用户查询、可视化、警告和探索监控指标.</li>
+<li>Loki 是一组可以组成一个功能齐全的日志堆栈组件, 负责存储日志和处理查询。</li>
+<li>Promtail 是一个日志收集的代理, 其类似于 ELk 中的 filebeat 的 日志采集端 agent，负责收集日志并将其发送给 Loki。</li>
+</ul>
+<p><br/></p>
+<h3 id="2-为什么要使用-Grafana-Loki"><a href="#2-为什么要使用-Grafana-Loki" class="headerlink" title="2.为什么要使用 Grafana Loki?"></a>2.为什么要使用 Grafana Loki?</h3><p>描述：Loki 采用了一种独特的方法，它只索引元数据而不是日志行的全文，并且为每个日志流设置一组标签，Loki 的最小索引方法意味着在 Loki 中存储同一组日志所需的存储空间比其他解决方案少得多，例如下图</p>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220714165431.png" target="_blank" title="WeiyiGeek.Loki-元数据" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220714165431.png" alt="WeiyiGeek.Loki-元数据" title="" class=""></a>
+                <p>WeiyiGeek.Loki-元数据</p>
+            </figure>
+<p>温馨提示: 从图纸中可以看到Loki针对时间戳和标签键值对进行了索引, 这极大的方便我们进行日志查询。</p>
+<p><strong>Loki 优点介绍</strong></p>
+<ul>
+<li>容易上手， 因为您可以使用各种客户端从任何来源以任何格式发送日志。</li>
+<li>对象存储持久化, 意味着您可以获得 PB 级规模、高吞吐量和经济高效且耐用的存储。</li>
+<li>告警通知, 可以通过采用的日志对比预定的告警阈值进行相应告警通知。</li>
+<li>灵活的日志格式, 为您提供更大的灵活性和在查询时进行格式设置的选项。</li>
+<li>实时跟踪应用日志, 以查看进入系统的日志、每隔特定时间更新日志、查看特定日期的日志等。 </li>
+<li>云原生环境集成, 可以非常方便的与 Prometheus、Grafana 和 K8s 原生集成.</li>
+</ul>
+<p><br/></p>
+<p><strong>与其他日志聚合系统相比</strong></p>
+<ul>
+<li>不像ELK对日志进行全文索引, 通过存储压缩的非结构化日志和仅索引元数据Loki 操作更简单，运行成本更低、效率也提升了。</li>
+<li>使用已在 Prometheus 中使用的相同标签对日志流进行索引和分组，使您能够使用已在 Prometheus 中使用的相同标签在指标和日志之间无缝切换。</li>
+<li>特别适合存储 Kubernetes Pod 日志, Pod 标签等元数据会被自动抓取和索引。</li>
+<li>在 Grafana 中有原生支持（需要 Grafana v6.0）。</li>
+</ul>
+<p><br/></p>
+<p>在 Loki 架构中类比与 EFK 几个概念：</p>
+<ul>
+<li>Grafana：相当于 EFK 中的 Kibana ，用于 UI 的展示。</li>
+<li>Loki：相当于 EFK 中的 ElasticSearch ，用于存储日志和处理查询。</li>
+<li>Promtail：相当于 EFK 中的 Filebeat/Fluentd ，用于采集日志并将其发送给 Loki 。</li>
+<li>LogQL：Loki 提供的日志查询语言，类似 Prometheus 的 PromQL，而且 Loki 支持 LogQL 查询直接转换为 Prometheus 指标。</li>
+</ul>
+<p><br/></p>
+<h3 id="3-Grafana-Loki-是如何工作的"><a href="#3-Grafana-Loki-是如何工作的" class="headerlink" title="3.Grafana Loki 是如何工作的?"></a>3.Grafana Loki 是如何工作的?</h3><p>描述: 我们可以官方图示中看出 Grafana Loki 的工作流程。</p>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220714170644.png" target="_blank" title="WeiyiGeek.Grafana Loki工作流程" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220714170644.png" alt="WeiyiGeek.Grafana Loki工作流程" title="" class=""></a>
+                <p>WeiyiGeek.Grafana Loki工作流程</p>
+            </figure>
+<p>步骤 01.Promtail 是专门为 Loki 构建的日志收集器，我们使用 Promtail 拉入任何日志，它使用与 Prometheus 相同的服务发现功能，并包括在将日志摄取到 Loki 之前标记、转换和过滤日志的类似功能。 </p>
+<p>步骤 02.promtail 将采集到的日志存储在 Loki 存储空间中，Loki 不索引日志文本，只将时间戳与标签进行索引，这不仅可以降低成本，还意味着可以在 Loki 接收到的几毫秒内查询日志行。 </p>
+<p>步骤 03.使用 Grfana 接入 Loki 数据源, 然后直接在 Grafana 中运行 LogQL 查询，以将您的日志与其他数据源一起可视化，或者使用 LogCLI 来显示查询到可视化数据。</p>
+<p>步骤 04.最后我们还可以为 Loki 设置警报规则以评估传入的日志数据，配置 Loki 以将生成的警报发送到 Prometheus Alertmanager 中，从而进行告警。</p>
+<p><br/></p>
+<h3 id="4-Grafana-Loki-架构简述"><a href="#4-Grafana-Loki-架构简述" class="headerlink" title="4.Grafana Loki 架构简述"></a>4.Grafana Loki 架构简述</h3><p>描述: Loki 整体架构也是由不同的组件来协同完成日志收集、索引、存储等工作的各个组件如下图所示。</p>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220715164422.png" target="_blank" title="WeiyiGeek.Loki Architecture" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220715164422.png" alt="WeiyiGeek.Loki Architecture" title="" class=""></a>
+                <p>WeiyiGeek.Loki Architecture</p>
+            </figure>
+<p><strong>架构图剖析:</strong><br>Loki 采用读写分离架构，关键组件有：</p>
+<ul>
+<li><p>Distributor 分发器（日志分发）：日志数据传输的“第一站”，Distributor 分发器接收到日志数据后，根据元数据和 hash 算法，将日志分批并行地发送到多个 Ingester 接收器上</p>
+</li>
+<li><p>Ingester 接收器（日志持久化）：接收器是一个有状态的组件，在日志进入时对其进行 gzip 压缩操作，并负责构建和刷新 chunck 块，当 chunk 块达到一定的数量或者时间后，就会刷新 chunk 块和对应的 Index 索引存储到数据库中</p>
+</li>
+<li><p>Querier 查询器 (查询解析)：给定一个时间范围和标签选择器，Querier 查询器可以从数据库中查看 Index 索引以确定哪些 chunck 块匹配，并通过 greps 将结果显示出来，它还会直接从 Ingester 接收器获取尚未刷新的最新数据</p>
+</li>
+<li><p>Query Frontend 查询前端（查询API）：查询前端是一个可选的组件，运行在 Querier 查询器之前，起到缓存，均衡调度的功能，用于加速日志查询</p>
+</li>
+<li><p>Ruler 预警规则: Ruler 规则规定了何种情况向 altermanger 发送，其语法规则近似于 Prometheus Alertmanager 中告警规则。</p>
+</li>
+<li><p>Object Store：存储采集到的日志index索引与Chunks。</p>
+</li>
+<li><p>Memcaches: 缓存写入、查询结果，加快查询效率。</p>
+</li>
+<li><p>Cluster Services: 包含 compactor 与 consul 服务发现组件。</p>
+</li>
+</ul>
+<p>温馨提示: 我们可以通过 loki 二进制的 <code>-target</code> 参数指定运行角色<code>(querier/inester/query-frontend/distributor)</code>.</p>
+<p><br></p>
+<h3 id="5-Grafana-Loki-参考来源"><a href="#5-Grafana-Loki-参考来源" class="headerlink" title="5.Grafana Loki 参考来源"></a>5.Grafana Loki 参考来源</h3><p>官方地址：<a href="https://grafana.com/oss/loki/" target="_blank" rel="noopener">https://grafana.com/oss/loki/</a></p>
+<p>项目地址: <a href="https://github.com/grafana/loki" target="_blank" rel="noopener">https://github.com/grafana/loki</a></p>
+<p>开始: <a href="https://grafana.com/docs/loki/latest/getting-started/" target="_blank" rel="noopener">https://grafana.com/docs/loki/latest/getting-started/</a></p>
+<p>安装参考: <a href="https://grafana.com/docs/loki/latest/installation/" target="_blank" rel="noopener">https://grafana.com/docs/loki/latest/installation/</a></p>
+<hr>
+<h2 id="0x01-安装部署"><a href="#0x01-安装部署" class="headerlink" title="0x01 安装部署"></a>0x01 安装部署</h2><p>描述: 我们可以使用多种方式进行安装 Loki 和 Promtail 组件，其中最常用的是使用 Helm 部署微服务、使用 Helm 进行简单的可扩展部署、通过 Docker 或 Docker Compose 安装、在本地安装和运行或者从源代码安装。</p>
+<p><strong>常规使用</strong><br>Step 1.下载并安装 Loki 和 Promtail。<br>Step 2.下载两个程序的配置文件。<br>Step 3.启动 Loki。<br>Step 4.更新 Promtail 配置文件，让您的日志进入 Loki。<br>Step 5.开始在Grafana中浏览日志。</p>
+<p><br/></p>
+<p><strong>Loki 三种部署方式</strong></p>
+<blockquote>
+<p>单体模式 <code>(Monolithic mode)</code>，ALL IN ONE : Loki 支持单一进程模式，可在一个进程中运行所有必需的组件。单进程模式非常适合测试 Loki 或以小规模运行。不过尽管每个组件都以相同的进程运行，但它们仍将通过本地网络相互连接进行组件之间的通信（grpc）。使用 Helm 部署就是采用的该模式。</p>
+</blockquote>
+<blockquote>
+<p>简单可扩展模式 <code>(Simple scalable deployment mode)</code>: 如果您每天的日志量超过几百 GB，或者如果您想分离读写关注点， Loki 提供了简单的可扩展部署模式, 该模式下每天存储的日志量可到TB级别，其分离读写路径有以下优点通过提供专用节点提高写入路径的可用性，可单独扩展的读取路径以按需添加/删除查询性能。</p>
+</blockquote>
+<blockquote>
+<p>微服务模式 <code>(Microservices mode)</code>：为了实现水平可伸缩性，Loki 支持组件拆分为单独的组件分开部署，从而使它们彼此独立地扩展。每个组件都产生一个用于内部请求的 gRPC 服务器和一个用于外部 API 请求的 HTTP 服务，所有组件都带有 HTTP 服务器，但是大多数只暴露就绪接口、运行状况和指标端点。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包含的组件</span></span><br><span class="line">distributor</span><br><span class="line">ingester </span><br><span class="line">querier</span><br><span class="line">query-scheduler</span><br><span class="line">query-frontend</span><br><span class="line">index-gateway</span><br><span class="line">ruler</span><br><span class="line">compactor</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>三种部署模式参考: <a href="https://grafana.com/docs/loki/latest/fundamentals/architecture/deployment-modes/" target="_blank" rel="noopener">https://grafana.com/docs/loki/latest/fundamentals/architecture/deployment-modes/</a></p>
+<p><br/></p>
+<h3 id="以-二进制方式-安装-Loki-与-Promtail"><a href="#以-二进制方式-安装-Loki-与-Promtail" class="headerlink" title="以 二进制方式 安装 Loki 与 Promtail"></a>以 二进制方式 安装 Loki 与 Promtail</h3><p>描述: 在进行容器化部署时，建议初学者先使用单节点主机模式部署各个组件，熟悉一下整个流程，然后在进行容器化部署。 </p>
+<p><strong>实践环境</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~$ cat /etc/issue.net</span><br><span class="line">Ubuntu 20.04.4 LTS</span><br><span class="line">~$ uname -a</span><br><span class="line">Linux devtest-102 5.4.0-59-generic <span class="comment">#65-Ubuntu SMP Thu Dec 10 12:01:51 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>实践步骤</strong></p>
+<ul>
+<li>Step 1.下载 Loki 与 Promtail 最新而二进制文件并准备安装配置文件, 当前最新版本release查看(<a href="https://github.com/grafana/loki/releases/)。" target="_blank" rel="noopener">https://github.com/grafana/loki/releases/)。</a><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">mkdir -vp /usr/<span class="built_in">local</span>/loki/&#123;config,data&#125;; mkdir -vp /usr/<span class="built_in">local</span>/loki/data/&#123;loki,promtail&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/loki</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下载二进制包</span></span><br><span class="line">LOKI_VERSION=v2.6.0</span><br><span class="line">curl -O -L https://github.com/grafana/loki/releases/download/<span class="variable">$&#123;LOKI_VERSION&#125;</span>/loki-linux-amd64.zip</span><br><span class="line">curl -O -L https://github.com/grafana/loki/releases/download/<span class="variable">$&#123;LOKI_VERSION&#125;</span>/promtail-linux-amd64.zip</span><br><span class="line">curl -O -L https://github.com/grafana/loki/releases/download/<span class="variable">$&#123;LOKI_VERSION&#125;</span>/logcli-linux-amd64.zip</span><br><span class="line"></span><br><span class="line">$ ls</span><br><span class="line">logcli-linux-amd64.zip  loki-linux-amd64.zip  promtail-linux-amd64.zip</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解压与可执行权限赋予</span></span><br><span class="line">unzip <span class="string">"loki-linux-amd64.zip"</span></span><br><span class="line">unzip promtail-linux-amd64.zip</span><br><span class="line">unzip logcli-linux-amd64.zip</span><br><span class="line"></span><br><span class="line">chmod a+x logcli-linux-amd64 loki-linux-amd64 promtail-linux-amd64</span><br><span class="line"></span><br><span class="line"><span class="comment"># 软连接创建</span></span><br><span class="line">ln -s $(<span class="built_in">pwd</span>)/loki-linux-amd64 /usr/<span class="built_in">local</span>/bin/loki</span><br><span class="line">ln -s $(<span class="built_in">pwd</span>)/promtail-linux-amd64 /usr/<span class="built_in">local</span>/bin/promtail</span><br><span class="line">ln -s $(<span class="built_in">pwd</span>)/logcli-linux-amd64 /usr/<span class="built_in">local</span>/bin/logcli</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 2.使用 systemd 管理 loki 与 Promtail 准备的服务器清单如下。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF &gt; /usr/lib/systemd/system/loki.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=loki.service</span><br><span class="line">Wants=network-online.target</span><br><span class="line">After=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/loki/loki-linux-amd64 -log.level=info -target all -config.file=/usr/<span class="built_in">local</span>/loki/config/loki-config.yaml</span><br><span class="line">WorkingDirectory=/usr/<span class="built_in">local</span>/loki/</span><br><span class="line">LimitMEMLOCK=infinity</span><br><span class="line">LimitNPROC=65536</span><br><span class="line">LimitNOFILE=65536</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">cat &lt;&lt;EOF &gt; /usr/lib/systemd/system/promtail.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=promtail.service</span><br><span class="line">Wants=network-online.target</span><br><span class="line">After=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/loki/promtail-linux-amd64 -config.file=/usr/<span class="built_in">local</span>/loki/config/promtail.conf</span><br><span class="line">WorkingDirectory=/usr/<span class="built_in">local</span>/loki/</span><br><span class="line">LimitMEMLOCK=infinity</span><br><span class="line">LimitNPROC=65536</span><br><span class="line">LimitNOFILE=65536</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>扩展补充: 我们也可使用 supervisor 管理进程, Supervisor 是Python编写的 Client/Server 模式的系统，通过supervisor，可以对类Unix操作系统的进程进行监控和管理,可以方便地进行进程集中管理，并监控进程的状态, 当程序异常退出时，可以自动拉起程序，起到守护进程的作用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CentOS</span></span><br><span class="line">sudo yum install epel-release -y</span><br><span class="line">sudo yum install supervisor -y </span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改内存、进程、文件限制</span></span><br><span class="line">sed -i <span class="string">'/forking/a LimitNOFILE=65536'</span> /usr/lib/systemd/system/supervisord.service;</span><br><span class="line">sed -i <span class="string">'/forking/a LimitNPROC=65536'</span> /usr/lib/systemd/system/supervisord.service;</span><br><span class="line">sed -i <span class="string">'/forking/a LimitMEMLOCK=infinity'</span> /usr/lib/systemd/system/supervisord.service;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置开机启动，启动服务</span></span><br><span class="line">systemctl daemon-reload </span><br><span class="line">systemctl <span class="built_in">enable</span> supervisord</span><br><span class="line">systemctl start supervisord</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置 supervisor 管理 loki进程</span></span><br><span class="line">mkdir -vp /usr/<span class="built_in">local</span>/loki/&#123;loki,promtail,config&#125; /var/<span class="built_in">log</span>/loki/ </span><br><span class="line">cat &lt;&lt;EOF&gt; /etc/supervisord.d/loki.ini</span><br><span class="line">[program:loki]</span><br><span class="line"><span class="built_in">command</span>=/usr/<span class="built_in">local</span>/loki/loki-linux-amd64 -log.level=info -target all -config.file=/usr/<span class="built_in">local</span>/loki/config/loki-config.yaml</span><br><span class="line">autorestart=<span class="literal">true</span></span><br><span class="line">autostart=<span class="literal">true</span></span><br><span class="line">stderr_logfile=/var/<span class="built_in">log</span>/loki/loki_err.log</span><br><span class="line">stdout_logfile=/var/<span class="built_in">log</span>/loki/loki_out.log</span><br><span class="line">user=root</span><br><span class="line">stopsignal=INT</span><br><span class="line">startsecs=10</span><br><span class="line">startretries=3</span><br><span class="line">directory=/usr/<span class="built_in">local</span>/loki/</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">cat &lt;&lt; EOF &gt; /etc/supervisord.d/promtail.ini</span><br><span class="line">[program:promtail]</span><br><span class="line"><span class="built_in">command</span>=/usr/<span class="built_in">local</span>/loki/promtail-linux-amd64 -config.expand-env=<span class="literal">true</span> -config.file=/usr/<span class="built_in">local</span>/loki/config/promtail.conf</span><br><span class="line">autorestart=<span class="literal">true</span></span><br><span class="line">autostart=<span class="literal">true</span></span><br><span class="line">stderr_logfile=/var/<span class="built_in">log</span>/loki/promtail_err.log</span><br><span class="line">stdout_logfile=/var/<span class="built_in">log</span>/loki/promtail_out.log</span><br><span class="line">user=root</span><br><span class="line">stopsignal=INT</span><br><span class="line">startsecs=10</span><br><span class="line">startretries=3</span><br><span class="line">directory=/usr/<span class="built_in">local</span>/loki/</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>Step 3.Loki 配置文件(loki-config.yaml) 与 promtail 配置文件(promtail.conf) 分别如下:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br></pre></td><td class="code"><pre><span class="line">tee /usr/<span class="built_in">local</span>/loki/config/loki-config.yaml &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">auth_enabled: <span class="literal">false</span></span><br><span class="line">server:</span><br><span class="line">  http_listen_port: 3100</span><br><span class="line">  grpc_listen_port: 9096</span><br><span class="line"></span><br><span class="line"><span class="comment"># 日志接收器，配置ingester的生命周期将如何运行以及在何处注册以进行发现</span></span><br><span class="line">ingester:</span><br><span class="line">  wal:</span><br><span class="line">    enabled: <span class="literal">true</span></span><br><span class="line">    dir: /usr/<span class="built_in">local</span>/loki/data/loki/wal</span><br><span class="line">  lifecycler:</span><br><span class="line">    address: 127.0.0.1</span><br><span class="line">    ring:</span><br><span class="line">      kvstore:</span><br><span class="line">        store: inmemory</span><br><span class="line">      replication_factor: 1</span><br><span class="line">    final_sleep: 0s</span><br><span class="line">  chunk_idle_period: 1h        <span class="comment"># 此时未接收到新日志的任何区块都将被刷新</span></span><br><span class="line">  max_chunk_age: 1h            <span class="comment"># 所有区块在达到该年龄时都将被刷新，默认值为1h</span></span><br><span class="line">  chunk_target_size: 10485760  <span class="comment"># Loki将尝试构建高达1.5MB的块，如果首先达到  chunk_idle_period or max_chunk_age 值则刷新。</span></span><br><span class="line">  chunk_retain_period: 30s     <span class="comment"># 如果使用索引缓存，则必须大于索引读缓存TTL（默认索引读缓存TTL为5m）</span></span><br><span class="line">  max_transfer_retries: 0      <span class="comment"># 禁用区块传输</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 块索引架构配置</span></span><br><span class="line">schema_config:</span><br><span class="line">  configs:</span><br><span class="line">    - from: 2022-07-15</span><br><span class="line">      store: boltdb-shipper</span><br><span class="line">      object_store: filesystem</span><br><span class="line">      schema: v11</span><br><span class="line">      index:</span><br><span class="line">        prefix: index_</span><br><span class="line">        period: 24h</span><br><span class="line"></span><br><span class="line"><span class="comment"># 存储配置</span></span><br><span class="line">storage_config:</span><br><span class="line">  boltdb_shipper:</span><br><span class="line">    active_index_directory: /usr/<span class="built_in">local</span>/loki/data/loki/boltdb-shipper-active</span><br><span class="line">    cache_location: /usr/<span class="built_in">local</span>/loki/data/loki/boltdb-shipper-cache</span><br><span class="line">    cache_ttl: 24h   <span class="comment"># 缓存周期与存储空间成正比关系。</span></span><br><span class="line">    shared_store: filesystem</span><br><span class="line">  filesystem:</span><br><span class="line">    directory: /usr/<span class="built_in">local</span>/loki/data/loki/chunks</span><br><span class="line"></span><br><span class="line"><span class="comment"># 压缩配置</span></span><br><span class="line">compactor:</span><br><span class="line">  working_directory: /usr/<span class="built_in">local</span>/loki/data/loki/boltdb-shipper-compactor</span><br><span class="line">  shared_store: filesystem</span><br><span class="line"></span><br><span class="line"><span class="comment"># 限制配置</span></span><br><span class="line">limits_config:</span><br><span class="line">  enforce_metric_name: <span class="literal">false</span></span><br><span class="line">  reject_old_samples: <span class="literal">true</span></span><br><span class="line">  reject_old_samples_max_age: 168h</span><br><span class="line">  <span class="comment"># 每秒允许promtail传输200MB，默认为4</span></span><br><span class="line">  ingestion_rate_mb: 200</span><br><span class="line">  <span class="comment"># ingestion_burst_size_mb: 400</span></span><br><span class="line">  <span class="comment"># max_streams_per_user: 0</span></span><br><span class="line">  <span class="comment"># max_chunks_per_query: 20000000</span></span><br><span class="line">  <span class="comment"># max_query_parallelism: 140</span></span><br><span class="line">  <span class="comment"># max_query_series: 5000</span></span><br><span class="line">  <span class="comment"># cardinality_limit: 1000000</span></span><br><span class="line">  <span class="comment"># max_streams_matchers_per_query: 10000</span></span><br><span class="line"></span><br><span class="line">chunk_store_config:</span><br><span class="line">  max_look_back_period: 0s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据保留时间， 等保要求应用日志需存放180天以上，此处保存为26周。</span></span><br><span class="line">table_manager:</span><br><span class="line">  retention_deletes_enabled: <span class="literal">true</span></span><br><span class="line">  retention_period: 4368h</span><br><span class="line"></span><br><span class="line"><span class="comment"># prometheus 告警配置</span></span><br><span class="line">ruler:</span><br><span class="line">  storage:</span><br><span class="line">    <span class="built_in">type</span>: <span class="built_in">local</span></span><br><span class="line">    <span class="built_in">local</span>:</span><br><span class="line">      directory: /usr/<span class="built_in">local</span>/loki/data/loki/rules</span><br><span class="line">  rule_path: /usr/<span class="built_in">local</span>/loki/data/loki/rules-temp</span><br><span class="line">  alertmanager_url: http://10.0.30.200:9093</span><br><span class="line">  ring:</span><br><span class="line">    kvstore:</span><br><span class="line">      store: inmemory</span><br><span class="line">  enable_api: <span class="literal">true</span></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">tee /usr/<span class="built_in">local</span>/loki/config/promtail.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">server:</span><br><span class="line">  log_level: error</span><br><span class="line">  http_listen_address: 0.0.0.0</span><br><span class="line">  http_listen_port: 9080</span><br><span class="line">  grpc_listen_port: 0   </span><br><span class="line">  <span class="comment"># gRPC服务侦听端口(0表示随机端口)</span></span><br><span class="line"><span class="comment"># 记录日志位置</span></span><br><span class="line">positions:</span><br><span class="line">  filename: /usr/<span class="built_in">local</span>/loki/data/promtail/positions.yaml</span><br><span class="line"><span class="comment"># Loki API 地址服务</span></span><br><span class="line">client:</span><br><span class="line">  url: http://localhost:3100/loki/api/v1/push</span><br><span class="line"><span class="comment"># 抓取配置</span></span><br><span class="line">scrape_configs:</span><br><span class="line">  - job_name: system</span><br><span class="line">    pipeline_stages:</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets:</span><br><span class="line">      - localhost</span><br><span class="line">      labels:</span><br><span class="line">        job: systemd-logs</span><br><span class="line">        host: 10.20.176.102</span><br><span class="line">        __path__: /var/<span class="built_in">log</span>/*.<span class="built_in">log</span></span><br><span class="line">  - job_name: messages</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets:</span><br><span class="line">      - localhost</span><br><span class="line">      labels:</span><br><span class="line">        job: messages-logs</span><br><span class="line">        host: 10.20.176.102</span><br><span class="line">        __path__: /var/<span class="built_in">log</span>/messages</span><br><span class="line">  - job_name: dmesg</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets:</span><br><span class="line">      - localhost</span><br><span class="line">      labels:</span><br><span class="line">        job: dmesg-logs</span><br><span class="line">        host: 10.20.176.102</span><br><span class="line">        __path__: /var/<span class="built_in">log</span>/dmesg</span><br><span class="line">  - job_name: journal</span><br><span class="line">    journal:</span><br><span class="line">      max_age: 12h</span><br><span class="line">      <span class="comment"># 从进程开始读取并发送最近12小时的数据至Loki</span></span><br><span class="line">      labels:</span><br><span class="line">        job: systemd-journal</span><br><span class="line">    relabel_configs:</span><br><span class="line">      - source_labels: [<span class="string">'__journal__systemd_unit'</span>]</span><br><span class="line">        target_label: <span class="string">'unit'</span></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置 Loki 的报警规则</span></span><br><span class="line"><span class="comment"># “fake”是Loki以单租户模式运行时默认的租户Id, 所以安装上述配置需要在/usr/local/loki/data/loki/rules/目录下创建一个fake目录并将 rules.yaml 规则文件放在该目录下。</span></span><br><span class="line">mkdir -vp /usr/<span class="built_in">local</span>/loki/data/loki/rules/fake</span><br><span class="line">tee /usr/<span class="built_in">local</span>/loki/data/loki/rules/fake/rules.yaml &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">groups:</span><br><span class="line">- name: service OutOfMemoryError</span><br><span class="line">  rules:</span><br><span class="line">    <span class="comment"># 关键字监控报警</span></span><br><span class="line">    - alert: loki check words java.lang.OutOfMemoryError</span><br><span class="line">      expr: sum by (env, hostname, log_type, filename) (count_over_time(&#123;env=~<span class="string">"\\w+"</span>&#125; |= <span class="string">"java.lang.OutOfMemoryError"</span> [5m]) &gt; 0)</span><br><span class="line">      labels:</span><br><span class="line">        severity: critical</span><br><span class="line">      annotations:</span><br><span class="line">        description: <span class="string">'&#123;&#123;$labels.env&#125;&#125; &#123;&#123;$labels.hostname&#125;&#125; file &#123;&#123;$labels.filename&#125;&#125; has  &#123;&#123; $value &#125;&#125; error'</span></span><br><span class="line">        summary: java.lang.OutOfMemoryError</span><br><span class="line">    <span class="comment"># java 程序日志性能报警</span></span><br><span class="line">    - alert: loki java full gc count check</span><br><span class="line">      expr: sum by (env, hostname, log_type, filename) (count_over_time(&#123;env=~<span class="string">"\\w+"</span>&#125; |= <span class="string">"Full GC (Allocation"</span> [5m]) &gt; 5)</span><br><span class="line">      labels:</span><br><span class="line">        severity: warning</span><br><span class="line">      annotations:</span><br><span class="line">        description: <span class="string">'&#123;&#123;$labels.env&#125;&#125; &#123;&#123;$labels.hostname&#125;&#125; &#123;&#123;$labels.filename&#125;&#125; &#123;&#123; $value &#125;&#125;'</span></span><br><span class="line">        summary: java full gc count check</span><br><span class="line">    <span class="comment"># 使用正则表达式报警</span></span><br><span class="line">    - alert: dbperform slowlog sql 慢查询</span><br><span class="line">      expr: <span class="string">'sum by (env, hostname, log_type, filename) (count_over_time(&#123;env=~"\\w+"&#125; |~ "time: [1-9]\\d&#123;4,&#125;" [5m]) &gt; 5)'</span></span><br><span class="line">      labels:</span><br><span class="line">        severity: warning</span><br><span class="line">      annotations:</span><br><span class="line">        description: <span class="string">'&#123;&#123;$labels.env&#125;&#125; &#123;&#123;$labels.hostname&#125;&#125; file &#123;&#123;$labels.filename&#125;&#125; has  &#123;&#123; $value &#125;&#125; error'</span></span><br><span class="line">        summary: sql slowlog</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>温馨提示: 关于labels，官网建议labels个数越少越好，过多的labels将会影响Loki日志的检索速度。</p>
+<p><br/></p>
+<ul>
+<li>Step 4.设置Loki与Promtail服务开机启动并启动服务。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload </span><br><span class="line">systemctl <span class="built_in">enable</span> loki.service;systemctl <span class="built_in">enable</span> promtail.service</span><br><span class="line">systemctl restart loki.service promtail.service</span><br><span class="line"></span><br><span class="line">$ systemctl status loki.service</span><br><span class="line">● loki.service</span><br><span class="line">     Loaded: loaded (/lib/systemd/system/loki.service; enabled; vendor preset: enabled)</span><br><span class="line">     Active: active (running) since Sat 2022-07-16 04:39:52 UTC; 26s ago</span><br><span class="line">   Main PID: 174310 (loki-linux-amd6)</span><br><span class="line">      Tasks: 11 (<span class="built_in">limit</span>: 19112)</span><br><span class="line">     Memory: 16.8M</span><br><span class="line">     CGroup: /system.slice/loki.service</span><br><span class="line">             └─174310 /usr/<span class="built_in">local</span>/loki/loki-linux-amd64 -log.level=info -target all -config.file=/usr/<span class="built_in">local</span>/loki/config/loki-config.yaml</span><br><span class="line"></span><br><span class="line">$ systemctl status promtail.service</span><br><span class="line">● promtail.service</span><br><span class="line">     Loaded: loaded (/lib/systemd/system/promtail.service; enabled; vendor preset: enabled)</span><br><span class="line">     Active: active (running) since Sat 2022-07-16 04:41:50 UTC; 47s ago</span><br><span class="line">   Main PID: 174401 (promtail-linux-)</span><br><span class="line">      Tasks: 15 (<span class="built_in">limit</span>: 19112)</span><br><span class="line">     Memory: 70.7M</span><br><span class="line">     CGroup: /system.slice/promtail.service</span><br><span class="line">             └─174401 /usr/<span class="built_in">local</span>/loki/promtail-linux-amd64 -config.file=/usr/<span class="built_in">local</span>/loki/config/promtail.conf</span><br><span class="line"></span><br><span class="line">Jul 16 04:41:50 devtest-102 systemd[1]: Started promtail.service.</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>分别访问Loki与Promtail监听服务部署结果验证如下命令与下图:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ curl http://10.20.176.102:3100/loki/api/v1/labels</span><br><span class="line">&#123;<span class="string">"status"</span>:<span class="string">"success"</span>,<span class="string">"data"</span>:[<span class="string">"filename"</span>,<span class="string">"host"</span>,<span class="string">"job"</span>,<span class="string">"unit"</span>]&#125;</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220716125817.png" target="_blank" title="WeiyiGeek.loki-API与Promtail" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220716125817.png" alt="WeiyiGeek.loki-API与Promtail" title="" class=""></a>
+                <p>WeiyiGeek.loki-API与Promtail</p>
+            </figure></p>
+<p>温馨提示: 在启动Loki后当其日志中出现<code>component=ruler</code>关键字集群rules时以及在<code>/usr/local/loki/data/loki/rules-temp/fake/</code>自动生成<code>rules.yaml</code>表示告警规则已经加载成功。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ journalctl -u loki.service | grep <span class="string">"component=ruler"</span></span><br><span class="line">Jul 17 08:35:12 devtest-102 loki-linux-amd64[178834]: level=info ts=2022-07-17T08:35:12.851099815Z <span class="built_in">caller</span>=metrics.go:133 component=ruler org_id=fake latency=fast query=<span class="string">"sum by(env,hostname,log_type,filename)((count_over_time(&#123;env=~\"\\\\w+\"&#125; |= \"java.lang.OutOfMemoryError\"[5m]) &gt; 0))"</span> query_type=metric range_type=instant length=0s step=0s duration=3.590441ms status=200 <span class="built_in">limit</span>=0 returned_lines=0 throughput=0B total_bytes=0B total_entries=0 queue_time=0s subqueries=1</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<ul>
+<li>Step 5.使用K8S快速安装部署快速搭建 grafana 可视化平台, 当然你也可以选择Dokcer请参考此篇文字《Grafana可视化快速入门》(<a href="https://blog.weiyigeek.top/2019/5-17-39.html">https://blog.weiyigeek.top/2019/5-17-39.html</a>)</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 6.使用 Grafana 显示 Loki 与 Promtail 采集的日志, 添加 Loki 数据源。</li>
+</ul>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220716131137.png" target="_blank" title="WeiyiGeek.Loki 数据源" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220716131137.png" alt="WeiyiGeek.Loki 数据源" title="" class=""></a>
+                <p>WeiyiGeek.Loki 数据源</p>
+            </figure>
+<p><br/></p>
+<ul>
+<li>Step 7.使用 Explore 显示 Loki 采集的数据，例如 查询的表达式为<code>{filename=&quot;/var/log/auth.log&quot;}</code>, 当然我们也可使用其它标签进行查看对应服务采集到的日志。</li>
+</ul>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220716131749.png" target="_blank" title="WeiyiGeek.Loki 采集的数据展示" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220716131749.png" alt="WeiyiGeek.Loki 采集的数据展示" title="" class=""></a>
+                <p>WeiyiGeek.Loki 采集的数据展示</p>
+            </figure>
+<p><br/></p>
+<ul>
+<li>Step 8.除了使用Gafana查询Loki之外，它还提供了linux终端的查询客户端<code>logcli</code>, 下面简单实践一下上面logcli客户端命令的使用。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.查看指定Loki采集的标签</span></span><br><span class="line">$ logcli labels --addr=<span class="string">"http://localhost:3100"</span> <span class="comment"># 或者 logcli labels -q </span></span><br><span class="line">http://localhost:3100/loki/api/v1/labels?end=1657983404379212368&amp;start=1657979804379212368</span><br><span class="line">filename</span><br><span class="line">host</span><br><span class="line">job</span><br><span class="line">unit</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.查看指定标签详情</span></span><br><span class="line">$ logcli labels filename --addr=<span class="string">"http://localhost:3100"</span></span><br><span class="line">http://localhost:3100/loki/api/v1/label/filename/values?end=1657983492060973446&amp;start=1657979892060973446</span><br><span class="line">/var/<span class="built_in">log</span>/auth.log</span><br><span class="line">/var/<span class="built_in">log</span>/bootstrap.log</span><br><span class="line">/var/<span class="built_in">log</span>/cloud-init-output.log</span><br><span class="line">/var/<span class="built_in">log</span>/cloud-init.log</span><br><span class="line">/var/<span class="built_in">log</span>/dmesg</span><br><span class="line">/var/<span class="built_in">log</span>/dpkg.log</span><br><span class="line">/var/<span class="built_in">log</span>/fail2ban.log</span><br><span class="line">/var/<span class="built_in">log</span>/ubuntu-advantage-timer.log</span><br><span class="line">/var/<span class="built_in">log</span>/vmware-network.1.log</span><br><span class="line">/var/<span class="built_in">log</span>/vmware-network.log</span><br><span class="line">/var/<span class="built_in">log</span>/vmware-vmsvc-root.1.log</span><br><span class="line">/var/<span class="built_in">log</span>/vmware-vmsvc-root.2.log</span><br><span class="line">/var/<span class="built_in">log</span>/vmware-vmsvc-root.3.log</span><br><span class="line">/var/<span class="built_in">log</span>/vmware-vmsvc-root.log</span><br><span class="line">/var/<span class="built_in">log</span>/vmware-vmtoolsd-root.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.查看指定标签下的日志，最大显示行数为100，每批次限制5条</span></span><br><span class="line">logcli query <span class="string">'&#123;host="10.20.176.102",filename="/var/log/auth.log"&#125;'</span> --<span class="built_in">limit</span> 100 --batch 5 </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.指定时间输出日志并指定中国时间输出,--from 和--to 后面的时间需要符合IETF RFC-3339[4]格式</span></span><br><span class="line">logcli query <span class="string">'&#123;host="10.20.176.102",filename="/var/log/auth.log"&#125;'</span> --<span class="built_in">limit</span>=10000 --from=<span class="string">"2022-03-12T14:00:05+08:00"</span>  --to=<span class="string">"2022-03-18T14:30:05+08:00"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.logcli query同样支持Logql语法</span></span><br><span class="line">logcli query <span class="string">'&#123;host="10.20.176.102",filename="/var/log/auth.log"&#125;|="ssh"'</span> --<span class="built_in">limit</span>=10000 --since=2h --timezone=UTC --output jsonl</span><br><span class="line">  <span class="comment"># http://localhost:3100/loki/api/v1/query_range?direction=BACKWARD&amp;end=1658022708817779154&amp;limit=1000&amp;query=%7Bhost%3D%2210.20.176.102%22%2Cfilename%3D%22%2Fvar%2Flog%2Fauth.log%22%7D%7C%3D%22ssh%22&amp;start=1658015508817779154</span></span><br><span class="line">  <span class="comment"># Common labels: &#123;filename="/var/log/auth.log", host="10.20.176.102", job="systemd-logs"&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"labels":&#123;&#125;,"line":"Jul 17 01:40:41 devtest-102 sshd[176420]: pam_unix(sshd:session): session opened for user weiyigeek by (uid=0)","timestamp":"2022-07-17T01:40:41.611039896Z"&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"labels":&#123;&#125;,"line":"Jul 17 01:40:41 devtest-102 sshd[176420]: Accepted publickey for weiyigeek from 10.20.176.101 port 18792 ssh2: ED25519 SHA256:9ayZkGn8V1koh8rm8MsYIh16hOTtpg+cZJdqSdJsTfM","timestamp":"2022-07-17T01:40:41.611004156Z"&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.获取所有标签的摘要信息, 此处获取filename为/var/log/auth.log的日志流信息</span></span><br><span class="line">logcli series <span class="string">'&#123;&#125;'</span> -q --analyze-labels</span><br><span class="line">  <span class="comment"># Total Streams:  9</span></span><br><span class="line">  <span class="comment"># Unique Labels:  4</span></span><br><span class="line">  <span class="comment"># Label Name  Unique Values  Found In Streams</span></span><br><span class="line">  <span class="comment"># unit        8              8</span></span><br><span class="line">  <span class="comment"># job         2              9</span></span><br><span class="line">  <span class="comment"># host        1              1</span></span><br><span class="line">  <span class="comment"># filename    1              1</span></span><br><span class="line">logcli series <span class="string">'&#123;filename="/var/log/auth.log"&#125;'</span> -q  <span class="comment"># 显示相关联的标签</span></span><br><span class="line">  <span class="comment"># &#123;filename="/var/log/auth.log", host="10.20.176.102", job="systemd-logs"&#125;</span></span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220716230005.png" target="_blank" title="WeiyiGeek.logcli简单使用" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220716230005.png" alt="WeiyiGeek.logcli简单使用" title="" class=""></a>
+                <p>WeiyiGeek.logcli简单使用</p>
+            </figure>
+<p><br/></p>
+<h3 id="以-Helm3-在K8S集群里安装-Loki-与-Promtail"><a href="#以-Helm3-在K8S集群里安装-Loki-与-Promtail" class="headerlink" title="以 Helm3 在K8S集群里安装 Loki 与 Promtail"></a>以 Helm3 在K8S集群里安装 Loki 与 Promtail</h3><p><strong>环境说明</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">~$ kubectl get node</span><br><span class="line">NAME                 STATUS   ROLES                  AGE   VERSION</span><br><span class="line">devtest-master-212   Ready    control-plane,master   32d   v1.23.7</span><br><span class="line">devtest-master-213   Ready    control-plane,master   32d   v1.23.7</span><br><span class="line">devtest-master-214   Ready    control-plane,master   32d   v1.23.7</span><br><span class="line">devtest-work-215     Ready    work                   32d   v1.23.7</span><br><span class="line"></span><br><span class="line">~$ helm3 version</span><br><span class="line">version.BuildInfo&#123;Version:<span class="string">"v3.9.0"</span>, GitCommit:<span class="string">"7ceeda6c585217a19a1131663d8cd1f7d641b2a7"</span>, GitTreeState:<span class="string">"clean"</span>, GoVersion:<span class="string">"go1.17.5"</span>&#125;</span><br><span class="line"></span><br><span class="line">~$ helm3 search repo grafana | egrep <span class="string">"loki|promtail"</span></span><br><span class="line">grafana/loki                            2.13.1          v2.6.0          Loki: like Prometheus, but <span class="keyword">for</span> logs.</span><br><span class="line">......</span><br><span class="line">grafana/promtail                        6.2.1           2.6.0           Promtail is an agent <span class="built_in">which</span> ships the contents o...</span><br></pre></td></tr></table></figure></p>
+<p><strong>安装部署</strong></p>
+<p>描述: 以 Helm 部署 Loki (StatefulSet 方式) 和 Promtail（DaemonSet 方式）采集 k8s pod 应用的日志为例</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.Add Loki’s chart repository to Helm:</span></span><br><span class="line">helm repo add grafana https://grafana.github.io/helm-charts</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.Update the chart repository and list Loki or Promtail</span></span><br><span class="line">helm repo update &amp;&amp; helm search repo grafana/loki</span><br><span class="line">helm search repo -l grafana/promtail</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.Download Loki’s and Promtail chart in local (拉取图表到本地并解压)</span></span><br><span class="line">helm pull grafana/loki --untar --version 2.13.1     <span class="comment"># 2.13.1</span></span><br><span class="line">helm pull grafana/promtail --untar --version 6.2.1  <span class="comment"># 6.2.1</span></span><br></pre></td></tr></table></figure>
+<p><strong>loki values.yaml 配置文件:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 4.Loki 图表配置文件</span></span><br><span class="line">/storage/dev/webapp/logging/loki<span class="comment"># ls</span></span><br><span class="line">Chart.yaml  README.md  templates  values.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># values.yaml (主要部分)</span></span><br><span class="line">$ grep -E -v <span class="string">"^$|#"</span> values.yaml</span><br><span class="line">image:</span><br><span class="line">  repository: grafana/loki</span><br><span class="line">  tag: 2.6.0</span><br><span class="line">  pullPolicy: IfNotPresent</span><br><span class="line">......</span><br><span class="line">tracing:</span><br><span class="line">  jaegerAgentHost:</span><br><span class="line">config:</span><br><span class="line">  auth_enabled: <span class="literal">false</span></span><br><span class="line">  memberlist:</span><br><span class="line">    join_members:</span><br><span class="line">      - <span class="string">'&#123;&#123; include "loki.fullname" . &#125;&#125;-memberlist'</span></span><br><span class="line">  ingester:</span><br><span class="line">    chunk_idle_period: 3m</span><br><span class="line">    chunk_block_size: 262144</span><br><span class="line">    chunk_retain_period: 1m</span><br><span class="line">    max_transfer_retries: 0</span><br><span class="line">    wal:</span><br><span class="line">      dir: /usr/<span class="built_in">local</span>/loki/data/loki/wal</span><br><span class="line">    lifecycler:</span><br><span class="line">      ring:</span><br><span class="line">        replication_factor: 1</span><br><span class="line">  limits_config:</span><br><span class="line">    enforce_metric_name: <span class="literal">false</span></span><br><span class="line">    reject_old_samples: <span class="literal">true</span>            <span class="comment"># 关键点: 是否拒绝老样本</span></span><br><span class="line">    reject_old_samples_max_age: 168h    <span class="comment"># 关键点: 168小时之前的样本将会被删除</span></span><br><span class="line">    max_entries_limit_per_query: 5000</span><br><span class="line">  schema_config:</span><br><span class="line">    configs:</span><br><span class="line">    - from: 2022-07-15   <span class="comment"># 关键点: 索引架构配置</span></span><br><span class="line">      store: boltdb-shipper</span><br><span class="line">      object_store: filesystem</span><br><span class="line">      schema: v11</span><br><span class="line">      index:</span><br><span class="line">        prefix: index_</span><br><span class="line">        period: 24h</span><br><span class="line">  server:</span><br><span class="line">    http_listen_port: 3100</span><br><span class="line">    grpc_listen_port: 9095</span><br><span class="line">  storage_config:</span><br><span class="line">    boltdb_shipper:</span><br><span class="line">      active_index_directory: /usr/<span class="built_in">local</span>/loki/data/loki/boltdb-shipper-active  <span class="comment"># 关键点: 索引存储目录</span></span><br><span class="line">      cache_location: /usr/<span class="built_in">local</span>/loki/data/loki/boltdb-shipper-cache</span><br><span class="line">      shared_store: filesystem</span><br><span class="line">    filesystem:</span><br><span class="line">      directory: /usr/<span class="built_in">local</span>/loki/data/loki/chunks     <span class="comment"># 关键点: 块存储路径</span></span><br><span class="line">  chunk_store_config:</span><br><span class="line">    max_look_back_period: 0s</span><br><span class="line">  table_manager:</span><br><span class="line">    retention_deletes_enabled: <span class="literal">true</span>  <span class="comment"># 关键点: 启用循环删除</span></span><br><span class="line">    retention_period: 4368h          <span class="comment"># 关键点: 日志保留期限为180天以上且必须是168的倍数约定于26周*168</span></span><br><span class="line">  compactor:</span><br><span class="line">    working_directory: /usr/<span class="built_in">local</span>/loki/data/loki/boltdb-shipper-compactor</span><br><span class="line">    shared_store: filesystem</span><br><span class="line">....</span><br><span class="line">persistence:</span><br><span class="line">  enabled: <span class="literal">true</span>  <span class="comment"># 关键点: 启用持久化卷</span></span><br><span class="line">  accessModes:</span><br><span class="line">  - ReadWriteOnce</span><br><span class="line">  size: 10Gi</span><br><span class="line">  labels: &#123;&#125;</span><br><span class="line">  annotations: &#123;&#125;</span><br><span class="line">  storageClassName: nfs-dev</span><br><span class="line">podLabels:       <span class="comment"># 关键点: pod 标签</span></span><br><span class="line">  app: <span class="string">"loki"</span></span><br><span class="line">rbac:            <span class="comment"># 关键点: rbac 权限创建</span></span><br><span class="line">  create: <span class="literal">true</span></span><br><span class="line">  pspEnabled: <span class="literal">true</span></span><br><span class="line">resources:       <span class="comment"># 关键点: 资源限制</span></span><br><span class="line">  limits:    </span><br><span class="line">    cpu: 1</span><br><span class="line">    memory: 2Gi</span><br><span class="line">  requests:</span><br><span class="line">    cpu: 100m</span><br><span class="line">    memory: 128Mi</span><br><span class="line">serviceMonitor:</span><br><span class="line">  enabled: <span class="literal">true</span>   <span class="comment">#  关键点: 启用服务监控即 Promethus 抓取指标</span></span><br><span class="line">  interval: 10s</span><br><span class="line">  additionalLabels: &#123;&#125;</span><br><span class="line">  annotations: &#123;&#125;</span><br><span class="line">  scrapeTimeout: 10s</span><br><span class="line">  path: /metrics</span><br><span class="line">  prometheusRule:</span><br><span class="line">    enabled: <span class="literal">false</span></span><br><span class="line">    additionalLabels: &#123;&#125;</span><br><span class="line">    rules: []</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: Loki 更多配置项解析参考地址 <a href="https://grafana.com/docs/loki/latest/configuration。" target="_blank" rel="noopener">https://grafana.com/docs/loki/latest/configuration。</a></p>
+<p>温馨提示: Storage中bolt-shipper与bolt的区别, Loki2.0版本之后，对于使用boltdb存储索引部分做了较大的重构，采用新的boltdb-shipper模式，可以让Loki的索引存储在S3上，而彻底摆脱Cassandra或者谷歌的BigTable。此后服务的横向扩展将变得更加容易。详见：<a href="https://grafana.com/docs/loki/latest/operations/storage/boltdb-shipper/" target="_blank" rel="noopener">https://grafana.com/docs/loki/latest/operations/storage/boltdb-shipper/</a></p>
+<p><br/></p>
+<p><strong>promtail values.yaml 配置文件:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 5.promtail 图表配置文件。</span></span><br><span class="line">/storage/dev/webapp/logging/promtail<span class="comment"># ls</span></span><br><span class="line">Chart.yaml  ci  README.md  README.md.gotmpl  templates  values.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># values.yaml</span></span><br><span class="line">daemonset:      <span class="comment"># 关键点: 采用 daemonset 资源清单部署 promtail。</span></span><br><span class="line">  enabled: <span class="literal">true</span></span><br><span class="line">.....</span><br><span class="line">defaultVolumes:</span><br><span class="line">  - name: run</span><br><span class="line">    hostPath:</span><br><span class="line">      path: /run/promtail</span><br><span class="line">  - name: containers</span><br><span class="line">    hostPath:</span><br><span class="line">      path: /var/lib/docker/containers</span><br><span class="line">  - name: pods</span><br><span class="line">    hostPath:</span><br><span class="line">      path: /var/<span class="built_in">log</span>/pods</span><br><span class="line">defaultVolumeMounts:</span><br><span class="line">  - name: run</span><br><span class="line">    mountPath: /run/promtail</span><br><span class="line">  - name: containers</span><br><span class="line">    mountPath: /var/lib/docker/containers</span><br><span class="line">    readOnly: <span class="literal">true</span></span><br><span class="line">  - name: pods</span><br><span class="line">    mountPath: /var/<span class="built_in">log</span>/pods</span><br><span class="line">    readOnly: <span class="literal">true</span></span><br><span class="line">extraVolumes:</span><br><span class="line">  - name: host-time  <span class="comment"># 关键点: promtail 采集时间时区设置</span></span><br><span class="line">    hostPath:</span><br><span class="line">      path: /etc/localtime</span><br><span class="line">extraVolumeMounts:</span><br><span class="line">  - name: host-time</span><br><span class="line">    mountPath: /etc/localtime</span><br><span class="line">......</span><br><span class="line">config:</span><br><span class="line">  logLevel: error  <span class="comment"># 关键点: 日志等级我调整为了error。</span></span><br><span class="line">  serverPort: 3101</span><br><span class="line">  clients:         <span class="comment"># 关键点: loki 服务 api 地址 , 此处采用 svc 服务名称。</span></span><br><span class="line">    - url: http://loki:3100/loki/api/v1/push</span><br><span class="line"> .....</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>开始在K8S中部署 Loki 与 Promtail</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 6.create namespace </span></span><br><span class="line">kubectl create ns logging</span><br><span class="line"></span><br><span class="line"><span class="comment"># 7.安装 loki 指定前面pull下载到本地的图表目录 loki/</span></span><br><span class="line">helm install --namespace logging loki loki/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 8.安装 promtail 指定前面pull下载到本地的图表目录 promtail/</span></span><br><span class="line">helm install --namespace logging promtail loki/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 9.查看 helm 的部署情况</span></span><br><span class="line">helm list -n logging</span><br><span class="line">  <span class="comment"># NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION</span></span><br><span class="line">  <span class="comment"># loki            logging         1               2022-07-15 10:23:45.694349558 +0800 CST deployed        loki-2.13.1     v2.6.0</span></span><br><span class="line">  <span class="comment"># promtail        logging         1               2022-07-15 10:33:30.229611294 +0800 CST deployed        promtail-6.2.1  2.6.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看资源清单部署状态</span></span><br><span class="line">$ kubectl get sts,daemonsets.apps,pod,svc -n logging</span><br><span class="line">NAME                    READY   AGE</span><br><span class="line">statefulset.apps/loki   1/1     4h55m</span><br><span class="line"></span><br><span class="line">NAME                      DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE</span><br><span class="line">daemonset.apps/promtail   4         4         4       4            4           &lt;none&gt;          4h45m</span><br><span class="line"></span><br><span class="line">NAME                 READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod/loki-0           1/1     Running   0          4h55m</span><br><span class="line">pod/promtail-75xzp   1/1     Running   0          4h45m</span><br><span class="line">pod/promtail-hjttw   1/1     Running   0          4h45m</span><br><span class="line">pod/promtail-z9tcn   1/1     Running   0          4h45m</span><br><span class="line">pod/promtail-zr4hq   1/1     Running   0          4h45m</span><br><span class="line"></span><br><span class="line">NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE</span><br><span class="line">service/loki              ClusterIP   10.102.118.31   &lt;none&gt;        3100/TCP   4h55m</span><br><span class="line">service/loki-headless     ClusterIP   None            &lt;none&gt;        3100/TCP   4h55m</span><br><span class="line">service/loki-memberlist   ClusterIP   None            &lt;none&gt;        7946/TCP   4h55m</span><br><span class="line"></span><br><span class="line"><span class="comment"># 10.访问 Loki api 接口验证。</span></span><br><span class="line">root@devtest-master-212:/storage/dev/webapp/logging<span class="comment"># curl 10.102.118.31:3100/loki/api/v1/labels</span></span><br><span class="line">    <span class="comment"># &#123;"status":"success","data":["app","component","container","filename","instance","job","namespace","node_name","pod","stream"]&#125;</span></span><br><span class="line"></span><br><span class="line">root@devtest-master-212:/storage/dev/webapp/logging<span class="comment"># curl -s 10.102.118.31:3100/metrics | head -n 10</span></span><br><span class="line"><span class="comment"># HELP cortex_distributor_ingester_clients The current number of ingester clients.</span></span><br><span class="line"><span class="comment"># TYPE cortex_distributor_ingester_clients gauge</span></span><br><span class="line">cortex_distributor_ingester_clients 2</span><br><span class="line"><span class="comment"># HELP cortex_dns_failures_total The number of DNS lookup failures</span></span><br><span class="line"><span class="comment"># TYPE cortex_dns_failures_total counter</span></span><br><span class="line">cortex_dns_failures_total&#123;name=<span class="string">"memberlist"</span>&#125; 0</span><br><span class="line"><span class="comment"># HELP cortex_dns_lookups_total The number of DNS lookups resolutions attempts</span></span><br><span class="line"><span class="comment"># TYPE cortex_dns_lookups_total counter</span></span><br><span class="line">cortex_dns_lookups_total&#123;name=<span class="string">"memberlist"</span>&#125; 0</span><br><span class="line"><span class="comment"># HELP cortex_frontend_query_range_duration_seconds Total time spent in seconds doing query range requests.</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h2 id="0x02-实践使用"><a href="#0x02-实践使用" class="headerlink" title="0x02 实践使用"></a>0x02 实践使用</h2><h3 id="使用-Grafana-连接到-Loki-数据源"><a href="#使用-Grafana-连接到-Loki-数据源" class="headerlink" title="使用 Grafana 连接到 Loki 数据源"></a>使用 Grafana 连接到 Loki 数据源</h3><p>此处<code>Grafana</code>的安装可以参考Grafana可视化快速入门[<a href="https://blog.weiyigeek.top/2019/5-17-39.html]">https://blog.weiyigeek.top/2019/5-17-39.html]</a>.</p>
+<p>此处 Grafana 我也是安装在K8S集群中, 所以我们可以直接采用SVC名称服务(<code>loki.logging.svc:3100</code>-服务名称.名称空间.svc) 的方式接入Loki。</p>
+<p>点击 设置⚙齿轮 -&gt; Data Sources -&gt; Loki -&gt; 在 HTTP 选项下输入 <code>http://loki.logging.svc:3100</code> -&gt; 在 Maximum lines 最大显示行数为 5000 -&gt; 最后点击 <code>Save &amp; test</code>, 如出现下图提示则表示连接配置成功。</p>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220715152942.png" target="_blank" title="WeiyiGeek.add Loki Data Sources" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220715152942.png" alt="WeiyiGeek.add Loki Data Sources" title="" class=""></a>
+                <p>WeiyiGeek.add Loki Data Sources</p>
+            </figure>
+<p>点击 Explore -&gt; 选择 Loki (默认其实会选择) -&gt; 在 Log Browser 选择查看指定标签的日志 -&gt; 例如，此处查看 <code>{app=&quot;loki&quot;}</code> 标签日志。</p>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220715153245.png" target="_blank" title="WeiyiGeek.Explore Loki日志查看" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220715153245.png" alt="WeiyiGeek.Explore Loki日志查看" title="" class=""></a>
+                <p>WeiyiGeek.Explore Loki日志查看</p>
+            </figure>
+<p><br/></p>
+<p>温馨提示: 在 Grafana 9.0 中，你将在 Explore 中看到一个全新的可视化查询生成器界面，允许任何人编写、编辑和理解一个查询的作用。你已经熟悉的 Explore 界面现在增加了切换字段，可以选择在<code>文本编辑模式（Code）</code>或<code>可视化生成器模式（Builder）</code>中编写 PromQL 查询。当你选择 Builder 模式时，一个新的可视化界面允许你通过多词搜索下拉菜单选择感兴趣的指标来制作你的查询。</p>
+<p><br></p>
+<h3 id="使用-Grafana-Dashboard-显示集群中-pods-日志"><a href="#使用-Grafana-Dashboard-显示集群中-pods-日志" class="headerlink" title="使用 Grafana Dashboard 显示集群中 pods 日志"></a>使用 Grafana Dashboard 显示集群中 pods 日志</h3><p>描述: grafana dashboard 商城 (<a href="https://grafana.com/grafana/dashboards/?plcmt=footer&amp;search=Loki" target="_blank" rel="noopener">https://grafana.com/grafana/dashboards/?plcmt=footer&amp;search=Loki</a>) 中提供需要关于Loki的Dashboard数据显示面板。</p>
+<p>其中 Lok i常用的 Dashboard 如下:</p>
+<ul>
+<li><a href="https://grafana.com/grafana/dashboards/12611" target="_blank" rel="noopener">https://grafana.com/grafana/dashboards/12611</a></li>
+<li><a href="https://grafana.com/grafana/dashboards/13639" target="_blank" rel="noopener">https://grafana.com/grafana/dashboards/13639</a></li>
+<li><a href="https://grafana.com/grafana/dashboards/13186" target="_blank" rel="noopener">https://grafana.com/grafana/dashboards/13186</a> (推荐)</li>
+<li><a href="https://grafana.com/grafana/dashboards/15141" target="_blank" rel="noopener">https://grafana.com/grafana/dashboards/15141</a> (推荐)</li>
+</ul>
+<p>Grafana 添加 Dashboar -&gt; 左边菜单应用 -&gt; +Import -&gt; 在 Import via grafana.com 下输入 15141 -&gt; 点击 Load -&gt; 然后选择我们添加的Loki数据源即可。</p>
+<p>最后我们便可查看到如下界面选择查看对应Labels标签的日志:</p>
+<figure class="image-box">
+                <a rel=Grafana之Loki日志聚合系统入门介绍与企业实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220717151642.png" target="_blank" title="WeiyiGeek.Loki Kubernetes Logs" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220717151642.png" alt="WeiyiGeek.Loki Kubernetes Logs" title="" class=""></a>
+                <p>WeiyiGeek.Loki Kubernetes Logs</p>
+            </figure>
+<p><br/></p>
+<p><strong>扩展: 使用 Grafana Loki 进行日志告警</strong><br>Loki 支持三种模式创建日志告警：</p>
+<ul>
+<li>在 Promtail 中的 pipeline 管道的 metrics 的阶段，根据需求增加一个监控指标，然后使用 Prometheus 结合 Alertmanager 完成监控报警。</li>
+<li>通过 Loki 自带的报警功能（ Ruler 组件）可以持续查询一个 rules 规则，并将超过阈值的事件推送给 AlertManager 或者其他 Webhook 服务。</li>
+<li>将 LogQL 查询转换为 Prometheus 指标。可以通过 Grafana 自带的 <code>Alert rules &amp; notifications</code>，定义有关 LogQL 指标的报警，推送到 <code>Notification channels（ Prometheus Alertmanager ， Webhook ）</code>等</li>
+</ul>
+<p>以下主要介绍 LogQL 转化为 Prometheus 指标的方式实现告警。</p>
+<p>首先，在 Grafana 添加 Prometheus 数据源，URL 只需要填入 <code>http://loki.logging.svc:3100</code> 即可将 LogQL 查询转换为 Prometheus 指标。</p>
+<p>然后, 在告警规则配置中配置 Notification channels 。</p>
+<p>之后, 新建一个 Dashboard ，配置一个面板，例如：当 nginx 出现 404 状态码，触发告警：</p>
+<p>至此，在Kubernetes集群中查看Pod应用日志到此结束。</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-07-22T08:44:46.329Z" itemprop="dateUpdated">2022-07-22 16:44:46</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/数据分析/可视化工具/Grafana之Loki日志聚合系统入门介绍与企业实践-cost.md" target="_blank" rel="noopener noreferrer">_posts/数据分析/可视化工具/Grafana之Loki日志聚合系统入门介绍与企业实践-cost.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2022/6-15-667.html" target="_blank" rel="external">https://blog.weiyigeek.top/2022/6-15-667.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Grafana/" rel="tag">Grafana</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/6-15-667.html&title=《Grafana之Loki日志聚合系统入门介绍与企业实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/6-15-667.html&title=《Grafana之Loki日志聚合系统入门介绍与企业实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/6-15-667.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Grafana之Loki日志聚合系统入门介绍与企业实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/6-15-667.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/6-15-667.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2022/6-21-659.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">宝德PowerLeader服务器基础知识与管理</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2022/6-12-669.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">2.Jmeter在Kubernetes的devops环境中分布式压力测试实践</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-快速入门"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 快速入门</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-什么是-Loki"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">1.什么是 Loki ?</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-为什么要使用-Grafana-Loki"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">2.为什么要使用 Grafana Loki?</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-Grafana-Loki-是如何工作的"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">3.Grafana Loki 是如何工作的?</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-Grafana-Loki-架构简述"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">4.Grafana Loki 架构简述</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-Grafana-Loki-参考来源"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">5.Grafana Loki 参考来源</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-安装部署"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 安装部署</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#以-二进制方式-安装-Loki-与-Promtail"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">以 二进制方式 安装 Loki 与 Promtail</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#以-Helm3-在K8S集群里安装-Loki-与-Promtail"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">以 Helm3 在K8S集群里安装 Loki 与 Promtail</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-实践使用"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 实践使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-Grafana-连接到-Loki-数据源"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">使用 Grafana 连接到 Loki 数据源</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-Grafana-Dashboard-显示集群中-pods-日志"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">使用 Grafana Dashboard 显示集群中 pods 日志</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/6-15-667.html&title=《Grafana之Loki日志聚合系统入门介绍与企业实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/6-15-667.html&title=《Grafana之Loki日志聚合系统入门介绍与企业实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/6-15-667.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Grafana之Loki日志聚合系统入门介绍与企业实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/6-15-667.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/6-15-667.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACJklEQVR42u3aQXKDMAwF0N7/0nTbTgb6JZFOsJ9XHZKAHgtVsvz1Fa/jx0o+PV7W2a/yp9ywMDAwHss4Llc1rLNfnYX+ev36uacxYGBgbMCo3jrhJY+fszEwMDCqSTAJ6zpQDAwMjHcwru9z3aB+UMLFwMD4eEaSOpOCb97uvr0Xx8DAeCAj33X//7/fMt/AwMB4FOMorvnc8K5Ift0TAwNjaUae4HrF3OToRvnwBwYGxqKMaqt5V6D5Blx0BQMDYxvGZJssb32TLbzy9zEwMDZgJMPC6vGIycCyPMLEwMBYmjHZoE8KuOpQs/ciMDAwdmD0HpwXcJPvjwacGBgYSzAmRxzmDXB1GHD6KwwMjA0Y12kxb197bWp+Pdo1xMDAWI6RF2F5KNUEPWmJ/8rEGBgYazImCXdyBHbygjAwMNZm5Emwd3irugHXe2UYGBj7MHobar0r+Vi0/P8BAwNjOcZdt5tskyXFZTM2DAyMhRjXD+uVgJPir3pEAwMDYzdG9UhEkmrzJDuKBwMDYwNGrymtBj0fnWJgYGD0UmT+OsoHJvIGGwMDY1HGUVy9oUIvyRZGqhgYGEszesPO3oGJvGTMy8QyBgMD47GMXiNaTZHVIWV14w8DA2MHRp74kqQ8KRObqR8DAwOjFURvwJk3yTcnXAwMjOUYk8Nh+TgheR0YGBj7MJImtpoi5+n1LdttGBgYD2RMTmpMms9JQdkcZGJgYDyP8Q01LEupbaa8DAAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

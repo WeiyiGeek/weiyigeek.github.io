@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 MYSQL高可用架构MMM实现|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="MYSQL">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>MYSQL高可用架构MMM实现</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">MYSQL高可用架构MMM实现</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-08-14T06:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-08-14
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/DBA/">DBA</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/DBA/%E8%BF%90%E7%BB%B4/">运维</a></li></ul></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-数据存储/Database-运维/MySQL/高可用/MYSQL高可用架构MySQL-MMM实现"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">MYSQL高可用架构MMM实现</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-08-14 14:34:30" datetime="2019-08-14T06:34:30.000Z"  itemprop="datePublished">2019-08-14</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/DBA/">DBA</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/DBA/%E8%BF%90%E7%BB%B4/">运维</a></li></ul></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="前言介绍"><a href="#前言介绍" class="headerlink" title="前言介绍"></a>前言介绍</h4><p>描述: MySQL的MMM（Master-Master replication manager for MySQL）是一套 <code>支持双主故障切换和双主日常管理的脚本程序</code>高可用架构;</p>
+<p>MMM使用Perl语言开发主要用来监控和管理MySQL Master-Master（双主）复制虽然叫做双主复制，<code>但是业务上同一时刻只允许对一个主进行写入，另一台备选主上提供部分读服务，以加速在主主切换时刻备选主的预热</code>，MMM这套脚本程序一方面实现了故障切换的功能，另一方面其内部附加的工具脚本也可以实现多个slave的read负载均衡。</p>
+<p>MMM提供了<code>自动和手动</code>两种方式移除一组服务器中<code>复制延迟较高的服务器的虚拟ip</code>，同时它还可以备份数据，实现两节点之间的数据同步等。<br>由于MMM无法完全的保证数据一致性，所以MMM适用于对数据的一致性要求不是很高，但是又想最大程度的保证业务可用性的场景。对于那些对数据的一致性要求很高的业务，非常不建议采用MMM这种高可用架构。</p>
+<p>优点：</p>
+<ul>
+<li>1.稳定和成熟的开源产品，经过了时间的考验 核心技术是mysql自己的技术，只是使用脚本程序来控制，所以在原理上比较容易理解，而且管理能够更智能化。</li>
+<li>2.安装简单，配置简单，使用简单</li>
+<li>3.功能强大 （HA，failover，tools套件，cluster模式可以一个monitor管理多个mmm组）</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>1.由于架构里只有一个写入点，所以扩展性是有限的，但是对一般中型企业够用了。<ul>
+<li><ul>
+<li>解决方案：对于大应用可以采取垂直拆分到多个mmm架构的方式，使用mmm cluster来管理。 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>2.对于读写分离和读负载均衡还是要程序来开发或者使用其他工具完成。</li>
+</ul>
+<p><strong>MySQL-MMM架构图</strong><br><figure class="image-box">
+                <a rel=MYSQL高可用架构MMM实现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814112936.png" target="_blank" title="WeiyiGeek.MySQL-MMM架构图" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814112936.png" alt="WeiyiGeek.MySQL-MMM架构图" title="" class=""></a>
+                <p>WeiyiGeek.MySQL-MMM架构图</p>
+            </figure></p>
+<p><strong>mysql-mmm运行机制</strong><br>监听端口说明：</p>
+<ul>
+<li>MMM-MONITOR: 9988 端口</li>
+<li>MMMM-MONITOR: 9989 端口<figure class="image-box">
+                <a rel=MYSQL高可用架构MMM实现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814113417.png" target="_blank" title="WeiyiGeek.MMM运行机制" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814113417.png" alt="WeiyiGeek.MMM运行机制" title="" class=""></a>
+                <p>WeiyiGeek.MMM运行机制</p>
+            </figure>
+</li>
+</ul>
+<p><br></p>
+<h4 id="MMM环境安装"><a href="#MMM环境安装" class="headerlink" title="MMM环境安装"></a>MMM环境安装</h4><p><strong>(1)mysql-mmm安装需求</strong></p>
+<ul>
+<li>Server n+1: N台安装mysql的机器和1台安装mmm monitor的机器。 </li>
+<li>2*(n+1)Ips: 每个主机一个固定ip、一个虚拟IP(reader role),全局一个writer role IP </li>
+<li>Monitor User: 一个可以在mmm monitor机器上使用的并且拥有REPLICATION，CLIENT权限的mysql用户 </li>
+<li>Agent User: 一个可以在mmm agent机器上使用的并且拥有super，replication，client，process权限的mysql用户 </li>
+<li>Replication user: 一个slaves主机上可以使用的并且有用replication slave权限的用户 </li>
+<li>Tools user:  一个mmm tools主机可以使用的并且有用super，replication client，reload权限的mysql用户</li>
+</ul>
+<p><strong>(2)安装环境</strong><br>分为真实IP和虚拟IP(VIP),还行进行以下配置<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#以及hosts文件的配置:</span></span><br><span class="line">192.168.1.11 master-db1</span><br><span class="line">192.168.1.12 master-db2</span><br><span class="line">192.168.1.13 slave-db1</span><br><span class="line">192.168.1.14 slave-db2</span><br><span class="line">192.168.1.15 mmm-monitor</span><br><span class="line"></span><br><span class="line"><span class="comment">#其他必须配置</span></span><br><span class="line">1.关闭iptables (测试阶段需要)</span><br><span class="line">2.同步时间</span><br><span class="line">3.配置yum和epel源</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=MYSQL高可用架构MMM实现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814113712.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814113712.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><strong>(3)安装MySQL并配置</strong><br>Step1.安装MySQL的文章请参考我博客里面说的比较详细了;<br>Step2.编辑各个机器的MySQL配置文件/etc/my.cnf;</p>
+<ul>
+<li><p>master-db1</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="attr">server-id</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">datadir</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data</span><br><span class="line"><span class="attr">log-bin</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data/mysql-bin</span><br><span class="line"><span class="attr">binlog_format</span> = ROW</span><br><span class="line"><span class="attr">relay_log</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data/relay-log</span><br><span class="line"><span class="attr">auto-increment-increment</span> = <span class="number">2</span></span><br><span class="line"><span class="attr">auto-increment-offset</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_binlog</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_master_info</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_relay_log</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_relay_log_info</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">max_binlog_size</span>  = <span class="number">100</span>M</span><br><span class="line"><span class="attr">log_slave_updates</span>   = <span class="number">1</span></span><br><span class="line"><span class="attr">sql_mode</span>=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>master-db2</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="attr">server-id</span> = <span class="number">2</span></span><br><span class="line"><span class="attr">datadir</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data</span><br><span class="line"><span class="attr">log-bin</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data/mysql-bin</span><br><span class="line"><span class="attr">binlog_format</span> = ROW</span><br><span class="line"><span class="attr">relay_log</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data/relay-log</span><br><span class="line"><span class="attr">auto-increment-increment</span> = <span class="number">2</span></span><br><span class="line"><span class="attr">auto-increment-offset</span> = <span class="number">2</span></span><br><span class="line"><span class="attr">sync_binlog</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_master_info</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_relay_log</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_relay_log_info</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">max_binlog_size</span>  = <span class="number">100</span>M</span><br><span class="line"><span class="attr">log_slave_updates</span>   = <span class="number">1</span></span><br><span class="line"><span class="attr">sql_mode</span>=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>slave-db1</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="attr">server-id</span> = <span class="number">3</span></span><br><span class="line"><span class="attr">datadir</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data </span><br><span class="line"><span class="attr">log-bin</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data/mysql-bin</span><br><span class="line"><span class="attr">binlog_format</span> = ROW</span><br><span class="line"><span class="attr">relay_log</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data/relay-log</span><br><span class="line"><span class="attr">sync_binlog</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_master_info</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_relay_log</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_relay_log_info</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">max_binlog_size</span>  = <span class="number">100</span>M</span><br><span class="line"><span class="attr">log_slave_updates</span>   = <span class="number">1</span></span><br><span class="line"><span class="attr">sql_mode</span>=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>slave-db2</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[mysqld]</span></span><br><span class="line"><span class="attr">server-id</span> = <span class="number">4</span></span><br><span class="line"><span class="attr">datadir</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data</span><br><span class="line"><span class="attr">log-bin</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data/mysql-bin</span><br><span class="line"><span class="attr">binlog_format</span> = ROW</span><br><span class="line"><span class="attr">relay_log</span> = /Data/apps/mysql-<span class="number">5.6</span>.<span class="number">36</span>/data/relay-log</span><br><span class="line"><span class="attr">sync_binlog</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_master_info</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_relay_log</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">sync_relay_log_info</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">max_binlog_size</span>  = <span class="number">100</span>M</span><br><span class="line"><span class="attr">log_slave_updates</span>   = <span class="number">1</span></span><br><span class="line"><span class="attr">sql_mode</span>=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Step3.重启上面四台mysql服务的机器: <code>service mysqld restart</code><br>Step4.在master-db1上创建mmm架构中需要的用户和权限<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@master-db1 ~]<span class="comment"># mysql</span></span><br><span class="line">Your MySQL connection id is 1</span><br><span class="line">Server version: 5.6.36-log MySQL Community Server (GPL)</span><br><span class="line">.......</span><br><span class="line">Type '<span class="keyword">help</span>;' or '\h' for help. <span class="keyword">Type</span> <span class="string">'\c'</span> <span class="keyword">to</span> <span class="keyword">clear</span> the <span class="keyword">current</span> <span class="keyword">input</span> statement.</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">GRANT</span> <span class="keyword">REPLICATION</span> <span class="keyword">CLIENT</span> <span class="keyword">ON</span> *.* <span class="keyword">TO</span> <span class="string">'mmm_monitor'</span>@<span class="string">'192.168.1.%'</span> <span class="keyword">IDENTIFIED</span> <span class="keyword">BY</span> <span class="string">'123456'</span>;  <span class="comment">/** 管理用户 **/</span></span><br><span class="line"></span><br><span class="line">mysql&gt; GRANT SUPER,REPLICATION CLIENT,PROCESS ON *.* TO 'mmm_agent'@'192.168.1.%' IDENTIFIED BY '123456';  /** 客户端用户 **/</span><br><span class="line"></span><br><span class="line">mysql&gt; GRANT REPLICATION SLAVE ON *.* TO 'replication'@'192.168.1.%' IDENTIFIED BY '123456';  /** 同步用户 **/</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#查看二进制日志位置</span></span><br><span class="line">mysql&gt; FLUSH TABLES WITH READ LOCK;  #刷线bin-log表并且并索表</span><br><span class="line">mysql&gt; SHOW MASTER STATUS;</span><br><span class="line">+<span class="comment">------------------+----------+--------------+------------------+-------------------+</span></span><br><span class="line">| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |</span><br><span class="line">+<span class="comment">------------------+----------+--------------+------------------+-------------------+</span></span><br><span class="line">| mysql-bin.000001 |      796 |              |                  |                   |</span><br><span class="line">+<span class="comment">------------------+----------+--------------+------------------+-------------------+</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#重启shell进行数据库备份</span></span><br><span class="line">mysqldump <span class="comment">--all-databases &gt; /tmp/database-backup.sql</span></span><br><span class="line"></span><br><span class="line">mysql&gt; UNLOCK TABLES;  #回到刚才mysql进程，进行解锁：</span><br><span class="line">Query OK, 0 rows affected (0.05 sec)</span><br></pre></td></tr></table></figure></p>
+<p>Step5.将database-backup.sql文件复制到其他db节点：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@master-db1 ~]$ scp /tmp/database-backup.sql master-db2:/tmp</span><br><span class="line">[root@master-db1 ~]$ scp /tmp/database-backup.sql slave-db1:/tmp</span><br><span class="line">[root@master-db1 ~]$ scp /tmp/database-backup.sql slave-db2:/tmp</span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
+<p>Step6.master-db，slave-db1,slave-db2三台主机导入sql文件并刷新权限：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql &lt; /tmp/database-backup.sql</span><br><span class="line">mysql -e <span class="string">"FLUSH PRIVILEGES;"</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>(4)设置MySQL主-从和主-主配置</strong><br>Step1.设置MySQL主-从和主-主配置:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">[root@master-db2 ~]<span class="comment"># </span></span><br><span class="line">mysql&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'192.168.1.11'</span>,MASTER_USER=<span class="string">'replication'</span>,MASTER_PASSWORD=<span class="string">'123456'</span>,MASTER_LOG_FILE=<span class="string">'mysql-bin.000001'</span>,MASTER_LOG_POS=796;</span><br><span class="line">Query OK, 0 rows affected, 2 warnings (0.11 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; start slave;</span><br><span class="line">Query OK, 0 rows affected (0.11 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; show slave status\G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 192.168.1.11  <span class="comment">#主MySQL IP</span></span><br><span class="line">                  Master_User: replication</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: mysql-bin.000001</span><br><span class="line">          Read_Master_Log_Pos: 796</span><br><span class="line">               Relay_Log_File: relay-log.000002</span><br><span class="line">                Relay_Log_Pos: 283</span><br><span class="line">        Relay_Master_Log_File: mysql-bin.000001</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看master-db2的master日志位置：</span></span><br><span class="line">mysql&gt; SHOW MASTER STATUS;</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| mysql-bin.000001 |   636231 |              |                  |                   |</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br></pre></td></tr></table></figure></p>
+<p>Step2.在master-db1上操作将master-db2设置为主 (即互为主从)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; CHANGE MASTER TO MASTER_HOST=<span class="string">'192.168.1.12'</span>,MASTER_USER=<span class="string">'replication'</span>,MASTER_PASSWORD=<span class="string">'123456'</span>,MASTER_LOG_FILE=<span class="string">'mysql-bin.000001'</span>,MASTER_LOG_POS=636231;</span><br><span class="line">mysql&gt; start slave;</span><br><span class="line">mysql&gt; show slave status\G;</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 192.168.1.12</span><br><span class="line">                  Master_User: replication</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: mysql-bin.000001</span><br><span class="line">          Read_Master_Log_Pos: 636231</span><br><span class="line">               Relay_Log_File: relay-log.000002</span><br><span class="line">                Relay_Log_Pos: 283</span><br><span class="line">        Relay_Master_Log_File: mysql-bin.000001</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br></pre></td></tr></table></figure></p>
+<hr>
+
+<h4 id="安装MMM"><a href="#安装MMM" class="headerlink" title="安装MMM"></a>安装MMM</h4><p>1.创建Tools user<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">useradd -s &#x2F;sbin&#x2F;nologin mmmd #所有机器</span><br></pre></td></tr></table></figure></p>
+<p>2.查看mmm版本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum list all|grep ^mysql-mmm</span><br><span class="line">mysql-mmm.noarch                            2.2.1-2.el6                  @epel  </span><br><span class="line">mysql-mmm-agent.noarch                      2.2.1-2.el6                  @epel  </span><br><span class="line">mysql-mmm-monitor.noarch                    2.2.1-2.el6                  epel   </span><br><span class="line">mysql-mmm-tools.noarch                      2.2.1-2.el6                  epel</span><br></pre></td></tr></table></figure></p>
+<p>3.在mmm-monitor上安装：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@mmm-monitor ~]# yum -y install mysql-mmm-monitor</span><br></pre></td></tr></table></figure></p>
+<p>4.在四台mysql服务器上安装mmm的客户端：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install mysql-mmm-agent</span><br></pre></td></tr></table></figure></p>
+<p>5.编写配置文件，五台主机必须一致：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">[root@mmm-monitor ~]<span class="comment"># vim /etc/mysql-mmm/mmm_common.conf</span></span><br><span class="line">active_master_role  writer  <span class="comment">#积极的master角色的标示，所有的db服务器要开启read_only参数，对于writer服务器监控代理会自动将read_only属性关闭。</span></span><br><span class="line"></span><br><span class="line">&lt;host default&gt;</span><br><span class="line">    cluster_interface    eth0 <span class="comment">#群集的网络接口</span></span><br><span class="line">    pid_path                /var/run/mysql-mmm/mmm_agentd.pid　　<span class="comment">#pid路径</span></span><br><span class="line">    bin_path                /usr/libexec/mysql-mmm/　　<span class="comment">#可执行文件路径</span></span><br><span class="line">    replication_user        replication　　　　<span class="comment">#复制用户</span></span><br><span class="line">    replication_password    123456　　　　　　<span class="comment">#复制用户密码</span></span><br><span class="line">    agent_user              mmm_agent　　　　<span class="comment">#代理用户</span></span><br><span class="line">    agent_password          123456　　　　　　<span class="comment">#代理用户密码</span></span><br><span class="line">&lt;/host&gt;</span><br><span class="line"></span><br><span class="line">&lt;host master-db1&gt;　　 <span class="comment">#master-db1的host名称</span></span><br><span class="line">    ip      192.168.1.11　　 <span class="comment">#master-db1的ip</span></span><br><span class="line">    mode    master      　　<span class="comment">#角色属性，master代表是主</span></span><br><span class="line">    peer    master-db2　　 <span class="comment">#与master-db1对等的服务器的host名，也就是master-db2的服务器host名</span></span><br><span class="line">&lt;/host&gt;</span><br><span class="line"></span><br><span class="line">&lt;host master-db2&gt;　　 <span class="comment">#和master-db1的概念一样</span></span><br><span class="line">    ip      192.168.1.12</span><br><span class="line">    mode    master</span><br><span class="line">    peer    master-db1</span><br><span class="line">&lt;/host&gt;</span><br><span class="line"></span><br><span class="line">&lt;host slave-db1&gt; 　　　　<span class="comment">#从库的host名,如果存在多个从库可以重复一样的配置</span></span><br><span class="line">    ip      192.168.1.13　　　　<span class="comment">#从的ip</span></span><br><span class="line">    mode    slave  　　　　<span class="comment">#slave的角色属性代表当前host是从</span></span><br><span class="line">&lt;/host&gt;</span><br><span class="line"></span><br><span class="line">&lt;host slave-db2&gt; 　　　　 <span class="comment">#和slave-db1的概念一样</span></span><br><span class="line">    ip      192.168.1.14</span><br><span class="line">    mode    slave</span><br><span class="line">&lt;/host&gt;</span><br><span class="line">&lt;role writer&gt; 　　　　 <span class="comment">#writer角色配置</span></span><br><span class="line">    hosts   master-db1, master-db2 　　<span class="comment">#能进行写操作的服务器的host名，如果不想切换写操作这里可以只配置master,这样也可以避免因为网络延时而进行write的切换，但是一旦master出现故障那么当前的MMM就没有writer了只有对外的read操作。</span></span><br><span class="line">    ips     192.168.1.250　　　　<span class="comment">#对外提供的写操作的虚拟IP</span></span><br><span class="line">    mode    exclusive　　　　<span class="comment">#exclusive代表只允许存在一个主，也就是只能提供一个写的IP</span></span><br><span class="line">&lt;/role&gt;</span><br><span class="line"></span><br><span class="line">&lt;role reader&gt; 　　<span class="comment">#read角色配置</span></span><br><span class="line">    hosts   master-db1, master-db2, slave-db1, slave-db2　　　　<span class="comment">#对外提供读操作的服务器的host名,当然这里也可以把master加进来</span></span><br><span class="line">    ips     192.168.1.251, 192.168.1.252, 192.168.1.253, 192.168.1.254　　　　<span class="comment">#对外提供读操作的虚拟ip，这三个ip和host不是一一对应的,并且ips也hosts的数目也可以不相同，如果这样配置的话其中一个hosts会分配两个ip</span></span><br><span class="line">    mode    balanced　　<span class="comment">#balanced代表负载均衡</span></span><br><span class="line">&lt;/role&gt;</span><br></pre></td></tr></table></figure></p>
+<p>6.复制到其他服务器上<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scp /etc/mysql-mmm/mmm_common.conf 192.168.1.11:/etc/mysql-mmm/mmm_common.conf </span><br><span class="line">scp /etc/mysql-mmm/mmm_common.conf 192.168.1.12:/etc/mysql-mmm/mmm_common.conf </span><br><span class="line">scp /etc/mysql-mmm/mmm_common.conf 192.168.1.13:/etc/mysql-mmm/mmm_common.conf </span><br><span class="line">scp /etc/mysql-mmm/mmm_common.conf 192.168.1.14:/etc/mysql-mmm/mmm_common.conf</span><br></pre></td></tr></table></figure></p>
+<p>7.在所有的MySQL上修改mmm_agent.conf<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/mysql-mmm/mmm_agent.conf</span><br><span class="line">include mmm_common.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># The 'this' variable refers to this server.  Proper operation requires </span></span><br><span class="line"><span class="comment"># that 'this' server (db1 by default), as well as all other servers, have the </span></span><br><span class="line"><span class="comment"># proper IP addresses set in mmm_common.conf.</span></span><br><span class="line">this master-db1 <span class="comment">#只需要修改master-db1这里是哪台就改成哪台这里只给出master-db1的</span></span><br></pre></td></tr></table></figure></p>
+<p>8.配置mmm-monitor上的mmm_mon.conf（即IP:192.168.1.11）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@mmm-monitor ~]<span class="comment"># vim /etc/mysql-mmm/mmm_mon.conf</span></span><br><span class="line">include mmm_common.conf</span><br><span class="line"></span><br><span class="line">&lt;monitor&gt;</span><br><span class="line">    ip                  192.168.1.15</span><br><span class="line">    pid_path            /var/run/mysql-mmm/mmm_mond.pid</span><br><span class="line">    bin_path            /usr/libexec/mysql-mmm</span><br><span class="line">    status_path         /var/lib/mysql-mmm/mmm_mond.status</span><br><span class="line">    ping_ips            192.168.1.11, 192.168.1.12, 192.168.1.13, 192.168.1.14</span><br><span class="line">    auto_set_online     60</span><br><span class="line"></span><br><span class="line">    <span class="comment"># The kill_host_bin does not exist by default, though the monitor will</span></span><br><span class="line">    <span class="comment"># throw a warning about it missing.  See the section 5.10 "Kill Host</span></span><br><span class="line">    <span class="comment"># Functionality" in the PDF documentation.</span></span><br><span class="line">    <span class="comment"># kill_host_bin     /usr/libexec/mysql-mmm/monitor/kill_host</span></span><br><span class="line">&lt;/monitor&gt;</span><br><span class="line"></span><br><span class="line">&lt;host default&gt;</span><br><span class="line">    monitor_user        mmm_monitor</span><br><span class="line">    monitor_password    123456</span><br><span class="line">&lt;/host&gt;</span><br><span class="line"></span><br><span class="line">debug 0</span><br></pre></td></tr></table></figure></p>
+<p>9.启动服务：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在Master1启动mmm-monitor</span></span><br><span class="line">[root@mmm-monitor ~]<span class="comment"># chkconfig mysql-mmm-monitor on</span></span><br><span class="line">[root@mmm-monitor ~]<span class="comment"># service mysql-mmm-monitor start</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#在所有mysql服务器上启动mmm-agent</span></span><br><span class="line">chkconfig mysql-mmm-agent on</span><br><span class="line">service mysql-mmm-agent start</span><br></pre></td></tr></table></figure></p>
+<hr>
+
+<h4 id="高可用性测试"><a href="#高可用性测试" class="headerlink" title="高可用性测试"></a>高可用性测试</h4><p>描述: 服务器读写采有VIP地址进行读写，出现故障时VIP会漂移到其它节点，由其它节点提供服务。<br><figure class="image-box">
+                <a rel=MYSQL高可用架构MMM实现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814123834.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190814123834.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>1.首先查看整个集群的状态，可以看到整个集群状态正常<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@mmm-monitor ~]# mmm_control show</span><br><span class="line">  master-db1(192.168.1.11) master&#x2F;ONLINE. Roles: reader(192.168.1.251), writer(192.168.1.250)</span><br><span class="line">  master-db2(192.168.1.12) master&#x2F;ONLINE. Roles: reader(192.168.1.254)</span><br><span class="line">  slave-db1(192.168.1.13) slave&#x2F;ONLINE. Roles: reader(192.168.1.252)</span><br><span class="line">  slave-db2(192.168.1.14) slave&#x2F;ONLINE. Roles: reader(192.168.1.253)</span><br></pre></td></tr></table></figure></p>
+<p>2.关闭master-db1上的mysql服务，模拟mysql宕机<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@master-db1 ~]# service mysqld stop</span><br><span class="line">Shutting down MySQL...                                     [确定]</span><br></pre></td></tr></table></figure></p>
+<p>3.mmm-monitor上查看集群状态<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@mmm-monitor ~]# mmm_control show</span><br><span class="line">  master-db1(192.168.1.11) master&#x2F;HARD_OFFLINE. Roles: </span><br><span class="line">  master-db2(192.168.1.12) master&#x2F;ONLINE. Roles: reader(192.168.1.254), writer(192.168.1.250)</span><br><span class="line">  slave-db1(192.168.1.13) slave&#x2F;ONLINE. Roles: reader(192.168.1.251), reader(192.168.1.252)</span><br><span class="line">  slave-db2(192.168.1.14) slave&#x2F;ONLINE. Roles: reader(192.168.1.253)</span><br></pre></td></tr></table></figure><br>从显示结果可以看出master-db1的状态有ONLINE转换为HARD_OFFLINE，写VIP转移到了master-db2主机上,同时查看slave-db1和slave-db2主从状态<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#slave-db1/slave-db2 都是一样</span></span><br><span class="line">mysql&gt; show slave status\G   </span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 192.168.1.12  <span class="comment">#切换了热备主 MASTER</span></span><br><span class="line">                  Master_User: replication</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: mysql-bin.000001</span><br><span class="line">          Read_Master_Log_Pos: 636231</span><br><span class="line">               Relay_Log_File: relay-log.000002</span><br><span class="line">                Relay_Log_Pos: 283</span><br><span class="line">        Relay_Master_Log_File: mysql-bin.000001</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br></pre></td></tr></table></figure><br>从上面可以看到写请求的VIP已经转移到master-db2上了，且从节点的主都指向了master-db2</p>
+<p>4.启动master-db1的mysql服务主master节点将被恢复,但是此时<code>可以看到主库启动不会接管主，直到现有的主再次宕机。</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@master-db1 ~]# service mysqld start</span><br><span class="line">Starting MySQL......                                       [确定]</span><br></pre></td></tr></table></figure><br>再次查看集群状态(大概等待一分钟左右)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@mmm-monitor ~]<span class="comment"># mmm_control show</span></span><br><span class="line">  master-db1(192.168.1.11) master/ONLINE. Roles: reader(192.168.1.252)</span><br><span class="line">  master-db2(192.168.1.12) master/ONLINE. Roles: reader(192.168.1.254), writer(192.168.1.250)  <span class="comment">#关键点</span></span><br><span class="line">  slave-db1(192.168.1.13) slave/ONLINE. Roles: reader(192.168.1.251)</span><br><span class="line">  slave-db2(192.168.1.14) slave/ONLINE. Roles: reader(192.168.1.253)</span><br></pre></td></tr></table></figure><br>再次slave-db1和slave-db2主从状态<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show slave status\G   <span class="comment">#slave-db1/2</span></span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 192.168.1.12  <span class="comment">#任然是master-db2 不会改变</span></span><br><span class="line">                  Master_User: replication</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: mysql-bin.000001</span><br><span class="line">          Read_Master_Log_Pos: 636231</span><br><span class="line">               Relay_Log_File: relay-log.000002</span><br><span class="line">                Relay_Log_Pos: 283</span><br><span class="line">        Relay_Master_Log_File: mysql-bin.000001</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br></pre></td></tr></table></figure></p>
+<h4 id="MySQL-mmm-总结"><a href="#MySQL-mmm-总结" class="headerlink" title="MySQL-mmm 总结"></a>MySQL-mmm 总结</h4><p><em>mysql-mmm故障处理机制</em></p>
+<ul>
+<li>1.对外提供读写的虚拟IP是由monitor程序控制。<ul>
+<li>如果monitor没有启动那么db服务器不会被分配虚拟ip,但是如果已经分配好了虚拟ip，当monitor程序关闭了原先分配的虚拟ip不会立即关闭外部程序还可以连接访问（只要不重启网络），好处就是对于monitor的可靠性要求就会低一些，</li>
+<li>但是如果这个时候其中的某一个db服务器故障了就无法处理切换，也就是原先的虚拟ip还是维持不变，挂掉的那台DB的虚拟ip会变的不可访问。</li>
+</ul>
+</li>
+<li>2.agent程序受monitor程序的控制处理write切换从库切换等操作。<ul>
+<li>如果monitor进程关闭了那么agent进程就起不到什么作用，它本身不能处理故障。</li>
+</ul>
+</li>
+<li>3.monitor程序负责监控db服务器的状态，包括Mysql数据库、服务器是否运行、复制线程是否正常、主从延时等；它还用于控制agent程序处理故障。</li>
+<li>4.monitor程序每隔几秒钟监控db服务器的状态，如果db服务器已经从故障变成了正常，那么monitor会自动在60s之后将其设置为online状态(默认是60s可以设为其它的值)，有监控端的配置文件参数“auto_set_online”决定，群集服务器的状态有三种分别是：<code>HARD_OFFLINE→AWAITING_RECOVERY→online</code></li>
+<li>5.默认monitor会控制mmm_agent会将writer db服务器read_only修改为OFF，其它的db服务器read_only修改为ON,所以为了严谨可以在所有的服务器的my.cnf文件中加入read_only=1由monitor控制来控制writer和read,root用户和复制用户不受read_only参数的影响。</li>
+</ul>
+<p><br></p>
+<p><em>mysql-mmm架构总结</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(1)master-db2备选主节点宕机不影响集群的状态，就是移除了master-db2备选节点的读状态。</span><br><span class="line">(2)master-db1主节点宕机，由master-db2备选主节点接管写角色，slave-db1,slave-db2指向新master2主库进行复制，slave-db1,slave-db2会自动change master到master2.</span><br><span class="line">(3)如果master-db1主库宕机，master-db2复制应用又落后于master-db1时就变成了主可写状态，这时的数据主无法保证一致性。</span><br><span class="line">   如果master-db2,slave-db1,slave-db2延迟于master-db1主，这个时master-db1宕机，slave-db1,slave-db2将会等待数据追上master-db1后，再重新指向新的主master-db2进行复制操作，这时的数据也无法保证同步的一致性。</span><br><span class="line">(4)如果采用MMM高可用架构，主，主备选节点机器配置一样，而且开启半同步进一步提高安全性或采用MariaDB/mysql5.7进行多线程从复制，提高复制的性能。</span><br></pre></td></tr></table></figure></p>
+<p><strong>参考文档：</strong></p>
+<ul>
+<li><a href="http://mysql-mmm.org/mmm2:guide" target="_blank" rel="noopener">http://mysql-mmm.org/mmm2:guide</a></li>
+<li><a href="http://mysql-mmm.org/mysql-mmm.html" target="_blank" rel="noopener">http://mysql-mmm.org/mysql-mmm.html</a></li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:06.312Z" itemprop="dateUpdated">2022-03-29 13:39:06</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/数据存储/Database-运维/MySQL/高可用/MYSQL高可用架构MySQL-MMM实现.md" target="_blank" rel="noopener noreferrer">_posts/数据存储/Database-运维/MySQL/高可用/MYSQL高可用架构MySQL-MMM实现.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/8-14-91.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/8-14-91.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MYSQL/" rel="tag">MYSQL</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/8-14-91.html&title=《MYSQL高可用架构MMM实现》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/8-14-91.html&title=《MYSQL高可用架构MMM实现》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/8-14-91.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《MYSQL高可用架构MMM实现》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/8-14-91.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/8-14-91.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/8-15-298.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Java学习入坑解决与总结</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/8-13-649.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">DNS注入原理解析(待整理)</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#前言介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言介绍</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#MMM环境安装"><span class="post-toc-number">2.</span> <span class="post-toc-text">MMM环境安装</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#安装MMM"><span class="post-toc-number">3.</span> <span class="post-toc-text">安装MMM</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#高可用性测试"><span class="post-toc-number">4.</span> <span class="post-toc-text">高可用性测试</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#MySQL-mmm-总结"><span class="post-toc-number">5.</span> <span class="post-toc-text">MySQL-mmm 总结</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/8-14-91.html&title=《MYSQL高可用架构MMM实现》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/8-14-91.html&title=《MYSQL高可用架构MMM实现》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/8-14-91.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《MYSQL高可用架构MMM实现》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/8-14-91.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/8-14-91.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACMUlEQVR42u3awW6DQAxF0fz/T1Op23TgPhsqjbmzihoa5rAw9tifD17H71r9/Xut/uv7Gv7tDUuGDBnbMo7TdX6D1TXnJPI7fG8yZMh4D+M8yNZgq62QrfO9yZAhQwYhkTDKkTJkyJDxHCMtR2tJpAwZMt7MqJWgwW1wIH68FpchQ8aGjLQx8J+fH+xvyJAhYxPGES6e0vGUkZe1y13JkCFjNKO2rTSVfCL0owxXhgwZL2CQkjI9mOPlKL9GhgwZsxk8LKbBt9Yq4E3NPzJcGTJkDGWQYzV+HF9rGJwH+qCIlSFDxlBGpzGZHpnVkj+0BxkyZIxmpAG3MwxBBsv43VvvDRkyZGzIqLUeO00C3kIgh3cyZMiYzeCH+2kKmDZE03QwLmJlyJCxLaM/q8A3lDYGisFahgwZ4xi1ZmHtaXUGNS7aCTJkyHgBo7Y5HoL50NiDGa4MGTI2Z/RDLfmFNDQHzU4ZMmS8gFELf2kbgN+LF8PL94YMGTIGMciRfSeYkkeTjnEswTJkyBjK4IHvicO4Wii/aAzIkCFjNIMETY5Jw3fr8cmQIWM0ozaoWhut4AliWkLLkCFjNuMIFwf3E8ogNMuQIWM0g690u+kA623tTBkyZAxlpMUqP7jnKSMPuEukDBkyXsDoBMHaKEbtDSBDhgwZdyV/JJXk36KEVYYMGTJAosZbAh3GRRErQ4aM0Yy0iG11SjE7GLaQIUPGaEardMRjE7Ub85aqDBkyhjJ+ANzPZauUZfykAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

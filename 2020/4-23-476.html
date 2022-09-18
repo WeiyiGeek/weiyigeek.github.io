@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 Etcd基础学习之架构及工作原理|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Etcd">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Etcd基础学习之架构及工作原理</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">Etcd基础学习之架构及工作原理</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-04-23T02:37:47.000Z" itemprop="datePublished" class="page-time">
+  2020-04-23
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Kubernetes/数据库组件/Etcd基础学习之架构及工作原理"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Etcd基础学习之架构及工作原理</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-04-23 10:37:47" datetime="2020-04-23T02:37:47.000Z"  itemprop="datePublished">2020-04-23</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-Etcd-简述"><a href="#0x00-Etcd-简述" class="headerlink" title="0x00 Etcd 简述"></a>0x00 Etcd 简述</h4><p><strong>Etcd应用背景说明:</strong><br>在实际生产环境中，有很多应用在同一时刻只能启动一个实例，例如更新数据库的操作，多个实例同时更新不仅会降低系统性能，还可能导致数据的不一致。但是单点部署也使得系统的容灾性减弱，比如进程异常退出<br>目前进程保活，也有很多方案如<code>supervisor和systemd</code>。但是如果宿主机down掉呢？<br>所有的进程保活方法都会无济于事，于是我们可以<code>采用基于etcd自带的leader选举机制</code>，轻松的使服务具备了高可用性。</p>
+<h5 id="1-基础"><a href="#1-基础" class="headerlink" title="1.基础"></a>1.基础</h5><p><em>Q:什么是Etcd?有何作用?</em><br>答:Etcd<code>(发音是“et-cee-dee”)</code>作<code>为开源、分布式、高可用、强一致性</code>的<code>key-value存储系统</code>(<code>采用Go开发则跨平台</code>), 它由CoreOS团队开发，现在由Cloud Native Computing Foundation负责管理，提供了配置共享和服务发现等众多功能。它是许多分布式系统的主干，为跨服务器集群存储数据提供可靠的方式。</p>
+<p>通过<code>raft算法维护集群</code>中各个节点的通信和数据一致性，节点之间是对等的关系，即使leader节点故障会很快选举出新的leader来保证系统的正常运行;<br>目前已广泛应用在<code>kubernetes、ROOK、CoreDNS、M3以及openstack</code>等领域</p>
+<p>官方地址&amp;文档: <a href="https://etcd.io/docs/" target="_blank" rel="noopener">https://etcd.io/docs/</a></p>
+<p>补充:<code>2020年4月23日</code></p>
+<ul>
+<li>(1)Etcd可用版本一览说明<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">* v3.4.x</span><br><span class="line">* v3.3.x</span><br><span class="line">* v3.2.x</span><br><span class="line">* v3.1.x</span><br><span class="line">* v2</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<h5 id="2-特性"><a href="#2-特性" class="headerlink" title="2.特性"></a>2.特性</h5><ul>
+<li>完全复制：集群中的每个节点都可以使用完整的存档</li>
+<li>高可用性：Etcd可用于避免硬件的单点故障或网络问题</li>
+<li>一致性：每次读取都会返回跨多主机的最新写入基础(Raft算法)</li>
+<li>简单：包括一个定义良好、面向用户的API（gRPC）</li>
+<li>安全：实现了带有可选的客户端证书身份验证的自动化TLS</li>
+<li>快速：每秒10000次写入的基准速度</li>
+<li>可靠：使用Raft算法实现了存储的合理分布</li>
+</ul>
+<p><strong>etcd概念词汇表:</strong></p>
+<ul>
+<li>Raft：etcd所采用的保证分布式系统强一致性的算法。</li>
+<li>Node：一个Raft状态机实例。</li>
+<li>Member： 一个etcd实例。它管理着一个Node，并且可以为客户端请求提供服务。</li>
+<li>Cluster：由多个Member构成可以协同工作的etcd集群。</li>
+<li>Peer：对同一个etcd集群中另外一个Member的称呼。</li>
+<li>Client： 向etcd集群发送HTTP请求的客户端。</li>
+<li>WAL：预写式日志，etcd用于持久化存储的日志格式。</li>
+<li>snapshot：etcd防止WAL文件过多而设置的快照，存储etcd数据状态。</li>
+<li>Proxy：etcd的一种模式，为etcd集群提供反向代理服务。</li>
+<li>Leader：Raft算法中通过竞选而产生的处理所有数据提交的节点。</li>
+<li>Follower：竞选失败的节点作为Raft中的从属节点，为算法提供强一致性保证。</li>
+<li>Candidate：当Follower超过一定时间接收不到Leader的心跳时转变为Candidate开始竞选。</li>
+<li>Term：某个节点成为Leader到下一次竞选时间，称为一个Term。</li>
+<li>Index：数据项编号。Raft中通过Term和Index来定位数据。</li>
+</ul>
+<p><br/></p>
+<h5 id="3-架构"><a href="#3-架构" class="headerlink" title="3.架构"></a>3.架构</h5><p>Etcd的架构如下图所示，主要分为四部分 <code>HTTP server、Store、Raft和WAL</code>组成:</p>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200423103313.png" target="_blank" title="WeiyiGeek.Etcd的架构" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200423103313.png" alt="WeiyiGeek.Etcd的架构" title="" class=""></a>
+                <p>WeiyiGeek.Etcd的架构</p>
+            </figure>
+<p>组成部分说明:</p>
+<ul>
+<li>HTTP server: 为用户提供的Api请求。</li>
+<li>Store: 用于处理 etcd 支持的各类功能的事务，包括<code>数据索引、节点状态变更、监控与反馈、事件处理与执行</code>等等。</li>
+<li>Raft: 利用raft算法<code>保证节点之间数据的强一致性</code>。</li>
+<li>WAL: 数据存储方式通过 WAL 进行数据持久化存储<ul>
+<li>Snapshot 存储数据的状态快照；</li>
+<li>Entry 表示存储的具体日志内容。</li>
+</ul>
+</li>
+</ul>
+<p><br/></p>
+<h5 id="4-工作原理"><a href="#4-工作原理" class="headerlink" title="4.工作原理"></a>4.工作原理</h5><p>ETCD集群是一个分布式系统，<code>每个ETCD节点都维护了一个状态机</code>，并且存储了完整的数据，任意时刻至多存在一个有效的主节点，而主节点处理所有来自客户端的读写操作。<br><figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200423103737.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200423103737.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>为了更好的了解Etcd工作机制我们需要了解三个概念（也就是下图所想表达）</p>
+<ul>
+<li>leaders(指挥): 处理所有需要集群一致协商的客户端请求,并负责接受新的更改，将信息复制到follower节点并在follower验证接受后提交更改；<ul>
+<li>注意:<code>每个集群在任何给定的时间内只能有一个leader</code></li>
+</ul>
+</li>
+<li>elections(选举): 每个节点维护一个随机的election计时器，该计时器表示节点在调用新的election以及选择自己作为候选之前需要等待的时间。</li>
+<li>Term(期限): 如果leader挂了或者不再响应了，那么其他节点将在预定的时间超时之后开启一个新的term来创建新election。</li>
+</ul>
+<p>补充情况说明:</p>
+<ul>
+<li>如果节点在超时发生之前没有收到leader的消息，则该<code>节点将通过启动新的term将自己标记为候选</code>，并要求其他节点投票来开始新的election(每个节点投票给请求其投票的第一个候选)。</li>
+<li>如果候选从集群中的大多数节点处获得了选票，那么它就成为了新的leader。</li>
+<li>如果存在多个候选且获得了相同数量的选票，那么现有的election term将在没有leader的情况下结束，而新的term将以新的随机选举计时器开始。</li>
+</ul>
+<p><em>Q:上面所诉实际就是选择主机制，那什么是选主机制呢</em><br>答:举个例子在军事演习中，我们总会发现某架预警机周围分布着多架战斗机和歼击机，他们统一听从预警机的调度，有序的完成消灭敌军的任务。那么在这个集群中，预警机就类似于我们选主中的master，某个集群有且只有一个master，完成任务的分发等工作，其他节点配合行动，当这个master节点挂掉之后，要能够立刻选出新的节点作为master。</p>
+<p><br/></p>
+<p>如上所述: <code>一个基于Raft的系统中，集群使用elections为给定的term选择leader。</code></p>
+<ul>
+<li>任何更改都必须连接到leader节点。</li>
+<li>Etcd没有立即接受和提交更改，而是使用Raft算法确保大多数节点都同意更改。</li>
+<li>Leader将提议的新值发送到集群中的每个节点,然后节点发送一条消息确认收到了新值。</li>
+<li>如果大多数节点确认接收，那么leader提交新值，并向每个节点发送将该值提交到日志的消息(<code>意味着每次更改都需要得到集群节点的仲裁才能提交</code>)</li>
+</ul>
+<p>通过上面基本了解我们再来看<code>Replicate State Machine</code>状态转换规则：<code>ETCD中每个节点的状态集合为（Follower、Candidate、Leader）</code></p>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200423105732.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200423105732.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>流程声明:</p>
+<ul>
+<li>(1) 集群初始化时候每个节点都是Follower角色，当Follower在一定时间内没有收到来自主节点的心跳，会将自己角色改变为Candidate，并发起一次选主投票；</li>
+<li>(2) 当收到包括自己在内超过半数节点赞成后<code>（选举成功）</code>；当收到票数不足半数<code>选举失败或者选举超时</code>,注意若本轮未选出主节点将进行下一轮选举。</li>
+<li>(3) 当某个Candidate节点成为Leader后，Leader节点会通过心跳与其他节点同步数据，同时参与竞选的Candidate节点进入Follower角色。</li>
+</ul>
+<hr>
+<h4 id="0x01-安装部署"><a href="#0x01-安装部署" class="headerlink" title="0x01 安装部署"></a>0x01 安装部署</h4><p><strong>(1)硬件建议</strong></p>
+<ul>
+<li>官方etcd性能基准测试:在8个<code>vCPU、16GB RAM、50GB SSD GCE</code>实例上运行etcd(<code>生产环境中推荐按照官方配置进行自定义资源配置</code>)</li>
+<li>但是对于测试来说任何具有低延迟存储和几gb内存的相对现代的机器都应该足够了，注意拥有大型v2数据存储的应用程序将需要比大型v3数据存储更多的内存，<code>因为数据保存在匿名内存中而不是从文件映射内存</code>;</li>
+</ul>
+<p>注意事项:</p>
+<ul>
+<li>Etcd会将数据写入磁盘，因此强烈<code>推荐使用SSD</code></li>
+<li>始终使用<code>奇数个集群数量</code>，因为需要通过仲裁来更新集群的状态</li>
+<li>出于性能考虑集群通常<code>不超过7个节点</code></li>
+</ul>
+<p>单机实例安装方式:</p>
+<ul>
+<li>预构建的二进制文件:<a href="https://github.com/etcd-io/etcd/releases/" target="_blank" rel="noopener">https://github.com/etcd-io/etcd/releases/</a></li>
+<li>构建最新版本: <a href="https://github.com/etcd-io/etcd.git" target="_blank" rel="noopener">https://github.com/etcd-io/etcd.git</a> </li>
+<li>采用go第三方包构建</li>
+</ul>
+<p>此处我们采用Build的方式进行安装Etcd，具体的实现流程如下;</p>
+<p><strong>(2)安装流程</strong><br>Step1.Go环境安装采用二进制包直接解压安装<code>https://golang.org/dl/</code>(自带梯子)，且版本必须在1.13以上;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">wget https://studygolang.com/dl/golang/go1.14.2.linux-amd64.tar.gz -O /opt/go1.14.2.linux-amd64.tar.gz</span><br><span class="line">tar -zxf /opt/go1.14.2.linux-amd64.tar.gz -C /usr/<span class="built_in">local</span>/</span><br><span class="line"><span class="comment">#在/root/.profile进行添加</span></span><br><span class="line">cat &gt;&gt; /etc/profile&lt;&lt;END</span><br><span class="line"><span class="comment">#Go环境配置</span></span><br><span class="line"><span class="built_in">export</span> GOROOT=/usr/<span class="built_in">local</span>/go</span><br><span class="line"><span class="comment">#第三方包的安装包路径</span></span><br><span class="line"><span class="built_in">export</span> GOBIN=\<span class="variable">$GOROOT</span>/bin</span><br><span class="line"><span class="built_in">export</span> GOPATH=\<span class="variable">$GOROOT</span>/path</span><br><span class="line"><span class="built_in">export</span> PATH=\<span class="variable">$PATH</span>:\<span class="variable">$GOBIN</span>:\<span class="variable">$GOPATH</span></span><br><span class="line">END</span><br><span class="line"><span class="built_in">source</span> /etc/profile</span><br><span class="line"></span><br><span class="line">mkdir -vp /usr/<span class="built_in">local</span>/go/path</span><br><span class="line">ln -s /usr/<span class="built_in">local</span>/go/bin/* /usr/<span class="built_in">local</span>/bin/</span><br><span class="line">go version</span><br></pre></td></tr></table></figure></p>
+<p>Step2.如果使用官方构建脚本从主分支构建etcd我们先进行Clone然后build即可(<code>如何采用此种方式安装就不需要第三步了</code>)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git config --global http.proxy <span class="string">'socks5://10.20.172.135:2083'</span></span><br><span class="line"><span class="built_in">cd</span> etcd</span><br><span class="line">./build</span><br></pre></td></tr></table></figure></p>
+<p>Step3.如果通过go get从主分支构建一个vendored etcd(<code>一键获取代码、编译并安装</code>), 执行以下命令即<code>/usr/local/go/path</code>Go第三方包安装目录中看见下载文件;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="variable">$GOPATH</span>  <span class="comment"># /usr/local/go/path</span></span><br><span class="line">go get -v go.etcd.io/etcd</span><br><span class="line">go get -v go.etcd.io/etcd/etcdctl</span><br></pre></td></tr></table></figure></p>
+<p>Step4.测试安装通过启动etcd并设置密钥，检查etcd二进制文件是否正确构建。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">./usr/<span class="built_in">local</span>/go/path/bin/etcd</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"warn"</span>,<span class="string">"ts"</span>:<span class="string">"2020-04-23T15:12:17.368+0800"</span>,<span class="string">"caller"</span>:<span class="string">"etcdmain/etcd.go:89"</span>,<span class="string">"msg"</span>:<span class="string">"'data-dir' was empty; using default"</span>,<span class="string">"data-dir"</span>:<span class="string">"default.etcd"</span>&#125;</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2020-04-23T15:12:17.368+0800"</span>,<span class="string">"caller"</span>:<span class="string">"embed/etcd.go:113"</span>,<span class="string">"msg"</span>:<span class="string">"configuring peer listeners"</span>,<span class="string">"listen-peer-urls"</span>:[<span class="string">"http://localhost:2380"</span>]&#125;</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2020-04-23T15:12:17.990+0800"</span>,<span class="string">"caller"</span>:<span class="string">"membership/cluster.go:524"</span>,<span class="string">"msg"</span>:<span class="string">"set initial cluster version"</span>,<span class="string">"cluster-id"</span>:<span class="string">"cdf818194e3a8c32"</span>,<span class="string">"local-member-id"</span>:<span class="string">"8e9e05c52164694d"</span>,<span class="string">"cluster-version"</span>:<span class="string">"3.5"</span>&#125;</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2020-04-23T15:12:17.990+0800"</span>,<span class="string">"caller"</span>:<span class="string">"etcdserver/server.go:1850"</span>,<span class="string">"msg"</span>:<span class="string">"published local member to cluster through raft"</span>,<span class="string">"local-member-id"</span>:<span class="string">"8e9e05c52164694d"</span>,<span class="string">"local-member-attributes"</span>:<span class="string">"&#123;Name:default ClientURLs:[http://localhost:2379]&#125;"</span>,<span class="string">"request-path"</span>:<span class="string">"/0/members/8e9e05c52164694d/attributes"</span>,<span class="string">"cluster-id"</span>:<span class="string">"cdf818194e3a8c32"</span>,<span class="string">"publish-timeout"</span>:<span class="string">"7s"</span>&#125;</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2020-04-23T15:12:17.991+0800"</span>,<span class="string">"caller"</span>:<span class="string">"embed/serve.go:139"</span>,<span class="string">"msg"</span>:<span class="string">"serving client traffic insecurely; this is strongly discouraged!"</span>,<span class="string">"address"</span>:<span class="string">"127.0.0.1:2379"</span>&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Step5.put一个关键key-value进行测试<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#如果OK被打印，那么etcd正在工作</span></span><br><span class="line">[root@initiator bin]<span class="comment"># /usr/local/go/bin/etcdctl put name WeiyiGeek</span></span><br><span class="line">OK</span><br><span class="line">[root@initiator bin]<span class="comment"># /usr/local/go/bin/etcdctl get name</span></span><br><span class="line">name</span><br><span class="line">WeiyiGeek</span><br><span class="line">[root@node3 ~]<span class="comment"># etcdctl --endpoints=$ENDPOINTS --write-out="json" get  name</span></span><br><span class="line">&#123;<span class="string">"header"</span>:&#123;<span class="string">"cluster_id"</span>:2819294416482393232,<span class="string">"member_id"</span>:17704130064291257467,<span class="string">"revision"</span>:7300,<span class="string">"raft_term"</span>:301&#125;,<span class="string">"kvs"</span>:[&#123;<span class="string">"key"</span>:<span class="string">"bmFtZQ=="</span>,<span class="string">"create_revision"</span>:7300,<span class="string">"mod_revision"</span>:7300,<span class="string">"version"</span>:1,<span class="string">"value"</span>:<span class="string">"V2VpeWlHZWVr"</span>&#125;],<span class="string">"count"</span>:1&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Step6.至此简单实例的etcd安装完成;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#补充etcd服务启动的时候开放了两个端口（默认只能本机访问）</span></span><br><span class="line">tcp        0      0 127.0.0.1:2379          0.0.0.0:*               LISTEN      108333/./etcd  <span class="comment">#客户端使用</span></span><br><span class="line">tcp        0      0 127.0.0.1:2380          0.0.0.0:*               LISTEN      108333/./etcd  <span class="comment">#对等etcd peer使用（集群使用）</span></span><br></pre></td></tr></table></figure></p>
+<p>参考:</p>
+<ul>
+<li><a href="https://etcd.io/docs/v3.4.0/dl-build/" target="_blank" rel="noopener">https://etcd.io/docs/v3.4.0/dl-build/</a></li>
+<li>Docker|macOS (Darwin) : <a href="https://github.com/etcd-io/etcd/releases/" target="_blank" rel="noopener">https://github.com/etcd-io/etcd/releases/</a> </li>
+</ul>
+<p><br></p>
+<h5 id="其它操作etcd"><a href="#其它操作etcd" class="headerlink" title="其它操作etcd"></a>其它操作etcd</h5><p>除了采用etcdctl命令进行数据的增删改查，我们也可以采用CURL命令采用GET/PUT方式操作etcd中的数据，但是<code>注意V2/V3版本的些许不同</code>;<br>补充知识:<code>[2020年4月26日 10:20:57]</code><br>原子CAS操作<code>（Compare And Swap）</code>: 基本用途就是创建分布式的锁服务，即选主仅当客户端提供的条件等于当前etcd的条件时，才会修改一个key的值。<br>当前提供的可以比较的条件有：</p>
+<ul>
+<li>prevExist：检查key是否存在。如果prevExist为true更新请求，如果prevExist的值是false创建请求</li>
+<li>prevValue：检查key之前的value</li>
+<li>prevIndex：检查key以前的modifiedIndex</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## [通用方式]</span></span><br><span class="line"><span class="comment">#版本查看</span></span><br><span class="line">curl -X GET http://192.168.10.243:2379/version</span><br><span class="line"><span class="comment">#健康状态</span></span><br><span class="line">curl -L http://192.168.10.243:2379/health</span><br><span class="line"><span class="comment">#度量查看</span></span><br><span class="line">curl -sL http://localhost:22379/metrics</span><br></pre></td></tr></table></figure>
+<p>[version 2]<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查看所有键并以json格式显示</span></span><br><span class="line">curl -LsS http://192.168.10.243:2379/v2/keys | python -mjson.tool</span><br><span class="line"><span class="comment"># put:新建key值为keyname value为“WeiyiGeekd”</span></span><br><span class="line">curl -X PUT -L http://192.168.10.243:2379/v2/keys/keyname -d value=<span class="string">"WeiyiGeek"</span></span><br><span class="line"><span class="comment"># get:查看key</span></span><br><span class="line">curl -X GET -L http://192.168.10.243:2379/v2/keys/keyname</span><br><span class="line"><span class="comment"># delete:删除key</span></span><br><span class="line">curl -X DELETE -L http://127.0.0.1:2379/v2/keys/keyname</span><br><span class="line"><span class="comment"># 新建TTL的key</span></span><br><span class="line">curl -X PUT http://127.0.0.1:2379/v2/keys/message -d value=<span class="string">"Hello world"</span> -d ttl=30</span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/message</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"get"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello world"</span>,<span class="string">"expiration"</span>:<span class="string">"2019-09-29T08:08:10.674930705Z"</span>,<span class="string">"ttl"</span>:2,<span class="string">"modifiedIndex"</span>:20,<span class="string">"createdIndex"</span>:20&#125;&#125;</span><br><span class="line"><span class="comment"># 取消key的TTL</span></span><br><span class="line">curl -X PUT http://127.0.0.1:2379/v2/keys/message -d value=<span class="string">"Hello world"</span> -d ttl= -d prevExist=<span class="literal">true</span></span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"update"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello world"</span>,<span class="string">"modifiedIndex"</span>:23,<span class="string">"createdIndex"</span>:22&#125;,<span class="string">"prevNode"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello world"</span>,<span class="string">"expiration"</span>:<span class="string">"2019-09-29T08:10:23.220573683Z"</span>,<span class="string">"ttl"</span>:16,<span class="string">"modifiedIndex"</span>:22,<span class="string">"createdIndex"</span>:22&#125;&#125;</span><br><span class="line"><span class="comment"># 重置key的TTL</span></span><br><span class="line">curl -X PUT http://127.0.0.1:2379/v2/keys/message -d ttl=30 -d refresh=<span class="literal">true</span> -d prevExist=<span class="literal">true</span></span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"update"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello world"</span>,<span class="string">"expiration"</span>:<span class="string">"2019-09-29T08:15:29.569276199Z"</span>,<span class="string">"ttl"</span>:30,<span class="string">"modifiedIndex"</span>:26,<span class="string">"createdIndex"</span>:25&#125;,<span class="string">"prevNode"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello world"</span>,<span class="string">"expiration"</span>:<span class="string">"2019-09-29T08:15:01.34698273Z"</span>,<span class="string">"ttl"</span>:2,<span class="string">"modifiedIndex"</span>:25,<span class="string">"createdIndex"</span>:25&#125;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新建带有TTL的目录</span></span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/dir -d ttl=30 -d dir=<span class="literal">true</span></span><br><span class="line"><span class="comment"># 在TTL到期前更新该目录的TTL</span></span><br><span class="line">curl -X PUT http://127.0.0.1:2379/v2/keys/dir -d ttl=60 -d dir=<span class="literal">true</span> -d prevExist=<span class="literal">true</span></span><br><span class="line"><span class="comment"># 向该目录插入数据</span></span><br><span class="line">curl -X PUT http://127.0.0.1:2379/v2/keys/dir/message -d value=<span class="string">"Hello world"</span></span><br><span class="line"><span class="comment"># 查看该目录中的数据，但是该目录到期后数据会被自动删除</span></span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/dir/message</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"get"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/dir/message"</span>,<span class="string">"value"</span>:<span class="string">"Hello world"</span>,<span class="string">"modifiedIndex"</span>:51,<span class="string">"createdIndex"</span>:51&#125;&#125;</span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/dir/message</span><br><span class="line">&#123;<span class="string">"errorCode"</span>:100,<span class="string">"message"</span>:<span class="string">"Key not found"</span>,<span class="string">"cause"</span>:<span class="string">"/dir"</span>,<span class="string">"index"</span>:52&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自动创建有序的key</span></span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/queue -XPOST -d value=Job1</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"create"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000042"</span>,<span class="string">"value"</span>:<span class="string">"Job1"</span>,<span class="string">"modifiedIndex"</span>:42,<span class="string">"createdIndex"</span>:42&#125;&#125;</span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/queue -XPOST -d value=Job2</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"create"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000043"</span>,<span class="string">"value"</span>:<span class="string">"Job2"</span>,<span class="string">"modifiedIndex"</span>:43,<span class="string">"createdIndex"</span>:43&#125;&#125;</span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/queue -XPOST -d value=Job3</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"create"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000044"</span>,<span class="string">"value"</span>:<span class="string">"Job3"</span>,<span class="string">"modifiedIndex"</span>:44,<span class="string">"createdIndex"</span>:44&#125;&#125;</span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/queue -XPOST -d value=Job4</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"create"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000045"</span>,<span class="string">"value"</span>:<span class="string">"Job4"</span>,<span class="string">"modifiedIndex"</span>:45,<span class="string">"createdIndex"</span>:45&#125;&#125;</span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/queue -XPOST -d value=Job5</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"create"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000046"</span>,<span class="string">"value"</span>:<span class="string">"Job5"</span>,<span class="string">"modifiedIndex"</span>:46,<span class="string">"createdIndex"</span>:46&#125;&#125; </span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/queue -XPOST -d value=Job6</span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"create"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000047"</span>,<span class="string">"value"</span>:<span class="string">"Job6"</span>,<span class="string">"modifiedIndex"</span>:47,<span class="string">"createdIndex"</span>:47&#125;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看创建有序的key</span></span><br><span class="line">curl <span class="string">'http://127.0.0.1:2379/v2/keys/queue?recursive=true&amp;sorted=true'</span></span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"get"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/queue"</span>,<span class="string">"dir"</span>:<span class="literal">true</span>,<span class="string">"nodes"</span>:[&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000042"</span>,<span class="string">"value"</span>:<span class="string">"Job1"</span>,<span class="string">"modifiedIndex"</span>:42,<span class="string">"createdIndex"</span>:42&#125;,&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000043"</span>,<span class="string">"value"</span>:<span class="string">"Job2"</span>,<span class="string">"modifiedIndex"</span>:43,<span class="string">"createdIndex"</span>:43&#125;,&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000044"</span>,<span class="string">"value"</span>:<span class="string">"Job3"</span>,<span class="string">"modifiedIndex"</span>:44,<span class="string">"createdIndex"</span>:44&#125;,&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000045"</span>,<span class="string">"value"</span>:<span class="string">"Job4"</span>,<span class="string">"modifiedIndex"</span>:45,<span class="string">"createdIndex"</span>:45&#125;,&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000046"</span>,<span class="string">"value"</span>:<span class="string">"Job5"</span>,<span class="string">"modifiedIndex"</span>:46,<span class="string">"createdIndex"</span>:46&#125;,&#123;<span class="string">"key"</span>:<span class="string">"/queue/00000000000000000047"</span>,<span class="string">"value"</span>:<span class="string">"Job6"</span>,<span class="string">"modifiedIndex"</span>:47,<span class="string">"createdIndex"</span>:47&#125;],<span class="string">"modifiedIndex"</span>:42,<span class="string">"createdIndex"</span>:42&#125;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 原子操作</span></span><br><span class="line"><span class="comment"># 插入一个已存在的key并添加参数prevExist=false，因为已经有存在的key</span></span><br><span class="line">curl -XPUT http://127.0.0.1:2379/v2/keys/foo?prevExist=<span class="literal">false</span> -d value=two</span><br><span class="line">&#123;<span class="string">"errorCode"</span>:105,<span class="string">"message"</span>:<span class="string">"Key already exists"</span>,<span class="string">"cause"</span>:<span class="string">"/foo"</span>,<span class="string">"index"</span>:56&#125;</span><br><span class="line"><span class="comment"># 将插入条件换成prevValue，即检查key的value值，条件相等就替换，否则就提示条件不匹配</span></span><br><span class="line">curl -XPUT  http://127.0.0.1:2379/v2/keys/foo?prevValue=three -d value=two </span><br><span class="line">&#123;<span class="string">"errorCode"</span>:101,<span class="string">"message"</span>:<span class="string">"Compare failed"</span>,<span class="string">"cause"</span>:<span class="string">"[three != one]"</span>,<span class="string">"index"</span>:56&#125;  <span class="comment">#值不匹配</span></span><br><span class="line"> curl http://127.0.0.1:2379/v2/keys/foo?prevValue=one -XPUT -d value=two   <span class="comment">#值匹配替换</span></span><br><span class="line">&#123;<span class="string">"action"</span>:<span class="string">"compareAndSwap"</span>,<span class="string">"node"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/foo"</span>,<span class="string">"value"</span>:<span class="string">"two"</span>,<span class="string">"modifiedIndex"</span>:57,<span class="string">"createdIndex"</span>:56&#125;,<span class="string">"prevNode"</span>:&#123;<span class="string">"key"</span>:<span class="string">"/foo"</span>,<span class="string">"value"</span>:<span class="string">"one"</span>,<span class="string">"modifiedIndex"</span>:56,<span class="string">"createdIndex"</span>:56&#125;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 持续watch</span></span><br><span class="line">curl http://127.0.0.1:2379/v2/keys/message?<span class="built_in">wait</span>=<span class="literal">true</span></span><br></pre></td></tr></table></figure></p>
+<p>[version 3]<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#PS 3.x 版本中需要对k/v进行base64编码，注意是POST请求而不再是PUT</span></span><br><span class="line"><span class="comment"># https://www.base64encode.org/</span></span><br><span class="line"><span class="comment"># WeiyiGeek  is 'V2VpeWlHZWVr' in Base64</span></span><br><span class="line"><span class="comment"># etcddemo is 'ZXRjZGRlbW8='</span></span><br><span class="line"><span class="comment"># btoa("Weiyi")</span></span><br><span class="line"><span class="comment"># "V2VpeWk="</span></span><br><span class="line"><span class="comment"># btoa("123456")</span></span><br><span class="line"><span class="comment"># "MTIzNDU2"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># [Put and get keys ] : /v3/kv/range and /v3/kv/put</span></span><br><span class="line">[root@node3 ~]<span class="comment"># curl -L http://localhost:2379/v3/kv/put -X POST -d '&#123;"key": "V2VpeWlHZWVr", "value": "ZXRjZGRlbW8="&#125;'</span></span><br><span class="line">[root@node3 ~]<span class="comment"># etcdctl get WeiyiGeek</span></span><br><span class="line">WeiyiGeek</span><br><span class="line">etcddemo</span><br><span class="line">[root@node3 ~]<span class="comment"># curl -L http://localhost:2379/v3/kv/range -X POST -d '&#123;"key": "V2VpeWlHZWVr"&#125;'</span></span><br><span class="line">&#123;<span class="string">"header"</span>:&#123;<span class="string">"cluster_id"</span>:<span class="string">"2819294416482393232"</span>,<span class="string">"member_id"</span>:<span class="string">"17704130064291257467"</span>,<span class="string">"revision"</span>:<span class="string">"7303"</span>,<span class="string">"raft_term"</span>:<span class="string">"301"</span>&#125;,<span class="string">"kvs"</span>:[&#123;<span class="string">"key"</span>:<span class="string">"V2VpeWlHZWVr"</span>,<span class="string">"create_revision"</span>:<span class="string">"7303"</span>,<span class="string">"mod_revision"</span>:<span class="string">"7303"</span>,<span class="string">"version"</span>:<span class="string">"1"</span>,<span class="string">"value"</span>:<span class="string">"ZXRjZGRlbW8="</span>&#125;],<span class="string">"count"</span>:<span class="string">"1"</span>&#125;</span><br><span class="line"><span class="comment">#get all keys prefixed with "foo" | 把所有的键都加上前缀"foo"</span></span><br><span class="line"><span class="comment">#curl -L http://localhost:2379/v3/kv/range  -X POST -d '&#123;"key": "Zm9v", "range_end": "Zm9w"&#125;'</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># [Watch keys]: /v3/watch</span></span><br><span class="line">curl -N http://localhost:2379/v3/watch -X POST -d <span class="string">'&#123;"create_request": &#123;"key":"Zm9v"&#125; &#125;'</span> </span><br><span class="line"><span class="comment"># &#123;"result":&#123;"header":&#123;"cluster_id":"2819294416482393232","member_id":"17704130064291257467","revision":"7303","raft_term":"301"&#125;,"created":true&#125;&#125;</span></span><br><span class="line"><span class="comment"># &#123;"result":&#123;"header":&#123;"cluster_id":"2819294416482393232","member_id":"17704130064291257467","revision":"7304","raft_term":"314"&#125;,"events":[&#123;"kv":&#123;"key":"Zm9v","create_revision":"7301","mod_revision":"7304","version":"2","value":"YmFy"&#125;&#125;]&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># [Transactions] : /v3/kv/txn事务处理</span></span><br><span class="line"><span class="comment">#创建目标</span></span><br><span class="line">curl -L http://localhost:2379/v3/kv/txn \</span><br><span class="line">  -X POST \</span><br><span class="line">  -d <span class="string">'&#123;"compare":[&#123;"target":"CREATE","key":"Zm9v","createRevision":"2"&#125;],"success":[&#123;"requestPut":&#123;"key":"Zm9v","value":"YmFy"&#125;&#125;]&#125;'</span></span><br><span class="line"><span class="comment"># &#123;"header":&#123;"cluster_id":"12585971608760269493","member_id":"13847567121247652255","revision":"3","raft_term":"2"&#125;,"succeeded":true,"responses":[&#123;"response_put":&#123;"header":&#123;"revision":"3"&#125;&#125;&#125;]&#125;</span></span><br><span class="line"><span class="comment">#目标版本</span></span><br><span class="line">curl -L http://localhost:2379/v3/kv/txn \</span><br><span class="line">  -X POST \</span><br><span class="line">  -d <span class="string">'&#123;"compare":[&#123;"version":"4","result":"EQUAL","target":"VERSION","key":"Zm9v"&#125;],"success":[&#123;"requestRange":&#123;"key":"Zm9v"&#125;&#125;]&#125;'</span></span><br><span class="line"><span class="comment"># &#123;"header":&#123;"cluster_id":"14841639068965178418","member_id":"10276657743932975437","revision":"6","raft_term":"3"&#125;,"succeeded":true,"responses":[&#123;"response_range":&#123;"header":&#123;"revision":"6"&#125;,"kvs":[&#123;"key":"Zm9v","create_revision":"2","mod_revision":"6","version":"4","value":"YmF6"&#125;],"count":"1"&#125;&#125;]&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># [Authentication] : /v3/auth</span></span><br><span class="line"><span class="comment"># create root user</span></span><br><span class="line">curl -L http://127.0.0.1:2379/v3/auth/user/add -X POST -d <span class="string">'&#123;"name": "root", "password": "pass"&#125;'</span></span><br><span class="line"><span class="comment"># create root role</span></span><br><span class="line">curl -L http://localhost:2379/v3/auth/role/add \</span><br><span class="line">  -X POST -d <span class="string">'&#123;"name": "root"&#125;'</span></span><br><span class="line"><span class="comment"># grant root role</span></span><br><span class="line">curl -L http://localhost:2379/v3/auth/user/grant \</span><br><span class="line">  -X POST -d <span class="string">'&#123;"user": "root", "role": "root"&#125;'</span></span><br><span class="line"><span class="comment"># enable auth</span></span><br><span class="line">curl -L http://localhost:2379/v3/auth/<span class="built_in">enable</span> -X POST -d <span class="string">'&#123;&#125;'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#使用etcd对使用/v3/auth/ Authenticate的身份验证令牌进行身份验证</span></span><br><span class="line"><span class="comment">#获取根用户的认证令牌</span></span><br><span class="line">curl -L http://localhost:2379/v3/auth/authenticate -X POST -d <span class="string">'&#123;"name": "root", "password": "pass"&#125;'</span></span><br><span class="line"><span class="comment"># &#123;"header":&#123;"cluster_id":"14841639068965178418","member_id":"10276657743932975437","revision":"1","raft_term":"2"&#125;,"token":"sssvIpwfnLAcWAQH.9"&#125;</span></span><br><span class="line"><span class="comment"># 然后在请求的Header头中Authorization字段加入上面的token即可认证然后便可以进行操作</span></span><br><span class="line">curl -L http://localhost:2379/v3/kv/range \</span><br><span class="line">  -H <span class="string">'Authorization: ExmKVoSbXOhIonIj.7329'</span> \</span><br><span class="line">  -X POST -d <span class="string">'&#123;"key": "V2VpeWlHZWVr"&#125;'</span></span><br><span class="line">&#123;<span class="string">"header"</span>:&#123;<span class="string">"cluster_id"</span>:<span class="string">"2819294416482393232"</span>,<span class="string">"member_id"</span>:<span class="string">"17704130064291257467"</span>,<span class="string">"revision"</span>:<span class="string">"7307"</span>,<span class="string">"raft_term"</span>:<span class="string">"314"</span>&#125;,<span class="string">"kvs"</span>:[&#123;<span class="string">"key"</span>:<span class="string">"V2VpeWlHZWVr"</span>,<span class="string">"create_revision"</span>:<span class="string">"7303"</span>,<span class="string">"mod_revision"</span>:<span class="string">"7303"</span>,<span class="string">"version"</span>:<span class="string">"1"</span>,<span class="string">"value"</span>:<span class="string">"ZXRjZGRlbW8="</span>&#125;],<span class="string">"count"</span>:<span class="string">"1"</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># disenable auth</span></span><br><span class="line">curl -L http://localhost:2379/v3/auth/<span class="built_in">disable</span> -X POST -d <span class="string">'&#123;&#125;'</span> -H <span class="string">'Authorization: ExmKVoSbXOhIonIj.7329'</span></span><br><span class="line">&#123;<span class="string">"header"</span>:&#123;<span class="string">"cluster_id"</span>:<span class="string">"2819294416482393232"</span>,<span class="string">"member_id"</span>:<span class="string">"17704130064291257467"</span>,<span class="string">"revision"</span>:<span class="string">"7307"</span>,<span class="string">"raft_term"</span>:<span class="string">"314"</span>&#125;&#125;[</span><br></pre></td></tr></table></figure></p>
+<p>参考地址:</p>
+<ul>
+<li><a href="https://etcd.io/docs/v3.4.0/dev-guide/api_grpc_gateway/" target="_blank" rel="noopener">https://etcd.io/docs/v3.4.0/dev-guide/api_grpc_gateway/</a></li>
+</ul>
+<hr>
+<h4 id="0x02-集群应用"><a href="#0x02-集群应用" class="headerlink" title="0x02 集群应用"></a>0x02 集群应用</h4><p>描述:此时只是一个简单的集群实例，没有加入证书认证以及安全效验，正式的生产环境中一定需要做这两样;</p>
+<p>环境说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">192.168.107.241 node1.weiyigeek.top <span class="comment">#CentOS8</span></span><br><span class="line">192.168.107.242 node2.weiyigeek.top <span class="comment">#CentOS7.7</span></span><br><span class="line">192.168.107.243 node3.weiyigeek.top <span class="comment">#CentOS7.7</span></span><br></pre></td></tr></table></figure></p>
+<p>Step1.安装etc部署安装（<code>此处以node1为例即上面的一台主机</code>）,其它主机安装类似不同之处在于ETCD_NAME的配置(多台机器名称需要不同)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">## Desc: Etcd一键部署</span></span><br><span class="line">ETCD_VER=v3.4.7</span><br><span class="line"></span><br><span class="line"><span class="comment">#选择下载的地址</span></span><br><span class="line">GOOGLE_URL=https://storage.googleapis.com/etcd</span><br><span class="line">GITHUB_URL=https://github.com/etcd-io/etcd/releases/download</span><br><span class="line">DOWNLOAD_URL=<span class="variable">$&#123;GITHUB_URL&#125;</span></span><br><span class="line">rm -rf /tmp/etcd &amp;&amp; mkdir -p /tmp/etcd</span><br><span class="line">curl -L <span class="variable">$&#123;DOWNLOAD_URL&#125;</span>/<span class="variable">$&#123;ETCD_VER&#125;</span>/etcd-<span class="variable">$&#123;ETCD_VER&#125;</span>-linux-amd64.tar.gz -o /tmp/etcd-<span class="variable">$&#123;ETCD_VER&#125;</span>-linux-amd64.tar.gz</span><br><span class="line">tar xzvf /tmp/etcd-<span class="variable">$&#123;ETCD_VER&#125;</span>-linux-amd64.tar.gz -C /tmp/etcd --strip-components=1</span><br><span class="line">ln -s /tmp/etcd/etcd /usr/bin</span><br><span class="line">ln -s /tmp/etcd/etcdctl /usr/bin</span><br><span class="line">etcd --version &amp;&amp; etcdctl version</span><br></pre></td></tr></table></figure></p>
+<p>Step2.在该台机器上设置<code>Etcd和Systemd</code>启动设置;<br><strong>etcd配置</strong><br>创建etcd配置文件/etc/etcd/etcd.conf<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/etcd/etcd.conf</span><br><span class="line">[member]</span><br><span class="line"><span class="comment">#member名称</span></span><br><span class="line">ETCD_NAME=instance1</span><br><span class="line"><span class="comment">#存储数据的目录(注意需要建立)</span></span><br><span class="line">ETCD_DATA_DIR=<span class="string">"/var/lib/etcd/data"</span></span><br><span class="line"><span class="comment">#用于监听客户端etcdctl或者curl连接</span></span><br><span class="line">ETCD_LISTEN_CLIENT_URLS=<span class="string">"http://192.168.107.241:2379,http://127.0.0.1:2379"</span></span><br><span class="line"><span class="comment">#用于监听集群中其它member的连接</span></span><br><span class="line">ETCD_LISTEN_PEER_URLS=<span class="string">"http:/192.168.107.241:2380"</span></span><br><span class="line"></span><br><span class="line">[cluster]</span><br><span class="line"><span class="comment">#本机地址用于通知客户端，客户端通过此IPs与集群通信;</span></span><br><span class="line">ETCD_ADVERTISE_CLIENT_URLS=<span class="string">"http://192.168.107.241:2379"</span></span><br><span class="line"><span class="comment">#本机地址用于通知集群member与member通信；</span></span><br><span class="line">ETCD_INITIAL_ADVERTISE_PEER_URLS=<span class="string">"http://192.168.107.241:2380"</span></span><br><span class="line"><span class="comment">#描述集群中所有节点的信息，本member根据此信息去联系其他member；</span></span><br><span class="line">ETCD_INITIAL_CLUSTER=<span class="string">"instance01=http://192.168.107.241:2380,instance02=http://192.168.107.242:2380,instance03=http://192.168.107.243:2380"</span></span><br><span class="line"><span class="comment">#集群状态新建集群时候设置为new,若是想加入某个已经存在的集群设置为existing</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_STATE=new</span><br></pre></td></tr></table></figure></p>
+<p><strong>systemd管理配置</strong><br>描述:创建etcd的systemd配置文件 /usr/lib/systemd/system/etcd.service<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description&#x3D;Etcd Server</span><br><span class="line">Documentation&#x3D;https:&#x2F;&#x2F;github.com&#x2F;etcd-io&#x2F;etcd</span><br><span class="line">After&#x3D;network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type&#x3D;simple</span><br><span class="line">WorkingDirectory&#x3D;&#x2F;var&#x2F;lib&#x2F;etcd&#x2F;</span><br><span class="line">EnvironmentFile&#x3D;-&#x2F;etc&#x2F;etcd&#x2F;etcd.conf</span><br><span class="line">ExecStart&#x3D;&#x2F;usr&#x2F;bin&#x2F;etcd</span><br><span class="line">KillMode&#x3D;process</span><br><span class="line">Restart&#x3D;always</span><br><span class="line">RestartSec&#x3D;5</span><br><span class="line">LimitNOFILE&#x3D;655350</span><br><span class="line">LimitNPROC&#x3D;655350</span><br><span class="line">PrivateTmp&#x3D;false</span><br><span class="line">SuccessExitStatus&#x3D;143</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy&#x3D;multi-user.target</span><br></pre></td></tr></table></figure></p>
+<p>Step3.启动etcd服务并查看集群状态<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#服务启动</span></span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl <span class="built_in">enable</span> etcd.service</span><br><span class="line">systemctl start etcd.service</span><br></pre></td></tr></table></figure></p>
+<p>Step4.读写以及删除操作<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">HOST_1=192.168.10.241</span><br><span class="line">HOST_2=192.168.10.242</span><br><span class="line">HOST_3=192.168.10.243</span><br><span class="line">ENDPOINTS=<span class="variable">$HOST_1</span>:2379,<span class="variable">$HOST_2</span>:2379,<span class="variable">$HOST_3</span>:2379</span><br><span class="line"></span><br><span class="line"><span class="comment">#写入|替换Key</span></span><br><span class="line">etcdctl --endpoints=<span class="variable">$ENDPOINTS</span> put name <span class="string">"WeiyiGeek"</span></span><br><span class="line"><span class="comment">#读取Key</span></span><br><span class="line">etcdctl --endpoints=<span class="variable">$ENDPOINTS</span> get name</span><br><span class="line"><span class="comment">#删除Key</span></span><br><span class="line">etcdctl --endpoints=<span class="variable">$ENDPOINTS</span> del name</span><br><span class="line"></span><br><span class="line"><span class="comment">#debug 查看</span></span><br><span class="line"><span class="variable">$etcdctl</span> --endpoints=<span class="variable">$ENDPOINTS</span> --debug get --from-key <span class="string">'\0'</span></span><br><span class="line">ETCDCTL_CACERT=</span><br><span class="line">ETCDCTL_CERT=</span><br><span class="line">ETCDCTL_COMMAND_TIMEOUT=5s</span><br><span class="line">ETCDCTL_DEBUG=<span class="literal">true</span></span><br><span class="line">ETCDCTL_DIAL_TIMEOUT=2s</span><br><span class="line">ETCDCTL_DISCOVERY_SRV=</span><br><span class="line">ETCDCTL_DISCOVERY_SRV_NAME=</span><br><span class="line">ETCDCTL_ENDPOINTS=[192.168.10.241:2379,192.168.10.242:2379,192.168.10.243:2379]</span><br><span class="line">ETCDCTL_HEX=<span class="literal">false</span></span><br><span class="line">ETCDCTL_INSECURE_DISCOVERY=<span class="literal">true</span></span><br><span class="line">ETCDCTL_INSECURE_SKIP_TLS_VERIFY=<span class="literal">false</span></span><br><span class="line">ETCDCTL_INSECURE_TRANSPORT=<span class="literal">true</span></span><br><span class="line">ETCDCTL_KEEPALIVE_TIME=2s</span><br><span class="line">ETCDCTL_KEEPALIVE_TIMEOUT=6s</span><br><span class="line">ETCDCTL_KEY=</span><br><span class="line">ETCDCTL_PASSWORD=</span><br><span class="line">ETCDCTL_USER=</span><br><span class="line">ETCDCTL_WRITE_OUT=simple</span><br><span class="line">WARNING: 2020/04/26 00:18:51 Adjusting keepalive ping interval to minimum period of 10s</span><br><span class="line">WARNING: 2020/04/26 00:18:51 Adjusting keepalive ping interval to minimum period of 10s</span><br><span class="line">INFO: 2020/04/26 00:18:51 parsed scheme: <span class="string">"endpoint"</span></span><br><span class="line">INFO: 2020/04/26 00:18:51 ccResolverWrapper: sending new addresses to cc: [&#123;192.168.10.241:2379 0  &lt;nil&gt;&#125; &#123;192.168.10.242:2379 0  &lt;nil&gt;&#125; &#123;192.168.10.243:2379 0  &lt;nil&gt;&#125;]</span><br></pre></td></tr></table></figure></p>
+<p>Step5.Watch进行监听我们在etcd集群中的操作<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#写入 v</span></span><br><span class="line"><span class="comment">#读取 x</span></span><br><span class="line"><span class="comment">#删除 v</span></span><br><span class="line">etcdctl --endpoints=<span class="variable">$ENDPOINTS</span> watch [key]</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200424143440.png" target="_blank" title="WeiyiGeek.执行效果" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200424143440.png" alt="WeiyiGeek.执行效果" title="" class=""></a>
+                <p>WeiyiGeek.执行效果</p>
+            </figure></p>
+<p>Step6.集群状态查看<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">etcdctl --endpoints=<span class="variable">$ENDPOINTS</span> --write-out=table member list</span><br><span class="line">etcdctl --endpoints=<span class="variable">$ENDPOINTS</span> --write-out=table endpoint status</span><br><span class="line">etcdctl --endpoints=<span class="variable">$ENDPOINTS</span> --write-out=table endpoint health</span><br><span class="line">etcdctl --endpoints=<span class="variable">$ENDPOINTS</span>  -w table endpoint status <span class="comment">#--write-out简写-w</span></span><br><span class="line">+--------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+</span><br><span class="line">|      ENDPOINT      |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |</span><br><span class="line">+--------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+</span><br><span class="line">| 192.168.10.241:2379 | ef8199869f22c2b7 |   3.4.7 |   20 kB |      <span class="literal">true</span> |      <span class="literal">false</span> |       301 |          8 |                  8 |        |</span><br><span class="line">| 192.168.10.242:2379 | cbd80ba26fce8c16 |   3.4.7 |   20 kB |     <span class="literal">false</span> |      <span class="literal">false</span> |       301 |          8 |                  8 |        |</span><br><span class="line">| 192.168.10.243:2379 | f5b1b47e3364dc7b |   3.4.7 |   20 kB |     <span class="literal">false</span> |      <span class="literal">false</span> |       301 |          9 |                  9 |        |</span><br><span class="line">+--------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+</span><br></pre></td></tr></table></figure></p>
+<p>Step7.权限与认证设置<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> ETCDCTL_API=3</span><br><span class="line"><span class="comment">#权限赋予</span></span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> role add root</span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> role grant-permission root readwrite foo</span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> role get root</span><br><span class="line"></span><br><span class="line"><span class="comment">#角色赋予</span></span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> user add root</span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> user grant-role root root</span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> user get root</span><br><span class="line"></span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> auth <span class="built_in">enable</span></span><br><span class="line"><span class="comment"># now all client requests go through aute|现在所有的客户端请求都经过验证</span></span><br><span class="line"></span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> --user=root:123 put foo bar</span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> get foo</span><br><span class="line">etcdctl --endpoints=<span class="variable">$&#123;ENDPOINTS&#125;</span> --user=root:123 get foo</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h5 id="TLS密钥和证书"><a href="#TLS密钥和证书" class="headerlink" title="TLS密钥和证书"></a>TLS密钥和证书</h5><p>描述:为了保证通信安全客户端<code>(如etcdctl)与etcd 集群、etcd 集群之间的通信</code>需要使用TLS 加密。</p>
+<p>我们将使用 CloudFlare’s PKI 工具 <a href="https://github.com/cloudflare/cfssl" target="_blank" rel="noopener">cfssl</a> 来配置 PKI Infrastructure，然后使用它去创建 Certificate Authority（CA）， 并为 etcd创建 TLS 证书。</p>
+<p>Step0.证书生成工具安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /k8s/kubernetes/ssl/ &amp;&amp; <span class="built_in">cd</span> <span class="variable">$_</span></span><br><span class="line"><span class="comment"># cfssl 最新下载地址: https://github.com/cloudflare/cfssl/releases</span></span><br><span class="line"><span class="comment"># cfssl 相关工具拉取 (如果拉取较慢，建议使用某雷下载，然后上传到服务器里)</span></span><br><span class="line">curl -L https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssl_1.6.1_linux_amd64 -o /usr/<span class="built_in">local</span>/bin/cfssl</span><br><span class="line">curl -L https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssljson_1.6.1_linux_amd64 -o /usr/<span class="built_in">local</span>/bin/cfssljson</span><br><span class="line">curl -L https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssl-certinfo_1.6.1_linux_amd64 -o /usr/<span class="built_in">local</span>/bin/cfssl-certinfo</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">chmod +x /usr/<span class="built_in">local</span>/bin/cfssl /usr/<span class="built_in">local</span>/bin/cfssl-certinfo /usr/<span class="built_in">local</span>/bin/cfssljson</span><br><span class="line"></span><br><span class="line"><span class="comment">#验证 cfssl 的版本为 1.6.0 或是更高</span></span><br><span class="line">cfssl version</span><br></pre></td></tr></table></figure></p>
+<p>Step1.创建 etcd CA 及 证书签名请求<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">//# etcd ca配置</span><br><span class="line"># cat ca-config.json</span><br><span class="line">cat &gt; ca-config.json &lt;&lt;EOF</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"signing"</span>: &#123;</span><br><span class="line">    <span class="attr">"default"</span>: &#123;</span><br><span class="line">      <span class="attr">"expiry"</span>: <span class="string">"87600h"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"profiles"</span>: &#123;</span><br><span class="line">      <span class="attr">"www"</span>: &#123;</span><br><span class="line">         <span class="attr">"expiry"</span>: <span class="string">"87600h"</span>,</span><br><span class="line">         <span class="attr">"usages"</span>: [</span><br><span class="line">            <span class="string">"signing"</span>,</span><br><span class="line">            <span class="string">"key encipherment"</span>,</span><br><span class="line">            <span class="string">"server auth"</span>,</span><br><span class="line">            <span class="string">"client auth"</span></span><br><span class="line">        ]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">//# cat ca-csr.json ca证书</span><br><span class="line">cat &gt; ca-csr.json &lt;&lt;EOF</span><br><span class="line">&#123;</span><br><span class="line">    <span class="attr">"CN"</span>: <span class="string">"etcd CA"</span>,</span><br><span class="line">    <span class="attr">"key"</span>: &#123;</span><br><span class="line">        <span class="attr">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">        <span class="attr">"size"</span>: <span class="number">2048</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">"names"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">            <span class="attr">"L"</span>: <span class="string">"Beijing"</span>,</span><br><span class="line">            <span class="attr">"ST"</span>: <span class="string">"Beijing"</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//# cat etcd-csr.json</span><br><span class="line">cat &gt; etcd-csr.json &lt;&lt;EOF</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"CN"</span>: <span class="string">"etcd"</span>,</span><br><span class="line">  <span class="attr">"hosts"</span>: [</span><br><span class="line">    <span class="string">"192.168.10.241"</span>,</span><br><span class="line">    <span class="string">"192.168.10.242"</span>,</span><br><span class="line">    <span class="string">"192.168.10.243"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"key"</span>: &#123;</span><br><span class="line">    <span class="attr">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">    <span class="attr">"size"</span>: <span class="number">2048</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"names"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">      <span class="attr">"ST"</span>: <span class="string">"BeiJing"</span>,</span><br><span class="line">      <span class="attr">"L"</span>: <span class="string">"BeiJing"</span>,</span><br><span class="line">      <span class="attr">"O"</span>: <span class="string">"k8s"</span>,</span><br><span class="line">      <span class="attr">"OU"</span>: <span class="string">"System"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>Step2.生成etcd证书和私钥<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CA 凭证和私钥生成:</span></span><br><span class="line">cfssl gencert -initca ca-csr.json | cfssljson -bare ca -</span><br><span class="line"></span><br><span class="line"><span class="comment"># 证书生成</span></span><br><span class="line">cfssl gencert -ca=/k8s/kubernetes/ssl/ca.pem -ca-key=/k8s/kubernetes/ssl/ca-key.pem  -config=/k8s/kubernetes/ssl/ca-config.json  -profile=kubernetes etcd-csr.json | cfssljson -bare etcd</span><br><span class="line"></span><br><span class="line"><span class="comment"># ls etcd*</span></span><br><span class="line">etcd.csr  etcd-csr.json  etcd-key.pem  etcd.pem <span class="comment"># 证书签名请求正在 +  证书公钥与密钥</span></span><br></pre></td></tr></table></figure></p>
+<p>Step3.在Etcd启动脚本中加入以下参数<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">--cert-file=/k8s/etcd/ssl/etcd.pem \</span><br><span class="line">--key-file=/k8s/etcd/ssl/etcd-key.pem \</span><br><span class="line">--peer-cert-file=/k8s/etcd/ssl/etcd.pem \</span><br><span class="line">--peer-key-file=/k8s/etcd/ssl/etcd-key.pem \</span><br><span class="line">--trusted-ca-file=/k8s/kubernetes/ssl/ca.pem \</span><br><span class="line">--peer-trusted-ca-file=/k8s/kubernetes/ssl/ca.pe\</span><br><span class="line"><span class="built_in">set</span> /flannel/network/config <span class="string">'&#123;"Network":"10.244.0.0/16", "SubnetMin": "10.244.1.0", "SubnetMax": "10.244.254.0", "SubnetLen": 24, "Backend": &#123;"Type": "vxlan"&#125;&#125;'</span> <span class="comment">#注意必须在参数中加入–enable-v2</span></span><br></pre></td></tr></table></figure></p>
+<p>Step4.采用证书进行通讯认证链接交换即节点状态查看<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ENDPOINTS=192.168.10.241:2379,192.168.10.242:2379,192.168.10.243:2379</span><br><span class="line">etcdctl --cacert=/k8s/kubernetes/ssl/ca.pem --cert=/k8s/etcd/ssl/etcd.pem --key=/k8s/etcd/ssl/etcd-key.pem --endpoints=<span class="variable">$ENDPOINTS</span> endpoint health</span><br><span class="line"><span class="comment"># 192.168.10.243:2379 is healthy: successfully committed proposal: took = 6.152483ms</span></span><br><span class="line"><span class="comment"># 192.168.10.241:2379 is healthy: successfully committed proposal: took = 6.461149ms</span></span><br><span class="line"><span class="comment"># 192.168.10.242:2379 is healthy: successfully committed proposal: took = 5.701604ms</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h4 id="0x03-应用介绍与实践"><a href="#0x03-应用介绍与实践" class="headerlink" title="0x03 应用介绍与实践"></a>0x03 应用介绍与实践</h4><h5 id="1-应用场景"><a href="#1-应用场景" class="headerlink" title="1.应用场景"></a>1.应用场景</h5><p>分布式系统中的数据分为<code>控制数据和应用数据</code>。使用etcd的场景默认处理的数据都是控制数据，对于应用数据只推荐数据量很小，但是更新访问频繁的情况。并且Etcd常常与微服务架构一起使用比如下面的一些场景之中;</p>
+<p><strong>场景一：服务发现（Service Discovery）</strong><br>Q：什么是Service Discovery?<br>答:即在同一个分布式集群中的进程或服务，要如何才能找到对方并建立连接,简单的说服务发现就是想要<code>了解集群中是否有进程在监听udp或tcp端口</code>，并且通过名字就可以查找和连接;</p>
+<ul>
+<li>一个强一致性、高可用的服务存储目录 == 基于Raft算法</li>
+<li>一种注册服务和监控服务健康状态的机制 == 在etcd中注册服务并且对注册的服务设置key TTL</li>
+<li>一种查找和连接服务的机制 == 在每个服务机器上都部署一个Proxy模式的etcd，确保能访问etcd集群的服务都能互相连接。</li>
+</ul>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425211000.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425211000.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>服务发现对应的具体场景:</p>
+<ul>
+<li>1) 微服务协同工作架构中，服务动态添加; 通过服务发现机制在etcd中注册某个服务名字的目录，在该目录下存储可用的服务节点的IP。在使用服务的过程中只要从服务目录下查找可用的服务节点去使用即可。</li>
+<li>2) PaaS平台中应用多实例与实例故障重启透明化。需要动态的配置域名解析（路由）中的信息而Etcd很好的支持了这一点;</li>
+</ul>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425211435.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425211435.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br/></p>
+<p><strong>场景二：消息发布与订阅</strong><br>在分布式系统中组件间通信方式就是消息发布与订阅,即构建一个配置共享中心，数据提供者在这个配置中心发布消息，而消息使用者则订阅他们关心的主题，一旦主题有消息发布就会实时通知订阅者，etcd实现了分布式系统配置的集中式管理与动态更新。</p>
+<ul>
+<li>应用中用到的一些配置信息放到etcd上进行集中管理 == 在etcd节点上注册一个Watcher并等待，当配置有更新的时候会配置有更新的时候；</li>
+<li>索引的元信息和服务器集群机器的节点状态存放在etcd中 == 使用etcd的key TTL功能可以确保机器状态是实时更新的；</li>
+<li>分布式日志收集系统 == 在etcd上创建一个以应用（主题）命名的目录P，并将这个应用（主题相关）的所有机器ip，以子目录的形式存储到目录P上，然后设置一个etcd递归的Watcher，递归式的监控应用（主题）目录下所有信息的变动</li>
+<li>系统中信息需要动态自动获取与人工干预修改信息请求内容的情况 == 引入etcd只要将信息存放到指定的etcd目录中即可，然后通过HTTP的接口在外部访问。</li>
+</ul>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425212200.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425212200.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br/></p>
+<p><strong>场景三：负载均衡</strong><br>此处指的是软负载均衡，为了保证服务的高可用以及数据的一致性，通常都会把数据和服务部署多份，以此达到对等服务即使其中的某一个服务失效了也不影响使用；由此带来的<code>坏处是数据写入性能下降</code>，而<code>好处则是数据访问时的负载均衡</code>;</p>
+<ul>
+<li>etcd本身分布式架构存储的信息访问支持负载均衡 == etcd集群化以后每个etcd的核心节点都可以处理用户的请求(推荐数据量小但是访问频繁的消息)</li>
+<li>利用etcd维护一个负载均衡节点表 == 类似KafkaMQ，通过ZooKeeper来维护生产者和消费者的负载均衡，同样也可以采用etcd</li>
+</ul>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425212621.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425212621.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br/></p>
+<p><strong>场景四：分布式通知与协调</strong><br>分布式通知与协调与消息发布和订阅有些相似,可以使用etcd中的Watcher机制，通过注册与异步通知机制，实现分布式环境下不同系统之间的通知与协调，从而对数据变更做到实时处理。<br>实现方式通常是这样：不同系统都在etcd上对同一个目录进行注册，同时设置Watcher观测该目录的变化（如果对子目录的变化也有需要，可以设置递归模式），当某个系统更新了etcd的目录，那么设置了Watcher的系统就会收到通知，并作出相应处理。</p>
+<ul>
+<li>通过etcd进行低耦合的心跳检测</li>
+<li>通过etcd完成系统调度</li>
+<li>通过etcd完成工作汇报<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425212909.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425212909.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>场景五：分布式锁</strong><br>因为etcd使用Raft算法保持了数据的强一致性，某次操作存储到集群中的值必然是全局一致的，所以很容易实现分布式锁。<br>锁服务有两种使用方式:<code>一是保持独占，二是控制时序</code>。</p>
+<ul>
+<li>保持独占即所有获取锁的用户最终只有一个可以得到 == etcd为此提供了一套实现分布式锁原子操作CAS（CompareAndSwap）的API。</li>
+<li>控制时序即所有想要获得锁的用户都会被安排执行，但是获得锁的顺序也是全局唯一的，同时决定了执行顺序 == 控制时序，即所有想要获得锁的用户都会被安排执行，但是获得锁的顺序也是全局唯一的，同时决定了执行顺序。etcd为此也提供了一套API（自动创建有序键），对一个目录建值时指定为POST动作，这样etcd会自动在目录下生成一个当前最大的值为键，存储这个新的值（客户端编号）</li>
+</ul>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425213236.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425213236.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br/></p>
+<p><strong>场景六：分布式队列</strong><br>分布式队列的常规用法与场景五中所描述的分布式锁的控制时序用法类似，即<code>创建一个先进先出的队列保证顺序</code>。另一种比较有意思的实现是在保证队列达到某个条件时再统一按顺序执行,这种方法的实现可以在/queue这个目录中另外建立一个/queue/condition节点。;</p>
+<ul>
+<li>condition可以表示队列大小</li>
+<li>condition可以表示某个任务在不在队列</li>
+<li>condition还可以表示其它的一类开始执行任务的通知</li>
+</ul>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425213432.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425213432.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br/></p>
+<p><strong>场景七：集群监控与Leader竞选</strong><br>通过etcd来进行监控实现起来非常简单并且实时性强。 比如通过Watcher机制，当某个节点消失或有变动时，Watcher会第一时间发现并告知用户，同时节点可以设置TTL key，进行节点存活健康状态的检测，以完成集群的监控要求;</p>
+<p>另外使用分布式锁，可以完成Leader竞选,通常是一些长时间CPU计算或者使用IO操作的机器，只需要竞选出的Leader计算或处理一次，就可以把结果复制给其他的Follower,从而避免重复劳动节省计算资源。</p>
+<p>该经典场景是搜索系统中建立全量索引，通过在etcd的CAS机制同时创建一个节点，<code>创建成功的机器作为Leader进行索引计算</code>，然后把计算结果分发到其它节点。</p>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425220406.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200425220406.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>Q:为什么用etcd而不用ZooKeeper？<br>相较之下ZooKeeper有如下缺点：</p>
+<ul>
+<li>ZooKeeper的部署维护复杂，管理员需要掌握一系列的知识和技能;而Paxos强一致性算法也是素来以复杂难懂而闻名于世</li>
+<li>Java编写本身就偏向于重型应用，它会引入大量的依赖。而运维人员则普遍希望保持强一致、高可用的机器集群尽可能简单，维护起来也不易出错。</li>
+<li>发展缓慢,Apache基金会项目特有的“Apache Way”在开源界饱受争议,由于基金会庞大的结构以及松散的管理导致项目发展缓慢。</li>
+</ul>
+<p>而etcd作为一个后起之秀其优点也很明显。</p>
+<ul>
+<li>Go语言编写部署简单；使用HTTP作为接口使用简单；使用Raft算法保证强一致性让用户易于理解。</li>
+<li>数据持久化，etcd默认数据一更新就进行持久化。</li>
+<li>安全，etcd支持SSL客户端安全认证。</li>
+</ul>
+<p><br></p>
+<h5 id="2-Etcd选主在Go中的实践"><a href="#2-Etcd选主在Go中的实践" class="headerlink" title="2.Etcd选主在Go中的实践"></a>2.Etcd选主在Go中的实践</h5><p>项目中如何利用etcd的选主机制来实现应用的高可用?<br>答:此时您需要往下看，您就能找到您的答案；</p>
+<p>环境说明:假如您此时已经按照前面安装Go环境进行了安装;</p>
+<p>Step1.采用go安装Clientv3<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get <span class="string">"github.com/coreos/etcd/clientv3"</span></span><br></pre></td></tr></table></figure></p>
+<p>Step2.添加常量<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> prefix = <span class="string">"/nanoPing"</span></span><br><span class="line"><span class="keyword">const</span> prop = <span class="string">"local"</span></span><br><span class="line"><span class="keyword">var</span> leaderFlag <span class="keyword">bool</span></span><br></pre></td></tr></table></figure></p>
+<p>Step3.编写client节点竞选函数campaign<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">campaign</span><span class="params">(c *clientv3.Client, election <span class="keyword">string</span>, prop <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">   <span class="keyword">for</span> &#123;</span><br><span class="line">      <span class="comment">//gets the leased session for a client(获取客户端租用的会话)</span></span><br><span class="line">      s, err := concurrency.NewSession(c, concurrency.WithTTL(<span class="number">15</span>))</span><br><span class="line">      <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">         log.Println(err)</span><br><span class="line">         <span class="keyword">continue</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">//returns a new election on a given key prefix(返回对给定键前缀的新选择)</span></span><br><span class="line">      e := concurrency.NewElection(s, election)</span><br><span class="line">      ctx := context.TODO()</span><br><span class="line"></span><br><span class="line">      <span class="comment">//Campaign puts a value as eligible for the election on the prefix key.</span></span><br><span class="line">      <span class="comment">//Multiple sessions can participate in the election for the same prefix, |多届会议可参加同一前缀的选举，</span></span><br><span class="line">      <span class="comment">//but only one can be the leader at a time 但是一次只能有一个领导者</span></span><br><span class="line">      <span class="keyword">if</span> err = e.Campaign(ctx, prop); err != <span class="literal">nil</span> &#123;</span><br><span class="line">         log.Println(err)</span><br><span class="line">         <span class="keyword">continue</span></span><br><span class="line">      &#125;</span><br><span class="line">      log.Println(<span class="string">"elect: success"</span>)</span><br><span class="line"></span><br><span class="line">      leaderFlag = <span class="literal">true</span></span><br><span class="line">  </span><br><span class="line">      <span class="keyword">select</span> &#123;</span><br><span class="line">      <span class="keyword">case</span> &lt;-s.Done():</span><br><span class="line">         leaderFlag = <span class="literal">false</span></span><br><span class="line">         log.Println(<span class="string">"elect: expired"</span>)</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Step4.添加竞选成功后执行的动作run<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">run</span><span class="params">()</span></span> &#123;</span><br><span class="line">  log.Println(<span class="string">"[info] Service master"</span>)</span><br><span class="line">  log.Println(<span class="string">"[info] Task start."</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Step5.编写入口函数，创建client节点，参与竞选master，竞选成功执行任务。<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Start</span><span class="params">()</span></span> &#123;</span><br><span class="line">   donec := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line"></span><br><span class="line">   <span class="comment">//create a client 创建客户端</span></span><br><span class="line">   cli, err := clientv3.New(clientv3.Config&#123;Endpoints: g.Config().Etcd.Addr,Username:g.Config().Etcd.User,Password:g.Config().Etcd.Password&#125;)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      log.Fatal(err)</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">defer</span> cli.Close()</span><br><span class="line"></span><br><span class="line">   <span class="keyword">go</span> campaign(cli, prefix, prop)</span><br><span class="line">   <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      ticker := time.NewTicker(time.Duration(<span class="number">10</span>) * time.Second)</span><br><span class="line">      <span class="keyword">for</span> &#123;</span><br><span class="line">         <span class="keyword">select</span> &#123;</span><br><span class="line">         <span class="keyword">case</span> &lt;-ticker.C:</span><br><span class="line">            &#123;</span><br><span class="line">               <span class="keyword">if</span> leaderFlag == <span class="literal">true</span> &#123;</span><br><span class="line">                run()</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line">               &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                log.Println(<span class="string">"[info] Service is not master"</span>)</span><br><span class="line">               &#125;</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;()</span><br><span class="line">   &lt;-donec</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果:<br><figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200423162334.png" target="_blank" title="WeiyiGeek.选主" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200423162334.png" alt="WeiyiGeek.选主" title="" class=""></a>
+                <p>WeiyiGeek.选主</p>
+            </figure></p>
+<p><em>总结:</em><br>通过etcd中的选主机制我们实现了服务的高可用。同时利用systemd对etcd本身进行了保活，只要etcd服务所在的机器没有宕机，进程就具备了容灾性。当然一个etcd集群不仅仅可以对一个服务提供高可用，我们可以将多个服务注册在一个etcd集群中，同时利用etcd所提供的共享配置和服务发现，此外etcd还有很多值得深入研究的技术，比如raft一致性算法等等;</p>
+<hr>
+<h4 id="0x04-命令-amp-脚本"><a href="#0x04-命令-amp-脚本" class="headerlink" title="0x04 命令&amp;脚本"></a>0x04 命令&amp;脚本</h4><h5 id="etcd-命令"><a href="#etcd-命令" class="headerlink" title="etcd 命令"></a>etcd 命令</h5><p>配置文件说嘛<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br></pre></td><td class="code"><pre><span class="line">#### [Memberflags]</span><br><span class="line"># member成员名称</span><br><span class="line">–name </span><br><span class="line"># 数据存储路径</span><br><span class="line">–data-dir</span><br><span class="line">–wal-dir</span><br><span class="line">–snapshot-count</span><br><span class="line">–heartbeat-interval</span><br><span class="line">–election-timeout</span><br><span class="line">–listen-peer-urls</span><br><span class="line">–listen-client-urls</span><br><span class="line">–max-snapshots</span><br><span class="line">–max-wals</span><br><span class="line">–cors</span><br><span class="line">–quota-backend-bytes</span><br><span class="line">–backend-batch-limit</span><br><span class="line">–backend-bbolt-freelist-type</span><br><span class="line">–backend-batch-interval</span><br><span class="line">–max-txn-ops</span><br><span class="line">–max-request-bytes</span><br><span class="line">–grpc-keepalive-min-time</span><br><span class="line">–grpc-keepalive-interval</span><br><span class="line">–grpc-keepalive-timeout</span><br><span class="line"></span><br><span class="line">#### [Clustering flags]</span><br><span class="line">–initial-advertise-peer-urls</span><br><span class="line">–initial-cluster</span><br><span class="line">–initial-cluster-state</span><br><span class="line">–initial-cluster-token: 参数为每个集群单独配置一个token认证,确保每个集群和集群的成员都拥有独特的ID。</span><br><span class="line">–advertise-client-urls</span><br><span class="line">–discovery</span><br><span class="line">–discovery-srv</span><br><span class="line">–discovery-srv-name</span><br><span class="line">–discovery-fallback</span><br><span class="line">–discovery-proxy</span><br><span class="line">–strict-reconfig-check</span><br><span class="line">–auto-compaction-retention</span><br><span class="line">–auto-compaction-mode</span><br><span class="line">–enable-v2  #Flannel操作etcd使用的是v2的API，而kubernetes操作etcd使用的v3的API，为了兼容Flannel网络</span><br><span class="line">Proxy flags</span><br><span class="line">–proxy</span><br><span class="line">–proxy-failure-wait</span><br><span class="line">–proxy-refresh-interval</span><br><span class="line">–proxy-dial-timeout</span><br><span class="line">–proxy-write-timeout</span><br><span class="line">–proxy-read-timeout</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## [Security flags]</span><br><span class="line">–ca-file   #SSL CA根证书文件</span><br><span class="line">–cert-file #SSL 证书文件</span><br><span class="line">–key-file  #SSL 证书密钥文件</span><br><span class="line">–client-cert-auth</span><br><span class="line">–client-crl-file</span><br><span class="line">–client-cert-allowed-hostname</span><br><span class="line">–trusted-ca-file #信任的 SSL CA根证书文件</span><br><span class="line">–auto-tls</span><br><span class="line">–peer-ca-file   #集群成员端点SSL CA根证书文件</span><br><span class="line">–peer-cert-file  #集群成员端点SSL 证书文件</span><br><span class="line">–peer-key-file   #集群成员端点SSL 证书密钥文件</span><br><span class="line">–peer-client-cert-auth</span><br><span class="line">–peer-crl-file</span><br><span class="line">–peer-trusted-ca-file #集群成员端点 信任的 SSL CA根证书文件</span><br><span class="line">–peer-auto-tls</span><br><span class="line">–peer-cert-allowed-cn</span><br><span class="line">–peer-cert-allowed-hostname</span><br><span class="line">–cipher-suites</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## [Logging flags]</span><br><span class="line">–logger</span><br><span class="line">–log-outputs</span><br><span class="line">–log-level</span><br><span class="line">–debug</span><br><span class="line">–log-package-levels</span><br><span class="line"></span><br><span class="line">## [Unsafe flags]</span><br><span class="line">–force-new-cluster</span><br><span class="line"></span><br><span class="line">## [Miscellaneous flags]</span><br><span class="line">–version</span><br><span class="line">–config-file</span><br><span class="line"></span><br><span class="line">## [Profiling flags]</span><br><span class="line">–enable-pprof</span><br><span class="line">–metrics</span><br><span class="line">–listen-metrics-urls</span><br><span class="line"></span><br><span class="line">## [Auth flags]</span><br><span class="line">–auth-token</span><br><span class="line">–bcrypt-cost</span><br><span class="line"></span><br><span class="line">## [Experimental flags]</span><br><span class="line">–experimental-corrupt-check-time</span><br><span class="line">–experimental-compaction-batch-limit</span><br><span class="line">–experimental-peer-skip-client-san-verification</span><br></pre></td></tr></table></figure></p>
+<h5 id="etcdctl-命令"><a href="#etcdctl-命令" class="headerlink" title="etcdctl 命令"></a>etcdctl 命令</h5><p>常用命令:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#增删改查</span></span><br><span class="line">etcdctl put [key] [value]</span><br><span class="line">etcdctl get [key]</span><br><span class="line">etcdctl del [key]</span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#(1)校验成员状态以及操作</span></span><br><span class="line"><span class="variable">$etcdctl</span> member list </span><br><span class="line">   member add     <span class="comment">#Adds a member into the cluster</span></span><br><span class="line">   member list    <span class="comment">#Lists all members in the cluster</span></span><br><span class="line">   member promote <span class="comment">#Promotes a non-voting member in the cluster</span></span><br><span class="line">   member remove  <span class="comment">#Removes a member from the cluster</span></span><br><span class="line">   member update  <span class="comment">#Updates a member in the cluster</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#(2)检查etcd集群的状态性能   </span></span><br><span class="line"><span class="variable">$etcdctl</span> --endpoints=<span class="variable">$ENDPOINTS</span> check perf</span><br><span class="line"><span class="comment">#60 / 60 Booooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo! 100.00% 1m0s</span></span><br><span class="line">   etcdctl --endpoints=<span class="variable">$ENDPOINTS</span> endpoint health</span><br><span class="line">   etcdctl --endpoints=<span class="variable">$ENDPOINTS</span> endpoint status</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#(3)认证相关</span></span><br><span class="line">   auth <span class="built_in">disable</span>   <span class="comment"># Disables authentication</span></span><br><span class="line">   auth <span class="built_in">enable</span>    <span class="comment"># Enables authentication</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#(4)用户相关</span></span><br><span class="line">   user add                <span class="comment">#Adds a new user</span></span><br><span class="line">   user delete             <span class="comment">#Deletes a user</span></span><br><span class="line">   user get                <span class="comment">#Gets detailed information of a user</span></span><br><span class="line">   user grant-role         <span class="comment">#Grants a role to a user</span></span><br><span class="line">   user list               <span class="comment">#Lists all users</span></span><br><span class="line">   user passwd             <span class="comment">#Changes password of user</span></span><br><span class="line">   user revoke-role        <span class="comment">#Revokes a role from a user</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#(5)角色权限相关</span></span><br><span class="line">   role add                <span class="comment">#Adds a new role</span></span><br><span class="line">   role delete             <span class="comment">#Deletes a role</span></span><br><span class="line">   role get                <span class="comment">#Gets detailed information of a role</span></span><br><span class="line">   role grant-permission   <span class="comment">#Grants a key to a role</span></span><br><span class="line">   role list               <span class="comment">#Lists all roles</span></span><br><span class="line">   role revoke-permission  <span class="comment">#Revokes a key from a role</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h5 id="一键安装集群脚本"><a href="#一键安装集群脚本" class="headerlink" title="一键安装集群脚本"></a>一键安装集群脚本</h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># Desc: Etcd集群一件安装</span></span><br><span class="line"><span class="comment"># Author: WeiyiGeek</span></span><br><span class="line"><span class="comment"># Create: 2020年4月24日 09:48:48</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#[全局变量]</span></span><br><span class="line"><span class="built_in">export</span> ETCD_VER=v3.4.7</span><br><span class="line"><span class="built_in">export</span> ETCD_SRCNAME=etcd-<span class="variable">$&#123;ETCD_VER&#125;</span>-linux-amd64.tar.gz</span><br><span class="line"><span class="built_in">export</span> ETCD_URL=https://github.com/etcd-io/etcd/releases/download/<span class="variable">$&#123;ETCD_VER&#125;</span>/<span class="variable">$&#123;ETCD_SRCNAME&#125;</span></span><br><span class="line"><span class="built_in">export</span> ETCD_DIR=/usr/<span class="built_in">local</span>/etcd</span><br><span class="line"><span class="built_in">export</span> ETCD_CONF=/etc/etcd</span><br><span class="line"><span class="built_in">export</span> ETCD_DATA=/apps/etcd/data</span><br><span class="line"><span class="built_in">export</span> ETCD_NODE1=192.168.10.241</span><br><span class="line"><span class="built_in">export</span> ETCD_NODE2=192.168.10.242</span><br><span class="line"><span class="built_in">export</span> ETCD_NODE3=192.168.10.243</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">Usage</span></span>()&#123;</span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">"\e[33m#Usage:<span class="variable">$0</span> node[1~3].weiyigeek.top\n#Example: NODENAME = node[1~3] \n\n\e[0m"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Usage</span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -xue</span><br><span class="line"><span class="built_in">export</span> CURRENT_NODE=<span class="variable">$1</span></span><br><span class="line"><span class="built_in">export</span> NODE_NAME=<span class="variable">$&#123;CURRENT_NODE%%.*&#125;</span></span><br><span class="line"><span class="built_in">export</span> NODE_DOMAIN=<span class="variable">$&#123;CURRENT_NODE#*.&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#[使用帮助]</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">BeforeSetting</span></span>()&#123;</span><br><span class="line">  <span class="comment">#1.当前机器hostname设置</span></span><br><span class="line">  hostnamectl <span class="built_in">set</span>-hostname <span class="variable">$&#123;NODE_NAME&#125;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">#2.配置/etc/hosts</span></span><br><span class="line">rm -rf /etc/hosts</span><br><span class="line">cat &lt;&lt;END &gt;/etc/hosts</span><br><span class="line">127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4</span><br><span class="line">::1         localhost localhost.localdomain localhost6 localhost6.localdomain6</span><br><span class="line"><span class="variable">$ETCD_NODE1</span> node1.<span class="variable">$&#123;NODE_DOMAIN&#125;</span></span><br><span class="line"><span class="variable">$ETCD_NODE2</span> node2.<span class="variable">$&#123;NODE_DOMAIN&#125;</span></span><br><span class="line"><span class="variable">$ETCD_NODE3</span> node3.<span class="variable">$&#123;NODE_DOMAIN&#125;</span></span><br><span class="line">END</span><br><span class="line"></span><br><span class="line">  <span class="comment">#3.防火墙配置</span></span><br><span class="line">  firewall-cmd --permanent --zone=public --add-port=2379-2380/tcp </span><br><span class="line">  firewall-cmd --reload</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#[暂时没用]</span></span><br><span class="line"><span class="comment"># function ChangeDownUrl()&#123;</span></span><br><span class="line"><span class="comment">#   ETCD_URL=$(echo $1 | sed 's/raw.githubusercontent.com/cdn.jsdelivr.net\/gh/' \</span></span><br><span class="line"><span class="comment">#                | sed 's/github.com/cdn.jsdelivr.net\/gh/' \</span></span><br><span class="line"><span class="comment">#                | sed 's/\/master//' | sed 's/\/blob//' )</span></span><br><span class="line"><span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">Download</span></span>()&#123;</span><br><span class="line">  <span class="keyword">if</span> [[ ! -f ./<span class="variable">$&#123;ETCD_SRCNAME&#125;</span> ]];<span class="keyword">then</span></span><br><span class="line">    curl -L <span class="variable">$&#123;DOWNLOAD_URL&#125;</span>/<span class="variable">$&#123;ETCD_VER&#125;</span>/etcd-<span class="variable">$&#123;ETCD_VER&#125;</span>-linux-amd64.tar.gz -o etcd-<span class="variable">$&#123;ETCD_VER&#125;</span>-linux-amd64.tar.gz</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">"#<span class="variable">$&#123;ETCD_SRCNAME&#125;</span> Already Exsit!"</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">Install</span></span>()&#123;</span><br><span class="line">  <span class="comment">#安装验证</span></span><br><span class="line">  <span class="keyword">if</span> [[ ! -d <span class="variable">$&#123;ETCD_DIR&#125;</span> ]];<span class="keyword">then</span></span><br><span class="line">    mkdir -p <span class="variable">$&#123;ETCD_DIR&#125;</span></span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    rm -rf <span class="variable">$&#123;ETCD_DIR&#125;</span></span><br><span class="line">    mkdir -p <span class="variable">$&#123;ETCD_DIR&#125;</span></span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">#数据存储</span></span><br><span class="line">  mkdir -vp  <span class="variable">$&#123;ETCD_DATA&#125;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">#解压</span></span><br><span class="line">  tar xzvf <span class="variable">$&#123;ETCD_SRCNAME&#125;</span> -C <span class="variable">$&#123;ETCD_DIR&#125;</span> --strip-components=1</span><br><span class="line"></span><br><span class="line">  <span class="comment">#判断软件链接</span></span><br><span class="line">  <span class="keyword">if</span> [[ ! -f /usr/bin/etcd ]];<span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">"#links File Not Exsit!"</span></span><br><span class="line">    ln -s <span class="variable">$&#123;ETCD_DIR&#125;</span>/etcd /usr/bin</span><br><span class="line">    ln -s <span class="variable">$&#123;ETCD_DIR&#125;</span>/etcdctl /usr/bin</span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">#验证是否安装成功否则停止安装</span></span><br><span class="line">  /usr/bin/etcd --version</span><br><span class="line">  /usr/bin/etcdctl version</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> [[ $? -ne 0 ]];<span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">"\e[31m#Install Error!\e[0m"</span></span><br><span class="line">    <span class="built_in">exit</span> 0</span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">AfterSetting</span></span>()&#123;</span><br><span class="line">  <span class="comment">#Etcd配置</span></span><br><span class="line">  rm -rf <span class="variable">$&#123;ETCD_CONF&#125;</span>/etcd.conf</span><br><span class="line">  mkdir -vp <span class="variable">$&#123;ETCD_CONF&#125;</span> /var/lib/etcd/</span><br><span class="line">  <span class="built_in">export</span> CURRENT_HOST=$(cat /etc/hosts | grep <span class="variable">$&#123;NODE_NAME&#125;</span> | awk -F <span class="string">" "</span> <span class="string">'&#123;print $1&#125;'</span>)</span><br><span class="line">cat &gt; <span class="variable">$&#123;ETCD_CONF&#125;</span>/etcd.conf &lt;&lt;END</span><br><span class="line">[member]</span><br><span class="line">ETCD_NAME=<span class="variable">$&#123;NODE_NAME&#125;</span></span><br><span class="line">ETCD_DATA_DIR=<span class="variable">$&#123;ETCD_DATA&#125;</span></span><br><span class="line">ETCD_LISTEN_CLIENT_URLS=<span class="string">"http://<span class="variable">$&#123;CURRENT_HOST&#125;</span>:2379,http://127.0.0.1:2379"</span></span><br><span class="line">ETCD_LISTEN_PEER_URLS=<span class="string">"http://<span class="variable">$&#123;CURRENT_HOST&#125;</span>:2380"</span></span><br><span class="line"></span><br><span class="line">[cluster]</span><br><span class="line">ETCD_ADVERTISE_CLIENT_URLS=<span class="string">"http://<span class="variable">$&#123;CURRENT_NODE&#125;</span>:2379"</span></span><br><span class="line">ETCD_INITIAL_ADVERTISE_PEER_URLS=<span class="string">"http://<span class="variable">$&#123;CURRENT_NODE&#125;</span>:2380"</span></span><br><span class="line">ETCD_INITIAL_CLUSTER=<span class="string">"node1=http://node1.<span class="variable">$&#123;NODE_DOMAIN&#125;</span>:2380,node2=http://node2.<span class="variable">$&#123;NODE_DOMAIN&#125;</span>:2380,node3=http://node3.<span class="variable">$&#123;NODE_DOMAIN&#125;</span>:2380"</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_TOKEN=<span class="string">"etcd-cluster"</span></span><br><span class="line">ETCD_INITIAL_CLUSTER_STATE=new</span><br><span class="line"></span><br><span class="line"><span class="comment"># [version]</span></span><br><span class="line"><span class="comment"># ETCD_ENABLE_V2=true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#[Security]</span></span><br><span class="line"><span class="comment"># ETCD_CERT_FILE="/opt/etcd/ssl/server.pem"</span></span><br><span class="line"><span class="comment"># ETCD_KEY_FILE="/opt/etcd/ssl/server-key.pem"</span></span><br><span class="line"><span class="comment"># ETCD_TRUSTED_CA_FILE="/opt/etcd/ssl/ca.pem"</span></span><br><span class="line"><span class="comment"># ETCD_CLIENT_CERT_AUTH="true"</span></span><br><span class="line"><span class="comment"># ETCD_PEER_CERT_FILE="/opt/etcd/ssl/server.pem"</span></span><br><span class="line"><span class="comment"># ETCD_PEER_KEY_FILE="/opt/etcd/ssl/server-key.pem"</span></span><br><span class="line"><span class="comment"># ETCD_PEER_TRUSTED_CA_FILE="/opt/etcd/ssl/ca.pem"</span></span><br><span class="line"><span class="comment"># ETCD_PEER_CLIENT_CERT_AUTH="true"</span></span><br><span class="line">END</span><br><span class="line"></span><br><span class="line"> <span class="comment">#systemd配置</span></span><br><span class="line">cat &gt; /usr/lib/systemd/system/etcd.service &lt;&lt;END</span><br><span class="line">[Unit]</span><br><span class="line">Description=Etcd Server</span><br><span class="line">Documentation=https://github.com/etcd-io/etcd</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">WorkingDirectory=/var/lib/etcd/</span><br><span class="line">EnvironmentFile=-/etc/etcd/etcd.conf</span><br><span class="line">ExecStart=/usr/bin/etcd</span><br><span class="line">KillMode=process</span><br><span class="line">Restart=always</span><br><span class="line">RestartSec=3</span><br><span class="line">LimitNOFILE=655350</span><br><span class="line">LimitNPROC=655350</span><br><span class="line">PrivateTmp=<span class="literal">false</span></span><br><span class="line">SuccessExitStatus=143</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">END</span><br><span class="line"></span><br><span class="line"> <span class="comment">#Reload systemd manager configuration</span></span><br><span class="line"> systemctl daemon-reload</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="function"><span class="title">ServiceRun</span></span>()&#123;</span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">"#正在启动Etcd服务"</span></span><br><span class="line">  systemctl restart etcd.service</span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">"#当所有节点启动后运行以下脚本或者 cat etcd.txt 查看"</span></span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">"ENDPOINTS=<span class="variable">$ETCD_NODE1</span>:2379,<span class="variable">$ETCD_NODE2</span>:2379,<span class="variable">$ETCD_NODE3</span>:2379 \netcdctl -w table --endpoints=\$ENDPOINTS endpoint status"</span></span><br><span class="line">  <span class="built_in">echo</span> -e <span class="string">"ENDPOINTS=<span class="variable">$ETCD_NODE1</span>:2379,<span class="variable">$ETCD_NODE2</span>:2379,<span class="variable">$ETCD_NODE3</span>:2379 \netcdctl -w table --endpoints=\$ENDPOINTS endpoint status"</span> &gt; etcd.txt</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">BeforeSetting</span><br><span class="line">Download</span><br><span class="line">Install</span><br><span class="line">AfterSetting</span><br><span class="line">ServiceRun</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=Etcd基础学习之架构及工作原理 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200424142339.png" target="_blank" title="WeiyiGeek.脚本效果" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200424142339.png" alt="WeiyiGeek.脚本效果" title="" class=""></a>
+                <p>WeiyiGeek.脚本效果</p>
+            </figure>
+<hr>
+<h4 id="0x05-入坑解决"><a href="#0x05-入坑解决" class="headerlink" title="0x05 入坑解决"></a>0x05 入坑解决</h4><p><strong>问题1.Go下载etcd时候报错<code>unrecognized import path - install error</code></strong><br>错误信息:import path does not begin with hostname<br>解决办法:设置GOROOT环境变量或者删除执行<code>unset GOROOT</code></p>
+<p><br/></p>
+<p><strong>问题2.采用systemctl管理etcd会触发以下类似报错“etcd: conflicting environment variable “ETCD_NAME” is shadowed by corresponding command-line flag (either unset environment variable or disable flag)”</strong><br>原因:ETCD3.4版本会自动读取环境变量的参数，所以EnvironmentFile文件中有的参数，不需要再次在ExecStart启动参数中添加二选一即可解决(但是需要注意官网启动参数是否有旧参数被替代)</p>
+<p><br/></p>
+<p><strong>问题3.出现类似提示无法获取某个节点健康状态的提示</strong><br>问题描述:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$/opt/etcd/bin/etcdctl --ca-file=/opt/etcd/ssl/ca.pem --cert-file=/opt/etcd/ssl/server.pem --key-file=/opt/etcd/ssl/server-key.pem --endpoints=<span class="variable">$ENDPOINTS</span> cluster-health</span><br><span class="line">member 11babd38de9e1f0f is healthy: got healthy result from https://10.0.52.13:2379</span><br><span class="line">failed to check the health of member 22436a037c5adb3b on https://10.0.52.14:2379: Get https://10.0.52.14:2379/health: dial tcp 10.0.52.14:2379: i/o timeout</span><br><span class="line">member 22436a037c5adb3b is unreachable: [https://10.0.52.14:2379] are all unreachable</span><br><span class="line">member a5e80429e983b681 is healthy: got healthy result from https://10.0.52.6:2379</span><br></pre></td></tr></table></figure><br>解决方式:各个主机应该关闭firewalld服务;</p>
+<p><br/></p>
+<p><strong>问题4.request cluster ID mismatch (got 4fb7ed98f0f6d1a7 want 4c0b05dc1b530742)</strong><br>问题描述:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$journalctl</span> -u etcd -f</span><br><span class="line">-- Logs begin at Thu 2019-05-23 14:29:05 CST. --</span><br><span class="line">May 23 15:59:09 k8s.master etcd[13366]: request sent was ignored (cluster ID mismatch: peer[102b996c4aa7e55a]=4fb7ed98f0f6d1a7, <span class="built_in">local</span>=4c0b05dc1b530742)</span><br><span class="line">May 23 15:59:09 k8s.master etcd[13366]: request cluster ID mismatch (got 4fb7ed98f0f6d1a7 want 4c0b05dc1b530742)</span><br><span class="line">May 23 15:59:09 k8s.master etcd[13366]: request sent was ignored (cluster ID mismatch: peer[102b996c4aa7e55a]=4fb7ed98f0f6d1a7, <span class="built_in">local</span>=4c0b05dc1b530742)</span><br><span class="line">May 23 15:59:09 k8s.master etcd[13366]: request cluster ID mismatch (got 4fb7ed98f0f6d1a7 want 4c0b05dc1b530742)</span><br><span class="line">May 23 15:59:09 k8s.master etcd[13366]: request cluster ID mismatch (got 4fb7ed98f0f6d1a7 want 4c0b05dc1b530742)</span><br><span class="line">May 23 15:59:09 k8s.master etcd[13366]: request cluster ID mismatch (got 4fb7ed98f0f6d1a7 want 4c0b05dc1b530742)</span><br></pre></td></tr></table></figure><br>解决办法: 删除缓存并重启etcd<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rm -rf /var/lib/etcd/default.etcd</span><br><span class="line">systemctl restart etcd</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>问题6.搭建部署etcd集群并配置https访问时报<code>remote error: tls: bad certificate</code>错误</strong></p>
+<ul>
+<li>错误信息: <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Apr 27 18:39:27 master-225 etcd[3747038]: &#123;<span class="string">"level"</span>:<span class="string">"warn"</span>,<span class="string">"ts"</span>:<span class="string">"2022-04-27T18:39:27.998+0800"</span>,<span class="string">"caller"</span>:<span class="string">"embed/mbed/config_logging.go:169"</span>,<span class="string">"msg"</span>:<span class="string">"rejected connection"</span>,<span class="string">"remote-addr"</span>:<span class="string">"10.10.107.224:47920"</span>,<span class="string">"server-name"</span>:<span class="string">""</span>,<span class="string">"error"</span>:<span class="string">"remote error: tls: bad certificate"</span>&#125;</span><br></pre></td></tr></table></figure></li>
+<li>问题原因: 由于你证书中hosts不包含你当前的名称或者地址, 此处我的问题是证书中不包括SAN地址或者域名。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -<span class="keyword">in</span> etcd.pem -text -noout | grep  <span class="string">"X509v3 Subject Alternative Name"</span> -A 1</span><br><span class="line">  <span class="comment"># X509v3 Subject Alternative Name:</span></span><br><span class="line">  <span class="comment">#   DNS:etcd1, DNS:etcd2, DNS:etcd3, IP Address:127.0.0.1, IP Address:10.10.107.223, IP Address:10.10.107.224, IP Address:10.10.107.225</span></span><br></pre></td></tr></table></figure></li>
+<li>解决办法: 重新签发证书<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># etcd 证书请求文件</span></span><br><span class="line">tee etcd-csr.json &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"CN"</span>: <span class="string">"etcd"</span>,</span><br><span class="line">  <span class="string">"hosts"</span>: [</span><br><span class="line">    <span class="string">"127.0.0.1"</span>,</span><br><span class="line">    <span class="string">"10.10.107.223"</span>,</span><br><span class="line">    <span class="string">"10.10.107.224"</span>,</span><br><span class="line">    <span class="string">"10.10.107.225"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"key"</span>: &#123;</span><br><span class="line">    <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">    <span class="string">"size"</span>: 2048</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"names"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"L"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"ST"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"O"</span>: <span class="string">"etcd"</span>,</span><br><span class="line">      <span class="string">"OU"</span>: <span class="string">"System"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 利用ca证书签发生成etcd证书</span></span><br><span class="line">cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=etcd etcd-csr.json | cfssljson -bare etcd</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>问题6.使用<code>etcdctl</code>命令查看etcd集群成员时报<code>authentication handshake failed: x509: certificate signed by unknown authority</code>错误。</strong></p>
+<ul>
+<li>错误信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ etcdctl --endpoints=https://10.10.107.225:2379,https://10.10.107.224:2379,https://10.10.107.223:2379 --write-out=table member list</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"warn"</span>,<span class="string">"ts"</span>:<span class="string">"2022-04-27T19:38:10.489+0800"</span>,<span class="string">"logger"</span>:<span class="string">"etcd-client"</span>,<span class="string">"caller"</span>:<span class="string">"v3/retry_interceptor.go:62"</span>,<span class="string">"msg"</span>:<span class="string">"retrying of unary invoker failed"</span>,<span class="string">"target"</span>:<span class="string">"etcd-endpoints://0xc0004a68c0/10.10.107.225:2379"</span>,<span class="string">"attempt"</span>:0,<span class="string">"error"</span>:<span class="string">"rpc error: code = DeadlineExceeded desc = latest balancer error: last connection error: connection error: desc = \"transport: authentication handshake failed: x509: certificate signed by unknown authority\""</span>&#125;</span><br><span class="line">Error: context deadline exceeded</span><br></pre></td></tr></table></figure></li>
+<li>解决方法: 由于集群采用证书认证,所以我们需要指定CA以及其签发的证书与key。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> ETCDCTL_API=3</span><br><span class="line">etcdctl --endpoints=https://10.10.107.225:2379,https://10.10.107.224:2379,https://10.10.107.223:2379 \</span><br><span class="line">--cacert=<span class="string">"/etc/etcd/pki/ca.pem"</span> --cert=<span class="string">"/etc/etcd/pki/etcd.pem"</span> --key=<span class="string">"/etc/etcd/pki/etcd-key.pem"</span> \</span><br><span class="line">--write-out=table member list</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-05-20T05:48:32.234Z" itemprop="dateUpdated">2022-05-20 13:48:32</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Kubernetes/数据库组件/Etcd基础学习之架构及工作原理.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Kubernetes/数据库组件/Etcd基础学习之架构及工作原理.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/4-23-476.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/4-23-476.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Etcd/" rel="tag">Etcd</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/4-23-476.html&title=《Etcd基础学习之架构及工作原理》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/4-23-476.html&title=《Etcd基础学习之架构及工作原理》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/4-23-476.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Etcd基础学习之架构及工作原理》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/4-23-476.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/4-23-476.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/4-23-603.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">2.Go语言之标准库学习记录(2)</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/4-22-272.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">持续集成gitlab-ci.yml配置文档基础</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-Etcd-简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Etcd 简述</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-安装部署"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 安装部署</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-集群应用"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 集群应用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-应用介绍与实践"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 应用介绍与实践</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-命令-amp-脚本"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 命令&amp;脚本</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x05-入坑解决"><span class="post-toc-number">6.</span> <span class="post-toc-text">0x05 入坑解决</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/4-23-476.html&title=《Etcd基础学习之架构及工作原理》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/4-23-476.html&title=《Etcd基础学习之架构及工作原理》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/4-23-476.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Etcd基础学习之架构及工作原理》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/4-23-476.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/4-23-476.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKElEQVR42u3aS27DMAwFwN7/0u62RWr3kXRaWBqtgvin0YIQSX18xOP4MpKrx8s4eyr/yg0DAwPjsYzjclxPNMecPfX6//VynFIxMDA2YOSvvv5A754JGwMDA2MeXnuBGwMDA2PCSEJnngb/W8DFwMB4ICNJYpOP5YW25Km35OIYGBgPZORV97///Zb+BgYGxqMYR3Hc1Tecz+TbOzEwMJZm5AEu2Q72Jh0lqMkbMDAwNmPkjcneRKtlu6i0h4GBsSijWsbq3V8t0pXvx8DAWJrRa1jmbch5wzJvLWBgYKzNyFPQXuKal+16C4GBgbEPY3J4IvpMsWyXvxMDA2NtRn6sYX5ga9IM+OUpDAyMDRjJ5Hol+/zgRfJ/VDXEwMBYjlFNU6utx7ypcEO9EAMDY1FG9TBEHnCrW8bJAmFgYOzDyANiNeHMC3C9RikGBsbajEnQPIJR2JMW7yysHwYGxtKM3rGJapksD/pRJxYDA2NpRl5cy0Ntb/NXPaKBgYGxG6Ma5ibbyvky/ZDEYmBgLM2YvLTanpy0Tk8XEQMDY0tGnmrmyzEvq0W5OAYGxkKMXgC9a6LzZcLAwNiBUQ1zeSpbDcG9bWIZg4GB8VjGXQWySTGu2ijFwMDYk5EHvl44zreJeejHwMDAmITUSYMzT5Kb+1MMDIxtGL1jGQk7v+eGgIuBgfEoRpLE5lfn4fWN5TYMDIwHMiYnNSbJ56RI12xkYmBgPI/xCZhFiYe7gCl8AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

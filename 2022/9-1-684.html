@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 使用Kaniko在Kubernetes集群中快速构建推送容器镜像|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Kaniko">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>使用Kaniko在Kubernetes集群中快速构建推送容器镜像</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">使用Kaniko在Kubernetes集群中快速构建推送容器镜像</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2022-09-01T09:37:47.000Z" itemprop="datePublished" class="page-time">
+  2022-09-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/">kubernetes</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/Containers/OperationTools/">OperationTools</a></li></ul></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Kubernetes/辅助组件/使用Kaniko在Kubernetes集群中构建容器镜像"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">使用Kaniko在Kubernetes集群中快速构建推送容器镜像</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2022-09-01 17:37:47" datetime="2022-09-01T09:37:47.000Z"  itemprop="datePublished">2022-09-01</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/">kubernetes</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/Containers/OperationTools/">OperationTools</a></li></ul></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><h3 id="快速介绍"><a href="#快速介绍" class="headerlink" title="快速介绍"></a>快速介绍</h3><h4 id="什么是Kaniko"><a href="#什么是Kaniko" class="headerlink" title="什么是Kaniko?"></a>什么是Kaniko?</h4><blockquote>
+<p>kaniko 是一个在 containerd 或 Kubernetes 集群内从 Dockerfile 构建容器镜像的工具 ( Build Container Images In Kubernetes )。</p>
+</blockquote>
+<figure class="image-box">
+                <a rel=使用Kaniko在Kubernetes集群中快速构建推送容器镜像 href="https://raw.githubusercontent.com/GoogleContainerTools/kaniko/main/docs/demo.gif" target="_blank" title="官方介绍" data-fancybox="images"><img src="https://raw.githubusercontent.com/GoogleContainerTools/kaniko/main/docs/demo.gif" alt="官方介绍" title="" class=""></a>
+                <p>官方介绍</p>
+            </figure>
+<p>温馨提示: kaniko不是谷歌官方发布支持的产品.</p>
+<h4 id="为啥用Kaniko"><a href="#为啥用Kaniko" class="headerlink" title="为啥用Kaniko?"></a>为啥用Kaniko?</h4><blockquote>
+<p>由于 kaniko 不依赖于 Docker 守护进程，并且完全在用户空间中执行 Dockerfile 中的每个命令，这使得能够在轻松或安全地运行在<code>无Docker守护程序的环境</code>（如标准Kubernetes集群 V1.24.x）中构建容器映像。<br>在 Kubernetes V1.24.x 版本之后默认采用 containerd.io 作为缺省的cri，不在支持 docker-shim 意味着我们不需要安装 docker 环境</p>
+</blockquote>
+<h4 id="Kaniko-是如何工作的"><a href="#Kaniko-是如何工作的" class="headerlink" title="Kaniko 是如何工作的?"></a>Kaniko 是如何工作的?</h4><p>kaniko 执行器镜像负责从 Dockerfile 构建镜像并将其推送到注册表，其流程大致如下：</p>
+<ul>
+<li>首先在执行者图像中，我们提取基础镜像的文件系统（Dockerfile 中的 FROM 镜像）。 </li>
+<li>其次我们执行 Dockerfile 中的命令，之后在用户空间中对文件系统进行快照每一个。 </li>
+<li>然后在每个命令之后，我们将一层更改的文件附加到基础 图像（如果有）并更新图像元数据。 </li>
+</ul>
+<h4 id="Kaniko-已知功能问题"><a href="#Kaniko-已知功能问题" class="headerlink" title="Kaniko 已知功能问题"></a>Kaniko 已知功能问题</h4><ul>
+<li>kaniko 不支持构建 Windows 容器。 </li>
+<li>kaniko 不支持 v1 Registry API。(由于其不安全性当前基本都是使用V2协议, 例如 Harbor)</li>
+<li>kaniko 不支持在除官方kaniko映像之外的任何Docker映像中运行二进制Kanico可执行文件（即YMMV）。</li>
+</ul>
+<h4 id="kaniko-构建上下文"><a href="#kaniko-构建上下文" class="headerlink" title="kaniko 构建上下文"></a>kaniko 构建上下文</h4><p>描述: kaniko 的构建上下文与您发送 Docker 守护程序以进行映像构建的构建上下文非常相似；它代表一个包含 Dockerfile 的目录，kaniko 将使用它来构建您的图像。<br>例如, Dockerfile 中的 COPY 命令应该引用构建上下文中的文件, 所以您需要将构建上下文存储在 kaniko 可以访问的位置。 </p>
+<p>目前kaniko 支持以下存储解决方案：</p>
+<ul>
+<li>GCS Bucket</li>
+<li>S3 Bucket</li>
+<li>Azure Blob Storage</li>
+<li>Local Directory</li>
+<li>Local Tar</li>
+<li>Standard Input</li>
+<li>Git Repository</li>
+</ul>
+<p>运行 kaniko 时，使用 <code>--context</code> 带有适当前缀的标志指定构建上下文的位置, 如果您不指定前缀 kaniko 将假定一个本地目录, 该参数可用值：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Source</th>
+<th>Prefix</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Local Directory</td>
+<td>dir://[path to a directory in the kaniko container]</td>
+<td><code>dir:///workspace</code></td>
+</tr>
+<tr>
+<td style="text-align:left">Local Tar Gz</td>
+<td>tar://[path to a .tar.gz in the kaniko container]</td>
+<td><code>tar://path/to/context.tar.gz</code></td>
+</tr>
+<tr>
+<td style="text-align:left">Standard Input</td>
+<td>tar://[stdin]</td>
+<td><code>tar://stdin</code></td>
+</tr>
+<tr>
+<td style="text-align:left">GCS Bucket</td>
+<td>gs://[bucket name]/[path to .tar.gz]</td>
+<td><code>gs://kaniko-bucket/path/to/context.tar.gz</code></td>
+</tr>
+<tr>
+<td style="text-align:left">S3 Bucket</td>
+<td>s3://[bucket name]/[path to .tar.gz]</td>
+<td><code>s3://kaniko-bucket/path/to/context.tar.gz</code></td>
+</tr>
+<tr>
+<td style="text-align:left">Azure Blob Storage</td>
+<td>https://[account].[azureblobhostsuffix]/[container]/[path to .tar.gz]</td>
+<td><code>https://myaccount.blob.core.windows.net/container/path/to/context.tar.gz</code></td>
+</tr>
+<tr>
+<td style="text-align:left">Git Repository</td>
+<td>git://[repository url][#reference][#commit-id]</td>
+<td><code>git://github.com/acme/myproject.git#refs/heads/mybranch#</code></td>
+</tr>
+</tbody>
+</table>
+<p>例如，要使用名为 kaniko-bucket 的 GCS 存储桶，您需要传入 <code>--context=gs://kaniko-bucket/path/to/context.tar.gz</code> 。</p>
+<p>温馨提示：kaniko 允许的唯一标准输入是 <code>.tar.gz</code> 格式, 如果要创建压缩 tar，您可以运行 <code>tar -C &lt;path to build context&gt; -zcvf context.tar.gz .</code>命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ ls cache/</span><br><span class="line">Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 压缩上下文目录</span></span><br><span class="line">$ tar -C cache/ -zcvf context.tar.gz .</span><br><span class="line">./</span><br><span class="line">./Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看压缩文件</span></span><br><span class="line">$ tar -ztvf context.tar.gz</span><br><span class="line">drwxr-xr-x root/root         0 2022-09-08 23:03 ./</span><br><span class="line">-rw-r--r-- root/root        52 2022-09-08 23:04 ./Dockerfile</span><br></pre></td></tr></table></figure>
+<h4 id="kaniko-缓存构建"><a href="#kaniko-缓存构建" class="headerlink" title="kaniko 缓存构建"></a>kaniko 缓存构建</h4><ul>
+<li>Caching Layers ：kaniko 可以在远程存储库中缓存由RUN（由flag–cache-RUN-layers配置）和COPY（由flag–cache-COPY-layeers配置）命令创建的层。<blockquote>
+<p>在执行命令之前 kaniko 会检查层的缓存，如果存在 kaniko将拉取并提取缓存层，而不是执行命令。如果没有 kaniko将执行命令，然后将新创建的层推送到缓存。<br>用户可以通过设置 <code>--cache=true</code> 标志选择缓存,并且可以通过<code>--cache-repo</code> 标志提供用于存储缓存层的远程存储库, 如果未提供此标志则将从提供的<code>--destination</code>推断缓存的repo。<br>温馨提示: 在缓存未命中后，kaniko无法从缓存中找到读取层，所有后续层都将在本地构建，而无需咨询缓存。</p>
+</blockquote>
+</li>
+<li>Caching Base Images: kaniko 可以将图像缓存在本地目录中，该目录可以卷装载到KanikoPod中。为此必须首先填充缓存, 我们在 <code>gcr.io/kaniko-project/warmer</code> 提供了一个kaniko缓存预热映像：<blockquote>
+<p>–image : 指定所需任意数量的图像, 填充缓存后 使用与上述相同的 <code>--cache=true</code> 标志选择缓存, 本地缓存的位置通过 <code>--cache-dir</code> 标志提供，默认为 <code>/cache</code> 与缓存预热器一样, 在实践中通常与 Kubernetes 集群和持久缓存卷一起使用。<br>示例： <code>docker run -v $(pwd):/workspace gcr.io/kaniko-project/warmer:latest --cache-dir=/workspace/cache --image=&lt;image to cache&gt; --image=&lt;another image to cache&gt;</code></p>
+</blockquote>
+</li>
+</ul>
+<hr>
+<h2 id="0x01-部署使用"><a href="#0x01-部署使用" class="headerlink" title="0x01 部署使用"></a>0x01 部署使用</h2><h3 id="环境依赖"><a href="#环境依赖" class="headerlink" title="环境依赖"></a>环境依赖</h3><ul>
+<li>kaniko 图像镜像</li>
+<li>一个 Kubernetes 集群 或者 一个 Containerd 容器运行环境。</li>
+<li>一个 dockerhub 帐户 用于将构建的图像公开。</li>
+</ul>
+<p><br/></p>
+<h3 id="小试牛刀之在Kubernetes集群中构建并发布镜像"><a href="#小试牛刀之在Kubernetes集群中构建并发布镜像" class="headerlink" title="小试牛刀之在Kubernetes集群中构建并发布镜像"></a>小试牛刀之在Kubernetes集群中构建并发布镜像</h3><p>描述: 此处我们准备在一个K8S集群中使用kaniko提供的镜像，按照提供的Dockerfile指令进行镜像构建，并上传到 docker hub 仓库中，以下为操作流程、</p>
+<p><strong>操作流程</strong><br>步骤 01.首先, 为了加快构建速度, 我们提前在集群中拉取 <code>gcr.io/kaniko-project/executor</code> 镜像到本地, 由于国内无法直接拉取此处我采用这篇<a href="https://blog.weiyigeek.top/2022/6-1-663.html">【使用Aliyun容器镜像服务对海外gcr、quay仓库镜像进行镜像拉取构建】</a> 文章中的方法进行拉取构建国外gcr.io仓库中的镜像。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 此处我已经创建了国内可以访问拉取的 executor 镜像, 不想在Aliyun容器镜像服务中进行创建拉取的朋友可以直接使用如下仓库地址。</span></span><br><span class="line">registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 ctr 或者 crictl 进行镜像拉取</span></span><br><span class="line">$ crictl pull registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest</span><br><span class="line">$ crictl images | grep <span class="string">"kaniko-executor"</span></span><br><span class="line">registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor  latest  da9592dbe1de3   25.8MB</span><br></pre></td></tr></table></figure>
+<p>步骤 02.准备一个 Dockerfile 此处将 <code>registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor</code> 镜像打包上传到hub中作为演示。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建存放dockerfile目录以及持久化缓存目录</span></span><br><span class="line">mkdir -vp /storage/dev/soft/kaniko/&#123;cache,demo&#125;</span><br><span class="line"><span class="built_in">cd</span> /storage/dev/soft/kaniko/demo</span><br><span class="line">tee dockerfile &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">FROM registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest</span><br><span class="line">LABEL MAINTAINER=master@weiyigeeek.top BUILDTYPE=kaniko</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>步骤 03.创建一个授权令牌的 Secret , 此处以公共的docker hub为例。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 语法:</span></span><br><span class="line">~$ kubectl create secret docker-registry dockerhub --docker-server=&lt;your-registry-server&gt; --docker-username=&lt;your-name&gt; --docker-password=&lt;your-pword&gt; --docker-email=&lt;your-email&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数值:</span></span><br><span class="line"><span class="comment"># &lt;your-registry-server&gt; is your Private Docker Registry FQDN. (https://index.docker.io/v1/ for DockerHub)</span></span><br><span class="line"><span class="comment"># &lt;your-name&gt; is your Docker username.</span></span><br><span class="line"><span class="comment"># &lt;your-pword&gt; is your Docker password.</span></span><br><span class="line"><span class="comment"># &lt;your-email&gt; is your Docker email.</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建示例: 此 docker-registry 将在 pod.yaml 配置中使用</span></span><br><span class="line">~$ kubectl create secret docker-registry dockerhub \</span><br><span class="line">--docker-server=https://index.docker.io/v1/ \</span><br><span class="line">--docker-username=weiyigeek \</span><br><span class="line">--docker-password=PASSWORD \</span><br><span class="line">--docker-email=master@weiyigeek.top</span><br><span class="line"><span class="comment"># secret/dockerhub created</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看创建的 secrets 情况</span></span><br><span class="line">~$ kubectl get secrets dockerhub</span><br><span class="line">NAME        TYPE                             DATA   AGE</span><br><span class="line">dockerhub   kubernetes.io/dockerconfigjson   1      16s</span><br><span class="line"></span><br><span class="line">~$ kubectl get secrets dockerhub -o yaml</span><br><span class="line">apiVersion: v1</span><br><span class="line">data:</span><br><span class="line">  .dockerconfigjson: eyJhdXRo*******VhsbE1qQXhPUT09In19fQ==</span><br><span class="line">kind: Secret</span><br><span class="line">metadata:</span><br><span class="line">  name: dockerhub</span><br></pre></td></tr></table></figure></p>
+<p>步骤 04.创建一个在k8s集群中运行的Pod，其资源清单如下所示：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">tee</span> <span class="string">kaniko.yaml</span> <span class="string">&lt;&lt;'EOF'</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kaniko</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  containers:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">kaniko</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest</span></span><br><span class="line"><span class="attr">    env:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">DOCKERHUB</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">"docker.io"</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">AUTHOR</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">"weiyigeek"</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">IMAGE_NAME</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">"kaniko-executor"</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">IMAGE_VERSION</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">"v1.9.0"</span></span><br><span class="line"><span class="attr">    args:</span> <span class="string">[</span> <span class="string">"--dockerfile=/workspace/dockerfile"</span><span class="string">,</span></span><br><span class="line">            <span class="string">"--context=dir://workspace"</span><span class="string">,</span></span><br><span class="line">            <span class="string">"--destination=docker.io/weiyigeek/kaniko-executor:v1.9.0"</span><span class="string">,</span></span><br><span class="line">            <span class="string">"--cache"</span><span class="string">,</span></span><br><span class="line">            <span class="string">"--cache-dir=/cache"</span><span class="string">]</span></span><br><span class="line"><span class="attr">    volumeMounts:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">kaniko-secret</span></span><br><span class="line"><span class="attr">        mountPath:</span> <span class="string">/kaniko/.docker</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">dockerfile-storage</span></span><br><span class="line"><span class="attr">        mountPath:</span> <span class="string">/workspace</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">kaniko-cache</span></span><br><span class="line"><span class="attr">        mountPath:</span> <span class="string">/cache</span></span><br><span class="line"><span class="attr">  restartPolicy:</span> <span class="string">Never</span></span><br><span class="line"><span class="attr">  nodeSelector:</span></span><br><span class="line">    <span class="string">kubernetes.io/hostname:</span> <span class="string">"weiyigeek-226"</span></span><br><span class="line"><span class="attr">  volumes:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">kaniko-secret</span></span><br><span class="line"><span class="attr">      secret:</span></span><br><span class="line"><span class="attr">        secretName:</span> <span class="string">dockerhub</span></span><br><span class="line"><span class="attr">        items:</span></span><br><span class="line"><span class="attr">          - key:</span> <span class="string">.dockerconfigjson</span></span><br><span class="line"><span class="attr">            path:</span> <span class="string">config.json</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">dockerfile-storage</span></span><br><span class="line"><span class="attr">      hostPath:</span></span><br><span class="line"><span class="attr">        path:</span> <span class="string">/storage/dev/soft/kaniko/demo</span></span><br><span class="line"><span class="attr">        type:</span> <span class="string">DirectoryOrCreate</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">kaniko-cache</span></span><br><span class="line"><span class="attr">      hostPath:</span></span><br><span class="line"><span class="attr">        path:</span> <span class="string">/storage/dev/soft/kaniko/cache</span></span><br><span class="line"><span class="attr">        type:</span> <span class="string">DirectoryOrCreate</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># args 参数说明</span></span><br><span class="line"><span class="bullet">-</span><span class="bullet">-dockerfile=/workspace/dockerfile</span>   <span class="comment"># 指定 dockerfile 路径</span></span><br><span class="line"><span class="bullet">-</span><span class="bullet">-context=dir://workspace</span>            <span class="comment"># 指定构建上下文</span></span><br><span class="line"><span class="bullet">-</span><span class="bullet">-destination=docker.io/weiyigeek/kaniko-executor:v1.9.0</span>  <span class="comment"># 指定生成镜像的tag</span></span><br><span class="line"><span class="bullet">-</span><span class="bullet">-cache</span>     <span class="comment"># 使用缓存</span></span><br><span class="line"><span class="bullet">-</span><span class="bullet">-cache-dir</span> <span class="comment"># 指定缓存目录</span></span><br></pre></td></tr></table></figure>
+<p>温馨提示: kaniko 中的二进制可执行文件 executor 支持的参数详解(<a href="https://github.com/GoogleContainerTools/kaniko/#additional-flags" target="_blank" rel="noopener">https://github.com/GoogleContainerTools/kaniko/#additional-flags</a>)</p>
+<p>步骤 05.执行 <code>kubectl apply</code> 部署资源清单生成运行 pod , 此处通过 <code>kubectl logs</code> 日志命令可以发现kaniko执行镜像构建，以及上传镜像到docker hub之中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f kaniko.yaml</span><br><span class="line"><span class="comment"># pod/kaniko created</span></span><br><span class="line"></span><br><span class="line">kubectl logs -f kaniko</span><br><span class="line"><span class="comment"># INFO[0005] Retrieving image manifest registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest</span></span><br><span class="line"><span class="comment"># INFO[0005] Retrieving image registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest from registry registry.cn-hangzhou.aliyuncs.com</span></span><br><span class="line"><span class="comment"># INFO[0006] Built cross stage deps: map[]</span></span><br><span class="line"><span class="comment"># INFO[0006] Retrieving image manifest registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest</span></span><br><span class="line"><span class="comment"># INFO[0006] Returning cached image manifest</span></span><br><span class="line"><span class="comment"># INFO[0006] Executing 0 build triggers</span></span><br><span class="line"><span class="comment"># INFO[0006] Building stage 'registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest' [idx: '0', base-idx: '-1']</span></span><br><span class="line"><span class="comment"># INFO[0006] Skipping unpacking as no commands require it.</span></span><br><span class="line"><span class="comment"># INFO[0006] LABEL MAINTAINER=master@weiyigeeek.top BUILDTYPE=kaniko</span></span><br><span class="line"><span class="comment"># INFO[0006] Applying label MAINTAINER=master@weiyigeeek.top</span></span><br><span class="line"><span class="comment"># INFO[0006] Applying label BUILDTYPE=kaniko</span></span><br><span class="line"><span class="comment"># INFO[0006] Pushing image to docker.io/weiyigeek/kaniko-executor:v1.9.0</span></span><br></pre></td></tr></table></figure>
+<p>步骤 06.在客户端中可以使用 docker 或者 ctr 、crictl 命令将上传到hub中的镜像进行拉取, 并且查看hub仓库中的 <code>kaniko-executor:v1.9.0</code> 镜像信息（<a href="https://hub.docker.com/r/weiyigeek/kaniko-executor）。" target="_blank" rel="noopener">https://hub.docker.com/r/weiyigeek/kaniko-executor）。</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker pull weiyigeek/kaniko-executor:v1.9.0</span><br><span class="line">9d4299bbd943: Already exists</span><br><span class="line">..............</span><br><span class="line">a8dae3110e38: Already exists</span><br><span class="line">v1.9.0: Pulling from weiyigeek/kaniko-executor</span><br><span class="line">Digest: sha256:9b0ef02e7650d00d24bbca683e317bc103d6d842311ff13ec6daee60c37b1e62</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> weiyigeek/kaniko-executor:v1.9.0</span><br><span class="line">docker.io/weiyigeek/kaniko-executor:v1.9.0</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=使用Kaniko在Kubernetes集群中快速构建推送容器镜像 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220908153522.png" target="_blank" title="WeiyiGeek.K8S集群中kaniko-executor" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220908153522.png" alt="WeiyiGeek.K8S集群中kaniko-executor" title="" class=""></a>
+                <p>WeiyiGeek.K8S集群中kaniko-executor</p>
+            </figure>
+<p>步骤 07.扩展补充，除了上述方式指定dockerfile文件和上下文外，我们还可以在运行 kaniko 时使用标准输入构建上下文，但需要添加 <code>-i, --interactive</code>参数, 一旦kaniko运行它将从STDIN获取数据，并将构建上下文创建为压缩tar，然后它将在启动映像构建之前解包构建上下文的压缩tar。</p>
+<p>如何使用 .tar.gz 标准输入数据交互运行 kaniko 的完整示例，使用带有临时容器和完全无 docker 环境的 Kubernetes 命令行来进行镜像构建与发布：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> -e <span class="string">'FROM alpine \nRUN echo "created from standard input"'</span> &gt; Dockerfile | tar -cf - Dockerfile | gzip -9 | kubectl run kaniko-executor \</span><br><span class="line">--rm --stdin=<span class="literal">true</span> \</span><br><span class="line">--image=registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest --restart=Never \</span><br><span class="line">--overrides=<span class="string">'&#123;</span></span><br><span class="line"><span class="string">  "apiVersion": "v1",</span></span><br><span class="line"><span class="string">  "spec": &#123;</span></span><br><span class="line"><span class="string">    "containers": [</span></span><br><span class="line"><span class="string">      &#123;</span></span><br><span class="line"><span class="string">        "name": "kaniko-executor",</span></span><br><span class="line"><span class="string">        "image": "registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest",</span></span><br><span class="line"><span class="string">        "stdin": true,</span></span><br><span class="line"><span class="string">        "stdinOnce": true,</span></span><br><span class="line"><span class="string">        "args": [</span></span><br><span class="line"><span class="string">          "--dockerfile=Dockerfile",</span></span><br><span class="line"><span class="string">          "--context=tar://stdin",</span></span><br><span class="line"><span class="string">          "--destination=docker.io/weiyigeek/alpine:v4.2"</span></span><br><span class="line"><span class="string">        ],</span></span><br><span class="line"><span class="string">        "volumeMounts": [</span></span><br><span class="line"><span class="string">          &#123;</span></span><br><span class="line"><span class="string">            "name": "kaniko-secret",</span></span><br><span class="line"><span class="string">            "mountPath": "/kaniko/.docker/"</span></span><br><span class="line"><span class="string">          &#125;</span></span><br><span class="line"><span class="string">        ]</span></span><br><span class="line"><span class="string">      &#125;</span></span><br><span class="line"><span class="string">    ],</span></span><br><span class="line"><span class="string">    "nodeSelector": &#123; </span></span><br><span class="line"><span class="string">      "kubernetes.io/hostname": "weiyigeek-226"</span></span><br><span class="line"><span class="string">    &#125;,</span></span><br><span class="line"><span class="string">    "volumes": [</span></span><br><span class="line"><span class="string">      &#123;</span></span><br><span class="line"><span class="string">        "name": "kaniko-secret",</span></span><br><span class="line"><span class="string">        "secret": &#123;</span></span><br><span class="line"><span class="string">          "secretName": "dockerhub",</span></span><br><span class="line"><span class="string">          "items": [&#123;"key":".dockerconfigjson", "path": "config.json"&#125;]</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">      &#125;,</span></span><br><span class="line"><span class="string">      &#123;</span></span><br><span class="line"><span class="string">        "name": "dockerfile-storage",</span></span><br><span class="line"><span class="string">        "hostPath": &#123;</span></span><br><span class="line"><span class="string">          "path": "/storage/dev/soft/kaniko/demo",</span></span><br><span class="line"><span class="string">          "type": "DirectoryOrCreate"</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">      &#125;,</span></span><br><span class="line"><span class="string">      &#123;</span></span><br><span class="line"><span class="string">        "name": "kaniko-cache",</span></span><br><span class="line"><span class="string">        "hostPath": &#123;</span></span><br><span class="line"><span class="string">          "path": "/storage/dev/soft/kaniko/cache",</span></span><br><span class="line"><span class="string">          "type": "DirectoryOrCreate"</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">      &#125;</span></span><br><span class="line"><span class="string">    ]</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string">&#125;'</span></span><br></pre></td></tr></table></figure>
+<p>执行结果:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">INFO[0003] Retrieving image manifest alpine</span><br><span class="line">INFO[0003] Retrieving image alpine from registry index.docker.io</span><br><span class="line">INFO[0009] Built cross stage deps: map[]</span><br><span class="line">INFO[0009] Retrieving image manifest alpine</span><br><span class="line">INFO[0009] Returning cached image manifest</span><br><span class="line">INFO[0009] Executing 0 build triggers</span><br><span class="line">INFO[0009] Building stage <span class="string">'alpine'</span> [idx: <span class="string">'0'</span>, base-idx: <span class="string">'-1'</span>]</span><br><span class="line">INFO[0009] Unpacking rootfs as cmd RUN <span class="built_in">echo</span> <span class="string">"created from standard input"</span> requires it.</span><br><span class="line">INFO[0036] RUN <span class="built_in">echo</span> <span class="string">"created from standard input"</span></span><br><span class="line">INFO[0036] Initializing snapshotter ...</span><br><span class="line">INFO[0036] Taking snapshot of full filesystem...</span><br><span class="line">INFO[0036] Cmd: /bin/sh</span><br><span class="line">INFO[0036] Args: [-c <span class="built_in">echo</span> <span class="string">"created from standard input"</span>]</span><br><span class="line">INFO[0036] Running: [/bin/sh -c <span class="built_in">echo</span> <span class="string">"created from standard input"</span>]</span><br><span class="line">created from standard input</span><br><span class="line">INFO[0036] Taking snapshot of full filesystem...</span><br><span class="line">INFO[0037] No files were changed, appending empty layer to config. No layer added to image.</span><br><span class="line">INFO[0037] Pushing image to docker.io/weiyigeek/alpine:v4.2</span><br><span class="line">INFO[0042] Pushed index.docker.io/weiyigeek/alpine@sha256:0ef53bcc0a6f261124e5f292fa17041d7e5f81f5542802b89c249351597167e4</span><br><span class="line">pod <span class="string">"kaniko-executor"</span> deleted</span><br></pre></td></tr></table></figure></p>
+<p>至此在 K8s 集群中使用 kaniko 构建镜像简单演示结束。</p>
+<p><br/></p>
+<h3 id="小试牛刀之在Containerd-io中构建并发布镜像"><a href="#小试牛刀之在Containerd-io中构建并发布镜像" class="headerlink" title="小试牛刀之在Containerd.io中构建并发布镜像"></a>小试牛刀之在Containerd.io中构建并发布镜像</h3><p>描述：当我们的环境中只安装了containerd.io 容器运行时没有 Docker 或者 Kubernetes 环境时，我们也可以采用kaniko进行镜像构建与发布，具体操作流程步骤如下：</p>
+<p><strong>环境说明</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ lsb_release -a</span><br><span class="line">Distributor ID: Ubuntu</span><br><span class="line">Description:    Ubuntu 20.04.3 LTS</span><br><span class="line">Release:        20.04</span><br><span class="line">Codename:       focal</span><br><span class="line"></span><br><span class="line">$ containerd -v</span><br><span class="line">containerd containerd.io 1.4.12 7b11cfaabd73bb80907dd23182b9347b4245eb5d</span><br><span class="line"></span><br><span class="line">$ ctr -v</span><br><span class="line">ctr containerd.io 1.4.12</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: 此处使用的是 Ubuntu 20.04 操作系统, 该系统已做安全加固和内核优化符合等保2.0要求【<a href="https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh" target="_blank" rel="noopener">SecOpsDev/Ubuntu-InitializeSecurity.sh at master · WeiyiGeek/SecOpsDev</a> 】, 如你的Linux未进行相应配置环境可能与读者有些许差异, 如需要进行(windows server、Ubuntu、CentOS)安全加固请参照如下加固脚本进行加固, <span style="color:red">请大家疯狂的star </span>。<br>加固脚本地址:【 <a href="https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh" target="_blank" rel="noopener">https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh</a> 】</p>
+<p>温馨提示：如果你使用的是最新 Ubuntu 22.04 操作系统，并需要对其安全加固和内核优化以满足等保2.0要求可参考如下加固脚本 【<a href="https://github.com/WeiyiGeek/SecOpsDev/tree/master/OperatingSystem/Security/Ubuntu" target="_blank" rel="noopener">https://github.com/WeiyiGeek/SecOpsDev/tree/master/OperatingSystem/Security/Ubuntu</a>】。</p>
+<figure class="image-box">
+                <a rel=使用Kaniko在Kubernetes集群中快速构建推送容器镜像 href="https://github.com/WeiyiGeek/SecOpsDev/raw/master/OperatingSystem/Security/Ubuntu/Readme.assets/image-20220823143235577.png" target="_blank" title="Ubuntu 22.04加固脚本示例图" data-fancybox="images"><img src="https://github.com/WeiyiGeek/SecOpsDev/raw/master/OperatingSystem/Security/Ubuntu/Readme.assets/image-20220823143235577.png" alt="Ubuntu 22.04加固脚本示例图" title="" class=""></a>
+                <p>Ubuntu 22.04加固脚本示例图</p>
+            </figure>
+<p><br/></p>
+<p><strong>操作流程</strong></p>
+<p>步骤 01.此处假设你已经安装配置好containerd.io了，如果没有安装配置请参考此篇文章【 1.Containerd容器运行时初识与尝试 - <a href="https://blog.weiyigeek.top/2021/6-27-570.html">https://blog.weiyigeek.top/2021/6-27-570.html</a> 】，此处不再累述。</p>
+<p>步骤 02.验证 containerd.io 服务状态以及提前拉取 <code>kaniko-executor:latest</code> 镜像以加快构建速度，此处将镜像拉到默认的名称空间下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl status containerd.service</span><br><span class="line">● containerd.service - containerd container runtime</span><br><span class="line">     Loaded: loaded (/lib/systemd/system/containerd.service; enabled; vendor preset: enabled)</span><br><span class="line">     Active: active (running) since Thu 2022-09-08 11:48:30 CST; 4h 49min ago</span><br><span class="line">       Docs: https://containerd.io</span><br><span class="line">    Process: 561811 ExecStartPre=/sbin/modprobe overlay (code=exited, status=0/SUCCESS)</span><br><span class="line">   Main PID: 561812 (containerd)</span><br><span class="line">      Tasks: 106</span><br><span class="line">     Memory: 4.0G</span><br><span class="line"></span><br><span class="line">$ ctr -n default images pull registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest</span><br></pre></td></tr></table></figure>
+<p>步骤 03.准备登录 hub docker 的账号以及密码，你可以按照下述的流程进行生成config.json文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mkdir /storage/dev/soft/kaniko/&#123;config,demo1&#125;</span><br><span class="line"><span class="built_in">cd</span> /storage/dev/soft/kaniko/config</span><br><span class="line"><span class="comment"># 生成认证所需的凭据</span></span><br><span class="line"><span class="comment"># BASE64 编码，注意下述为格式为 你的hub账号:你的hub密码</span></span><br><span class="line">AUTH=$(<span class="built_in">echo</span> -n <span class="string">"weiyigeek:password"</span> | base64)</span><br><span class="line"><span class="comment"># BASE64 解码</span></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$&#123;AUTH&#125;</span> | base64 -d</span><br><span class="line"><span class="comment"># 使用该方法可以解析变量 AUTH (值得注意)</span></span><br><span class="line">cat &gt; config.json &lt;&lt;EOF</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"auths"</span>: &#123;</span><br><span class="line">    <span class="string">"https://index.docker.io/v1/"</span>: &#123;</span><br><span class="line">        <span class="string">"auth"</span>: <span class="string">"<span class="variable">$&#123;AUTH&#125;</span>"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成结果</span></span><br><span class="line">cat config.json</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"auths"</span>: &#123;</span><br><span class="line">    <span class="string">"https://index.docker.io/v1/"</span>: &#123;</span><br><span class="line">        <span class="string">"auth"</span>: <span class="string">"d2VpeWlnZ************AxOQ=="</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>步骤 04.准备dockerfile文件，此处将<code>busybox:1.35.0</code>镜像重新构建后上传到我的账户下的hub仓库中，该文件示例如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /storage/dev/soft/kaniko/demo1</span><br><span class="line">tee dockerfile &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">FROM docker.io/library/busybox:1.35.0</span><br><span class="line">LABEL MAINTAINER=master@weiyigeeek.top BUILDTOOLS=kaniko BUILDENV=containerd.io;</span><br><span class="line">ENTRYPOINT [<span class="string">"/bin/sh"</span>, <span class="string">"-c"</span>, <span class="string">"echo hello,busybox"</span>]</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>步骤 05.当上述都准备完成后我们便可以执行containerd.io提供的ctr客户端工具直接创建容器，例如如下命令:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">ctr -n default run --rm --net-host --env DOCKERHUB=docker.io \</span><br><span class="line">--mount <span class="built_in">type</span>=<span class="built_in">bind</span>,src=/storage/dev/soft/kaniko/config,dst=/kaniko/.docker,options=rbind:ro \</span><br><span class="line">--mount <span class="built_in">type</span>=<span class="built_in">bind</span>,src=/storage/dev/soft/kaniko/demo1,dst=/workspace,options=rbind:rw \</span><br><span class="line">registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest kaniko-executor \</span><br><span class="line">/kaniko/executor --dockerfile=/workspace/dockerfile --context=dir://workspace --destination=docker.io/weiyigeek/busybox:1.35.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数说明</span></span><br><span class="line">-n 指定名称空间</span><br><span class="line">--rm 在退出容器时删除容器</span><br><span class="line">--net-host 使用主机网络</span><br><span class="line">--env 指定容器内部shell变量</span><br><span class="line">--mount 指定挂载到容器内部的本地文件，src是指定宿主机上文件目录路径，而dst是指定容器内部目录。</span><br></pre></td></tr></table></figure></p>
+<p>执行结果：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">INFO[0002] Retrieving image manifest docker.io/library/busybox:1.35.0</span><br><span class="line">INFO[0002] Retrieving image docker.io/library/busybox:1.35.0 from registry index.docker.io</span><br><span class="line">INFO[0006] Built cross stage deps: map[]</span><br><span class="line">INFO[0006] Retrieving image manifest docker.io/library/busybox:1.35.0</span><br><span class="line">INFO[0006] Returning cached image manifest</span><br><span class="line">INFO[0006] Executing 0 build triggers</span><br><span class="line">INFO[0006] Building stage <span class="string">'docker.io/library/busybox:1.35.0'</span> [idx: <span class="string">'0'</span>, base-idx: <span class="string">'-1'</span>]</span><br><span class="line">INFO[0006] Skipping unpacking as no commands require it.</span><br><span class="line">INFO[0006] LABEL MAINTAINER=master@weiyigeeek.top BUILDTOOLS=kaniko BUILDENV=containerd.io;</span><br><span class="line">INFO[0006] Applying label MAINTAINER=master@weiyigeeek.top</span><br><span class="line">INFO[0006] Applying label BUILDTOOLS=kaniko</span><br><span class="line">INFO[0006] Applying label BUILDENV=containerd.io;</span><br><span class="line">INFO[0006] ENTRYPOINT [<span class="string">"/bin/sh"</span>, <span class="string">"-c"</span>, <span class="string">"echo hello,busybox"</span>]</span><br><span class="line">INFO[0006] Pushing image to docker.io/weiyigeek/busybox:1.35.0</span><br><span class="line">INFO[0010] Pushed index.docker.io/weiyigeek/busybox@sha256:d6ed480cc7864b9e19b40f09263abfad4689a9244a5abeb2e3eaf14a439cc55f</span><br></pre></td></tr></table></figure></p>
+<p>步骤 06.查看上传到docker hub中 的 busybox:1.35.0 镜像信息以及拉取到本地进行运行测试验证。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ctr -n default images pull docker.io/weiyigeek/busybox:1.35.0</span><br><span class="line">ctr -n default run --rm docker.io/weiyigeek/busybox:1.35.0 busybox</span><br><span class="line">hello,busybox</span><br></pre></td></tr></table></figure>
+<p><a rel=使用Kaniko在Kubernetes集群中快速构建推送容器镜像 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220908214417.png" target="_blank" title="WeiyiGeek.在containerd.io进行镜像构建并发布到hub中" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220908214417.png" alt="WeiyiGeek.在containerd.io进行镜像构建并发布到hub中"></a></p>
+<p>至此，在containerd.io 环境中，进行镜像构建并发布到hub中实践完毕!</p>
+<p><br/></p>
+<h3 id="小试牛刀之在Docker中使用kaniko构建并发布镜像"><a href="#小试牛刀之在Docker中使用kaniko构建并发布镜像" class="headerlink" title="小试牛刀之在Docker中使用kaniko构建并发布镜像"></a>小试牛刀之在Docker中使用kaniko构建并发布镜像</h3><p>描述：前面说到kaniko的出现实际是为了在没有docker环境的情况之下，按照 Dockerfile 文件中的指令进行镜像构建，不过此处还是简单的介绍一下在docker环境中的使用。 (实际情况中不建议如此多此一举)</p>
+<p>步骤 01.执行如下命令生成 docker hub 认证票据（存储路径为 ~/.docker/config.json）以及提前拉取 kaniko 项目中 executor:latest 镜像。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker login -u weiyigeek</span><br><span class="line"><span class="comment"># Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.</span></span><br><span class="line"><span class="comment"># Login Succeeded</span></span><br><span class="line"></span><br><span class="line">docker pull registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest</span><br></pre></td></tr></table></figure></p>
+<p>步骤 02.创建 dockerfile 文件其中 FROM 指定 K8S 集群中常用的NFS动态持久卷镜像，我们将其上传到 hub 仓库中的WeiyiGeek账户下面。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir /storage/dev/soft/kaniko/demo2</span><br><span class="line"><span class="built_in">cd</span> /storage/dev/soft/kaniko/demo2</span><br><span class="line">tee dockerfile &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">FROM registry.cn-hangzhou.aliyuncs.com/weiyigeek/nfs-subdir-external-provisioner:latest</span><br><span class="line">LABEL MAINTAINER=master@weiyigeeek.top BUILDTOOLS=kaniko BUILDENV=docker;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>步骤 03.使用如下示例命令进行 kaniko-executor 容器的创建运行，并进行镜像构建并上传到公共的docker hub 仓库中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker rm -f kaniko-executor</span><br><span class="line">docker run --rm --name kaniko-executor \</span><br><span class="line">    -v <span class="variable">$HOME</span>/.docker/:/kaniko/.docker \</span><br><span class="line">    -v /storage/dev/soft/kaniko/demo2:/workspace \</span><br><span class="line">    registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest \</span><br><span class="line">    --dockerfile=/workspace/dockerfile --context=dir://workspace --destination=docker.io/weiyigeek/nfs-subdir-external-provisioner:latest</span><br></pre></td></tr></table></figure>
+<p>执行结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">INFO[0002] Retrieving image manifest registry.cn-hangzhou.aliyuncs.com/weiyigeek/nfs-subdir-external-provisioner:latest</span><br><span class="line">INFO[0002] Retrieving image registry.cn-hangzhou.aliyuncs.com/weiyigeek/nfs-subdir-external-provisioner:latest from registry registry.cn-hangzhou.aliyuncs.com</span><br><span class="line">INFO[0003] Built cross stage deps: map[]</span><br><span class="line">INFO[0003] Retrieving image manifest registry.cn-hangzhou.aliyuncs.com/weiyigeek/nfs-subdir-external-provisioner:latest</span><br><span class="line">INFO[0003] Returning cached image manifest</span><br><span class="line">INFO[0003] Executing 0 build triggers</span><br><span class="line">INFO[0003] Building stage <span class="string">'registry.cn-hangzhou.aliyuncs.com/weiyigeek/nfs-subdir-external-provisioner:latest'</span> [idx: <span class="string">'0'</span>, base-idx: <span class="string">'-1'</span>]</span><br><span class="line">INFO[0003] Skipping unpacking as no commands require it.</span><br><span class="line">INFO[0003] LABEL MAINTAINER=master@weiyigeeek.top BUILDTOOLS=kaniko BUILDENV=docker;</span><br><span class="line">INFO[0003] Applying label MAINTAINER=master@weiyigeeek.top</span><br><span class="line">INFO[0003] Applying label BUILDTOOLS=kaniko</span><br><span class="line">INFO[0003] Applying label BUILDENV=docker;</span><br><span class="line">INFO[0003] Pushing image to docker.io/weiyigeek/nfs-subdir-external-provisioner:latest</span><br><span class="line">INFO[0012] Pushed index.docker.io/weiyigeek/nfs-subdir-external-provisioner@sha256:4dc0d27b8fa4608c9e2d8a6f2368d2029df32b9b55f96f27a9218a620ea14828</span><br></pre></td></tr></table></figure>
+<p>步骤 04.查看上传到docker hub 仓库中的 nfs-subdir-external-provisioner:latest 信息 (<a href="https://hub.docker.com/r/weiyigeek/nfs-subdir-external-provisioner" target="_blank" rel="noopener">https://hub.docker.com/r/weiyigeek/nfs-subdir-external-provisioner</a>) 。</p>
+<p><a rel=使用Kaniko在Kubernetes集群中快速构建推送容器镜像 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220908215842.png" target="_blank" title="WeiyiGeek.在 Docker 中使用 kaniko 进行镜像构建与发布" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220908215842.png" alt="WeiyiGeek.在 Docker 中使用 kaniko 进行镜像构建与发布"></a></p>
+<p>步骤 05.当然我们也可以在安装有docker环境中使用上下文使用标准输入，并采用docker进行创建kaniko-executor容器，从标准输入接收dockerfile文件并进行镜像构建与推送。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir /storage/dev/soft/kaniko/demo3</span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">'FROM alpine \nRUN echo "created from standard input"'</span> &gt; Dockerfile | tar -cf - Dockerfile | gzip -9 | docker run \</span><br><span class="line">  --interactive -v /storage/dev/soft/kaniko/demo3:/workspace  -v <span class="variable">$HOME</span>/.docker/:/kaniko/.docker \</span><br><span class="line">  registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest \</span><br><span class="line">  --context tar://stdin \</span><br><span class="line">  --destination=docker.io/weiyigeek/alpine:4.2</span><br></pre></td></tr></table></figure>
+<p>执行结果: 如果在交互运行期间没有数据管道传输，则需要按Ctrl+D自行发送EOF信号。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">INFO[0000] To simulate EOF and <span class="built_in">exit</span>, press <span class="string">'Ctrl+D'</span></span><br><span class="line">INFO[0002] Retrieving image manifest alpine</span><br><span class="line">INFO[0002] Retrieving image alpine from registry index.docker.io</span><br><span class="line">INFO[0005] Built cross stage deps: map[]</span><br><span class="line">INFO[0005] Retrieving image manifest alpine</span><br><span class="line">INFO[0005] Returning cached image manifest</span><br><span class="line">INFO[0005] Executing 0 build triggers</span><br><span class="line">INFO[0005] Building stage <span class="string">'alpine'</span> [idx: <span class="string">'0'</span>, base-idx: <span class="string">'-1'</span>]</span><br><span class="line">INFO[0005] Unpacking rootfs as cmd RUN <span class="built_in">echo</span> <span class="string">"created from standard input"</span> requires it.</span><br><span class="line">INFO[0008] RUN <span class="built_in">echo</span> <span class="string">"created from standard input"</span></span><br><span class="line">INFO[0008] Initializing snapshotter ...</span><br><span class="line">INFO[0008] Taking snapshot of full filesystem...</span><br><span class="line">INFO[0008] Cmd: /bin/sh</span><br><span class="line">INFO[0008] Args: [-c <span class="built_in">echo</span> <span class="string">"created from standard input"</span>]</span><br><span class="line">INFO[0008] Running: [/bin/sh -c <span class="built_in">echo</span> <span class="string">"created from standard input"</span>]</span><br><span class="line">created from standard input</span><br><span class="line">INFO[0008] Taking snapshot of full filesystem...</span><br><span class="line">INFO[0008] No files were changed, appending empty layer to config. No layer added to image.</span><br><span class="line">INFO[0008] Pushing image to docker.io/weiyigeek/alpine:4.2</span><br><span class="line">INFO[0016] Pushed index.docker.io/weiyigeek/alpine@sha256:49360dc74ecf57ea94fbec9d7a3b5cf59dfba8aa5e60f8802cc6299e668a3e1e</span><br></pre></td></tr></table></figure></p>
+<p>至此，在 Docker 中使用 kaniko 进行镜像构建与发布实践完毕。</p>
+<hr>
+<h2 id="0x0n-参考来源"><a href="#0x0n-参考来源" class="headerlink" title="0x0n 参考来源"></a>0x0n 参考来源</h2><p>项目地址: <a href="https://github.com/GoogleContainerTools/kaniko" target="_blank" rel="noopener">https://github.com/GoogleContainerTools/kaniko</a><br>kaniko 图像镜像仓库: gcr.io/kaniko-project/executor<br>kaniko 国内镜像仓库源：<code>weiyigeek/kaniko-executor:latest</code> 或者 <code>registry.cn-hangzhou.aliyuncs.com/weiyigeek/kaniko-executor:latest</code></p>
+<p>首发地址：<br>原文地址: <a href="https://blog.weiyigeek.top/2022/9-1-684.html">https://blog.weiyigeek.top/2022/9-1-684.html</a></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-09-09T02:45:54.933Z" itemprop="dateUpdated">2022-09-09 10:45:54</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Kubernetes/辅助组件/使用Kaniko在Kubernetes集群中构建容器镜像.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Kubernetes/辅助组件/使用Kaniko在Kubernetes集群中构建容器镜像.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2022/9-1-684.html" target="_blank" rel="external">https://blog.weiyigeek.top/2022/9-1-684.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kaniko/" rel="tag">Kaniko</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/9-1-684.html&title=《使用Kaniko在Kubernetes集群中快速构建推送容器镜像》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/9-1-684.html&title=《使用Kaniko在Kubernetes集群中快速构建推送容器镜像》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/9-1-684.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《使用Kaniko在Kubernetes集群中快速构建推送容器镜像》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/9-1-684.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/9-1-684.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="next">
+      <a href="/2022/8-17-682.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Gitalk-基于Github项目issue的评论系统在博客系统中实践</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#快速介绍"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">快速介绍</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#什么是Kaniko"><span class="post-toc-number">1.1.1.</span> <span class="post-toc-text">什么是Kaniko?</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#为啥用Kaniko"><span class="post-toc-number">1.1.2.</span> <span class="post-toc-text">为啥用Kaniko?</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Kaniko-是如何工作的"><span class="post-toc-number">1.1.3.</span> <span class="post-toc-text">Kaniko 是如何工作的?</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Kaniko-已知功能问题"><span class="post-toc-number">1.1.4.</span> <span class="post-toc-text">Kaniko 已知功能问题</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#kaniko-构建上下文"><span class="post-toc-number">1.1.5.</span> <span class="post-toc-text">kaniko 构建上下文</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#kaniko-缓存构建"><span class="post-toc-number">1.1.6.</span> <span class="post-toc-text">kaniko 缓存构建</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-部署使用"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 部署使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#环境依赖"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">环境依赖</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#小试牛刀之在Kubernetes集群中构建并发布镜像"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">小试牛刀之在Kubernetes集群中构建并发布镜像</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#小试牛刀之在Containerd-io中构建并发布镜像"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">小试牛刀之在Containerd.io中构建并发布镜像</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#小试牛刀之在Docker中使用kaniko构建并发布镜像"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">小试牛刀之在Docker中使用kaniko构建并发布镜像</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x0n-参考来源"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x0n 参考来源</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/9-1-684.html&title=《使用Kaniko在Kubernetes集群中快速构建推送容器镜像》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/9-1-684.html&title=《使用Kaniko在Kubernetes集群中快速构建推送容器镜像》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/9-1-684.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《使用Kaniko在Kubernetes集群中快速构建推送容器镜像》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/9-1-684.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/9-1-684.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACHElEQVR42u3aUa7DIAwEwHf/S+edoOnaTioBw1cVtSnDh8Ua/v7icQXj0/fv31n91WhgYGAsy0gmdz/pZKKf3pl8ThYOAwPjBEYyiXt8/qt72P0bPj7HwMDA6BXBVrHGwMDAeLbg3kfQ/Dt5ycbAwDiZkYTYvGVWLaY/zeIYGBgLMnqNs998fuV8AwMDYynGVRz5e6rl8hoMDAyMvRl5gUsmkW8Nk/ZcPh8MDIxzGJN4mYTPZNM5eYKBgbE3YxJWJ03/fFuZLCIGBsYJjDxeJkXwqTBcLdYYGBj7MZKpJ39QLZr5k2RuGBgYezOql8OqJbjw98GyluMrBgbGpox5y77awkuQhecYGBjHMHqFMm+xTcrxA+02DAyMpRi9VtokfPYmXcjiGBgY2zF6kbVXQKsL0duSYmBgnMCYIyex9oEdLgYGxtaM6vWIN4LraI0xMDA2ZVSvqFYXolqUq8eZGBgYJzCqf9+75Nq7XlaNxBgYGKcxJs39atCdbBC/nHJgYGBszXg73PZK9pf3YGBgHMDIjwHyo83qprAXazEwMPZmXMVRbe73NnkJtbC3xcDAWJzRa/pHbfq4TZaU6cfujGBgYCzLSIpsPt3e0ULenhsdDGBgYCzO6N22mh8eTC5hlNttGBgYxzN6cTc5+Cw03TAwMDAGTfzJQkQYDAyMAxhJiE3C52TzV8VjYGCcw8ijY+/o8b1NJAYGxgGMfydWdHIlxWaMAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

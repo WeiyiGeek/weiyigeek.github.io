@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 11-kubernetes入门学习之网络设计实现方案|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="k8s">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>11-kubernetes入门学习之网络设计实现方案</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">11-kubernetes入门学习之网络设计实现方案</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-09-27T10:37:47.000Z" itemprop="datePublished" class="page-time">
+  2020-09-27
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Kubernetes/11-kubernetes进阶之网络设计实现方案"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">11-kubernetes入门学习之网络设计实现方案</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-09-27 18:37:47" datetime="2020-09-27T10:37:47.000Z"  itemprop="datePublished">2020-09-27</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><h3 id="基础简述"><a href="#基础简述" class="headerlink" title="基础简述"></a>基础简述</h3><p>在前面的章节中我们介绍过Pod是K8s进行创建、调度管理的最小单位，在同一个Pod内的Container不会垮主机，每个Pod都有独立的Pod IP (<code>IP per Pod</code>)并且该Pod包含的所有容器共享一个网络协议栈(或者网络名称空间), 例如容器之间通过localhost+port可以进行相互访问。即集群中的所有Pod都处于一个扁平互通的网络空间。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">~$ kubectl get pod --all-namespaces -o json | jq <span class="string">'.items[] | select(.metadata.name=="kubernetes-dashboard-7448ffc97b-sd9bt")'</span> | jq .status.podIP</span><br><span class="line"><span class="string">"172.16.182.203"</span></span><br><span class="line"></span><br><span class="line">~$ kubectl get endpoints --all-namespaces</span><br><span class="line">kubernetes-dashboard   dashboard-metrics-scraper        172.16.24.198:8000                                                       59d</span><br><span class="line">kubernetes-dashboard   kubernetes-dashboard             172.16.182.203:8443                                                      59d</span><br></pre></td></tr></table></figure></p>
+<p>Tips: 在Docker中我们使用<code>Docker Bridge</code>模型实现服务的跨节点访问,而在我们的Kubernets中则采用一个更优的<code>IP-Per-Pod</code>模型;</p>
+<p><br></p>
+<p><strong>Linux网络名词解释</strong></p>
+<ul>
+<li><p>网络的命名空间：Linux在网络栈中引入网络命名空间，将独立的网络协议栈隔离到不同的命令空间中，彼此间无法通信；Docker利用这一特性，实现不同容器间的网络隔离。</p>
+</li>
+<li><p>Veth设备对：Veth设备对的引入是为了实现在不同网络命名空间的通信。</p>
+</li>
+<li><p>Iptables/Netfilter：Netfilter负责在内核中执行各种挂接的规则（过滤、修改、丢弃等），运行在内核模式中；Iptables模式是在用户模式下运行的进程，负责协助维护内核中Netfilter的各种规则表；通过二者的配合来实现整个Linux网络协议栈中灵活的数据包处理机制。</p>
+</li>
+<li><p>网桥：网桥是一个二层网络设备，通过网桥可以将Linux支持的不同的端口连接起来，并实现类似交换机那样的多对多的通信。</p>
+</li>
+<li><p>路由：Linux系统包含一个完整的路由功能，当IP层在处理数据发送或转发的时候，会使用路由表来决定发往哪里。</p>
+</li>
+</ul>
+<p><br/></p>
+<h3 id="模型标准"><a href="#模型标准" class="headerlink" title="模型标准"></a>模型标准</h3><p>描述: 容器网络发展的两大阵营即Docker的CNM容器网络模型(原生)和CoreOS、Google、K8s主导的CNI容器网络接口模型(网络管理插件)，他们主要的作用是进行网络管理。即从架构角度来看他们是<code>网络规范和网络体系</code>,而从研发的角度他们就是一堆接口。</p>
+<p><strong>CNM 介绍</strong><br>它是 Docker Libnetwork Container Network Model 的简称(<code>Libnetwork 是 CNM 标准的实现</code>) Libnetwork 提供 Docker 守护程序和网络驱动程序之间的接口。网络控制器负责将驱动程序与网络配对。每个驱动程序负责管理其拥有的网络，包括提供给该网络的服务。每个网络有一个驱动程序，多个驱动程序可以与连接到多个网络的容器同时使用。</p>
+<p>优点: Docker 原生所以和Docker容器生命周期结合紧密。<br>缺点: Docker 原生所以被Docker绑架了没他不行。<br>实现插件: Docker Swarm Overlay 、Macvaln、 Calico、 Contiv、 Weave</p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313232313.png" target="_blank" title="WeiyiGeek.CNM" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313232313.png" alt="WeiyiGeek.CNM" title="" class=""></a>
+                <p>WeiyiGeek.CNM</p>
+            </figure>
+<p><br></p>
+<p><strong>CNI 介绍</strong><br>它是 Container Network Interface 的简述(<code>CNCF 的正式项目</code>); 用于编写插件以配置 Linux 容器中的网络接口。CNI 仅关注容器的网络连接并在删除容器的同时删除分配的资源<br>优点: 提供了广泛的支持，并且规范易于实现，支持第三方插件。 简单的说兼容其它容器技术(Podman)以及上层编排系统(Kubernetes &amp; Mesos等)并且社区活跃度高(CoreOS主推);<br>缺点: 非Docker原生与Docker容器没那么紧密。</p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313232442.png" target="_blank" title="WeiyiGeek.CNI" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313232442.png" alt="WeiyiGeek.CNI" title="" class=""></a>
+                <p>WeiyiGeek.CNI</p>
+            </figure>
+<p>常见的 CNI 网络插件有：</p>
+<ul>
+<li><p>Calico（性能好、灵活性最强，目前的企业级主流）：是一个<code>基于 BGP 路由协议</code>的纯 L3 的数据中心网络方案（不需要 Overlay），提供简单，可扩展的网络。除了可扩展的网络， Calico 还提供策略隔离。</p>
+</li>
+<li><p>Flannel（最成熟、最简单的选择）：基于 Linux TUN/TAP，<code>使用 UDP 封装 IP 数据包</code>的方式来创建 Overlay 网络，并借助 etcd 来维护网络资源的分配情况，是一种简单易用的 Overlay 网络方案。</p>
+</li>
+<li><p>Weave Net：支持多主机容器网络可以跨越不同的<code>云网络配置</code>。独有的功能，是对整个网络的简单加密，会增加网络开销。</p>
+</li>
+<li><p>Cilium：是一个开源软件，基于 Linux Kernel BPF 技术，可以在 Linux Kernel 内部动态地插入具有安全性、可见性的网络控制逻辑。</p>
+</li>
+<li><p>kopeio-networking：是专为 Kubernetes 而设计的网络方案，充分利用了 Kubernetes API，因此更简单更可靠。</p>
+</li>
+<li><p>kube-router：是专为 Kubernetes 打造的专用网络解决方案，旨在提供操作简单性和性能。</p>
+</li>
+</ul>
+<p>CNI 插件项目 Forks 数量比较：<br><figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313233227.png" target="_blank" title="WeiyiGeek.市场占有率" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313233227.png" alt="WeiyiGeek.市场占有率" title="" class=""></a>
+                <p>WeiyiGeek.市场占有率</p>
+            </figure></p>
+<p>Tips : CNI 插件项目 10Gbit 网络下的 CPU 消耗比较 <code>Calico &lt; Cilium &lt; Flannel &lt; kube-router &lt; Weave Net</code></p>
+<hr>
+<h2 id="0x01-网络模型"><a href="#0x01-网络模型" class="headerlink" title="0x01 网络模型"></a>0x01 网络模型</h2><p>描述: 在进行网络模型的讲解之前先来看看基础网络模型;</p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313233740.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313233740.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><strong>Kubernetes 网络中涉及以下几种类型的地址：</strong></p>
+<ul>
+<li>Node IP：宿主机 IP 地址。</li>
+<li>Pod IP：Pod 是 Kubernetes 的最小部署单元，Pod 下可以包含若干个 Containers，但是 Container 没有独立的 IP 地址，它们共享 Pod 的 IP 地址和 Ports 区间。</li>
+<li>Cluster IP：这里所述 Cluster 并非 Kubernetes Cluster，而是 Kubernetes Service 的 IP 地址。外部网络是无法访问该地址的，只有 Kubernetes Cluster 内部才能访问。因为 Cluster IP 是一个虚拟的 IP 地址，即：没有网络设备为这个 IP 地址负责。在 Kubernetes 内部使用了 IPtables 规则来重定向到其本地端口，再均衡到后端的 Pods；</li>
+<li>Public IP：因为 Cluster IP 能在 Kubernetes Cluster Internal 访问，属于应用程序内部的层级。如果希望将这个 Service 为 Kubernetes Cluster External 的客户端提供访问就需要为这个 Service 提供一个 Public IP。</li>
+</ul>
+<h3 id="网络实现"><a href="#网络实现" class="headerlink" title="网络实现"></a>网络实现</h3><p>描述: 根据业务和需求的不同k8s在进行网络设计时主要考虑了下面几种通信场景</p>
+<ul>
+<li>1) Pod 内部的 Containers 间的通信</li>
+<li>2) 同主机 Pod 间的通信（Host Virtual Network 模式）</li>
+<li>3) 跨主机 Pod 间的通信（SDN 模式）</li>
+<li>4) 集群中 Service 与 Pod 间的通信</li>
+<li>5) 集群中 各内外组件间的通信</li>
+</ul>
+<p><br/></p>
+<h4 id="1-Pod-内部的-Containers-间的通信"><a href="#1-Pod-内部的-Containers-间的通信" class="headerlink" title="(1) Pod 内部的 Containers 间的通信"></a>(1) Pod 内部的 Containers 间的通信</h4><p>描述: Pod 内部的 Containers 间的通信<code>（Container 模式）</code>，Pod 内部的 Containers 通过 localhost 进行通信，它们使用了同一个 Network Namespace。对 Container 而言hostname 就是 Pod 的名称。</p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313235045.png" target="_blank" title="WeiyiGeek.Pod 内部的 Containers 间的通信" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313235045.png" alt="WeiyiGeek.Pod 内部的 Containers 间的通信" title="" class=""></a>
+                <p>WeiyiGeek.Pod 内部的 Containers 间的通信</p>
+            </figure>
+<p>Pod 内部的 Containers 共享同一个 IP 地址和端口区间，所以要为每个可以建立连接的 Container 分配不同的 Port 号。也就是说Pod 中的 “应用” 需要自己协调端口号的分配和使用。</p>
+<p>举个例子：创建一个 Pod 包含两个 Containers 同一个 Pod 下属的两个 Containers 不能占有同一个 Port 号，因为 Port 区间也是共享的。</p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313234705.png" target="_blank" title="WeiyiGeek.Containers共享网络栈" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313234705.png" alt="WeiyiGeek.Containers共享网络栈" title="" class=""></a>
+                <p>WeiyiGeek.Containers共享网络栈</p>
+            </figure>
+<p>所以，我们可以将 Pod 理解为一个小型的 “操作系统沙盒”，两个进程可以使用同一个操作系统 IP 地址，自然也就不可以使用同一个 Port 号了。</p>
+<p>实现原理：同一个 Pod 内的 Containers 处于同一个 Network Namespace，因此使用了相同的 IP 地址和 Port 区间。该 Namespace 是由一个名为 Pause Container 实现的，每当一个 Pod 被创建，<code>首先会创建一个 Pause Container</code>。<code>后续所有新的普通 Containers 都通过过共享 Pause Container 的网络栈</code>，实现与外部 Pod 进行通信。因此对于同 Pod 下属的 Containers 而言，它们看到的网络视图是一样的。上述我们在 Container 中看的 IP 地址，实际就是 Pause Container 的 IP 地址，通过控制 Pause Container 的网络协议栈就可以影响所有同属 Pod 下的 Container 的网络协议栈了。</p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313235141.png" target="_blank" title="WeiyiGeek.Pause Container 的网络协议栈" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313235141.png" alt="WeiyiGeek.Pause Container 的网络协议栈" title="" class=""></a>
+                <p>WeiyiGeek.Pause Container 的网络协议栈</p>
+            </figure>
+<p>Tips：这种新创建的容器和已经存在的一个容器（Pause）共享一个 Network Namespace（<code>而不是和宿主机共享</code>）的模式就是常说的 Container 模式。</p>
+<p><br></p>
+<h4 id="2-同主机-Pod-间的通信（Host-Virtual-Network-模式）"><a href="#2-同主机-Pod-间的通信（Host-Virtual-Network-模式）" class="headerlink" title="(2) 同主机 Pod 间的通信（Host Virtual Network 模式）"></a>(2) 同主机 Pod 间的通信（Host Virtual Network 模式）</h4><p>描述: 每个 Node 上的每个 Pod 都有自己专属的 Network Namespace，由此实现 Container 模型网络的隔离。而两个 Pod 之间即两个 Network Namespace 之间希望进行通信的话，就需要使用到 Linux 操作系统的<code>网络虚拟化技术 Veth Pair（虚拟网线）</code>了。</p>
+<p>但是，如果有多个 Pod 都需要两两建立 Veth Pair 的话，扩展性就会非常的差，假如：有 N 个 Pod，就需要创建 n(n-1)/2 个 Veth Pair。可见，除了 Veth Pair（虚拟网线）之外，我们还需要一个二层的 “集线” 设备 <code>Linux Bridge（虚拟交换机）</code>。</p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313235531.png" target="_blank" title="WeiyiGeek.同主机 Pod 间的通信" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210313235531.png" alt="WeiyiGeek.同主机 Pod 间的通信" title="" class=""></a>
+                <p>WeiyiGeek.同主机 Pod 间的通信</p>
+            </figure>
+<p>Tips: 在K8s节点中将会从Docker0虚拟网卡中的tunl0隧道接口子网中分配一个该网段IP给Pod进行使用并且此tunl0隧道接口地址即为Pod网关通信地址;</p>
+<p>原理示例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1</span></span><br><span class="line">$ ip addr</span><br><span class="line">....</span><br><span class="line">3: tunl0@NONE: &lt;NOARP,UP,LOWER_UP&gt; mtu 1480 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/ipip 0.0.0.0 brd 0.0.0.0</span><br><span class="line">    inet 172.16.0.192/32 scope global tunl0  <span class="comment"># 运行在该节点上的Pod的网关地址</span></span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">4: docker0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default</span><br><span class="line">    link/ether 02:42:e3:83:5e:a1 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::42:e3ff:fe83:5ea1/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">....</span><br><span class="line">97: veth09836f7@if96: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue master docker0 state UP group default</span><br><span class="line">    link/ether 6e:e4:02:db:75:57 brd ff:ff:ff:ff:ff:ff link-netnsid 2</span><br><span class="line">    inet6 fe80::6ce4:2ff:fedb:7557/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">117: veth867869c@if116: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue master docker0 state UP group default</span><br><span class="line">    link/ether 4a:62:4c:ba:c6:91 brd ff:ff:ff:ff:ff:ff link-netnsid 3</span><br><span class="line">    inet6 fe80::4862:4cff:feba:c691/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"><span class="comment"># 方式2</span></span><br><span class="line">$ bridge -d link</span><br><span class="line">4: docker0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 master docker0 docker0</span><br><span class="line">97: veth09836f7@if96: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 master docker0 state forwarding priority 32 cost 2</span><br><span class="line">    hairpin off guard off root_block off fastleave off learning on flood on mcast_flood on mcast_to_unicast off neigh_suppress off vlan_tunnel off isolated off veth09836f7</span><br><span class="line">117: veth867869c@if116: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 master docker0 state forwarding priority 32 cost 2</span><br><span class="line">    hairpin off guard off root_block off fastleave off learning on flood on mcast_flood on mcast_to_unicast off neigh_suppress off vlan_tunnel off isolated off veth867869c</span><br><span class="line"></span><br><span class="line"><span class="comment"># 例如本机的corednsPod</span></span><br><span class="line">~$ kubectl get pod -n kube-system  -o wide | grep <span class="string">"coredns"</span></span><br><span class="line">coredns-6c76c8bb89-hr9b7                   1/1     Running   2          61d   172.16.0.198     weiyigeek-107  </span><br><span class="line">coredns-6c76c8bb89-kgbdb                   1/1     Running   2          61d   172.16.0.199     weiyigeek-107 </span><br><span class="line"><span class="comment"># coredns 的端点情况</span></span><br><span class="line">~$ kubectl get endpoints -n kube-system kube-dns</span><br><span class="line">NAME       ENDPOINTS                                                     AGE</span><br><span class="line">kube-dns   172.16.0.198:53,172.16.0.199:53,172.16.0.198:53 + 3 more...   61d</span><br><span class="line"></span><br><span class="line"><span class="comment"># 路由跟踪就是本机</span></span><br><span class="line">~$ tracepath  -4 172.16.0.199</span><br><span class="line"> 1?: [LOCALHOST]                      pmtu 1480</span><br><span class="line"> 1:  172.16.0.199                                          0.063ms reached</span><br><span class="line"> 1:  172.16.0.199                                          0.034ms reached</span><br><span class="line">     Resume: pmtu 1480 hops 1 back 1</span><br></pre></td></tr></table></figure></p>
+<p>补充说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 例如 jenkins-844756cf77-nvhmj pod 运行在weiyigeek-226节点的 172.16.182.205 中</span></span><br><span class="line">~$ kubectl get pod -n devops -o wide</span><br><span class="line">NAME                                 READY   STATUS    RESTARTS   AGE   IP               NODE      </span><br><span class="line">jenkins-844756cf77-nvhmj             1/1     Running   0          12d   172.16.182.205   weiyigeek-226   </span><br><span class="line"></span><br><span class="line"><span class="comment"># 其次我们在宿主机上进行路由跟踪</span></span><br><span class="line">~$ tracepath  -4 172.16.182.205</span><br><span class="line"> 1?: [LOCALHOST]                      pmtu 1480</span><br><span class="line"> 1:  172.16.182.192                    0.353ms  <span class="comment"># 实际上是weiyigeek-226节点的tunl0虚拟网卡;</span></span><br><span class="line"> 1:  172.16.182.192                    0.305ms</span><br><span class="line"> 2:  172.16.182.205                    0.304ms reached</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证结论</span></span><br><span class="line">weiyigeek@weiyigeek-226:~$ ip addr | grep <span class="string">"172.16.182.192"</span> -B 2</span><br><span class="line">7: tunl0@NONE: &lt;NOARP,UP,LOWER_UP&gt; mtu 1480 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/ipip 0.0.0.0 brd 0.0.0.0</span><br><span class="line">    inet 172.16.182.192/32 scope global tunl0</span><br></pre></td></tr></table></figure></p>
+<p>Tips : 这种借助于 Linux 操作系统原生的网络虚拟化技术实现的两个本地 Pods 之间的网络通信方式，称为 <code>Host Virtual Network</code> 模式。</p>
+<p><br></p>
+<h4 id="3-跨主机-Pod-间的通信（SDN-模式）"><a href="#3-跨主机-Pod-间的通信（SDN-模式）" class="headerlink" title="(3) 跨主机 Pod 间的通信（SDN 模式）"></a>(3) 跨主机 Pod 间的通信（SDN 模式）</h4><p>描述: 总的来说跨主机通信无非是下面两种方式，本质是在网络上架设一层Overlay Network使容器的网络运行在Overlay网络上，前面提到K8s的网络对Pod的IP地址的规划是平面管理的。</p>
+<ul>
+<li>Overlay 隧道互通：Nodes 之间通过物理网络互通，e.g. OvS、Flannel 和 Weave。</li>
+<li>Underlay 直接互通：Nodes 之间通过物理网络互通，e.g. Calico 的 Direct 模式、macvlan。</li>
+</ul>
+<p>从网络角度对 Flannel 和 Calico 进行简单对比(<code>后面详细讲解</code>)。</p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314001828.png" target="_blank" title="WeiyiGeek.Flannel 和 Calico对比" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314001828.png" alt="WeiyiGeek.Flannel 和 Calico对比" title="" class=""></a>
+                <p>WeiyiGeek.Flannel 和 Calico对比</p>
+            </figure>
+<p>Tips: 可见对性能敏感、策略需求较高时偏向于 Calico 方案。否则采用 Flannel 会是更好的选择；<br>Tips: 跨主机Pod间通信的简单流程<code>Pod1流出到Veth虚拟接口-&gt;到达Docker0网桥-&gt;通过宿主机物理网口-&gt;到达对方物理网口-&gt;对方Docker0网桥-&gt;Veth虚拟接口-&gt;Pod2</code></p>
+<p><br></p>
+<h4 id="4-Service-的-Cluster-IP-和外部网络间的通信"><a href="#4-Service-的-Cluster-IP-和外部网络间的通信" class="headerlink" title="(4) Service 的 Cluster IP 和外部网络间的通信"></a>(4) Service 的 Cluster IP 和外部网络间的通信</h4><p>描述: Service 之于集群内部 Pods 之间的通信Pod 间可以直接通过 IP 地址通信，但前提是 Pod 知道对方的 IP。</p>
+<p>在 Kubernetes Cluster 中，Pod 可能会频繁地销毁和创建，也就是说 Pod 的 IP 不是固定的。为了解决这个问题，Kubernetes Service 作为访问 Pod 的上层抽象。无论后端的 Pod 如何变化，Service 都作为稳定的前端对外提供服务(通过标签label方式进行绑定)。同时 Service 还提供了高可用和负载均衡功能，负责将请求转发给正确的 Pod。</p>
+<p>描述: Service 之于集群外部与 Pod 的通信, 无论是 <code>Pod IP 还是 Service 的 Cluster IP</code>，它们都是只能在 Kubernetes Cluster 内部可见的私有 IP 地址。Kubernetes 提供了两种方式可以让外部网络访问 Service 的 Cluster IP继而与 Pod 进行通信：</p>
+<ul>
+<li><p>ClusterIP ： 默认类型自动分配一个仅Cluster内部可以访问的虚拟IP(<code>常常由 flannel/Calico 网络插件进行管理</code>)【service创建一个仅集群内部可访问的ip，集群内部其他的pod可以通过该服务访问到其监控下的pod】</p>
+</li>
+<li><p>NodePort：Service 通过 Node 的静态端口对外提供服务，外部网络可以通过 NodeIP:NodePort 访问 Service，根据不同的 NodePort 可以访问不同的 Service。</p>
+</li>
+<li><p>LoadBalancer：Service 利用自建的负载均衡器（反向代理）将流量导向 Service，例如：Nginx、OpenStack Octavia、Cloud Provider（GCP、AWS、 Azure）等。</p>
+</li>
+</ul>
+<p>Tips: NodePort 其工作原理与ClusterIP大致相同发送到某个<code>NodeIP:NodePort</code>时, 通过iptables重定向到kube-proxy对应的端口之中(<code>固定或者随机由nodePort决定</code>), 然后由Kube-proxy将请求发送到指定Pod的TargetPod端口之中。</p>
+<p><br/></p>
+<p><strong>Kube-proxy 原理简述</strong><br>实现的两种Porxy Mode:</p>
+<ul>
+<li>1) UserSpace Mode : v1.0 版本及之前默认。<ul>
+<li>描述: 在用户空间通过kube-proxy实现Service的代理服务，其主要问题是<code>Service请求先会从用户空间进入内核的IPtables 然后回到用户空间，由kube-proxy完成后端的Endpoints的选择和代理工作</code>，这样导致流量从用户空间进入内核带来的性能损耗是不可接受的。</li>
+</ul>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314090853.png" target="_blank" title="WeiyiGeek.UserSpace Mode" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314090853.png" alt="WeiyiGeek.UserSpace Mode" title="" class=""></a>
+                <p>WeiyiGeek.UserSpace Mode</p>
+            </figure>
+<ul>
+<li>2) IPtables mode : v1.1 版本出现，在v1.2版本该模式替代了userpace模式.<ul>
+<li>描述: 它完全利用内核的IPtables来实现Service的代理和LB, 其主要问题是使用<code>IPtables NAT来完成转发存在一定的且不可忽视的性能损耗</code>。另外如果集群中存在上万的Service/Endpoint那么Node上的iptables rules将会非常庞大且性能还会再打折扣。所以常常在企业中通过Ingress Controller来集成HAproxy或者Nginx来替代Kube-proxy;</li>
+</ul>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314090942.png" target="_blank" title="WeiyiGeek.IPtables mode" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314090942.png" alt="WeiyiGeek.IPtables mode" title="" class=""></a>
+                <p>WeiyiGeek.IPtables mode</p>
+            </figure>
+<p>示例说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 获取ClusterIP与Endpoint端点可知 10.107.122.223 代理了后端 172.16.182.200:8080,172.16.183.89:8080,172.16.24.230:8080</span></span><br><span class="line">~$ kubectl get endpoints deploy-maven-svc</span><br><span class="line">  <span class="comment"># NAME               ENDPOINTS                                                   AGE</span></span><br><span class="line">  <span class="comment"># deploy-maven-svc   172.16.182.200:8080,172.16.183.89:8080,172.16.24.230:8080   9d  # </span></span><br><span class="line"></span><br><span class="line">~$ kubectl get svc deploy-maven-svc</span><br><span class="line">  <span class="comment"># NAME               TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE</span></span><br><span class="line">  <span class="comment"># deploy-maven-svc   NodePort   10.107.122.223   &lt;none&gt;        8080:30089/TCP   9d</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 内核中 iptables 转发列表查看</span></span><br><span class="line">~$ sudo iptables -S -t nat</span><br><span class="line">  <span class="comment"># -A KUBE-FIREWALL -j KUBE-MARK-DROP</span></span><br><span class="line">  <span class="comment"># -A KUBE-LOAD-BALANCER -j KUBE-MARK-MASQ</span></span><br><span class="line">  <span class="comment"># -A KUBE-MARK-MASQ -j MARK --set-xmark 0x4000/0x4000</span></span><br><span class="line">  <span class="comment"># -A KUBE-NODE-PORT -p tcp -m comment --comment "Kubernetes nodeport TCP port for masquerade purpose" -m set --match-set KUBE-NODE-PORT-TCP dst -j KUBE-MARK-MASQ</span></span><br><span class="line">  <span class="comment"># -A KUBE-POSTROUTING -m comment --comment "Kubernetes endpoints dst ip:port, source ip for solving hairpin purpose" -m set --match-set KUBE-LOOP-BACK dst,dst,src -j MASQUERADE</span></span><br><span class="line">  <span class="comment"># -A KUBE-POSTROUTING -m mark ! --mark 0x4000/0x4000 -j RETURN</span></span><br><span class="line">  <span class="comment"># -A KUBE-POSTROUTING -j MARK --set-xmark 0x4000/0x0</span></span><br><span class="line">  <span class="comment"># -A KUBE-POSTROUTING -m comment --comment "kubernetes service traffic requiring SNAT" -j MASQUERADE --random-fully</span></span><br><span class="line">  <span class="comment"># # 此为 Pod 运行的的网段指向`KUBE-CLUSTER-IP`ClusterIP</span></span><br><span class="line">  <span class="comment"># -A KUBE-SERVICES ! -s 172.16.0.0/16 -m comment --comment "Kubernetes service cluster ip + port for masquerade purpose" -m set --match-set KUBE-CLUSTER-IP dst,dst -j KUBE-MARK-MASQ  </span></span><br><span class="line">  <span class="comment"># -A KUBE-SERVICES -m addrtype --dst-type LOCAL -j KUBE-NODE-PORT</span></span><br><span class="line">  <span class="comment"># # 转发到 KUBE-SERVICES 链中匹配CLUSTER-IP地址进行通信</span></span><br><span class="line">  <span class="comment"># -A KUBE-SERVICES -m set --match-set KUBE-CLUSTER-IP dst,dst -j ACCEPT</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h3 id="网络组件"><a href="#网络组件" class="headerlink" title="网络组件"></a>网络组件</h3><h4 id="1-Flannel"><a href="#1-Flannel" class="headerlink" title="(1) Flannel"></a>(1) Flannel</h4><p>描述: Flannel 是 CoreOS 团队针对于Kubernetes设计的一个网络规划服务也可以为其它其它容器提供往来服务，简单来说它的功能是让集群中的不同节点主机创建的Docker容器都具有全集权唯一的虚拟IP地址，并且它能将这些IP地址之间建立一个覆盖网络<code>(Overlay Network 将数据包原封不动的传递到目标容器内)</code>，即实现了跨主机的扁平化管理网络；</p>
+<p>Tips: 所有容器在Flannel提供的网络平面上可以看作是同一个网段自由通信，其模型全部的容器使用一个Network然后在每个Host上从network中划分一个子网subnet，在为host上的容器创建网络时，将会从subnet中划分一个IP给容器，这样就大大提高了容器之间的工作效率并且不用考虑IP转换问题。</p>
+<p>Tips: 由于K8s的模型为每一个Pod提供一个IP，Flannel的模型正好与之契合。因此Flannel是最简单易用的Kubernetes集群网络解决方案。</p>
+<p><br/></p>
+<p><strong>优缺点</strong><br>优点: Flannel 模型与K8s默认模型一样都为每个Pod提供一个ip,其可以大大提升容器之间的工作效率。<br>缺点: 资源占用较高，且必须和etcd数据库一起使用。</p>
+<p><br/></p>
+<p><strong>原理解析与图示</strong><br>描述: Flannel网络解决方案利用Overlay网络在报文进入实际物理网络之前会经过一层UDP封装作为Playload到达对端，对端拿到UDP报文后进行解包得到真实用户报文后转发给实际接收方。</p>
+<p>原理图如下:<br><figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201101220922.png" target="_blank" title="WeiyiGeek.Flannel网络解决方案原理" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201101220922.png" alt="WeiyiGeek.Flannel网络解决方案原理" title="" class=""></a>
+                <p>WeiyiGeek.Flannel网络解决方案原理</p>
+            </figure></p>
+<p>原理说明：</p>
+<ul>
+<li>(0) etcd 在 Flannel 主要用于存储管理Flannel可分配的IP地址段资源, 监控etcd中每个pod的实际地址并在内存中建立维护Pod节点的路由表（<code>便于跨Pod间交流通信知道走哪里</code>）;</li>
+<li>(1) Flanneld 进程服务有一个监听端口，用于后期转发数据包以及接收数据包的接口;</li>
+<li>(2) Iptables 通过底层的一堆转发机制进行数据包的转发到另外一台RealServer的Flanneld上</li>
+</ul>
+<p>囊括说明: Flannel 网络组件离不开etcd因为其存储了各个Node中Pod子网以及Service相关的IP地址，当需要对其它HOST进行数据转发时，从etcd数据库查询到目标host所在的子网IP，并将数据发往对应的host上的Flanneld交由其转发。</p>
+<p>Tips : 官方图示为Docker0但出于地址规划的原因，实际上在K8s上会新创建一个CNI0网桥其负责本 Node 容器的IP分配(/24)。</p>
+<p>Q: 每个Node都有自己的CNI0网桥如何保证地址不会重复分配呢?</p>
+<blockquote>
+<p>答: 这就是使用了Flannel插件其会根据全局统一的etcd来为每一个Node分配全集群唯一的网段来避免地址分配冲突，即当cni0拿到报文后查询本机路由，将会匹配的是16位的掩码Flannel。</p>
+</blockquote>
+<p>Q: linux 上用户态和内核态通信的手段?</p>
+<blockquote>
+<p>1.Netlink Socket<br>2.syscall : 例如调用用户态的read/write接口。<br>3.IOCTL<br>4.procfs : 例如读取/proc目录下的ip统计计数。<br>5.TUN/TAP : 两种驱动程序实现了虚拟网卡的功能，Tun表示虚拟的是点对点的设备，tap表示虚拟的是以太网设备两种设备都是对网络包实施不同的封装。</p>
+</blockquote>
+<p><br/></p>
+<p><strong>地址分配 &amp; 路由下发</strong><br>描述: flanneld 守护进程第一次启动时，会从 etcd 获取配置的 Pod 网段信息，为本节点分配一个未使用的 IP 地址段，然后创建 flannedl.1 网络接口（也可能是其它名称），Flannel 将分配给自己的 Pod 网段信息写入 <code>/run/flannel/docker</code> 文件（不同 Kubernets 版本的文件名存在差异），Docker 后续使用这个文件中的环境变量设置 docker0 网桥，从而使这个地址段为本节点的所有。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 Flannel 为 Docker 分配的地址段：</span></span><br><span class="line">~$ cat /run/flannel/subnet.env</span><br><span class="line">FLANNEL_NETWORK=10.244.0.0/16</span><br><span class="line">FLANNEL_SUBNET=10.244.1.1/24</span><br><span class="line">FLANNEL_MTU=1450</span><br><span class="line">FLANNEL_IPMASQ=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<p>Tips : 表示该 Node 上所有 Pod 的 IP 地址都从 <code>Flannel Subnet 10.244.1.1/24</code> 中分配，比如 node1 下属的 2 个 Pod 的 IP 地址：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">~$ kubectl get pod -o wide | grep <span class="string">"Running"</span></span><br><span class="line">  <span class="comment"># deploy-blog-html-0                        1/1     Running       2          79d   10.244.1.19    weiyigeek-ubuntu</span></span><br><span class="line">  <span class="comment"># deploy-java-maven-0                       1/1     Running       2          40d   10.244.1.15    weiyigeek-ubuntu</span></span><br><span class="line">  <span class="comment"># nfs-client-provisioner-58b5dc958d-pxhb7   1/1     Running       1          11d   10.244.1.20    weiyigeek-ubuntu</span></span><br><span class="line">  <span class="comment"># nginx-app                                 1/1     Running       2          38d   10.244.1.14    weiyigeek-ubuntu</span></span><br><span class="line">  <span class="comment"># web-0                                     1/1     Running       2          38d   10.244.1.16    weiyigeek-ubuntu</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips : 路由下发 每个 Node 中的 flanneld 守护进程，可以创建 Kernel 的路由表，查看 node1 的路由表如下, 其中 Destination 10.244.2.0 为 node2 的目的网段出口为 <code>flannel.1 interface</code>;<br><code>flannel.1 interface</code>是 flanneld 创建的一个隧道接口。并且 flanneld 中央存储了 Container-Node 之间的映射关系到 etcd 中，以此来作为建立最外层隧道封装的 Tunnel ID，将两个 Nodes 中的两个 Containers 互联起来。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">~$ route -n</span><br><span class="line">  <span class="comment"># Kernel IP routing table</span></span><br><span class="line">  <span class="comment"># Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</span></span><br><span class="line">  <span class="comment"># 0.0.0.0         10.10.107.1     0.0.0.0         UG    0      0        0 ens160</span></span><br><span class="line">  <span class="comment"># 10.10.107.0     0.0.0.0         255.255.255.0   U     0      0        0 ens160</span></span><br><span class="line">  <span class="comment"># 10.244.0.0      0.0.0.0         255.255.255.0   U     0      0        0 cni0</span></span><br><span class="line">  <span class="comment"># 10.244.1.0      10.244.1.0      255.255.255.0   UG    0      0        0 flannel.1</span></span><br><span class="line">  <span class="comment"># 10.244.2.0      10.244.2.0      255.255.255.0   UG    0      0        0 flannel.1</span></span><br><span class="line">  <span class="comment"># 172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0</span></span><br><span class="line">  <span class="comment"># 172.18.0.0      0.0.0.0         255.255.0.0     U     0      0        0 br-26a32f4b83c1</span></span><br></pre></td></tr></table></figure>
+<p><br></p>
+<p><strong>数据封装</strong><br>描述: Flannel 知道外层封装的隧道对端 IP 地址后，对数据报文进行封装，SourceIP 采用本节点的 NodeIP，DestIP 采用对端的 VXLAN 外层的 UDP Port 8472，隧道的对端只需要监听这个 Port 即可，当该 Port 收到报文后将报文送到 flannedld 进程，进程将报文送到 flanned interface 进行封装，然后查询本地路由表，可以看到目的地址的 interface 为 cni0<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~$ route -n</span><br><span class="line">  <span class="comment"># Kernel IP routing table</span></span><br><span class="line">  <span class="comment"># Destination     Gateway         Genmask         Flags Metric Ref    Use Iface</span></span><br><span class="line">  <span class="comment"># 10.244.0.0      0.0.0.0         255.255.255.0   U     0      0        0 cni0</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>实际流程</strong></p>
+<ul>
+<li><p>1) 假如 Web app3 访问 Backend , 其流程如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1.Web APP3 发生请求记录目标的IP为10.1.20.3和请求地址的数据包</span><br><span class="line">2.Docker0网桥收到数据包后发现是在同一个子网里`利用UDP`直接转发给10.1.20.3的Backend服务</span><br><span class="line">3.Backend接收到Web App3的请求后将反馈的数据通过原路返回</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>2) 假如 Web app2 访问 Backend , 其流程如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1.Web APP3 发生请求生成数据包其中包括目标的IP(`10.1.20.3`)和源IP(10.1.15.2)以及自身的Mac</span><br><span class="line">2.Docker0 (10.1.15.1/24) 网桥对该数据封包进行解析发现目标地址非本局域网内填上自身的源转发给Flannel0</span><br><span class="line">3.在Dlannel0接收到后会通过Flanneld进程服务从etcd数据库中取出到该目标IP的路由</span><br><span class="line">4.然后通过Iptable转发封装OuterIP的Src地址192.168.66.11和Dest地址为192.168.66.12, 其InnerIP 记录实际的请求源地址以及目标地址在加上Playload的数据包实体;</span><br><span class="line">5.当Pod网络接口接收到该数据包时候转发给Flanneld服务</span><br><span class="line">6.Flanneld服务获得InnerIP数据包的请求的目标地址并在etc中进行查询获得路由表信息</span><br><span class="line">7.转发给Flannel0在发送Docker0网桥其发现访问的地址为10.1.20.3则将请求进行重新封装后转发</span><br><span class="line">8.Backend获得请求的数据包</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Flannel跨Pod通信流程: <code>Container A -&gt; vethx(Pod IP) -&gt; docker0 -&gt; flannel(0CNI) -&gt; Node A(物理网卡) --&gt; Node B(物理网卡) -&gt; flannel(0CNI) -&gt;  docker0 -&gt; vethx (Pod IP) -&gt; Container B</code></p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201101223859.png" target="_blank" title="WeiyiGeek.Flannel跨Pod通信流程" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201101223859.png" alt="WeiyiGeek.Flannel跨Pod通信流程" title="" class=""></a>
+                <p>WeiyiGeek.Flannel跨Pod通信流程</p>
+            </figure>
+<p><br/></p>
+<p><strong>补充说明:</strong></p>
+<ul>
+<li><p>(1) Docker 可以与 Flannel 网络模型进行集成配置;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">~$ mkdir -vp /usr/lib/systemd/system/docker.service.d/</span><br><span class="line">~$ tee -a /usr/lib/systemd/system/docker.service.d/flannel.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">[Service]</span><br><span class="line">environmentFile=-/run/flannel/docker</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">~$ cat /run/flannel/subnet.env</span><br><span class="line">FLANNEL_NETWORK=10.244.0.0/16</span><br><span class="line">FLANNEL_SUBNET=10.244.0.1/24</span><br><span class="line">FLANNEL_MTU=1450</span><br><span class="line">FLANNEL_IPMASQ=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>(2) Flannel 支持 2 种不同的后端实现，分别是：</p>
+<ul>
+<li>Host-gw：需要两个 Node 处于同一网段，不支持跨网，因此不适合大规模部署。</li>
+<li>VXLAN：使用 VXLAN 技术为各 Node 创建一个可以互通的 Pod 网络，使用的端口为 UDP 8472。</li>
+</ul>
+</li>
+</ul>
+<p><br/></p>
+<h4 id="2-Calico"><a href="#2-Calico" class="headerlink" title="(2) Calico"></a>(2) Calico</h4><p>描述: Calico 是一个纯三层的数据中心网络方案，而且无缝集成像OpenStack这种IaaS云架构，能够提供可控的VM/容器/裸机之间的IP通信。其采用虚拟路由替代虚拟交换，每台虚拟路由通过<code>BGP协议</code>传播可达信息(路由)到剩余数据中心。</p>
+<p><strong>原理解析</strong><br>描述: Calico 在每一个计算节点利用Linux Kernel 实现一个高效的vRouter来负责数据的转发，而每个vRouter通过BGP协议负责把自己运行的Workload的路由信息向整个Calico网络传播(<code>小规模可以直接互联而在大规模下可通过指定的BGP Route Reflector来完成</code>)。</p>
+<p><br></p>
+<p><strong>Calico 架构</strong></p>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314222310.png" target="_blank" title="WeiyiGeek.架构图" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314222310.png" alt="WeiyiGeek.架构图" title="" class=""></a>
+                <p>WeiyiGeek.架构图</p>
+            </figure>
+<p><br></p>
+<p><strong>Calico 组件功能(重点):</strong></p>
+<ul>
+<li>Felix（Calico agent）：运行在每个 Node 上，为容器设置网络信息，例如：IP 地址、路由规则，IPtables 规则等。</li>
+<li>Bird（BGP Client）：运行在每个 Node 上，监听由 Felix 注入的路由信息，然后通过 BGP 协议广播告诉其他 Nodes，从而实现网络互通。</li>
+<li>BGP Route Reflector：BGP Peer 建立的方式多样，可以在 Node 之间两两建立 BPGP Peer（默认模式），和传统 iBGP Peer 问题类似，这会带来 n*(n-1)/2 的邻居量。因此也可以自建 RR 反射器，Node 和 RR 建立 Peer。当然 Node 也可以和 TOR 建立 Peer。具体选择哪种 Peer 方式没有固定标准，要适配总体网络规划，只要最终保证容器网络可正确发布到物理网络即可；</li>
+<li>Etcd : 分布式键值数据库，负责网络元数据的一致性以及Calico网络状态的准确性。</li>
+<li>Calicoctl：命令行管理工具。</li>
+</ul>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314222200.png" target="_blank" title="WeiyiGeek.组件功能图" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314222200.png" alt="WeiyiGeek.组件功能图" title="" class=""></a>
+                <p>WeiyiGeek.组件功能图</p>
+            </figure>
+<p>Tips : Calico 其不使用重叠的网络比如Flannel 和 Libnetwork 网络驱动。<br>Tips : Calico 节点组网可直接利用数据中心的网络结果无论是(L2或者L3)，不需要额外的NAT以及隧道或者Overlay Network;<br>Tips : Calico 基于IPtables还提供了丰富而又灵活的网络Policy, 保证通过各个节点上的ACLs来提供Workload的多租户隔离、安全组以及其它可达限制等功能。</p>
+<p><br></p>
+<p><strong>Calico 支持 3 种路由模式：</strong></p>
+<ul>
+<li>1) Direct 路由转发，报文不做封装；</li>
+<li>2) IP-in-IP（Default）封装；</li>
+<li>3) VXLAN 封装；</li>
+</ul>
+<p>这里主要介绍 Direct 模式，使用 BGP 路由协议宣告容器网段，使得全网所有的 Nodes 和网络设备都有到彼此的路由的信息，然后直接通过 Underlay 转发。</p>
+<p><strong>通信流程:</strong><br>数据通信的流程为<code>数据包先从 Veth Pair 的一端发出，到达 Node 上的以 Cali 为前缀的虚拟网卡上，也就到达了 Host 的内核网络协议栈, 然后查询路由表转发</code>；因为本地节点通过 Bird 和 RR 建立 BGP 邻居关系，会将本地的容器地址发送到 RR 从而反射到网络中的其它 Nodes 上，同样其它 Nodes 的网络地址也会传送到本地，然后由 Felix 进程进行管理并下发到路由表中，报文匹配路由规则后正常进行转发即可（实际还有复杂的 iptables 规则这里不做展开）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 虚拟接口</span></span><br><span class="line">~$ ip addr | egrep -v <span class="string">"^\s"</span></span><br><span class="line">  <span class="comment"># 1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span></span><br><span class="line">  <span class="comment"># 2: ens160: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP group default qlen 1000</span></span><br><span class="line">  <span class="comment"># 3: tunl0@NONE: &lt;NOARP,UP,LOWER_UP&gt; mtu 1480 qdisc noqueue state UNKNOWN group default qlen 1000</span></span><br><span class="line">  <span class="comment"># 4: docker0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default</span></span><br><span class="line">  <span class="comment"># 5: kube-ipvs0: &lt;BROADCAST,NOARP&gt; mtu 1500 qdisc noop state DOWN group default</span></span><br><span class="line">  <span class="comment"># 6: calib6c39f0a1d5@if4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1480 qdisc noqueue state UP group default</span></span><br><span class="line">  <span class="comment"># 7: calic77cbbaf4da@if4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1480 qdisc noqueue state UP group default</span></span><br><span class="line">  <span class="comment"># 97: veth09836f7@if96: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue master docker0 state UP group default</span></span><br><span class="line">  <span class="comment"># 117: veth867869c@if116: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue master docker0 state UP group default</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># NAT 转发表以及五条链</span></span><br><span class="line"><span class="comment"># PREROUTING:数据包进入路由表之前</span></span><br><span class="line"><span class="comment"># INPUT:通过路由表后目的地为本机</span></span><br><span class="line"><span class="comment"># FORWARDING:通过路由表后，目的地不为本机</span></span><br><span class="line"><span class="comment"># OUTPUT:由本机产生，向外转发</span></span><br><span class="line"><span class="comment"># POSTROUTIONG:发送到网卡接口之前。</span></span><br><span class="line">~$ sudo iptables -S -t nat | grep <span class="string">"cali"</span></span><br><span class="line">  <span class="comment"># -N cali-OUTPUT</span></span><br><span class="line">  <span class="comment"># -N cali-POSTROUTING</span></span><br><span class="line">  <span class="comment"># -N cali-PREROUTING</span></span><br><span class="line">  <span class="comment"># -N cali-fip-dnat</span></span><br><span class="line">  <span class="comment"># -N cali-fip-snat</span></span><br><span class="line">  <span class="comment"># -N cali-nat-outgoing</span></span><br><span class="line">  <span class="comment"># -A PREROUTING -m comment --comment "cali:6gwbT8clXdHdC1b1" -j cali-PREROUTING</span></span><br><span class="line">  <span class="comment"># -A OUTPUT -m comment --comment "cali:tVnHkvAo15HuiPy0" -j cali-OUTPUT</span></span><br><span class="line">  <span class="comment"># -A POSTROUTING -m comment --comment "cali:O3lYWMrLQYEMJtB5" -j cali-POSTROUTING</span></span><br><span class="line">  <span class="comment"># -A cali-OUTPUT -m comment --comment "cali:GBTAv2p5CwevEyJm" -j cali-fip-dnat</span></span><br><span class="line">  <span class="comment"># -A cali-POSTROUTING -m comment --comment "cali:Z-c7XtVd2Bq7s_hA" -j cali-fip-snat</span></span><br><span class="line">  <span class="comment"># -A cali-POSTROUTING -m comment --comment "cali:nYKhEzDlr11Jccal" -j cali-nat-outgoing</span></span><br><span class="line">  <span class="comment"># -A cali-POSTROUTING -o tunl0 -m comment --comment "cali:SXWvdsbh4Mw7wOln" -m addrtype ! --src-type LOCAL --limit-iface-out -m addrtype --src-type LOCAL -j MASQUERADE --random-fully</span></span><br><span class="line">  <span class="comment"># -A cali-PREROUTING -m comment --comment "cali:r6XmIziWUJsdOK6Z" -j cali-fip-dnat</span></span><br><span class="line">  <span class="comment"># -A cali-nat-outgoing -m comment --comment "cali:flqWnvo8yq4ULQLa" -m set --match-set cali40masq-ipam-pools src -m set ! --match-set cali40all-ipam-pools dst -j MASQUERADE --random-fully</span></span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=11-kubernetes入门学习之网络设计实现方案 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314222849.png" target="_blank" title="WeiyiGeek.通讯图示" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210314222849.png" alt="WeiyiGeek.通讯图示" title="" class=""></a>
+                <p>WeiyiGeek.通讯图示</p>
+            </figure>
+<p><br></p>
+<h4 id="3-CoreDNS"><a href="#3-CoreDNS" class="headerlink" title="(3) CoreDNS"></a>(3) CoreDNS</h4><p>描述: Kubernetes 就是通过使用容器卷映射的功能修改 <code>/etc/resolv.conf</code>，使集群的所有容器都使用集群 DNS 服务器(CoreDNS)进行 DNS 解析, 默认的集群DNS名称为<code>svc.cluster.local</code>。</p>
+<p>文档参考地址: <a href="https://coredns.io/manual/toc/" target="_blank" rel="noopener">https://coredns.io/manual/toc/</a><br>应用场景: <a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/" target="_blank" rel="noopener">https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/</a><br>应用场景: <a href="https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/" target="_blank" rel="noopener">https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/</a></p>
+<p>Tips : 在 K8s 中它被用于提供服务发现功能; CoreDNS 最大的特点是灵活，可以很方便地给它编写插件以提供新功能。功能非常强大，相比传统 DNS 服务器，它非常“现代化”。</p>
+<p><br/></p>
+<p><strong>CoreDNS 应用在k8s场景</strong><br>描述: 主流的本地 DNS 服务器中，提供 UI 界面的有 <code>Windows DNS Server</code> 和 群晖 <code>DNS Server</code>，很方便不过这两个都是操作系统绑定的。</p>
+<p>在开源的 DNS 服务器里边儿BIND 好像是最有名的，各大 Linux 发行版自带的 <code>dig/host/nslookup</code>，最初都是 Bind 提供的命令行工具, 不过为了一举两得（DNS+K8s）咱还是直接学习 CoreDNS 的使用。。</p>
+<p><br/></p>
+<p>示例1.在k8s中集群内部服务发现与绑定采用的是CoreDNS如下所示:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1) 例如 我们设置 /etc/resolv.conf 如下</span></span><br><span class="line"><span class="comment"># nameserver 192.168.12.254</span></span><br><span class="line"><span class="comment"># search weiyigeek.top weiyigeek.cn</span></span><br><span class="line">nameserver 10.96.0.10</span><br><span class="line">search default.svc.cluster.local svc.cluster.local cluster.local</span><br><span class="line"><span class="comment"># ndots:5 是指少于 5 个 dots 的域名，都首先当作非 FQDN 看待优先在搜索域里面查找;</span></span><br><span class="line">options ndots:5</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2) 输入一个不存在的域名查看尝试过程</span></span><br><span class="line">~$ host -v weiyigeek</span><br><span class="line">  <span class="comment"># Trying "weiyigeek.default.svc.cluster.local"</span></span><br><span class="line">  <span class="comment"># Trying "weiyigeek.svc.cluster.local"</span></span><br><span class="line">  <span class="comment"># Trying "weiyigeek.cluster.local"</span></span><br><span class="line">  <span class="comment"># Trying "weiyigeek"</span></span><br><span class="line">  <span class="comment"># Host weiyigeek not found: 3(NXDOMAIN)</span></span><br><span class="line">  <span class="comment"># Received 102 bytes from 10.96.0.10#53 in 47 ms</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>CoreDNS 配置外部DNS</strong><br>描述: 接下来以 CoreDNS 为例，讲述如何配置一个 DNS 服务器，添加私有的 DNS 记录，并设置转发规则以解析公网域名。</p>
+<ol>
+<li>配置文件：Corefile<br>CoreDNS 因为是 Go 语言写的，编译结果是单个可执行文件，它默认以当前文件夹下的 Corefile 为配置文件。以 kubernetes 中的 Corefile 为例：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">.:53 &#123;</span><br><span class="line">    errors  <span class="comment"># 启用错误日志</span></span><br><span class="line">    health  <span class="comment"># 启用健康检查 api</span></span><br><span class="line">    ready  <span class="comment"># 启用 readiness 就绪 api</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 启用 kubernetes 集群支持，详见 https://coredns.io/plugins/kubernetes/</span></span><br><span class="line">    <span class="comment"># 此插件只处理 cluster.local 域，以及 PTR 解析</span></span><br><span class="line">    kubernetes cluster.local <span class="keyword">in</span>-addr.arpa ip6.arpa &#123;</span><br><span class="line">      pods insecure</span><br><span class="line">      upstream  <span class="comment"># </span></span><br><span class="line">      fallthrough <span class="keyword">in</span>-addr.arpa ip6.arpa  <span class="comment"># 向下传递 DNS 反向查询</span></span><br><span class="line">      ttl 30  <span class="comment"># 过期时间</span></span><br><span class="line">    &#125;</span><br><span class="line">    prometheus :9153  <span class="comment"># 启用 prometheus metrics 支持</span></span><br><span class="line">    forward . 114.114.114.114 19.29.29.29 <span class="comment"># 将非集群域名的 DNS 请求，转发给公网 DNS 服务器。</span></span><br><span class="line">    cache 30  <span class="comment"># 启用前端缓存，缓存的 TTL 设为 30</span></span><br><span class="line">    loop    <span class="comment"># 检测并停止死循环解析</span></span><br><span class="line">    reload  <span class="comment"># 支持动态更新 Corefile</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 随机化 A/AAAA/MX 记录的顺序以实现负载均衡。</span></span><br><span class="line">    <span class="comment">#   因为 DNS resolver 通常使用第一条记录，而第一条记录是随机的。这样客户端的请求就能被随机分配到多个后端。</span></span><br><span class="line">    loadbalance</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>Corefile 首先定义 DNS 域，域后的代码块内定义需要使用的各种插件。注意这里的插件顺序是没有任何意义的！插件的调用链是在 CoreDNS 编译时就定义好的，不能在运行时更改。</p>
+<p>通过上述配置启动的 CoreDNS 是无状态的，它以 Kubernetes ApiServer 为数据源，CoreDNS 本身只相当于一个查询器/缓存，因此它可以很方便地扩缩容。</p>
+<ol start="2">
+<li>将 CoreDNS 设置成一个私有 DNS 服务器<br>现在清楚了 Corefile 的结构，让我们来设计一个通过文件配置 DNS 条目的 Corefile 配置：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"># 定义可复用 Block</span><br><span class="line">(common) &#123;</span><br><span class="line">    log</span><br><span class="line">    errors</span><br><span class="line">    cache</span><br><span class="line">    loop    # 检测并停止死循环解析</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 本地开发环境的 DNS 解析</span><br><span class="line">dev-env.local:<span class="number">53</span> &#123;</span><br><span class="line">    <span class="keyword">import</span> common  # 导入 Block</span><br><span class="line">    file dev-env.local &#123; # 从文件 <span class="string">`dev-env.local`</span> 中读取 DNS 数据</span><br><span class="line">        reload <span class="number">30s</span>  # 每 <span class="number">30s</span> 检查一次配置的 Serial，若该值有变更则重载整个 Zone 的配置。</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 本地测试环境</span><br><span class="line">test-env.local:<span class="number">53</span> &#123;</span><br><span class="line">    <span class="keyword">import</span> common</span><br><span class="line">    file test-env.local &#123;</span><br><span class="line">        reload <span class="number">30s</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 其他</span><br><span class="line">.:<span class="number">53</span> &#123;</span><br><span class="line">    forward . <span class="number">114.114</span><span class="number">.114</span><span class="number">.114</span>  # 解析公网域名</span><br><span class="line">    log</span><br><span class="line">    errors</span><br><span class="line">    cache</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>上面的 Corefile 定义了两个本地域名 dev-env.local 和 test-env.local，它们的 DNS 数据分别保存在 file 指定的文件中。</p>
+<p>这个 file 指定的文件和 bind9 一样，都是使用在 rfc1035 中定义的 Master File 格式，dig 命令输出的就是这种格式的内容。示例如下：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">;; 與整個領域相關性較高的設定包括 NS, A, MX, SOA 等標誌的設定處！</span><br><span class="line">$TTL    <span class="number">30</span></span><br><span class="line">@                       IN SOA   dev-env.local. devops.dev-env.local. (</span><br><span class="line">                                     <span class="number">20200202</span> ; SERIAL，每次修改此文件，都应该同步修改这个“版本号”，可将它设为修改时间。</span><br><span class="line">                                     <span class="number">7200</span>     ; REFRESH</span><br><span class="line">                                     <span class="number">600</span>      ; RETRY</span><br><span class="line">                                     <span class="number">3600000</span>  ; EXPIRE</span><br><span class="line">                                     <span class="number">60</span>)      ; MINIMUM</span><br><span class="line">@                       IN NS    dns1.dev-env.local.   ; DNS 伺服器名稱</span><br><span class="line">dns1.dev-env.local.    IN A     <span class="number">192.168</span><span class="number">.23</span><span class="number">.2</span>         ; DNS 伺服器 IP</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">redis.dev-env.local.         IN A     <span class="number">192.168</span><span class="number">.23</span><span class="number">.21</span></span><br><span class="line">mysql.dev-env.local.         IN A     <span class="number">192.168</span><span class="number">.23</span><span class="number">.22</span></span><br><span class="line">elasticsearch.dev-env.local. IN A     <span class="number">192.168</span><span class="number">.23</span><span class="number">.23</span></span><br><span class="line">ftp                          IN A     <span class="number">192.168</span><span class="number">.23</span><span class="number">.25</span>  ;</span><br></pre></td></tr></table></figure></p>
+<p>test-env.local 也是一样的格式，根据上面的模板修改就行, 将这两个配置文件和 Corefile 放在同一个目录下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">root@<span class="built_in">test</span>-ubuntu:~/dns-server<span class="comment"># tree</span></span><br><span class="line">.</span><br><span class="line">├── coredns  <span class="comment"># coredns binary</span></span><br><span class="line">├── Corefile</span><br><span class="line">├── dev-env.local</span><br><span class="line">└── <span class="built_in">test</span>-env.local</span><br></pre></td></tr></table></figure></p>
+<p>然后通过 ./coredns 启动 coredns。通过 dig 检验不出意外就可以看到 ftp.dev-env.local 已经被成功解析了。</p>
+<ol start="3">
+<li><p>可选插件（External Plugins）<br>CoreDNS 提供的预编译版本，不包含 External Plugins 中列出的部分，如果你需要，可以自行修改 plugin.cfg，然后手动编译。不得不说 Go 语言的编译，比 C 语言是方便太多了。自动拉取依赖一行命令编译！只要配好 GOPROXY，启用可选插件其实相当简单。</p>
+</li>
+<li><p>设置 DNS 集群<br>单台 DNS 服务器的性能是有限的，而且存在单点故障问题。因此在要求高可用或者高性能的情况下，就需要设置 DNS 集群。</p>
+</li>
+</ol>
+<p>虽然说 CoreDNS 本身也支持各种 DNS Zone 传输，主从 DNS 服务器等功能，不过我想最简单的，可能还是直接用 K8s。</p>
+<p>直接用 ConfigMap 存配置，通过 Deployment 扩容就行，多方便。</p>
+<p>要修改起来更方便，还可以启用可选插件：redis，直接把配置以 json 的形式存在 redis 里，通过 redis-desktop-manager 进行查看与修改。</p>
+<hr>
+<h2 id="0x02-网络组件性能对比"><a href="#0x02-网络组件性能对比" class="headerlink" title="0x02 网络组件性能对比"></a>0x02 网络组件性能对比</h2><p><strong>1) CPU 压力  低 -&gt; 高</strong></p>
+<blockquote>
+<p>对比结果: host  &lt; Calico (BGP) &lt; Calico (IPIP) == Flannel (VXLAN) == Docker (VXLAN) &lt; Flannel(UDP) &lt; Weave (UDP)</p>
+</blockquote>
+<p><strong>2) 带宽(MB/Sec) 低 -&gt; 高</strong></p>
+<blockquote>
+<p>对比结果: Weave (UDP) &lt;  Flannel(UDP) &lt;  Flannel (VXLAN)  &lt; Docker (Overlay)  &lt; Calico (BGP) &lt; Calico (IPIP)  &lt; Host</p>
+</blockquote>
+<p><strong>3) 延迟(us) 低 -&gt; 高</strong></p>
+<blockquote>
+<p>对比结果: Host &lt; Calico (IPIP) &lt; Calico (BGP) &lt;  Flannel (VXLAN) &lt;  Flannel (udp)  &lt; Docker(Overlay)</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>网络方案</th>
+<th>Calico</th>
+<th>Flannel</th>
+<th>Docker Overlay</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>优势</td>
+<td>性能好、可靠性及隔离性好</td>
+<td>部署简单性能还可以</td>
+<td>Docker原生性能凑合</td>
+</tr>
+<tr>
+<td>劣势</td>
+<td>操作复杂对IPtbales依赖</td>
+<td>无法实现固定IP的容器漂移以及无法子网隔离，对上层设计依赖度高，没有IPAM以及IP地址浪费对Docker启动方式有绑定</td>
+<td>对内核版本有要求(&gt;3.16)并且docker守护进程依赖于Consul或者Etcd, 本身驱动实现还是略差点。针对于Network以及多子网隔离局部交叉的需求还是比较麻烦的IPAM很差。</td>
+</tr>
+</tbody>
+</table>
+<BR/>
+
+<p>网络组件总结: Calico BGP方案最好不能用BGP也可以考虑<code>Calico ipip</code>tunnel方案；如果是CoreOS系又能开UDP Offload，Flannel是不错的选择, Docker原生Overlay还有很多需要改进的地方。</p>
+<hr>
+<h2 id="0x03-Q-amp-A"><a href="#0x03-Q-amp-A" class="headerlink" title="0x03 Q&amp;A"></a>0x03 Q&amp;A</h2><p>Q：A的Pod如何连接B的Pod？ kube-dns起到什么作用？ kube-dns如果调用kube-proxy？</p>
+<pre><code>A：这里说的A和B应当是指Service，A Service中Pod与B Service Pod之间的通信，可以在其容器的环境变量中定义Service IP或是Service Name来实现；由于Service IP提前不知道，使用引入kube-dns做服务发现，它的作用就是监听Service变化并更新DNS，即Pod通过服务名称可以查询DNS；kube-proxy是一个简单的网络代理和负载均衡器，它的作用主要是负责service的实现，具体来说，就是实现了内部从Pod到Service和外部的从NodePort向Service的访问，可以说kube-dns和kube-proxy都是为Service服务的。
+</code></pre><p>Q：网络问题docker default是网桥模式（NAT） 如果用路由的模式，所以Pod的网关都会是docker0 IP ？ 那Pod 1与Pod 2之间也走路由 ，这会使路由表很大？ Flannel 网络是不是可以把所有的Node上，相当于一个分布式交换机？</p>
+<pre><code>A：Docker实现跨主机通信可以通过桥接和路由的方式，桥接的方式是将docker0桥接在主机的网卡上，而路由直接通过主机网口转发出去；Kubernetes网络有Pod和Server，Pod网络实现的方式很多，可以参考CNI网络模型，Flannel实质上是一种`“覆盖网络（Overlay Network）”`，也就是`将TCP数据包装在另一种网络包里面进行路由转发和通信`。
+</code></pre><p>Q：大规模容器集群如何保证安全? 主要从几个方面考虑？</p>
+<ul>
+<li>A: 一个大规模容器集群从安全性考虑来讲，可以分为几个方面：</li>
+<li>1、集群安全，包括集群高可用；</li>
+<li>2、访问安全，包括认证、授权、访问控制等；</li>
+<li>3、资源隔离，包括多租户等；</li>
+<li>4、网络安全，包括网络隔离、流量控制等；</li>
+<li>5、镜像安全，包括容器漏洞等；</li>
+<li>6、容器安全，包括端口暴露、privileged权限等。</li>
+</ul>
+<p>Q：SVC如何进行客户端分流，A网段的访问Pod1 ，B网段的访问Pod2，C网段的访问Pod3，3个Pod都在SVC的Endpoint中？</p>
+<pre><code>A：内部从Pod到Service的实现是由kube-proxy（简单的网络代理和负载均衡器）来完成，kube-proxy默认采用轮询方法进行分配，也可以通过将service.spec.sessionAffinity设置为“ClientIP”（默认为“无”）来选择基于客户端IP的会话关联，目前还不能进行网段的指定。
+</code></pre><p>Q：对于Ingress+HAProxy这种实现Service负载均衡的方式，Ingress controller轮询Service后面的Pods状态，并重新生成HAProxy配置文件，然后重启HAProxy，从而达到服务发现的目的。这种原理对于HAProxy来讲是不是服务会暂时间断。有没有好的替代方案？之前看到Golang实现的Træfik，可无缝对接Kubernetes，同时不需要Ingress了。方案可行么？</p>
+<pre><code>A：由于微服务架构以及Docker技术和Kubernetes编排工具最近几年才开始逐渐流行，所以一开始的反向代理服务器比如Nginx/HAProxy并未提供其支持，毕竟他们也不是先知，所以才会出现IngressController这种东西来做Kubernetes和前端负载均衡器如Nginx/HAProxy之间做衔接，即Ingress Controller的存在就是为了能跟Kubernetes交互，又能写 Nginx/HAProxy配置，还能 reload 它，这是一种折中方案；而最近开始出现的Traefik天生就是提供了对Kubernetes的支持，也就是说Traefik本身就能跟Kubernetes API交互，感知后端变化，因此在使用Traefik时就不需要Ingress Controller，此方案当然可行。
+</code></pre><p>Q：1、一个POD里面的多个Container是同一个Service的？还是由不同的Service的组成？ 是啥样的分配逻辑？ 2、Flannel 是实现多个宿主机上的N多的Service以及Pod里面的各个Container的IP的唯一性么？ 3、Kubernetes具备负载均衡的效果 。那是否就不用在考虑Nigix？</p>
+<pre><code>A：Pod是Kubernetes的基本操作单元，Pod包含一个或者多个相关的容器，Pod可以认为是容器的一种延伸扩展，一个Pod也是一个隔离体，而Pod内部包含的一组容器又是共享的（包括PID、Network、IPC、UTS）；Service是Pod的路由代理抽象，能解决Pod之间的服务发现问题；Flannel的设计目的就是为集群中的所有节点重新规划IP地址的使用规则，从而使得不同节点上的容器能够获得“同属一个内网”且”不重复的”IP地址，并让属于不同节点上的容器能够直接通过内网IP通信；Kubernetes kube-proxy实现的是内部L4层轮询机制的负载均衡，要支持L4、L7负载均衡，Kubernetes也提供了Ingress组件，通过反向代理负载均衡器（Nginx/HAProxy）+Ingress Controller+Ingress可以实现对外服务暴露，另外使用Traefik方案来实现Service的负载均衡也是一种不错的选择。
+</code></pre><p>Q：kube-proxy是怎样进行负载？ Service虚拟IP存在哪里？</p>
+<pre><code>A：kube-proxy有2个模式实现负载均衡，一种是userspace，通过Iptables重定向到kube-proxy对应的端口上，然后由kube-proxy进一步把数据发送到其中的一个Pod上，另一种是Iptables，纯采用Iptables来实现负载均衡，kube-proxy默认采用轮询方法进行分配，也可以通过将service.spec.sessionAffinity设置为“ClientIP”（默认为“无”）来选择基于客户端IP的会话关联；Service Cluster IP它是一个虚拟IP，是由kube-proxy使用Iptables规则重新定向到其本地端口，再均衡到后端Pod的，通过 apiserver的启动参数--service-cluster-ip-range来设置，由kubernetes集群内部维护。
+</code></pre><p>Q：Kubernetes网络复杂，如果要实现远程调试，该怎么做，端口映射的方式会有什么样的隐患？</p>
+<pre><code>A：Kubernetes网络这块采用的是CNI规范，网络插件化，非常灵活，不同的网络插件调试的方法也是不一样的；端口映射方式的最大隐患就是很容易造成端口冲突。
+</code></pre><p>Q：RPC的服务注册，把本机IP注册到注册中心，如果在容器里面会注册那个虚拟IP，集群外面没法调用，有什么好的解决方案吗？</p>
+<pre><code>A：Kubernetes Service到Pod的通信是由kube-proxy代理分发，而Pod中容器的通信是通过端口，不同Service间通信可以通过DNS，不一定要使用虚拟IP。
+</code></pre><p>Q：我现在才用的是CoreOS作为底层，所以网络采用的是Flannel 但是上层用Calico作为Network Policy，最近有一个Canal的结构和这个比较类似，能介绍一下么，可以的话，能详细介绍一下CNI原理和Callico的Policy实现么？</p>
+<pre><code>A：Canal不是很了解；CNI并不是网络实现，它是网络规范和网络体系，从研发的角度它就是一堆接口，关心的是网络管理的问题，CNI的实现依赖于两种Plugin，一种是CNI Plugin负责将容器connect/disconnect到host中的vbridge/vswitch，另一种是IPAM Plugin负责配置容器Namespace中的网络参数；Calico 的policy是基于Iptables，保证通过各个节点上的 ACLs 来提供workload 的多租户隔离、安全组以及其他可达性限制等功能。
+</code></pre><p>Q：CNI是怎么管理网络的？或者说它跟网络方案之间是怎么配合的？</p>
+<pre><code>A：CNI并不是网络实现，它是网络规范和网络体系，从研发的角度它就是一堆接口，你底层是用Flannel也好、用Calico也好，它并不关心，它关心的是网络管理的问题，CNI的实现依赖于两种plugin，一种是CNI Plugin负责将容器connect/disconnect到host中的vbridge/vswitch，另一种是IPAM Plugin负责配置容器Namespace中的网络参数。
+</code></pre><p>Q：Service是个实体组件么？那些个Service配置文件，什么部件来执行呢？</p>
+<pre><code>A：Services是Kubernetes的基本操作单元，是真实应用服务的抽象，Service IP范围在配置kube-apiserver服务的时候通过--service-cluster-ip-range参数指定，由Kubernetes集群自身维护。
+</code></pre>
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:03.676Z" itemprop="dateUpdated">2022-03-29 13:39:03</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Kubernetes/11-kubernetes进阶之网络设计实现方案.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Kubernetes/11-kubernetes进阶之网络设计实现方案.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/9-27-538.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/9-27-538.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/k8s/" rel="tag">k8s</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/9-27-538.html&title=《11-kubernetes入门学习之网络设计实现方案》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/9-27-538.html&title=《11-kubernetes入门学习之网络设计实现方案》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/9-27-538.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《11-kubernetes入门学习之网络设计实现方案》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/9-27-538.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/9-27-538.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/10-13-453.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Wireshark数据分析与处理操作</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/9-27-522.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">7-Kubernetes入门基础之存储Volume介绍</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#基础简述"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">基础简述</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#模型标准"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">模型标准</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-网络模型"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 网络模型</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#网络实现"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">网络实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-Pod-内部的-Containers-间的通信"><span class="post-toc-number">2.1.1.</span> <span class="post-toc-text">(1) Pod 内部的 Containers 间的通信</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-同主机-Pod-间的通信（Host-Virtual-Network-模式）"><span class="post-toc-number">2.1.2.</span> <span class="post-toc-text">(2) 同主机 Pod 间的通信（Host Virtual Network 模式）</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-跨主机-Pod-间的通信（SDN-模式）"><span class="post-toc-number">2.1.3.</span> <span class="post-toc-text">(3) 跨主机 Pod 间的通信（SDN 模式）</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-Service-的-Cluster-IP-和外部网络间的通信"><span class="post-toc-number">2.1.4.</span> <span class="post-toc-text">(4) Service 的 Cluster IP 和外部网络间的通信</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#网络组件"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">网络组件</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-Flannel"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">(1) Flannel</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-Calico"><span class="post-toc-number">2.2.2.</span> <span class="post-toc-text">(2) Calico</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-CoreDNS"><span class="post-toc-number">2.2.3.</span> <span class="post-toc-text">(3) CoreDNS</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-网络组件性能对比"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 网络组件性能对比</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-Q-amp-A"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 Q&amp;A</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/9-27-538.html&title=《11-kubernetes入门学习之网络设计实现方案》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/9-27-538.html&title=《11-kubernetes入门学习之网络设计实现方案》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/9-27-538.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《11-kubernetes入门学习之网络设计实现方案》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/9-27-538.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/9-27-538.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACGUlEQVR42u3aS27DMAwFwN7/0um2RRDnkVSKWhqtgsR2NF4Q/OjrK16Pp/Xq1+T6n9dcP2fxwsDAuC3jcbmuN5pjXt31/P3163hJxcDAOICRP7oXiK+vmbAxMDAwqoxkW0ngxsDAwJgwesXnvwu4GBgYN2QkoTPZdN5oS9pzH6nFMTAwbsjIu+5///kj8w0MDIxbMR7FlfCSwnW+k1/PxMDA2JqRB7heMlctaCf7wcDAOJMx+bNVDbj8GwwMjL0Zqw5G5IljklY2W34YGBibMvJ2fG9Dk4Fl/powMDBOYEwa9KuGmvmLeJPhYmBgbMfotdXy4Du5vvlyMTAwNmLMi9JqSK0276K7MDAwDmD0jllMWmx5whcV0hgYGFszeklb0rivzhbzRtubl4uBgbE1oxfm8jFktdGWjwcwMDBOYKw6r9Frli0DY2BgHMCoxq6clCdzk+IZAwPjTEYvdH4iuYzSRAwMjAMYeYI4GUNWj2IkeAwMjJMZ1cbcqpK4+loxMDAwen+TjzaTcWmUwmJgYBzAyBtekzBaPjARJ6AYGBi7Mh7FNWFUg2zyfAwMjBMY84Nik0FmdfywIGRjYGDcltErRKsbqg4p8/QUAwPjHEYvdUsStWqa2Az9GBgYGNdN+eJd1bBbaLphYGBgtA57TQrdwugCAwPjAEZ1GDC/q4dcUItjYGDckDE5qTEpPidNuuYgEwMD436Mb/Um0T/mplT0AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

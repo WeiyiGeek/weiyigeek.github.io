@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 RAID磁盘阵列原理分析总结|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="raid">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>RAID磁盘阵列原理分析总结</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">RAID磁盘阵列原理分析总结</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-03-01T05:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-03-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">基础知识</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-基础知识/机器硬件/RAID/RAID磁盘阵列原理分析总结"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">RAID磁盘阵列原理分析总结</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-03-01 13:34:30" datetime="2019-03-01T05:34:30.000Z"  itemprop="datePublished">2019-03-01</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/">基础知识</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x01-前言简述"><a href="#0x01-前言简述" class="headerlink" title="0x01 前言简述"></a>0x01 前言简述</h4><p><em>什么是RAID?</em></p>
+<blockquote>
+<p>答:RAID (Redundant  Arrays of Independent Disks)全称” 独立磁盘冗余阵列”,简称磁盘阵列（Disk Array）其基本思想就是把多个相对便宜的硬盘组合起来，成为一个硬盘阵列组，使性能达到甚至超过一个价格昂贵、容量巨大的硬盘。。</p>
+</blockquote>
+<p><em>它有什么作用?</em></p>
+<blockquote>
+<p>RAID是一种把多块独立的硬盘（物理硬盘）按不同的方式组合起来形成一个硬盘组（逻辑硬盘连接在一起协同工作），从而提供比单个硬盘更高的存储性能和提供数据备份技术以及大大提高IO了速度;<br>简单的说就是<code>硬盘数据跨盘（Spanning）</code>使多个硬盘像一个硬盘那样工作，这使用户通过组合已有的资源或增加一些资源来廉价地突破现有的硬盘空间限制。</p>
+</blockquote>
+<p>先上一张神图简单了解RAID磁盘阵列：<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317151051.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317151051.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><strong>部署方式</strong></p>
+<ul>
+<li>单机部署（stand-alone）：一个饮水机提供服务，服务只部署一份</li>
+<li>集群部署（cluster）：多个饮水机同时提供服务，服务冗余部署，每个冗余的服务都对外提供服务，一个服务挂掉时依然可用</li>
+<li>热备部署（hot-swap）：只有一个桶提供服务另一个桶stand-by，在水用完时自动热替换，服务冗余部署，只有一个主服务对外提供服务，影子服务在主服务挂掉时顶上</li>
+</ul>
+<p><strong>RAID 技术大致分为两种：</strong></p>
+<ul>
+<li>基于硬件的RAID(硬RAID):额外的RAID卡的支持;</li>
+<li>基于软件的RAID(软RAID):再运维中会进行实际演示;</li>
+</ul>
+<p><br/></p>
+<p><strong>(1) 基本原理</strong><br>1.RAID 是<code>由多个独立的高性能磁盘驱动器组成</code>的磁盘子系统，从而提供比单个磁盘更高的存储性能和数据冗余的技术。<br>2.RAID是<code>一类多磁盘管理技术</code>，其向主机环境提供了成本适中、数据可靠性高的高性能存储。 </p>
+<p>3.RAID 的两个关键目标是提高数据可靠性和 I/O 性能<code>,磁盘阵列中数据分散在多个磁盘中，然而对于计算机系统来说就像一个单独的磁盘</code>。</p>
+<p><em>SNIA 对 RAID 的定义</em><br>一种磁盘阵列，部分物理存储空间用来记录保存在剩余空间上的用户数据的冗余信息。当其中某一个磁盘或访问路径发生故障时，<code>冗余信息可用来重建用户数据</code>。磁盘条带化虽然与 RAID 定义不符，通常还是称为 RAID （即 RAID0 ）。</p>
+<p><em>RAID特性:</em></p>
+<p>描述：RAID通过把相同数据同时写入到多块磁盘（典型地如镜像），或者将计算的校验数据写入阵列中来获得冗余能力，当单块磁盘出现故障时可以保证不会导致数据丢失;</p>
+<p>RAID磁盘阵列可以在部分磁盘（单块或多块，根据实现而论）损坏的情况下，仍能保证系统不中断地连续运行。在重建故障磁盘数据至新磁盘的过程中，系统可以继续正常运行，但是性能方面会有一定程度上的降低;</p>
+<ul>
+<li><p>比如RAID 6可以在两块磁盘同时损坏下采用新磁盘进行替换,然后RAID会自动根据剩余磁盘中的数据和校验数据重建丢失的数据，保证数据一致性和完整性;</p>
+</li>
+<li><p>比如一些磁盘阵列在添加或删除磁盘时必须停机，而有些则支持热交换( Hot Swapping )允许不停机下替换磁盘驱动器</p>
+</li>
+</ul>
+<p>注意事项:一般来说RAID 不可作为数据备份的替代方案，它对非磁盘故障等造成的数据丢失无能为力，比如<code>病毒、人为破坏、意外删除</code>等情形。此时的数据丢失是相对操作系统、文件系统、卷管理器或者应用系统来说的，对于 RAID 系统来身，<code>数据都是完好的没有发生丢失</code>;所以，数据备份、灾 备等数据保护措施是非常必要的，与 RAID 相辅相成，保护数据在不同层次的安全性，防止发生数据丢失。</p>
+<p><br></p>
+<p><strong>(2) RAID 三个关键概念和技术</strong><br>RAID 中主要有三个关键概念和技术：镜像（ Mirroring ）、数据条带（ Data Stripping ）和数据校验（ Data parity ）</p>
+<ul>
+<li><p>2.1) 数据条带(Stripping):将数据分片保存在多个不同的磁盘，多个数据分片共同组成一个完整数据副本，这与镜像的多个副本是不同的，它通常用于性能考虑。数据条带具有更高的并发粒度，当访问数据时，可以同时对位于不同磁盘上数据进行读写操作， 从而获得非常可观的 I/O 性能提升。</p>
+</li>
+<li><p>2.2) 镜像(Mirroring):将数据复制到多个磁盘，一方面可以提高可靠性，另一方面可并发从两个或多个副本读取数据来提高读性能。显而易见，镜像的写性能要稍低， 确保数据正确地写到多个磁盘需要更多的时间消耗.</p>
+</li>
+<li><p>2.3) 数据校验，利用冗余数据进行数据错误检测和修复，冗余数据通常采用海明码、异或操作等算法来计算获得。利用校验功能，可以很大程度上提高磁盘阵列的可靠性、鲁棒性和容错能力。不过数据校验需要从多处读取数据并进行计算和对比，会影响系统性能。 </p>
+</li>
+</ul>
+<p>不同等级的 <code>RAID 采用一个或多个以上的三种技术</code>，来获得<code>不同的数据可靠性、可用性和 I/O 性能</code>。至于设计何种 RAID （甚至新的等级或类型）或采用何种模式的 RAID ，需要在深入理解系统需求的前提下进行合理选择，综合评估可靠性、性能和成本来进行折中的选择。</p>
+<p><br/></p>
+<p>RAID 思想从提出后就广泛被业界所接纳，存储工业界投入了大量的时间和财力来研究和开发相关产品。而且，随着处理器、内存、计算机接口等技术的不断发展， RAID 不断地发展和革新，在计算机存储领域得到了广泛的应用，从高端系统逐渐延伸到普通的中低端系统。 RAID 技术如此流行，源于其具有显著的特征和优势，基本可以满足大部分的数据存储需求。<br>RAID 主要优势有如下几点：</p>
+<ul>
+<li>1.大容量:扩大了磁盘的容量由多个磁盘组成的 RAID 系统具有海量的存储空间可以达到 PB 级;通常RAID 容量利用率在 50% ~ 90% 之间。这是根据RAID等级和算法不同来决定的;</li>
+<li>2.高性能:RAID 的高性能受益于数据条带化技术,通过数据条带化， RAID 将数据 I/O 分散到各个成员磁盘上，从而获得比单个磁盘成倍增长的聚合 I/O 性能。</li>
+<li>3.可靠性:高可用性和可靠性是其一个重要特征；从理论上讲由多个磁盘组成的 RAID 系统在可靠性方面应该比单个磁盘要差，由于RAID 采用镜像和数据校验等数据冗余技术保证了若干磁盘出错时，<code>不会导致数据的丢失，不影响系统的连续运行</code>，但是存在冗余开销(效率稍低)以及可用容量空间的减少;</li>
+<li>4.可管理性:RAID 是一种虚拟化技术，它对多个物理磁盘驱动器虚拟成一个大容量的逻辑驱动器。对于外部主机系统来说RAID 是一个单一的、快速可靠的大容量磁盘驱动器,用户就可以在这个虚拟驱动器上来组织和存储应用系统数据(简单易用管理便利)。<code>由于 RAID 内部完成了大量的存储管理工作，管理员只需要管理单个虚拟驱动器，可以节省大量的管理工作。 RAID 可以动态增减磁盘驱动器，可自动进行数据校验和数据重建，这些都可以大大简化管理工作。</code></li>
+</ul>
+<hr>
+<h4 id="0x00-RAID-等级"><a href="#0x00-RAID-等级" class="headerlink" title="0x00 RAID 等级"></a>0x00 RAID 等级</h4><p>描述:SNIA|Berkeley 等组织机构把 <code>RAID0 、 RAID1 、 RAID2 、 RAID3 、 RAID4 、 RAID5 、 RAID6</code>七个等级定为标准的 RAID 等级这也被业界和学术界所公认。</p>
+<ul>
+<li>标准等级是最基本的 RAID 配置集合，单独或综合利用数据条带、镜像和数据校验技术。标准 RAID 可以组合等级，以满足 对性能、安全性、可靠性要求更高的存储应用需求。</li>
+<li>组合等级是由于标准 RAID 等级各有优势和不足，我们想到把多个 RAID 等级组合起来，实现优势互补，弥补相互的不足，从而达到在性能、数据安全性等指标上更高的 RAID 系统。目前在业界和学术研究中提到的 RAID 组合等级主要有 RAID00 、 RAID01 、 RAID10 、 RAID100 、 RAID30 、 RAID50 、 RAID53 、 RAID60 ，但实际得到较为广泛应用的只有 <code>RAID01 和 RAID10</code>两个等级。 <code>由于组合等级的实现成本一般都非常昂贵，只是在少数特定场合应用</code>；</li>
+<li>JBOD （ Just a Bunch Of Disks ）不是标准的 RAID 等级，它通常用来表示一个没有控制软件提供协调控制的磁盘集合。</li>
+</ul>
+<p>如何选择RAID的等级版本?</p>
+<blockquote>
+<p>根据选择的版本不同，RAID比单颗硬盘有以下一个或多个方面的好处：<code>增强数据集成度，增强容错功能，增加处理量或容量</code>。</p>
+</blockquote>
+<p><strong>RAID(磁盘阵列)级别一览(按照时间排序):</strong><br>常用等级:</p>
+<ul>
+<li>Raid 0:存取速度最快,没有容错;</li>
+<li>Raid 1:完全容错 成本高</li>
+<li>Raid 5:具备多任务及容错功能 Parity 磁盘驱动器<code>不会造成性能瓶颈</code></li>
+<li>Raid 6:具备多任务及容错功能 写入时有overhead<br>理论等级:(较少实际应用，它们大多只在研究领域有实作)</li>
+<li>Raid 2:带海明码校验，数据冗余多，速度慢</li>
+<li>Raid 3:写入性能最好 没有多任务功能</li>
+<li>Raid 4:并发写操作时的校验盘性能瓶颈问题</li>
+<li>Raid 7:性能安全好，但是需要独立的硬件设备和独立系统</li>
+</ul>
+<p>组合等级:</p>
+<ul>
+<li>Raid 0+1（也称Raid 10): 速度快、完全容错 成本高</li>
+<li>Raid 50</li>
+<li>Raid 53 (也称Raid 0 + 3):传输效率以及性能高，存储空间利用率要比RAID 10低</li>
+<li>Raid 60</li>
+<li>Raid 1+0:速度快而且又安全,一个字<code>贵</code></li>
+</ul>
+<p><br></p>
+<h5 id="1-等级原理解析"><a href="#1-等级原理解析" class="headerlink" title="1.等级原理解析"></a>1.等级原理解析</h5><p><strong>1) JBOD</strong><br>介绍:目前 JBOD 常指磁盘柜，而不论其是否提供 RAID 功能。JBOD 将多个物理磁盘串联起来，提供一个巨大的逻辑磁盘。 JBOD 的数据存放机制是由第一块磁盘开始按顺序往后存储，当前磁盘存储空间用完后，再依次往后面的磁盘存储数据。 JBOD 存储性能完全等同于单块磁盘，而且也不提供数据安全保护。它只是简单提供一种扩展存储空间的机制，JBOD 可用存储容量等于所有成员磁盘的存储空间之和。</p>
+<figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317235228.png" target="_blank" title="WeiyiGeek.JBOD" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317235228.png" alt="WeiyiGeek.JBOD" title="" class=""></a>
+                <p>WeiyiGeek.JBOD</p>
+            </figure>
+<p><br/></p>
+<p><strong>2) RAID 0</strong><br>描述:RAID 0称为<code>Stripe（条带化）或Striping</code>，是一种简单的、无数据校验的数据条带化技术，它拥有级别总<code>最高的存储性能</code>。</p>
+<p><em>原理:</em><br>实际上不是一种真正的 RAID 因为它并不提供任何形式的冗余策略，RAID0 将所在磁盘条带化后组成大容量的存储空间，将数据分散存储在所有磁盘中，以独立访问方式实现多块磁盘的并读访问。<br>RAID 0把连续的数据分散到多个磁盘上存取，系统有数据请求就可以被多个磁盘并行的执行，每个磁盘执行属于它自己的那部分数据请求,由于<code>并行I/O作数据</code>可以充分利用总线的带宽显著提高磁盘整体存取性能。<br>理论上讲一个由 n 块磁盘组成的 RAID0 ，它的<code>读写性能是单个磁盘性能的 n 倍</code>，但由于总线带宽等多种因素的限制，实际的性能提升低于理论值。</p>
+<p>RAID 0结构图解:<br>系统向2个磁盘组成的逻辑硬盘（RADI 0 磁盘组）发出的I/O数据请求被转化为2项操作，其中的每一项操作都对应于一块物理硬盘,通过建立RAID 0原先顺序的数据请求被分散到所有的两块硬盘中同时执行。<br>从理论上讲2块硬盘的并行操作使同一时间内磁盘读写速度提升了2倍。</p>
+<figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317133628.png" target="_blank" title="WeiyiGeek.RAID 0结构图解" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317133628.png" alt="WeiyiGeek.RAID 0结构图解" title="" class=""></a>
+                <p>WeiyiGeek.RAID 0结构图解</p>
+            </figure>
+<p><em>优缺点:</em><br>优点:具有低成本、高读写性能、 100% 的高存储空间利用率<br>缺点:不提供数据冗余，因此一旦用户数据损坏，损坏的数据将无法得到恢复</p>
+<p><em>应用领域:</em></p>
+<ul>
+<li>适用于对性能要求严格但对数据安全性和可靠性不高的应用领域 ，如图形工作站等。</li>
+<li>对于个人用户，RAID 0也是提高硬盘存储性能的绝佳选择。</li>
+</ul>
+<p><br/></p>
+<p><strong>3) RAID 1</strong><br>描述:RAID 1又称为<code>Mirror或Mirroring（镜像）</code>，它将数据完全一致地分别写到工作磁盘和镜像磁盘，它的磁盘空间利用率为 50%;<br>RAID1 在数据写入时，响应时间会有所影响，但是读数据的时候没有影响。<br>RAID1 提供了最佳的数据保护，一旦工作磁盘发生故障，系统自动从镜像磁盘读取数据，不会影响用户工作。</p>
+<p>RAID1 与 RAID0 刚好相反，是为了增强数据安全性使两块 磁盘数据呈现完全镜像，从而<code>达到安全性好、技术简单、管理方便</code>。 </p>
+<p><em>RAID 1结构图解:</em><br>当读取数据时，系统先从RAID 0的源盘读取数据，如果读取数据成功，则系统不去管备份盘上的数据；如果读取源盘数据失败，则系统自动转而读取备份盘上的数据，不会造成用户工作任务的中断。<br>当然我们应当及时地更换损坏的硬盘并利用备份数据重新建立Mirror，避免备份盘在发生损坏时，造成不可挽回的数据损<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317140925.png" target="_blank" title="WeiyiGeek.RAID1结构图解" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317140925.png" alt="WeiyiGeek.RAID1结构图解" title="" class=""></a>
+                <p>WeiyiGeek.RAID1结构图解</p>
+            </figure></p>
+<p><em>优缺点</em><br>优点:较高的数据安全性,拥有完全容错的能力<br>缺点:磁盘空间利用率低,存储成本高</p>
+<p><em>应用领域:</em></p>
+<ul>
+<li>适用于存放重要数据，如服务器和数据库存储等领域.</li>
+</ul>
+<p><br/></p>
+<p><strong>4) RAID01|RAID10</strong><br>描述:RAID 0+1是<code>先做条带化再作镜像</code>，本质是对物理磁盘实现镜像。而 RAID10 <code>是先做镜像再作条带化</code>，是对虚拟磁盘实现镜像。相同的配置下，通常 RAID01 比 RAID10 具有更好的容错能力。</p>
+<p>RAID01 兼备了 RAID0 和 RAID1 的优点，它先用两块磁盘建立镜像，然后再在镜像内部做条带化。 RAID01 的数据将同时写入到两个磁盘阵列中，如果其中一个阵列损坏，仍可继续工作，保证数据安全性的同时又提高了性能。<br>RAID01 和 RAID10 内部都含有 RAID1 模式，因此整体磁盘利用率均仅为 50% 。</p>
+<figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318031357.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318031357.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>RAID 10结构图解:<br>以四个磁盘组成的RAID 0+1数据存储方式为例，它在提供与RAID 1一样的数据安全保障的同时，也提供了与RAID 0近似的存储性能。<br>由于RAID 0+1也通过数据的100%备份功能提供数据安全保障，因此RAID 0+1的磁盘空间利用率与RAID 1相同存储成本高。<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317142449.png" target="_blank" title="WeiyiGeek.RAID0+1" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317142449.png" alt="WeiyiGeek.RAID0+1" title="" class=""></a>
+                <p>WeiyiGeek.RAID0+1</p>
+            </figure></p>
+<p><em>优缺点</em><br>优点:存储性能和数据安全兼顾的方案<br>缺点:存储成本高</p>
+<p><em>应用领域:</em></p>
+<ul>
+<li>适用于既有大量数据需要存取，同时又对数据安全性要求严格的领域，如银行、金融、商业超市、仓储库房、各种档案管理等。(国企用的比较多的存储方案)</li>
+</ul>
+<p><br/></p>
+<p><strong>5) RAID3</strong><br>描述:RAID 3是把数据分成多个”块”，按照一定的容错算法，存放在N+1个硬盘上，实际数据占用的有效空间为N个硬盘的空间总和，而第N+1个硬盘上存储的数据是校验容错信息，当这N+1个硬盘中的其中一个硬盘出现故障时，从其它N个硬盘中的数据也可以恢复原始数据，这样仅使用这N个硬盘也可以带伤继续工作（如采集和回放素材），当更换一个新硬盘后，系统可以重新恢复完整的校验容错信息。</p>
+<p>RAID 3结构图解:<code>容错算法和分块大小</code><br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317142942.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317142942.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><em>优缺点</em><br>优点:安全性有保障<br>缺点:IO速度相比较于RAID0较慢</p>
+<p><em>应用领域:</em></p>
+<ul>
+<li>适合大文件类型且安全性要求较高的应用，如视频编辑、硬盘播出机、大型数据库等.</li>
+</ul>
+<p><br/></p>
+<p><strong>6) RAID5</strong><br>描述:RAID 5 是一种<code>存储性能、数据安全和存储成本</code>兼顾的存储解决方案(理解为 RAID0 和 RAID1 的折中方案)。RAID 5磁盘阵列由<code>N（N&gt;=3）块盘</code>组成阵列，一份数据产生N-1个条带，同时还有1份校验数据共N份数据在N块盘上循环均衡存储</p>
+<p>RAID5是<code>目前最常见的 RAID 等级</code>，它的原理与 RAID4 相似，区别在于校验数据分布在阵列中的所有磁盘上，而没有采用专门的校验磁盘。<br>对于数据和校验数据，它们的写操作可以同时发生在完全不同的磁盘上, 因此RAID5 不存在 RAID4 中的并发写操作时的校验盘性能瓶颈问题。<br>RAID5 还具备很好的扩展性，当阵列磁盘 数量增加时，并行操作量的能力也随之增长，可比 RAID4 支持更多的磁盘，从而拥有更高的容量以及更高的性能。</p>
+<p>RAID 5结构图解:<br>以四个硬盘组成的RAID 5不对存储的数据进行备份，而是把数据和相对应的奇偶校验信息存储到组成RAID5的各个磁盘上，并且奇偶校验信息和相对应的数据分别存储于不同的磁盘上。数据块和对应的校验信息存保存在不同的磁盘上，<code>当一个数据盘损坏时，系统可以根据同一条带的其他数据块和对应的校验数据来重建损坏的数据</code>，与其他 RAID 等级一样，重建数据时 RAID5 的性能会受到较大的影响。<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317143613.png" target="_blank" title="WeiyiGeek.RAID5" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317143613.png" alt="WeiyiGeek.RAID5" title="" class=""></a>
+                <p>WeiyiGeek.RAID5</p>
+            </figure></p>
+<p><em>优缺点</em><br>优点:具有和RAID 0相近似的数据读取速度（多了一个奇偶校验信息），安全性也很高（可以利用校验位恢复数据），空间利用率也不错（不完全复制，只冗余校验位）则成本低,扩展性好;<br>缺点:保障程度要比Mirror稍低，IO写性能速度比RAID0稍慢（多存储了校验位）</p>
+<p><strong>应用领域:</strong></p>
+<ul>
+<li>互联网公司，数据中心用的比较多的存储方案;</li>
+</ul>
+<p><br/></p>
+<p><strong>7) RAID6</strong><br>描述：RAID 6等级是在RAID 5基础上，为了进一步加强数据保护而设计的一种RAID方式，实际上是一种<code>扩展RAID 5等级</code>,它一般是替代 RAID10 方案的经济性选择;<br>RAID6 引入双重校验的概念，它可以保护阵列中同时出现两个磁盘失效时，阵列仍能够继续工作，不会发生数据丢失<br>RAID6 不仅要支持数据的恢复，还要支持校验数据的恢复，因此实现代价很高，控制器的设计也比其他等级更复杂、更昂贵。</p>
+<p>RAID6 思想最常见的实现方式是采用两个独立的校验算法，假设称为 P 和 Q ，校验数据可以分别存储在两个不同的校验盘上，或者分散存储在所有成员磁盘中。当两个磁盘同时失效时，即可通过求解两元方程来重建两个磁盘上的数据。</p>
+<p>RAID 6结构图解:<br>与RAID 5的不同之处于除了每个硬盘上都有同级数据XOR校验区外，还有一个针对每个数据块的XOR校验区;当前盘数据块的校验数据不可能存在当前盘而是交错存储的,这样一来等于每个数据块有了两个校验保护屏障<code>（一个分层校验，一个是总体校验）</code>但是控制系统的设计也更为复杂；<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317144522.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317144522.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><em>优缺点</em><br>优点:快速的读取性能、更高的容错能力,数据冗余性能相当好，对于RAID 5在校验方面的微弱优势<br>缺点:写性能较RAID5稍差(与RAID5在性能与性价比方面的较大劣势),成本较RAID5高;</p>
+<p><em>应用领域:</em></p>
+<ul>
+<li>RAID 6等级基本没有实际应用过，只是对更高级的数据的冗余进行的一种技术与思路上的尝试</li>
+</ul>
+<p><br/></p>
+<p><strong>8) RAID7</strong><br>描述:RAID 7并非公开的RAID标准，而是Storage Computer Corporation的专利硬件产品名称。该等级是至今为止理论上性能最高的RAID模式，因为它从组建方式上就已经和以往的方式有了重大的不同。</p>
+<p>RAID 7结构图解:<br>在以往一个硬盘是一个组成阵列的”柱子”，而在RAID 7中多个硬盘组成一个”柱子”，它们都有各自的通道，也正因为如此，你可以把这个图分解成一个个硬盘连接在主通道上，只是比以前的等级更为细分了。<br>这样做的好处就是在读/写某一区域的数据时，可以迅速定位，而不会因为以往因单个硬盘的限制同一时间只能访问该数据区的一部分，在RAID 7中，以前的单个硬盘相当于分割成多个独立的硬盘，有自己的读写通道，效率也就不言自明了。</p>
+<figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317145224.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317145224.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>RAID 7特性:</p>
+<ul>
+<li><p>所有的I/O传输都是异步的，因为它有自己独立的控制器和带有Cache的接口，与系统时钟并不同步所有的读与写的操作都将通过一个带有中心Cache的高速系统总线，我们称之为X-Bus专用的校验硬盘可以用于任何通道带有完整功能的即时操作系统内嵌于阵列控制微处理器（<code>RAID 7的心脏</code>)，它负责各通道的通信以及Cache的管理，这也是它与其他等级最大不同之一</p>
+</li>
+<li><p>连通性：可增至12个主机接口</p>
+</li>
+<li><p>扩展性：线性容量可增至48个硬盘</p>
+</li>
+<li><p>开放式系统，运用标准的SCSI硬盘、标准的PC总线、主板以及SIMM内存</p>
+</li>
+<li><p>高速的，集成Cache的数据总线（就是上文提到的X-bus）</p>
+</li>
+<li><p>在Cache内部完成校验生成工作</p>
+</li>
+<li><p>多重的附加驱动可以随时热机待命，提高冗余率和灵活性易管理性：SNMP（Simple Network Management Protocol,简单网络管理协议） 可以让管理员远程监视并实现系统控制按照RAID 7设计者的说法，这种阵列将比其他RAID等级提高150-600%写入时的I/O性能，虽然这引起了不小的争议。</p>
+</li>
+</ul>
+<p><em>优缺点</em><br>优点:IO性能效率高<br>缺点:价格方面非常的高昂，需要额外的整体系统以及自己处理器和总线而不是通过简单的插卡就可以实现的;</p>
+<p><br/></p>
+<p><strong>10) RAID 50</strong><br>描述:RAID 50可以看着<code>是RAID 5与RAID 0的组合</code>，先作RAID 5，再作RAID 0，也就是对多组RAID 5彼此构成Stripe访问;<br>由于RAID 50是以RAID 5为基础，而RAID 5至少需要3颗硬盘，因此要以多组RAID 5构成RAID 50，至少需要6颗硬盘。以RAID 50最小的6颗硬盘配置为例，先把6颗硬盘分为2组，<code>每组3颗构成RAID 5</code>，如此就得到两组RAID 5，然后<code>再把两组RAID 5构成RAID 0</code>。</p>
+<p>RAID 50在底层的任一组或多组RAID 5中出现1颗硬盘损坏时，仍能维持运作，不过如果任一组RAID 5中出现2颗或2颗以上硬盘损毁，整组RAID 50就会失效。</p>
+<p>RAID 50由于在上层把多组RAID 5构成Stripe，性能比起单纯的RAID 5高，容量利用率比RAID5要低。比如同样使用9颗硬盘，由各3颗RAID 5再组成RAID 0的RAID 50，每组RAID 5浪费一颗硬盘，利用率为(1-3/9)，RAID 5则为(1-1/9)。</p>
+<p>RAID 50结构图解:<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318032024.png" target="_blank" title="WeiyiGeek.RAID 50" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318032024.png" alt="WeiyiGeek.RAID 50" title="" class=""></a>
+                <p>WeiyiGeek.RAID 50</p>
+            </figure></p>
+<p><em>优缺点</em><br>优点:性能高<br>缺点:容量利用率低</p>
+<p><br/></p>
+<p><strong>11) RAID53</strong><br>描述:RAID 53也是一种组合RAID 等级,应该称为<code>RAID 30或RAID 03</code>（也可以说是RAID 0+3），即RAID 3与RAID 0的组合；</p>
+<p>原理:可以发现RAID 53中将备份等级由RAID 0变为了RAID 3，也就是说把原来的<code>镜像阵列变成了分割式（Segments）存储阵列</code>。<br>但它不是对每个RAID 0硬盘都用一个RAID 3系统进行，而是用RAID 3对所有数据进行冗余存储（或者说是校验），而且读写与ECC效率比RAID 0要高不少。</p>
+<p>RAID 53结构图解:<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317145956.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317145956.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><em>优缺点</em><br>优点:由于RAID 3的传输率高的缘故，RAID 53的性能要比RAID 10好（因为冗余备份的时间缩短）并且借助于RAID 0其I/O带宽并没有降低；<br>缺点:存储空间利用率要比RAID 10低</p>
+<p><br/></p>
+<p><strong>12) RAID 60</strong><br>描述:RAID60是RAID 6与RAID 0的组合(先作RAID 6，再作RAID 0),换句话说就是对两组以上的RAID 6作Stripe访问;RAID 6至少需具备4颗硬盘，所以RAID 60的最小需求是8颗硬盘。</p>
+<p>由于底层是以RAID 6组成，所以RAID 60可以容许任一组RAID 6中损毁最多2颗硬盘，而系统仍能维持运作；不过只要底层任一组RAID 6中损毁3颗硬盘，整组RAID 60就会失效，当然这种情况的概率相当低。</p>
+<p>比起单纯的RAID 6，RAID 60的上层通过结合多组RAID 6构成Stripe访问因此性能较高。不过使用门槛高，而且容量利用率低是较大的问题。</p>
+<p>RAID 60结构图解:<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318124225.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318124225.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><em>优缺点:</em><br>优点:性能比较高<br>缺点:容量利用率低</p>
+<p><br/></p>
+<p><strong>13) RAID1+0</strong><br>描述:RAID 1+0是RAID0和RAID1的折中方案；</p>
+<p><em>优缺点</em><br>优点:速度快而且又安全<br>缺点:贵</p>
+<p><em>应用领域:</em></p>
+<ul>
+<li>云厂商必备高端公司甚至用固态磁盘代替普通磁盘做RAID 1+0.(经费充足的企业首选)</li>
+</ul>
+<hr>
+<h5 id="2-常用等级总结"><a href="#2-常用等级总结" class="headerlink" title="2.常用等级总结"></a>2.常用等级总结</h5><p><strong>1）常见RAID类型</strong><br>常见5种RAID类型对比以及n位磁盘数量。<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200624213708.png" target="_blank" title="WeiyiGeek.RAID级别" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200624213708.png" alt="WeiyiGeek.RAID级别" title="" class=""></a>
+                <p>WeiyiGeek.RAID级别</p>
+            </figure></p>
+<p><br></p>
+<p>功能比对:</p>
+<figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317152350.png" target="_blank" title="WeiyiGeek.RAID类型" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200317152350.png" alt="WeiyiGeek.RAID类型" title="" class=""></a>
+                <p>WeiyiGeek.RAID类型</p>
+            </figure>
+<hr>
+<h4 id="0x02-RAID-升级版本"><a href="#0x02-RAID-升级版本" class="headerlink" title="0x02 RAID 升级版本"></a>0x02 RAID 升级版本</h4><h5 id="1-RAID-2-0"><a href="#1-RAID-2-0" class="headerlink" title="1.RAID 2.0"></a>1.RAID 2.0</h5><p>描述:RAID 2.0（<code>独立磁盘冗余数组2.0, Redundant Array of Independent Disks Version 2.0</code>），为增强型RAID技术，有效解决了机械硬盘容量越来越大，重构一块机械硬盘所需时间越来越长，传统RAID组重构窗口越来越大而导致重构期间又故障一块硬盘而彻底丢失数据风险的问题。</p>
+<p>其基本思想就是把大容量机械硬盘先按照固定的容量切割成多个更小的分块（Chunk，通常为64MB），<code>RAID组建立在这些小分块上而不是某些硬盘上，我们称为分块组（Chunk Group）</code>。此时硬盘间不再组成传统的RAID关系，而是组成更大硬盘数量的硬盘组（建议最大硬盘数量为96-120,不建议超过120块盘），每个硬盘上不同的分块可与此硬盘组上不同硬盘上的分块组成不同RAID类型的分块组，这样一个硬盘上的分块可以属于多个RAID类型的多个分块组;</p>
+<p>以这样的组织形式基于 RAID2.0 技术的存储系统能够做到在一块硬盘故障后，在硬盘组上的所有硬盘上并发进行重构，而不再是传统 RAID 的单个热备盘上进行重构，从而大大降低重构时间，减少重构窗口扩大导致的数据丢失风险，在硬盘容量大幅增加的同时确保存储系统的性能和可靠性;RAID 2.0 并没有改变传统的各种RAID类型的算法，而是把RAID范围缩小到分块组上。</p>
+<p>因此RAID2.0技术具备以下技术特征：</p>
+<ul>
+<li>几个、几十个甚至上百个机械硬盘组成硬盘组；</li>
+<li>硬盘组中的硬盘被分割成几十兆、上百兆的分块，不同硬盘上的分块组成的分块组 (Chunk Group)；</li>
+<li>RAID 计算在分块组 (Chunk Group) 内进行，系统不再有热备盘，而是被同一分块组内保留的热备块所代替。</li>
+</ul>
+<p>传统RAID与RAID2.0技术存储阵列恢复机制对比:<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318125227.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318125227.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>由于RAID 2.0系统中一块硬盘故障后，重构可以在同一硬盘组内其他所有硬盘保留的热备空间上并发进行，使用RAID 2.0技术的存储系统具备以下优势：</p>
+<ul>
+<li>快速重构：存储池内所有硬盘参与重构，相对于传统RAID重构速度大幅提；</li>
+<li>自动负载均衡：RAID 2.0使得各硬盘均衡分担负载，不再有热点硬盘，提升了系统的性能和硬盘可靠性；</li>
+<li>系统性能提升：LUN基于分块组创建，可以不受传统RAID硬盘数量的限制分布在更多的物理硬盘上，因而系统性能随硬盘IO带宽增加得以有效提升；</li>
+<li>自愈合：当出现硬盘预警时，无需热备盘，无需立即更换故障盘，系统可快速重构，实现自愈合。</li>
+</ul>
+<p><br/></p>
+<h5 id="2-RAID-2-0"><a href="#2-RAID-2-0" class="headerlink" title="2.RAID 2.0+"></a>2.RAID 2.0+</h5><p>描述:RAID2.0+（<code>独立磁盘冗余数组2.0, Redundant Array of Independent Disks Version 2.0+</code>）在 RAID 2.0 的基础上提供了更细粒度 (可以达几十KB粒度) 的资源颗粒，形成存储资源的标准分配及回收单位，类似计算虚拟化中的虚拟机，我们称之为虚拟块。这些容量单位一致的虚拟块构成了一个统一的存储资源池，所有应用、中间件、虚拟机、操作系统所需的资源可以在这个资源池中按需分配及回收。相对传统 RAID 系统，RAID2.0+ 技术实现了存储资源的虚拟化及预配置，存储资源的申请及释放完全自动化的通过存储池实现，而不再需要传统 RAID 阵列的RAID组创建，LUN创建以及LUN格式化等耗时而容易出错的手工配置过程。因此RAID 2.0+ 技术解决了虚拟机环境下，存储资源必须动态按需分配及释放的问题。</p>
+<p>在 RAID 2.0 基础上，RAID2.0+技术具备以下技术特征：</p>
+<ul>
+<li>在 RAID 2.0 基础上，分块组（Chunk Group）被切分为容量从256KB到64MB的虚拟化存储颗粒（Extent）；</li>
+<li>存储资源以以上颗粒为单位自动分配及释放；</li>
+<li>可以以以上颗粒度为单位在存储池内或不同存储池间进行细粒度分级存储；</li>
+<li>在系统通过扩展控制器扩展性能或容量后，可以通过自动化的迁移这些标准颗粒来达到负载均衡的目的。</li>
+</ul>
+<figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318125843.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318125843.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><em>技术优点</em><br>RAID2.0+技术主要用于实现系统资源的智能分配，满足虚拟机环境对存储的需求：</p>
+<ul>
+<li>存储容量虚拟化:存储资源按需自动化分配及释放，满足了虚拟机对存储最本质的需求；</li>
+<li>实时资源调配:可根据业务实时情况，将不同数据分级存储，通过灵活调配SSD等高性能存储资源满足高性能业务需求；</li>
+<li>自动数据迁移:根据业务特点自动迁移数据，提高存储利用效率；</li>
+</ul>
+<p>RAID 2.0与传统RAID的对比<br><figure class="image-box">
+                <a rel=RAID磁盘阵列原理分析总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318130206.png" target="_blank" title="WeiyiGeek.RAID 2.0与传统RAID的对比" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200318130206.png" alt="WeiyiGeek.RAID 2.0与传统RAID的对比" title="" class=""></a>
+                <p>WeiyiGeek.RAID 2.0与传统RAID的对比</p>
+            </figure></p>
+<hr>
+<h4 id="0x03-应用场景"><a href="#0x03-应用场景" class="headerlink" title="0x03 应用场景"></a>0x03 应用场景</h4><p><strong>不适合使用RAID的场景</strong></p>
+<p><em>Hadoop集群中为何不使用RAID？</em><br>描述:尽管建议采用RAID (Redundant Array of Independent Disk,即磁盘阵列) 作为 namenode 的存储器以保护元数据，但是若将 RAID 作为 datanode 的存储设备则不会给 HDFS 带来益处。HDFS 所提供的节点间数据复制技术已可满足数据备份需求，无需使用 RAID 的冗余机制。</p>
+<p>此外尽管 RAID 条带化技术 (RAID 0) 被广泛用户提升性能，但是其速度仍然比用在 HDFS 里的 JBOD (Just a Bunch Of Disks) 配置慢。JBOD 在所有磁盘之间循环调度 HDFS 块。RAID 0 的读写操作受限于磁盘阵列中最慢盘片的速度，而 JBOD 的磁盘操作均独立，因而平均读写速度高于最慢盘片的读写速度。需要强调的是，各个磁盘的性能在实际使用中总存在相当大的差异，即使对于相同型号的磁盘。</p>
+<ul>
+<li>若 JBOD 配置的某一磁盘出现故障，HDFS 可以忽略该磁盘继续工作</li>
+<li>若 RAID 的某一盘片故障会导致整个磁盘阵列不可用，进而使相应节点失效。</li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-08-28T07:48:37.862Z" itemprop="dateUpdated">2022-08-28 15:48:37</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/基础知识/机器硬件/RAID/RAID磁盘阵列原理分析总结.md" target="_blank" rel="noopener noreferrer">_posts/基础知识/机器硬件/RAID/RAID磁盘阵列原理分析总结.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/3-1-33.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/3-1-33.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/raid/" rel="tag">raid</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/3-1-33.html&title=《RAID磁盘阵列原理分析总结》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/3-1-33.html&title=《RAID磁盘阵列原理分析总结》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/3-1-33.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《RAID磁盘阵列原理分析总结》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/3-1-33.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/3-1-33.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/3-1-32.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">个人计算机硬件设备配置介绍与选型参考</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/2-27-21.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">常见的操作系统与软件系统体系结构介绍</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x01 前言简述</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-RAID-等级"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x00 RAID 等级</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-RAID-升级版本"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 RAID 升级版本</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-应用场景"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 应用场景</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/3-1-33.html&title=《RAID磁盘阵列原理分析总结》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/3-1-33.html&title=《RAID磁盘阵列原理分析总结》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/3-1-33.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《RAID磁盘阵列原理分析总结》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/3-1-33.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/3-1-33.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLUlEQVR42u3aS27DMAxFUe9/0+40E8v3UXIBUdejIk0cHRdg+bsufN34enp/+i3XF5cMGTK2Zaw61vhTv6+QT/GzyZAh4xzG07HGXz8OlOjrMenlzDJkyJCBgyAJuOkDkiFDhoy1jFqBOn4QMmTIkMFD50ynKyV9WIvLkCFjQwbvuv//z5/MN2TIkLEV4w6vWpuMh8i7dMmQIaM3gwc40jjjh+apYXAHGTJkNGWMQ+qq36aY+BUZMmQcwKglc/w9M+kjer8MGTJaM0jaN8NLl8nSgUSQvcqQIWNzxkyqlw4seeFavJsMGTLaMYoLWGAlYny4NMi+nFOGDBmtGWRwyIvJVatgfEjw0juUIUNGC8aqMpInlLVBwst9ZMiQcQxjVUDkxWfwP4Fsi8iQIaM1g/fYawVt7bM8QZQhQ0ZvBkn4OIwfdO3DkiFDxjkMvnKR9vP4k+OJ44LNERkyZGzFqC1M1JbD0jAdPD4ZMmS0ZvCAy0ebnFRrsaG/iQwZMhoxeDpYa7ERfNqke9wZkSFDxgGMNCnkCxYzFSgqa2XIkHEAIy1NZ5K5WkPt5ZwyZMhoyrjDi4fgWnLJi14ZMmScw1g74EyDbLqcMR+yZciQsS8jPVBafKaj0Kl2mwwZMloz5gNfujYRrFCQu8mQIUPGMJjyUpOPKuMhgQwZMmSEK1w8UJIKG2FkyJBxAIO3+2tLEml4jYegMmTIaM3gpWP6Stpo44DiIFOGDBn7Mf4A6g4i4HpbbeAAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 HPP攻击原理介绍和利用|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="HPP">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>HPP攻击原理介绍和利用</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">HPP攻击原理介绍和利用</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-09-17T02:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-09-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E5%89%8D%E7%AB%AF%E6%BC%8F%E6%B4%9E/">前端漏洞</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/OWASPTOP/WebBackEnd/HPP攻击原理介绍和利用"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">HPP攻击原理介绍和利用</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-09-17 10:36:30" datetime="2019-09-17T02:36:30.000Z"  itemprop="datePublished">2019-09-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E5%89%8D%E7%AB%AF%E6%BC%8F%E6%B4%9E/">前端漏洞</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><b style="color:red">注意：本文分享给安全从业人员、网站开发人员以及运维人员在日常工作防范恶意攻击,请勿恶意使用下面介绍技术进行非法攻击操作。。</b></p>
+<p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言介绍"><a href="#0x00-前言介绍" class="headerlink" title="0x00 前言介绍"></a>0x00 前言介绍</h4><p>描述:HPP参数污染的定义:<code>HTTP Parameter Pollution</code>简称HPP也称之为<code>“HPP参数污染”</code>，HPP是一种注入型的漏洞攻击者通过在HTTP请求中插入特定的参数来发起攻击,如果Web应用中存在这样的漏洞，可以被攻击者利用来进行客户端或者服务器端的攻击还能绕过WAF。</p>
+<hr>
+
+<h4 id="0x01-HPP原理"><a href="#0x01-HPP原理" class="headerlink" title="0x01 HPP原理"></a>0x01 HPP原理</h4><p>描述:简单的说就是使用相同的名称提供多个HTTP参数可能会导致应用程序以意想不到的方式解释值。<br>由于HTTP参数污染(简言之HPP)影响所有web技术的构建块，所以存在服务器端和客户端攻击;通过利用这些效果攻击者可以绕过输入验证、触发应用程序错误或修改内部变量值。<br>通过上面OWASP的截取WIKI我们知道实际这个漏洞就是采用多个同名参数,比如：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#E.G:</span></span><br><span class="line">https://weiyigeek.com/test.php?color=red&amp;color=blue</span><br></pre></td></tr></table></figure><br>不同的后端对其解析是不同的备忘清单如下：<br><figure class="image-box">
+                <a rel=HPP攻击原理介绍和利用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923225456.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190923225456.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure><br>补充:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Web服务器 参数获取函数</span><br><span class="line">PHP/Apache <span class="variable">$_GET</span>(<span class="string">"par"</span>)</span><br><span class="line">JSP/Tomcat Request.getParameter(<span class="string">"par"</span>)</span><br><span class="line">Perl(CGI)/Apache Param(<span class="string">"par"</span>)</span><br><span class="line">Python/Apache getvalue(<span class="string">"par"</span>)</span><br><span class="line">ASP/IIS Request.QueryString(<span class="string">"par"</span>)</span><br><span class="line">All (comma-delimited string)</span><br></pre></td></tr></table></figure></p>
+<p>又比如搜索引擎对于HPP解析理解是不同的:<br>假如这个URL:<code>https://www.baidu.com/s?wd=whoami&amp;wd=WeiyiGeek</code></p>
+<ul>
+<li>百度会理解成让百度搜索：whoami     #选择了第一个参数,放弃了第二个参数。</li>
+<li>雅虎会理解成让雅虎搜索：WeiyiGeek　 #选择了第二个参数,放弃了第一个参数。</li>
+<li>谷歌会理解成让谷歌搜索：whoami WeiyiGeek  #两个参数同时选择。</li>
+</ul>
+<p>总结：</p>
+<ul>
+<li>不同的后端解释语言对于重复的同名参数请求的处理方式是不一样的;</li>
+<li>而不同的搜索引擎主要就是三种情况了,由于<code>源于不同的网站对处理参数的处理方式不同</code>。</li>
+</ul>
+<hr>    
+
+
+<h4 id="0x02-HPP利用"><a href="#0x02-HPP利用" class="headerlink" title="0x02 HPP利用"></a>0x02 HPP利用</h4><p>描述:HPP参数污染攻击方式在网站接受用户输入，将其用于生成发往其它系统的HTTP请求，并且不校验用户输出的时候发生。<br>它以两种方式产生通过<code>服务器（后端）</code>或者<code>通过客户端</code></p>
+<p><strong>(1)HPP客户端攻击</strong><br>描述:比如有这样一个网站，用来给其他人在2个候选人之间投票，这个网站的URL和代码是这样的：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Url : http://host/election.jsp?poll_id=4568  </span><br><span class="line">Link1: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=zhang"</span>&gt;为张三投票&lt;/a&gt;  </span><br><span class="line">Link2: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=li"</span>&gt;为李四投票&lt;/a&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#我们根据HPP原理以及后端语言解析可知,JSP来说在有2个相同的名称的参数的时候会取第一个值,所以不管投票人选择的是谁始终都是张三得票。</span></span><br><span class="line">Url : http://host/election.jsp?poll_id=4568&amp;candidate=zhang  </span><br><span class="line">Link1: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=zhang&amp;candidate=zhang"</span>&gt;为张三投票&lt;/a&gt;  </span><br><span class="line">Link2: &lt;a href=<span class="string">"vote.jsp?poll_id=4568&amp;candidate=zhang&amp;candidate=li"</span>&gt;为李四投票&lt;/a&gt;  <span class="comment">#其实还是为张三投票</span></span><br></pre></td></tr></table></figure></p>
+<p>客户端的攻击一般会是如下流程:</p>
+<ul>
+<li>存在HPP漏洞网站-&gt;攻击者生成精心设计的恶意URL-&gt;将其分发给普通用户-&gt;请求服务器端(写入数据库)-&gt;攻击成功</li>
+</ul>
+<p><br></p>
+<p><strong>(2)HPP服务端攻击</strong><br>描述:它有个独立的集中认证服务器用来做用户权限方面的认证，另外的业务服务器专门用来处理业务，对外的门户实际上紧紧只是用来做请求的转发。<br>那么看看一个本来紧紧只是具有<code>只读权限的用户</code>，如果发送如下请求给服务器：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//比如某网站的实现如下：</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="keyword">private</span> <span class="title">executeBackendRequest</span><span class="params">(HTTPRequest request)</span></span>&#123;  </span><br><span class="line">String action=request.getParameter(<span class="string">"action"</span>);  </span><br><span class="line">String user=request.getParameter(<span class="string">"userid"</span>);  </span><br><span class="line">String target=request.getParameter(<span class="string">"target"</span>);  </span><br><span class="line">HttpRequest(<span class="string">"http://centralauthencationserver/checkpriviledge.jsp"</span>, <span class="string">"POST"</span>,<span class="string">"action="</span>+action+<span class="string">"&amp;user="</span>+user+<span class="string">"&amp;target="</span>+target);&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">/* get feedback of whether this user has privilege to perform specified action. If no such privilege, return error, otherwise continue perform the action*/</span>  </span><br><span class="line">HttpRequest(<span class="string">"http://businessserver/performaction.php"</span>, <span class="string">"POST"</span>,<span class="string">"action="</span>+action+<span class="string">"&amp;user="</span>+user+<span class="string">"&amp;target="</span>+target);&#125;</span><br></pre></td></tr></table></figure><br>根据我们知道的Web服务器参数处理的方式这个用户可以通过认证做一些本来没有权限做的事情。</p>
+<blockquote>
+<p><a href="http://www.weiyigeek.org/page?action=view&amp;userid=zhangsan&amp;target=bizreport&amp;action=edit">http://www.weiyigeek.org/page?action=view&amp;userid=zhangsan&amp;target=bizreport&amp;action=edit</a></p>
+</blockquote>
+<p><br></p>
+<p><strong>(3)HPP参数污染安全设备绕过</strong><br>描述:HPP还可以被攻击者用来绕过一些Web应用防火墙(WAF, WebApp Firewall)，HTTP参数污染注入<code>源于网站对于提交的相同的参数的不同处理方式导致</code>。<br>假设输入:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#示例服务端有可能会将key处理为select 1,2,3,4 from table，从而导致SQL注入</span></span><br><span class="line">www.backlion.org/a?key=select&amp;key=1,2,3,4 from table  <span class="comment">#因为在参数id里面存在明显的SQL注入的模板：select…from…而会被WAF成功拦截。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#但是如果换成HPP的方式：</span></span><br><span class="line">show_user.aspx?id=5;select+1&amp;id=2&amp;id=3+from+users+<span class="built_in">where</span>+id=1--  <span class="comment">#没有任何参数具备select…from…的特征，可能就可以绕过WAF的拦截了。</span></span><br><span class="line">http://www.xishaonian.com/hello.php?id=select 1&amp;id=2,3,4 from admin <span class="comment">#还可以与XSS结合使用</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="0x03-HPP案例"><a href="#0x03-HPP案例" class="headerlink" title="0x03 HPP案例"></a>0x03 HPP案例</h4><p><strong>1.HPP与XSS组合</strong><br>描述:案例是关于Apple Cups的，它是被许多UNIX系统利用的打印系统实际是绕过系统的验证机制;<br>利用如下的方式触发一个XSS攻击：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#第一个kerberos直到被用于构建动态HTML内容前都没有被验证。</span></span><br><span class="line">http://127.0.0.1:631/admin/?kerberos=onmouseover=alert(1)&amp;kerberos  <span class="comment">#原因是这个验证系统只采纳了第二个kerberos的值，这个值为空因此不会触发。</span></span><br><span class="line"><span class="comment">#最终在web站点的上下文中javascript语句被执行</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>2.HPP与HTML注入</strong><br>HPP 客户端涉及到向链接和其它src属性注入额外的参数。在 OWASP 的一个例子中，假设我们拥有下列代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;? <span class="variable">$val</span>=htmlspecialchars(<span class="variable">$_GET</span>[<span class="string">'par'</span>],ENT_QUOTES); ?&gt; &lt;a href=<span class="string">"/page.php?action=view&amp;par='.&lt;?=<span class="variable">$val</span>?&gt;.'"</span>&gt;View Me!&lt;/a&gt;</span><br></pre></td></tr></table></figure><br>它从 URL 接受par的值，确保它是安全的，并从中创建链接。现在如果攻击者提交了： <code>http://host/page.php?par=123&amp;action=edit</code></p>
+<p>产生的链接可能为：导致应用接受编辑操作而不是查看操作:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a href=<span class="string">"/page.php?action=view&amp;par=123&amp;action=edit"</span>&gt;View Me!&lt;/a&gt;</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>3.HPP付款签名验证(有利于价值)</strong><br>描述:比如付款链接一般会有重要的参数构建的签名是由某些重要的字段组成的加了同名的字段以后；<br>有可能在签名的时候验证了第一个付款金额参数,但是在实际付款的时候用了后面的一个付款金额参数,导致签名被绕了过去。<br>模拟案例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Reuqest</span></span><br><span class="line">POST https://www.example.com/transferMoney.php</span><br><span class="line"><span class="comment">#Params</span></span><br><span class="line">amount=1000&amp;fromAccount=12345</span><br></pre></td></tr></table></figure><br>当应用处理请求时，它生成自己的发往其它后端系统的 POST 请求，这实际上会使用固定的toAccount参数来处理事务。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">分离后端 URL：https://backend.example/doTransfer.php</span><br><span class="line">分离后端参数：toAccount=9876&amp;amount=1000&amp;fromAccount=12345</span><br><span class="line"></span><br><span class="line"><span class="comment">#假设攻击者修改了发往网站的 POST 请求来提交toAccount参数像这样：</span></span><br><span class="line">amount=1000&amp;fromAccount=12345&amp;toAccount=99999</span><br><span class="line"></span><br><span class="line"><span class="comment">#存在 HPP 漏洞的站点就会将请求转发给另一个后端系统（然而在PHP处理最后1个参数值则触发漏洞攻击）</span></span><br><span class="line">toAccount=9876&amp;amount=1000&amp;fromAccount=12345&amp;toAccount=9999 <span class="comment">#将钱转账给恶意用户调教得账户（99999）而不是由系统设置的预期账户（9876）。</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>4.HPP参数污染实例</strong><br><em>HackerOne 社交分享按钮</em><br>描述:HackerOne 包含的链接用于在知名社交媒体站点上分享内容，例如 Twitter，Fackbook以及其他。这些社交媒体的链接包含用于社交媒体链接的特定参数。<br>攻击者可以将另一个 URL 参数追加到链接中，并诱惑受害者点击<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#U参数的值诱惑受害者点击，尝试通过社交媒体链接分享内容，恶意链接就会变为：</span></span><br><span class="line">https://www.facebook.com/sharer.php?u=https://hackerone.com/blog/introducing-signal?&amp;u=https://vk.com/durov</span><br><span class="line"></span><br><span class="line"><span class="comment">#参数u就会拥有比第一个参数更高的优先级，之后会用于 Fackbook 的发布。在 Twitter 上发布时建议的默认文本也会改变：</span></span><br><span class="line">https://hackerone.com/blog/introducing-signal?&amp;u=https://vk.com/durov&amp;text=another_site:https://vk.com/durov</span><br></pre></td></tr></table></figure><br><br></p>
+<p><em>Twitter 取消订阅</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Poc:默认取最后一个人参数</span></span><br><span class="line">https://twitter.com/i/u?t=1&amp;cn=bWV&amp;sig=657&amp;iid=F6542&amp;uid=1134885524&amp;uid=1134885524&amp;nid=22+26 <span class="comment">#成功取消订阅了其它用户的邮件提醒</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+
+<h4 id="0x04-安全防御"><a href="#0x04-安全防御" class="headerlink" title="0x04 安全防御"></a>0x04 安全防御</h4><ul>
+<li><p>1.HPP是一种新的注入型漏洞要防止这种漏洞，除了要做好对输入参数的格式验证外，另外还需要意识到HTTP协议是允许同名的参数的，在整个应用的处理过程中要意识到这一点从而根据业务的特征对这样的情况作正确的处理。</p>
+</li>
+<li><p>2.让WAF或其他网关设备（比如IPS）在检查URL时，对同一个参数被多次赋值的情况进行特殊处理。由于HTTP协议允许相同参数在URL中多次出现，因此这种特殊处理需要注意避免误杀的情况</p>
+</li>
+<li><p>3.在代码层面编写WEB程序时，要通过合理的$_GET方法获取URL中的参数值，而尝试获取web服务器返回给程序的其他值时要慎重处理。</p>
+</li>
+</ul>
+<hr>
+
+<h4 id="0x05-总结补充"><a href="#0x05-总结补充" class="headerlink" title="0x05 总结补充"></a>0x05 总结补充</h4><p>文章参考来源:</p>
+<ul>
+<li><a href="https://www.owasp.org/index.php/Testing_for_HTTP_Parameter_pollution_(OTG-INPVAL-004)" target="_blank" rel="noopener">https://www.owasp.org/index.php/Testing_for_HTTP_Parameter_pollution_(OTG-INPVAL-004)</a></li>
+<li><a href="https://www.cnblogs.com/backlion/p/8556150.html" target="_blank" rel="noopener">https://www.cnblogs.com/backlion/p/8556150.html</a></li>
+<li><a href="https://www.owasp.org/images/b/ba/AppsecEU09_CarettoniDiPaola_v0.8.pdf" target="_blank" rel="noopener">https://www.owasp.org/images/b/ba/AppsecEU09_CarettoniDiPaola_v0.8.pdf</a><br>  <a href="https://medium.com/@logicbomb_1/bugbounty-compromising-user-account-how-i-was-able-to-compromise-user-account-via-http-4288068b901f" target="_blank" rel="noopener">https://medium.com/@logicbomb_1/bugbounty-compromising-user-account-how-i-was-able-to-compromise-user-account-via-http-4288068b901f</a></li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-30T05:02:09.821Z" itemprop="dateUpdated">2022-03-30 13:02:09</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/网安大类/OWASPTOP/WebBackEnd/HPP攻击原理介绍和利用.md" target="_blank" rel="noopener noreferrer">_posts/网安大类/OWASPTOP/WebBackEnd/HPP攻击原理介绍和利用.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/9-17-385.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/9-17-385.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HPP/" rel="tag">HPP</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/9-17-385.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/9-17-385.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员、网站开发人员以及运维人员在日常工作防范恶意攻击,请勿恶意使用下面介绍技术进行非法攻击操作。。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/9-17-385.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/9-17-385.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/9-17-385.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/9-17-420.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">高中学生综合素质评价系统脆弱性</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/9-17-400.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Subdomain-Takeover子域名接管原理和利用案例</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言介绍</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-HPP原理"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 HPP原理</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-HPP利用"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 HPP利用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-HPP案例"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 HPP案例</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-安全防御"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 安全防御</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x05-总结补充"><span class="post-toc-number">6.</span> <span class="post-toc-text">0x05 总结补充</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/9-17-385.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/9-17-385.html&title=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员、网站开发人员以及运维人员在日常工作防范恶意攻击,请勿恶意使用下面介绍技术进行非法攻击操作。。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/9-17-385.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《HPP攻击原理介绍和利用》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/9-17-385.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/9-17-385.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACL0lEQVR42u3aS07EQAxF0d7/psMYoYT77AqoXLdGrdBKckAy/n0++Fw35+dP775/d8+7p3zeODJkyNiWcT2e2neerzyT0ufKkCHjHAa/9XOs42H6+aX5u8mQIUNG+rkfgmXIkCFjFYMHRxKU/y3gypAhYysGKVB5c4002vivZnEtLkOGjA0ZvOv+959fmW/IkCFjK8YVnlXFbf9Nvt1ThgwZoxk8wHXGlrygrb2PDBkyZjNIg56Xl+mCF2nAoSsyZMgYzeAN+k7CR5r+tTT0lymHDBkyxjFqr0vCdArjAwAZMmScw0iLSZ7SERgPvsF/DBkyZAxlpA212lIXvxsZoMqQIeNkRroAUZxINIL+bWooQ4aMcYxOW41f4XfjyejtzogMGTKGMkgShhazwnUNkkQWt0VkyJAxiJGGttoCWa3RlqaeMmTImM3ghStJ7HgQ5yU0AsuQIWM0Iy1EO2llLWbGR4YMGYMYvLCsLZvWBqI8fMuQIeMERq0R1mmQ9VPPBX8TGTJkbMtIR4+8oOVBlofd250RGTJkjGakixd8UaxTvgZjThkyZBzM4KROkO00BGXIkDGbcYUnXa2oBeW0/SdDhozZjP66WPo5beQtDtkyZMjYlrE2sUuXwNIls6CIlSFDxjjGqtSNDyZRhQ1CvwwZMmSQx/AVLl7uBsNLGTJkyGiUoym1NUaVIUPGAQxSxKa9un54faXdJkOGjA0ZrU0N/M10LEoacDJkyDiA8QVn8yLgWhRN/QAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

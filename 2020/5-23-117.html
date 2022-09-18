@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 2.FastDFS分布式的文件存储系统进阶配置与入坑出坑|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>2.FastDFS分布式的文件存储系统进阶配置与入坑出坑</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">2.FastDFS分布式的文件存储系统进阶配置与入坑出坑</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-05-23T06:34:30.000Z" itemprop="datePublished" class="page-time">
+  2020-05-23
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/">系统架构</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E5%88%86%E5%B8%83%E5%BC%8F/Distributed/">Distributed</a></li></ul></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/系统架构/分布式/FastDFS/2.FastDFS分布式的文件存储系统进阶配置与入坑出坑"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">2.FastDFS分布式的文件存储系统进阶配置与入坑出坑</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-05-23 14:34:30" datetime="2020-05-23T06:34:30.000Z"  itemprop="datePublished">2020-05-23</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/">系统架构</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84/%E5%88%86%E5%B8%83%E5%BC%8F/Distributed/">Distributed</a></li></ul></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-进阶使用"><a href="#0x00-进阶使用" class="headerlink" title="0x00 进阶使用"></a>0x00 进阶使用</h2><h3 id="1-FastDFS-重复文件处理"><a href="#1-FastDFS-重复文件处理" class="headerlink" title="1.FastDFS 重复文件处理"></a>1.FastDFS 重复文件处理</h3><p>描述: 由于FastDFS本身不能对重复上传的文件进行去重, 所以使用FastDFS时如果多次上传同一张照片，默认都会将其上传到storage服务器中，这样造成磁盘空间的浪费，所以我们可以采用 FastDHT 进行重复文件处理，以达到同一份图片只留存一份。</p>
+<p>FastDHT是一个高性能的分布式哈希系统，它是基于键值对存储的，它可以存储大量键值对，例如文件名映射，会话数据和用户相关数据。但它依赖于Berkeley DB作为数据存储的媒介，使用libevent做网络IO处理, 同时需要依赖于<code>libfastcommon</code>。</p>
+<p>FastDHT 项目地址: <a href="https://github.com/happyfish100/fastdht" target="_blank" rel="noopener">https://github.com/happyfish100/fastdht</a><br>Berkeley DB 下载地址: <a href="https://www.oracle.com/database/technologies/related/berkeleydb-downloads.html" target="_blank" rel="noopener">https://www.oracle.com/database/technologies/related/berkeleydb-downloads.html</a></p>
+<p>FastDHT是一个高性能的分布式哈希系统，它是基于键值对存储的，而且它需要依赖于Berkeley DB作为数据存储的媒介，使用libevent做网络IO处理。同时需要依赖于libfastcommon。</p>
+<p>在 FastDHT 中，key 包含三个字段：namespace、object ID 和 key name。这三个概念类似于数据库系统的概念：<code>命名空间与数据库名称、对象 ID 与表名称以及键名称与字段名称</code>,由于导入了命名空间和对象 ID，系统更加灵活。</p>
+<ul>
+<li>命名空间的目的是解决之间可能的数据冲突多个用户，例如不同的应用程序或产品。 </li>
+<li>对象ID的目的是方便组织和管理  对象相关数据，如用户数据，提高整体性能。 </li>
+</ul>
+<p><br></p>
+<p><strong>FastDHT 流程:</strong><br>描述: FastDFS的storage server每次上传均计算文件的hash值，然后从FastDHT服务器上进行查找比对，如果没有返回，则写入hash，并将文件保存；如果有返回，则建立一个新的文件链接（软链），不保存文件。</p>
+<p>FastDHT 由客户端决定应该选择哪台服务器，为例避免查表根据key(文件)的<code>hash code</code>来选择服务器，算法描述如下:</p>
+<ol>
+<li>计算出key(文件)的hash值hash_code</li>
+<li>group_index = hash_code % group_count </li>
+<li>new_hash_code = hash_code  <code>高16位和低16位互换</code></li>
+<li>server_index = new_hash_code % 组内 server_count </li>
+</ol>
+<p>为啥计算 <code>server_index</code> 和 <code>group_index</code> 时使用了不同的hash code?</p>
+<blockquote>
+<p>因为如果<code>group_count</code>和组内<code>server_count</code>相等，例如都等于2，那么对于一个组来说，任何key值都将选中其中一台固定的服务器<code>server_index == group_index</code>，所以上述<code>高16位和低16位互换</code>就是为了解决此问题。</p>
+</blockquote>
+<p><br></p>
+<p><strong>部署流程:</strong></p>
+<ul>
+<li>Step 1.Berkeley DB 与 fastdht 下载编译安装 (此处安装环境还是Ubuntu并已经安装了FastDFS)<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) Berkeley DB 需要认证后下载并解压:</span></span><br><span class="line"><span class="comment"># https://download.oracle.com/otn/berkeley-db/db-18.1.40.tar.gz</span></span><br><span class="line"><span class="comment"># https://download.oracle.com/otn/berkeley-db/db-18.1.32.tar.gz </span></span><br><span class="line">tar -zxf db-18.1.40.tar.gz -C /usr/<span class="built_in">local</span>/src/</span><br><span class="line"><span class="comment"># 防止编译错误，这是db-18.1.40版本的Bug。</span></span><br><span class="line">mkdir -vp /usr/<span class="built_in">local</span>/src/db-18.1.40/docs/&#123;bdb-sql,gsg_db_server&#125;</span><br><span class="line"><span class="comment"># 进入build_unix目录，必须是这个目录</span></span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/db-18.1.40/build_unix</span><br><span class="line"><span class="comment"># 执行 configure 命令（一定要是进入上面的目录后，使用相对路径执行命令）：</span></span><br><span class="line">../dist/configure --prefix=/usr/<span class="built_in">local</span>/berkeley-db</span><br><span class="line"><span class="comment"># 编译并安装</span></span><br><span class="line">make &amp;&amp; make install</span><br><span class="line"><span class="comment"># 查看安装下目录结构</span></span><br><span class="line">ls /usr/<span class="built_in">local</span>/berkeley-db</span><br><span class="line"><span class="comment"># 词语删除db-18.1.40.tar.gz解压后的文件夹</span></span><br><span class="line">rm -rf /usr/<span class="built_in">local</span>/src/db-18.1.40</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 拉取 fastdht 项目并进行编译安装</span></span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/ </span><br><span class="line">git <span class="built_in">clone</span> https://github.com/happyfish100/fastdht.git</span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/fastdht </span><br><span class="line"><span class="comment"># 编译安装 (安装前必须解决依赖问题) 一定要确认是否已经安装了libevent、libevent-devel 和libfastcommon依赖安装包。</span></span><br><span class="line">apt-get install libevent-dev</span><br><span class="line"><span class="comment"># 解决db.h文件错误问题</span></span><br><span class="line">vim /usr/<span class="built_in">local</span>/src/fastdht/make.sh</span><br><span class="line">27 行: CFLAGS=<span class="string">'-Wall -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -I/usr/local/berkeley-db/include/ -L/usr/local/berkeley-db/lib/'</span></span><br><span class="line">./make.sh &amp;&amp; ./make.sh install</span><br><span class="line"><span class="comment"># 查看安装了可执行文件以及配置文件</span></span><br><span class="line">ls /usr/<span class="built_in">local</span>/bin/fdht*</span><br><span class="line">  <span class="comment"># /usr/local/bin/fdht_batch_test  /usr/local/bin/fdht_get       /usr/local/bin/fdht_test_set</span></span><br><span class="line">  <span class="comment"># /usr/local/bin/fdht_compress    /usr/local/bin/fdht_set       /usr/local/bin/fdht_test_thread</span></span><br><span class="line">  <span class="comment"># /usr/local/bin/fdhtd            /usr/local/bin/fdht_test</span></span><br><span class="line">  <span class="comment"># /usr/local/bin/fdht_delete      /usr/local/bin/fdht_test_get</span></span><br><span class="line"><span class="comment"># 安装成功后fastdht被安装在/etc/fdht目录下，生成3个配置文件</span></span><br><span class="line">ls /etc/fdht/</span><br><span class="line"><span class="comment"># fdht_client.conf  fdhtd.conf  fdht_servers.conf</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 拷贝库文件并重新加载库文件 否则将会报错</span></span><br><span class="line">cp /usr/<span class="built_in">local</span>/berkeley-db/lib/libdb-18.so /usr/lib/ &amp;&amp; cp /usr/<span class="built_in">local</span>/berkeley-db/lib/libdb-18.so /usr/lib64/</span><br><span class="line">ldconfig </span><br><span class="line"><span class="comment"># ldd /usr/local/bin/fdhtd</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<ul>
+<li>Step 2.fastdht 相关配置文件设置<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 创建fastdht数据日志存放目录</span></span><br><span class="line">mkdir -vp /home/fdfs/fdht</span><br><span class="line">chown -R fdfs:fdfs /home/fdfs/fdht</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 修改 /etc/fdht/fdht_client.conf 配置文件 </span></span><br><span class="line">vi /etc/fdht/fdht_client.conf</span><br><span class="line"><span class="comment"># 保持持久连接</span></span><br><span class="line">keep_alive=1</span><br><span class="line">base_path=/home/fdfs/fdht</span><br><span class="line"><span class="comment">## 本行前有#表示打开，如果想关闭(注释)此选项，则应该为##开头</span></span><br><span class="line"><span class="comment">#include /etc/fdht/fdht_servers.conf   </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 修改 /etc/fdht/fdht_servers.conf 配置文件 (单节点)</span></span><br><span class="line">group_count = 1</span><br><span class="line">group0 = 10.10.107.225:11411</span><br><span class="line"><span class="comment"># group0 = 10.10.107.226:11411</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 修改 /etc/fdht/fdhtd.conf 配置文件</span></span><br><span class="line">vi /etc/fdht/fdhtd.conf</span><br><span class="line"><span class="comment"># 启用fdhtd.conf配置</span></span><br><span class="line">disabled=<span class="literal">false</span></span><br><span class="line"><span class="comment"># 绑定监听地址</span></span><br><span class="line">bind_addr=10.10.107.225</span><br><span class="line">port=11411</span><br><span class="line"><span class="comment"># FastDHT数据和日志存放目录</span></span><br><span class="line">base_path=/home/fdfs/fdht</span><br><span class="line"><span class="comment"># 该目录必须是已经存在的，前面已经创建过了</span></span><br><span class="line">bash_path= /fastdfs/fastdht </span><br><span class="line"><span class="comment"># 文件HASH值存放方式BDB for Berkeley DB</span></span><br><span class="line">store_type = BDB</span><br><span class="line"><span class="comment"># 缓存大小默认64MB(需要根据实际情况进行配置)</span></span><br><span class="line">cache_size = 128MB</span><br><span class="line"><span class="comment"># 与前面一样，用指定用户和组来执行程序</span></span><br><span class="line">run_by_group=fdfs</span><br><span class="line">run_by_user=fdfs</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 3.在 FastDFS Storage 配置文件中设置接入FastDHT (重点)<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置/etc/fdfs/目录下的storage.conf</span></span><br><span class="line">vi /etc/fdfs/storage.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查文件副本并使用FastDHT存储文件索引</span></span><br><span class="line">check_file_duplicate = 1</span><br><span class="line"><span class="comment"># 检查文件副本算法方式</span></span><br><span class="line"><span class="comment">## hash: four 32 bits hash code</span></span><br><span class="line"><span class="comment">## md5: MD5 signature</span></span><br><span class="line">file_signature_method = <span class="built_in">hash</span></span><br><span class="line"><span class="comment"># 用于存储文件索引（键值对）的命名空间</span></span><br><span class="line">key_namespace = FastDFS</span><br><span class="line"><span class="comment"># 将keep_alive设置为1以启用与FastDHT服务器的持久连接</span></span><br><span class="line">keep_alive = 1</span><br><span class="line"><span class="comment"># 您可以使用“#include filename”（不包括双引号）指令加载FastDHT服务器列表 (此处非常注意、注意、#与inclue之间没有空格、没有空格以及其它字符)</span></span><br><span class="line"><span class="comment">#include /etc/fdht/fdht_servers.conf</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips : 非常注意启用include时#include之间不能包含空格(巨坑、巨坑)</p>
+<p><br/></p>
+<ul>
+<li>Step 4.使用systemd管理fdhtd进程和重启fdhtd、storage服务<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 服务清单单元</span></span><br><span class="line">tee /lib/systemd/system/fdhtd.service &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=FastDHT daemon service</span><br><span class="line">After=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=forking</span><br><span class="line">WorkingDirectory=/home/fdfs/fdht</span><br><span class="line">PIDFile=/home/fdfs/fdht/data/fdhtd.pid </span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/bin/fdhtd /etc/fdht/fdhtd.conf start</span><br><span class="line">ExecStop=/usr/<span class="built_in">local</span>/bin/fdhtd /etc/fdht/fdhtd.conf stop</span><br><span class="line">ExecReload=/usr/<span class="built_in">local</span>/bin/fdhtd /etc/fdht/fdhtd.conf restart</span><br><span class="line"></span><br><span class="line"><span class="comment"># No artificial start/stop timeout</span></span><br><span class="line">TimeoutSec=3</span><br><span class="line"></span><br><span class="line"><span class="comment"># Disable OOM kill by Linux kernel</span></span><br><span class="line">OOMScoreAdjust=-1000</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">EOF</span><br><span class="line">systemctl daemon-reload</span><br><span class="line"></span><br><span class="line"><span class="comment"># 防火墙放行设置</span></span><br><span class="line">ufw allow 11411/tcp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新启动服务 </span></span><br><span class="line">/usr/<span class="built_in">local</span>/bin/fdhtd /etc/fdht/fdhtd.conf stop</span><br><span class="line">systemctl restart fdhtd.service &amp;&amp; systemctl status fdhtd.service</span><br><span class="line">systemctl restart fdfs_storaged.service &amp;&amp; systemctl status fdfs_storaged.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行结果:</span></span><br><span class="line"><span class="comment"># ● fdhtd.service - FastDHT daemon service</span></span><br><span class="line"><span class="comment">#      Loaded: loaded (/lib/systemd/system/fdhtd.service; disabled; vendor preset: enabled)</span></span><br><span class="line"><span class="comment">#      Active: active (running) since Tue 2021-11-02 22:22:17 CST; 6s ago</span></span><br><span class="line"><span class="comment">#     Process: 940357 ExecStart=/usr/local/bin/fdhtd /etc/fdht/fdhtd.conf start (code=exited, status=0/SUCCESS)</span></span><br><span class="line"><span class="comment">#    Main PID: 940359 (fdhtd)</span></span><br><span class="line"><span class="comment">#       Tasks: 12 (limit: 9414)</span></span><br><span class="line"><span class="comment">#      Memory: 2.5M</span></span><br><span class="line"><span class="comment">#      CGroup: /system.slice/fdhtd.service</span></span><br><span class="line"><span class="comment">#              └─940359 /usr/local/bin/fdhtd /etc/fdht/fdhtd.conf start</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Nov 02 22:22:17 elk1 systemd[1]: Starting FastDHT daemon service...</span></span><br><span class="line"><span class="comment"># Nov 02 22:22:17 elk1 systemd[1]: Started FastDHT daemon service.</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># fast* 相关进程查看</span></span><br><span class="line">$ ps aux | grep <span class="string">"/etc/fd"</span></span><br><span class="line">  <span class="comment"># fdfs      837401  0.0  0.0 211196  6132 ?        Sl   Oct30   0:38 /usr/bin/fdfs_trackerd /etc/fdfs/tracker.conf start</span></span><br><span class="line">  <span class="comment"># fdfs      940039  0.0  0.0 534916  4136 ?        Sl   22:12   0:00 /usr/bin/fdfs_storaged /etc/fdfs/storage.conf start</span></span><br><span class="line">  <span class="comment"># fdfs      940359  0.0  0.0 253952  3436 ?        Sl   22:22   0:00 /usr/local/bin/fdhtd /etc/fdht/fdhtd.conf start</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 5.验证FastDHT文件去重功能。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 我们三次上传同一个文件,首次上传时同一文件分两次先后上传（串行）</span></span><br><span class="line">root@Master:/tmp/<span class="built_in">test</span><span class="variable">$fdfs_upload_file</span> /etc/fdfs/client.conf bibi.png</span><br><span class="line">  group1/M00/00/00/Cgpr4mGBS9yABcwKAAFcGln-TU4047.png   <span class="comment"># 文件首次上传，即生成软链接指向上传文件</span></span><br><span class="line">root@Master:/tmp/<span class="built_in">test</span><span class="variable">$fdfs_upload_file</span> /etc/fdfs/client.conf bibi.png</span><br><span class="line">  group1/M00/00/00/Cgpr4WGBS92ASA_jAAFcGkEHz3I407.png</span><br><span class="line">root@Master:/tmp/<span class="built_in">test</span><span class="variable">$fdfs_upload_file</span> /etc/fdfs/client.conf bibi.png</span><br><span class="line">  group1/M00/00/00/Cgpr4mGBS92APWWCAAFcGh4OjGI465.png</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 可以看到上传的三个文件指向同一个Cgpr4WGBSxaABHlXAAFcGo7c2Jk187.png副本。Nice</span></span><br><span class="line">root@Master:/tmp/<span class="built_in">test</span><span class="comment"># find /home/fdfs/storage/data/ -name "Cgpr4*.png" -ctime -0.5 -exec  ls -lh &#123;&#125; \;</span></span><br><span class="line">-rw-r--r-- 1 fdfs fdfs 88K Nov  2 22:28 /home/fdfs/storage/data/00/00/Cgpr4WGBSxaABHlXAAFcGo7c2Jk187.png</span><br><span class="line">lrwxrwxrwx 1 fdfs fdfs 64 Nov  2 22:31 /home/fdfs/storage/data/00/00/Cgpr4WGBS92ASA_jAAFcGkEHz3I407.png -&gt; /home/fdfs/storage/data/00/00/Cgpr4WGBSxaABHlXAAFcGo7c2Jk187.png</span><br><span class="line">lrwxrwxrwx 1 fdfs fdfs 64 Nov  2 22:31 /home/fdfs/storage/data/00/00/Cgpr4mGBS9yABcwKAAFcGln-TU4047.png -&gt; /home/fdfs/storage/data/00/00/Cgpr4mGBSxWAV58oAAFcGo7c2Jk916.png</span><br><span class="line">lrwxrwxrwx 1 fdfs fdfs 64 Nov  2 22:31 /home/fdfs/storage/data/00/00/Cgpr4mGBS92APWWCAAFcGh4OjGI465.png -&gt; /home/fdfs/storage/data/00/00/Cgpr4mGBSxWAV58oAAFcGo7c2Jk916.png</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=2.FastDFS分布式的文件存储系统进阶配置与入坑出坑 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211102223709.png" target="_blank" title="WeiyiGeek.FastDHT重复处理" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211102223709.png" alt="WeiyiGeek.FastDHT重复处理" title="" class=""></a>
+                <p>WeiyiGeek.FastDHT重复处理</p>
+            </figure>
+<p>至此完毕!</p>
+<p><br/></p>
+<p>上面是单实例的FastDHT环境搭建，在实际企业环境中我们可以根据需求搭建 FastDHT 集群。</p>
+<p>FastDHT 集群由一个或多个组（group）组成，每个组由一台或多台服务器组成，同组服务器上存储的数据是相同的，数据同步只在同组的服务器之间进行。组内各个服务器是对等的，对数据进行存取时，可以根据key的hash值来决定使用哪台服务器。数据同步采用推（Push）的方式，由源服务器主动将数据同步到本组的其他服务器。</p>
+<ul>
+<li>Step 1.FastDHT 集群的安装非常的简单，按照上面单实例流程进行安装宁外一台FastDHT服务，然后分别修改两台主机的<code>fdht_servers.conf</code>，重启后即可使用。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 配置两台机器的fdht_servers.conf文件</span></span><br><span class="line">vim /etc/fdhtd/fdht_servers.conf</span><br><span class="line">group_count = 2</span><br><span class="line"><span class="comment"># FastDHT 集群中划分一个组，改组由两台服务器进行存储索引数据（完全相同，它会实时同步）。</span></span><br><span class="line">group0 = 10.10.107.225:11411</span><br><span class="line">group0 = 10.10.107.226:11411</span><br><span class="line"><span class="comment"># group1 = 10.10.107.227:11411</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 重新两台机器的相关服务 </span></span><br><span class="line">/usr/<span class="built_in">local</span>/bin/fdhtd /etc/fdht/fdhtd.conf stop</span><br><span class="line">systemctl restart fdhtd.service &amp;&amp; systemctl status fdhtd.service</span><br><span class="line">systemctl restart fdfs_storaged.service &amp;&amp; systemctl status fdfs_storaged.service</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 2.验证FastDHT 集群的去重功能是否正常。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 上传多份hello.logs</span></span><br><span class="line">root@elk2:/tmp<span class="comment"># ls</span></span><br><span class="line">hello.logs</span><br><span class="line">root@Slave:/tmp<span class="comment"># fdfs_upload_file /etc/fdfs/client.conf hello.logs</span></span><br><span class="line">group1/M00/00/00/Cgpr4WGBUTmAKPrOAAAAHW1scFk00.logs</span><br><span class="line">group1/M00/00/00/Cgpr4WGBWruAVSl2AAAAHUTG_1091.logs</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 同样只有一个源文件，其它都是链接指向 `Cgpr4WGBUTmAH106AAAAHdiEv7475.logs`</span></span><br><span class="line">root@elk2:/tmp<span class="comment"># find /home/fdfs/storage/data/ -name "*.logs" -ctime -0.5 -exec  ls -lh &#123;&#125; \;</span></span><br><span class="line">lrwxrwxrwx 1 fdfs fdfs 64 Nov  2 22:54 /home/fdfs/storage/data/00/00/Cgpr4WGBUTmAKPrOAAAAHW1scFk00.logs -&gt; /home/fdfs/storage/data/00/00/Cgpr4WGBUTmAH106AAAAHdiEv7475.logs</span><br><span class="line">lrwxrwxrwx 1 fdfs fdfs 64 Nov  2 22:54 /home/fdfs/storage/data/00/00/Cgpr4WGBWruAVSl2AAAAHUTG_1091.logs -&gt; /home/fdfs/storage/data/00/00/Cgpr4WGBUTmAH106AAAAHdiEv7475.logs</span><br><span class="line">-rw-r--r-- 1 fdfs fdfs 29 Nov  2 22:54 /home/fdfs/storage/data/00/00/Cgpr4WGBUTmAH106AAAAHdiEv7475.logs</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 链接拷贝以及文件打开</span></span><br><span class="line">root@elk2:/tmp<span class="comment"># cp /home/fdfs/storage/data/00/00/Cgpr4WGBUTmAKPrOAAAAHW1scFk00.logs .</span></span><br><span class="line">root@elk2:/tmp<span class="comment"># ls -alh</span></span><br><span class="line">-rw-r--r--  1 root root   29 Nov  2 22:55 Cgpr4WGBUTmAKPrOAAAAHW1scFk00.logs  <span class="comment"># 此时不再是链接文件。</span></span><br><span class="line">-rw-r--r--  1 root root   29 Nov  2 22:48 hello.logs</span><br><span class="line">root@elk2:/tmp<span class="comment"># cat Cgpr4WGBUTmAKPrOAAAAHW1scFk00.logs</span></span><br><span class="line">Hello World,FastDFS!</span><br><span class="line">By Test</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips : FastDFS不会返回原始文件的索引，返回的全部都是软链接，当所有的软链接都被删除的时候，原始文件也会从FastDFS中被删除。</p>
+<p><br/></p>
+<p><strong>扩展说明: 使用fdht提供的相关工具操作FastDHT服务</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置值</span></span><br><span class="line">fdht_set /etc/fdht/fdht_client.conf database:user01 name=<span class="string">'WeiyiGeek'</span>,age=18;</span><br><span class="line">  <span class="comment"># success set key count: 2, fail count: 0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 读取值</span></span><br><span class="line">fdht_get &lt;config_file&gt; [namespace:][object id] &lt;key list split by comma&gt;</span><br><span class="line">fdht_get /etc/fdht/fdht_client.conf database:user01 name,age;</span><br><span class="line">  <span class="comment"># name=WeiyiGeek</span></span><br><span class="line">  <span class="comment"># age=18</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除值</span></span><br><span class="line">fdht_delete /etc/fdht/fdht_client.conf database:user01 name;</span><br><span class="line">  <span class="comment"># success delete keys: name</span></span><br><span class="line">  <span class="comment"># success delete key count: 1, fail count: 0</span></span><br></pre></td></tr></table></figure></p>
+<p>至此安装搭建配置、验证测试完成!</p>
+<p><br></p>
+<h3 id="2-FastDFS-原始文件名恢复"><a href="#2-FastDFS-原始文件名恢复" class="headerlink" title="2.FastDFS 原始文件名恢复"></a>2.FastDFS 原始文件名恢复</h3><p>描述: 当其它文档被上传到FastDFS后，Storage服务端将返回的文件索引（FID），其中文件名是根据FastDFS自定义规则重新生成的而不是原始文件名。</p>
+<p>例如: 在使用浏览器访问 <code>http://file.weiyigeek.top/group2/M00/00/89/eQ6h3FKJf_PRl8p4AUz4wO8tqaA688.docx</code>, 显示给用户的文件名会是这样的eQ6h3FKJf_PRl8p4AUz4wO8tqaA688.docx 那FastDFS在进行文件下载时如何恢复原始文件名称。</p>
+<p><br></p>
+<p><strong>操作流程：</strong></p>
+<ul>
+<li>Step 1.应用系统在上传文件到FastDFS成功时将原始文件名以及”文件索引（FID）”都保存下来（例如：保存到数据库）。</li>
+</ul>
+<p><br></p>
+<ul>
+<li>Step 2.用户点击下载的时用Nginx的域名和FID拼出url，然后在url后面增加一个参数，指定原始文件名。<br>例如：<code>http://file.weiyigeek.top/group2/M00/00/89/eQ6h3FKJf_PRl8p4AUz4wO8tqaA688.docx?attname=filename.docx</code></li>
+</ul>
+<p><br></p>
+<ul>
+<li>Step 3.然后在Nginx上进行如下配置此时Nginx就会截获url中的参数attname，并且在Http响应头中进行展示<code>Content-Disposition &quot;attachment;filename=$arg_attname&quot;</code><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location /group1/M00 &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="variable">$arg_attname</span> ~* \.(doc|docx|txt|pdf|zip|rar|xls|xlsx|png|jpeg|jpg)$) &#123;</span><br><span class="line">    add_header Content-Disposition <span class="string">"attachment;filename=<span class="variable">$arg_attname</span>"</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ngx_fastdfs_module;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips : 上面脚本主要功能是通过正则匹配文件后缀，然后将下载文件名改为路径参数attname的值,并返回给客户端。</p>
+<p><br></p>
+<ul>
+<li>Step 4.现在要将下载后的文件名称由<code>Cgpr4WGCMMOAamL7AAApDWjxgXI44.xlsx</code>改为<code>设备清单.xlsx</code>, 访问如下下载路径格式即可<code>http://file.weiyigeek.top/group1/M00/00/00/Cgpr4WGCMMOAamL7AAApDWjxgXI44.xlsx?attname=设备清单.xlsx</code></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 浏览器返回的响应头</span></span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/1.20.1</span><br><span class="line">Date: Wed, 03 Nov 2021 06:53:42 GMT</span><br><span class="line">Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</span><br><span class="line">Content-Length: 10509</span><br><span class="line">Last-Modified: Wed, 03 Nov 2021 06:48:35 GMT</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Content-Disposition: attachment;filename=%E8%AE%BE%E5%A4%87%E6%B8%85%E5%8D%95.xlsx</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=2.FastDFS分布式的文件存储系统进阶配置与入坑出坑 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211103145407.png" target="_blank" title="WeiyiGeek.FastDFS下载文件重命名" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211103145407.png" alt="WeiyiGeek.FastDFS下载文件重命名" title="" class=""></a>
+                <p>WeiyiGeek.FastDFS下载文件重命名</p>
+            </figure>
+<p><br></p>
+<h3 id="3-FastDFS-资源防盗链功能"><a href="#3-FastDFS-资源防盗链功能" class="headerlink" title="3.FastDFS 资源防盗链功能"></a>3.FastDFS 资源防盗链功能</h3><p>描述: 前面使用nginx支持http方式访问文件，但所有人都能直接访问这个文件服务器，所以有些场景我们需要做一下权限控制。</p>
+<p>FastDFS 的权限控制是在服务端开启token验证, 客户端根据文件名、当前unix时间戳、秘钥获取token，然后在地址中带上token参数即可通过http方式访问文件。</p>
+<p><strong>操作流程:</strong></p>
+<ul>
+<li>(1) 服务端开启token验证, 我们修改<code>/etc/fdfs/http.conf</code>配置文件。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/fdfs/http.conf</span><br><span class="line"><span class="comment"># HTTP默认内容类型</span></span><br><span class="line">http.default_content_type = application/octet-stream</span><br><span class="line"><span class="comment"># MIME类型映射文件名</span></span><br><span class="line">http.mime_types_filename = mime.types</span><br><span class="line"><span class="comment"># 设置为true表示开启token验证</span></span><br><span class="line">http.anti_steal.check_token=<span class="literal">true</span></span><br><span class="line"><span class="comment"># 密钥,它需要与客户端配置文件的 fastdfs.http_secret_key 保持一致。</span></span><br><span class="line">http.anti_steal.secret_key=WeiyiGeek.top</span><br><span class="line"><span class="comment"># 设置token失效的时间单位为秒(s)</span></span><br><span class="line">http.anti_steal.token_ttl=1800</span><br><span class="line"><span class="comment"># 当检查令牌失败时返回文件的内容</span></span><br><span class="line">http.anti_steal.token_check_fail = /home/yuqing/fastdfs/conf/anti-steal.jpg</span><br><span class="line"><span class="comment"># 支持HTTP范围的多区域</span></span><br><span class="line">http.multi_range.enabed = <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>(2) 拷贝Token检查失败时显示的图片以及重启Nginx服务。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp /usr/<span class="built_in">local</span>/src/fastdfs/conf/anti-steal.jpg /usr/<span class="built_in">local</span>/nginx/html/anti-steal.jpg</span><br><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>(3) 客户端生成Token需要文件名称、当前时间以及httpSecretKey参数<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 获取访问服务器的token，拼接到地址后面</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> filepath 文件路径 group1/M00/00/00/wKgzgFnkTPyAIAUGAAEoRmXZPp876.jpeg</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> httpSecretKey 密钥</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> ts 当前时间戳</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> 返回token，如： token=078d370098b03e9020b82c829c205e1f&amp;ts=1508141521</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getToken</span><span class="params">(String filepath, String httpSecretKey)</span></span>&#123;</span><br><span class="line">  <span class="comment">// unix seconds</span></span><br><span class="line">  <span class="keyword">int</span> ts = (<span class="keyword">int</span>) Instant.now().getEpochSecond();</span><br><span class="line">  <span class="comment">// token</span></span><br><span class="line">  String token = <span class="string">"null"</span>;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">      token = ProtoCommon.getToken(getFilename(filepath), ts, httpSecretKey);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (UnsupportedEncodingException e) &#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">  &#125; <span class="keyword">catch</span> (NoSuchAlgorithmException e) &#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">  &#125; <span class="keyword">catch</span> (MyException e) &#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">  &#125;</span><br><span class="line">  StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">  sb.append(<span class="string">"token="</span>).append(token);</span><br><span class="line">  sb.append(<span class="string">"&amp;ts="</span>).append(ts);</span><br><span class="line">  <span class="keyword">return</span> sb.toString(); <span class="comment">//返回的token是token和时间戳的拼接</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>(4) 此时访问文件需要带上生成的token以及unix时间戳,例如<code>http://file.weiyigeek.top/group1/M00/00/00/wKgzgFnkaXqAIfXyAAEoRmXZPp878.jpeg?token=078d370098b03e9020b82c829c205e1f&amp;ts=1508141521</code></li>
+</ul>
+<p><br/></p>
+<p><strong>注意事项:</strong></p>
+<ul>
+<li><p>Tips: 如果生成的token验证无法通过，请进行如下两项检查：</p>
+<blockquote>
+<p>(1) 确认调用token生成函数(ProtoCommon.getToken)，传递的文件ID中没有包含group name。传递的文件ID格式形如：M00/00/00/wKgzgFnkTPyAIAUGAAEoRmXZPp876.jpeg<br>(2) 确认服务器时间基本是一致的，注意服务器时间不能相差太多，不要相差到分钟级别。</p>
+</blockquote>
+</li>
+<li><p>Tips: 如果系统文件隐私性较高，可以直接通过<code>fastdfs-client</code>提供的API去访问即可，不用再配置Nginx走http访问。配置Nginx的主要目的是为了快速访问服务器的文件(如图片)，如果还要加权限验证，则需要客户端生成token，其实已经没有多大意义, 但是防止爬虫还是非常不错的。</p>
+</li>
+</ul>
+<p><br/></p>
+<h3 id="4-FastDFS-从文件的使用技巧"><a href="#4-FastDFS-从文件的使用技巧" class="headerlink" title="4.FastDFS 从文件的使用技巧"></a>4.FastDFS 从文件的使用技巧</h3><p>描述: 当时使用FastDFS存储一个图片的多个分辨率的备份时，希望只记录源图的FID，并能将其它分辨率的图片与源图关联，此时可以使用从文件方法。</p>
+<p>主从文件是指文件ID有关联的文件，一个主文件可以对应多个从文件。</p>
+<blockquote>
+<p>主文件ID = 主文件名 + 主文件扩展名<br>从文件ID = 主文件名 + 从文件后缀名 + 从文件扩展名</p>
+</blockquote>
+<p><br/></p>
+<p>以本场景为例：主文件为原始图片，从文件为该图片的一张或多张缩略图。</p>
+<p><strong>流程说明：</strong></p>
+<ul>
+<li>先上传主文件（即：原文件），得到主文件FID。</li>
+<li>然后上传从文件（即：缩略图），指定主文件FID和从文件后缀名，上传后得到从文件FID。</li>
+</ul>
+<p>java伪代码，如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Logger logger = Logger.getLogger(FastDFSUtils.class);</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span>&#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">      ClientGlobal.init(<span class="string">"D:/WorkSpace/app-filesystem/conf/fdfs_client.conf"</span>);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">uploadFile</span><span class="params">(String filePath)</span> <span class="keyword">throws</span> Exception</span>&#123;        </span><br><span class="line">  String fileId = <span class="string">""</span>; </span><br><span class="line">  String fileExtName = <span class="string">""</span>; </span><br><span class="line">  <span class="keyword">if</span> (filePath.contains(<span class="string">"."</span>)) &#123; </span><br><span class="line">      fileExtName = filePath.substring(filePath.lastIndexOf(<span class="string">"."</span>) + <span class="number">1</span>); </span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; </span><br><span class="line">      logger.warn(<span class="string">"Fail to upload file, because the format of filename is illegal."</span>); </span><br><span class="line">      <span class="keyword">return</span> fileId; </span><br><span class="line">  &#125; </span><br><span class="line"></span><br><span class="line">  <span class="comment">//建立连接 </span></span><br><span class="line">  <span class="comment">/*.......*/</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">//上传文件 (主文件点)</span></span><br><span class="line">  <span class="keyword">try</span> &#123; </span><br><span class="line">      fileId = client.upload_file1(filePath, fileExtName, <span class="keyword">null</span>); </span><br><span class="line">  &#125; <span class="keyword">catch</span> (Exception e) &#123; </span><br><span class="line">      logger.warn(<span class="string">"Upload file \""</span> + filePath + <span class="string">"\"fails"</span>); </span><br><span class="line">  &#125;<span class="keyword">finally</span>&#123;</span><br><span class="line">      trackerServer.close();</span><br><span class="line">  &#125;        </span><br><span class="line">  <span class="keyword">return</span> fileId; </span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">uploadSlaveFile</span><span class="params">(String masterFileId, String prefixName, String slaveFilePath)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">  String slaveFileId = <span class="string">""</span>; </span><br><span class="line">  String slaveFileExtName = <span class="string">""</span>; </span><br><span class="line">  <span class="keyword">if</span> (slaveFilePath.contains(<span class="string">"."</span>)) &#123; </span><br><span class="line">      slaveFileExtName = slaveFilePath.substring(slaveFilePath.lastIndexOf(<span class="string">"."</span>) + <span class="number">1</span>); </span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; </span><br><span class="line">      logger.warn(<span class="string">"Fail to upload file, because the format of filename is illegal."</span>); </span><br><span class="line">      <span class="keyword">return</span> slaveFileId; </span><br><span class="line">  &#125; </span><br><span class="line"></span><br><span class="line">  <span class="comment">//建立连接 </span></span><br><span class="line">  <span class="comment">/*.......*/</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">//上传文件 (从文件点)</span></span><br><span class="line">  <span class="keyword">try</span> &#123; </span><br><span class="line">    slaveFileId = client.upload_file1(masterFileId, prefixName, slaveFilePath, slaveFileExtName, <span class="keyword">null</span>); </span><br><span class="line">  &#125; <span class="keyword">catch</span> (Exception e) &#123; </span><br><span class="line">      logger.warn(<span class="string">"Upload file \""</span> + slaveFilePath + <span class="string">"\"fails"</span>); </span><br><span class="line">  &#125;<span class="keyword">finally</span>&#123;</span><br><span class="line">      trackerServer.close();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> slaveFileId;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">download</span><span class="params">(String fileId, String localFile)</span> <span class="keyword">throws</span> Exception</span>&#123;   </span><br><span class="line">  <span class="keyword">int</span> result = <span class="number">0</span>;</span><br><span class="line">  <span class="comment">//建立连接 </span></span><br><span class="line">  TrackerClient tracker = <span class="keyword">new</span> TrackerClient();</span><br><span class="line">  TrackerServer trackerServer = tracker.getConnection();</span><br><span class="line">  StorageServer storageServer = <span class="keyword">null</span>;</span><br><span class="line">  StorageClient1 client = <span class="keyword">new</span> StorageClient1(trackerServer, storageServer); </span><br><span class="line"></span><br><span class="line">  <span class="comment">//上传文件 </span></span><br><span class="line">  <span class="keyword">try</span> &#123; </span><br><span class="line">      result = client.download_file1(fileId, localFile); </span><br><span class="line">  &#125; <span class="keyword">catch</span> (Exception e) &#123; </span><br><span class="line">      logger.warn(<span class="string">"Download file \""</span> + localFile + <span class="string">"\"fails"</span>); </span><br><span class="line">  &#125;<span class="keyword">finally</span>&#123;</span><br><span class="line">      trackerServer.close();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">      String masterFileId = uploadFile(<span class="string">"D:/Tmp/apk/t01134ede0e696735e7.png"</span>);</span><br><span class="line">      System.out.println(masterFileId);</span><br><span class="line">      download(masterFileId, <span class="string">"D:/Tmp/apk/master.png"</span>);</span><br><span class="line"></span><br><span class="line">      String slaveFileId = uploadSlaveFile(masterFileId, <span class="string">"_120x120"</span>, <span class="string">"D:/Tmp/apk/PC.png"</span>);</span><br><span class="line">      System.out.println(slaveFileId);</span><br><span class="line"></span><br><span class="line">      download(slaveFileId, <span class="string">"D:/Tmp/apk/slave.png"</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      logger.error(<span class="string">"upload file to FastDFS failed."</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>上面代码运行后打印的文件Id为：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">主文件：group1/M00/00/00/wKhbylJx1zkIAAAAAAApPcQL87AAAAAAQCmDxUAAClV522.png</span><br><span class="line">从文件：group1/M00/00/00/wKhbylJx1zkIAAAAAAApPcQL87AAAAAAQCmDxUAAClV522_120x120.png</span><br></pre></td></tr></table></figure></p>
+<p>Tips : FastDFS中的主从文件只是在文件ID上有联系。FastDFS server端没有记录主从文件对应关系，因此删除主文件，FastDFS不会自动删除从文件。删除主文件后，从文件的级联删除，需要由应用端来实现(程序后端)。</p>
+<p>参考地址: <a href="http://www.ttlsa.com/fastdfs/fastdfs-experience-sharing" target="_blank" rel="noopener">http://www.ttlsa.com/fastdfs/fastdfs-experience-sharing</a></p>
+<hr>
+<h2 id="0x01-容灾恢复"><a href="#0x01-容灾恢复" class="headerlink" title="0x01 容灾恢复"></a>0x01 容灾恢复</h2><h3 id="1-主从同步异常恢复测试"><a href="#1-主从同步异常恢复测试" class="headerlink" title="1.主从同步异常恢复测试"></a>1.主从同步异常恢复测试</h3><p>描述: 假如此时 <code>10.10.107.225</code> 主 <code>tracker、storage</code> 由于异常退出, 此时<code>10.10.107.226</code> 正常运行，此时当我们想把文件上传到fastdfs时，它将自动通过<code>/etc/fdfs/client.txt</code>中配置的<code>tracker server</code>地址,选择一个可用的<code>tracker server</code>地址进行文件上传，并在主 storage 节点服务恢复后自动同步到其storage数据目录中。</p>
+<p><strong>演示流程:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 故障演示将主 master 10.10.107.225 的 fdfs_storaged 和 fdfs_trackerd.service 进行停止</span></span><br><span class="line">systemctl stop fdfs_storaged.service fdfs_trackerd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 从客户端查看fdfs storage相关信息。</span></span><br><span class="line">fdfs_monitor /etc/fdfs/client.conf</span><br><span class="line">  <span class="comment"># tracker server is 10.10.107.226:22122  # 此时发现 tracker server 变成slave的地址。</span></span><br><span class="line">  <span class="comment"># Storage 1:</span></span><br><span class="line">  <span class="comment">#     id = 10.10.107.225</span></span><br><span class="line">  <span class="comment">#     ip_addr = 10.10.107.225  OFFLINE   # 存储离线状态</span></span><br><span class="line">  <span class="comment">#     http domain = file1.weiyigeek.top</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Storage 2:</span></span><br><span class="line">  <span class="comment">#     id = 10.10.107.226</span></span><br><span class="line">  <span class="comment">#     ip_addr = 10.10.107.226  ACTIVE</span></span><br><span class="line">  <span class="comment">#     http domain = file2.weiyigeek.top</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 客户端上传文件到fastdfs中。</span></span><br><span class="line">fdfs_upload_file /etc/fdfs/client.conf ip.txt</span><br><span class="line">  <span class="comment"># group1/M00/00/00/Cgpr4WF_PduAOZWzAAACU_pTy9w129.txt</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) slave 节点 storage 已正常存储, Master 肯定没有存储到。</span></span><br><span class="line">Slave$ ls /home/fdfs/storage/data/00/00/Cgpr4WF_PduAOZWzAAACU_pTy9w129.txt</span><br><span class="line">/home/fdfs/storage/data/00/00/Cgpr4WF_PduAOZWzAAACU_pTy9w129.txt</span><br><span class="line"></span><br><span class="line">Master$ ls /home/fdfs/storage/data/00/00/Cgpr4WF_PduAOZWzAAACU_pTy9w129.txt</span><br><span class="line">ls: cannot access <span class="string">'/home/fdfs/storage/data/00/00/Cgpr4WF_PduAOZWzAAACU_pTy9w129.txt'</span>: No such file or directory</span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) 此时启动master节点的fdfs_storaged.service 和 fdfs_trackerd.service</span></span><br><span class="line">systemctl start fdfs_storaged.service fdfs_trackerd.service</span><br><span class="line"></span><br><span class="line"><span class="comment"># (6) 验证是否slave节点的文件是否同步到master过来。</span></span><br><span class="line">Master$ cat /home/fdfs/storage/data/sync/binlog.000</span><br><span class="line">1635728859 c M00/00/00/Cgpr4WF_PduAOZWzAAACU_pTy9w129.txt</span><br><span class="line"></span><br><span class="line">Master$ find /home/fdfs/storage/data/ -name *.png -ctime -0.5 -<span class="built_in">exec</span>  ls -lh &#123;&#125; \;</span><br><span class="line">-rw-r--r-- 1 fdfs fdfs 295K Oct 31 16:08 /home/fdfs/storage/data/00/00/Cgpr4WF_PduAOZWzAAACU_pTy9w129.txt</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="2-集群数据整体迁移-思路"><a href="#2-集群数据整体迁移-思路" class="headerlink" title="2.集群数据整体迁移(思路)"></a>2.集群数据整体迁移(思路)</h3><p>描述: 当我们系统需要从一个地方迁移到另一个地方并且需要数据保持不变，假如此时ip地址和网络情况不一样了，通常我会将FastDFS存储的目录整体拷贝过去，该方法简单粗暴且有效，这样文件在文件系统中的位置也不会发生变化，访问文件时文件地址只需要修改为迁移后的ip即可。</p>
+<p><strong>解决方案流程:</strong></p>
+<p>Step 1.在需要迁移的那边用同样的docker镜像构建FastDFS文件系统，容器映射目录、http访问端口尽量保持不变。</p>
+<p>Step 2.首先将tracker目录下的data文件夹直接拷贝过去，覆盖新的文件系统中的tracker中的data目录，进行如下的修改：　<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将下面文件中的旧ip改为新地址的ip即可。</span></span><br><span class="line">storage_groups_new.dat</span><br><span class="line">storage_servers_new.dat</span><br><span class="line">storage_sync_timestamp.dat</span><br></pre></td></tr></table></figure></p>
+<p>Step 3.其次将storage目录下的data文件夹之际拷贝过去，覆盖新的文件系统中的storage中的data目录，进行如下的修改（可<code>使用ll -a命令查看隐藏文件</code>）：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ls data/</span><br><span class="line">.data_init_flag</span><br><span class="line">sync/<span class="variable">$&#123;IP_addr&#125;</span>_<span class="variable">$&#123;port&#125;</span>.mark</span><br></pre></td></tr></table></figure><br>将上述文件中的旧ip改为新地址的ip即可。</p>
+<p>Step 4.将上面都修改完成之后，启动集群，关闭防火墙，在新的服务器环境下通过url访问文件系统中的文件，即可获取到文件。</p>
+<p>Step 5.假如迁移前后ip地址和端口不变只是系统进行更换时，我们配置好服务后将可直接将data目录拷贝过去，不需要修改任何信息。</p>
+<hr>
+<h2 id="0x02-测试优化"><a href="#0x02-测试优化" class="headerlink" title="0x02 测试优化"></a>0x02 测试优化</h2><h3 id="3-1-测试工具"><a href="#3-1-测试工具" class="headerlink" title="3.1 测试工具"></a>3.1 测试工具</h3><p>描述: 我们采用 fastdfs 客户端命令 fdfs_upload_file 和 xargs 并发执行工具,上传测试样本 10W 张表情包图片 ，大小在 <strong>8KB–128KB</strong> 之间，我们分别进行上传和下载测试。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 上传测试命令：</span></span><br><span class="line"><span class="built_in">pwd</span>     <span class="comment"># /opt/photo</span></span><br><span class="line">time ls | xargs -n 1 -I &#123;&#125; -P 256 sh -c <span class="string">"/usr/bin/fdfs_upload_file /etc/fdfs/client.conf &#123;&#125;"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 下载测试命令：</span></span><br><span class="line">time cat url.log  | xargs -n 1 -I &#123;&#125; -P 256 sh -c <span class="string">"wget  &#123;&#125;"</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p><strong>测试结果</strong><br>使用 FastDFS 自带的上传测试工具和 xargs 并发执行工具，通过 xargs -P 参数指定的并发请求数，测得结果为单机性能在网络环境稳定的情况下可以达到 5000 并发上传请求。10W 张图片上传时间耗时 2 分 11 秒左右。使用定时脚本持续测试，总测试上传 100W 张图片。分析 tracker 服务器和 storage 服务器的日志，无论上传还是下载均未发现错误和异常，性能和稳定性较好。</p>
+<p><br></p>
+<h3 id="3-2-优化参数"><a href="#3-2-优化参数" class="headerlink" title="3.2 优化参数"></a>3.2 优化参数</h3><p>描述: 根据业务需求和线上环境调整一下参数，可充分发挥 FastDFS 文件系统的性能.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"># 接收请求的线程数数量</span><br><span class="line">accept_threads&#x3D;1</span><br><span class="line"></span><br><span class="line"># work thread count, should &lt;&#x3D; max_connections</span><br><span class="line"># default value is 4</span><br><span class="line"># since V2.00</span><br><span class="line"># 工作线程数量，应当小于等于最大连接数</span><br><span class="line">work_threads&#x3D;4</span><br><span class="line"></span><br><span class="line"># min buff size</span><br><span class="line"># default value 8KB</span><br><span class="line"># 最小缓冲大小，默认值为 8KB</span><br><span class="line">min_buff_size &#x3D; 8KB</span><br><span class="line"></span><br><span class="line"># max buff size</span><br><span class="line"># default value 128KB</span><br><span class="line"># 最大缓冲大小，默认值为 128KB</span><br><span class="line">max_buff_size &#x3D; 128KB</span><br><span class="line"></span><br><span class="line"># thread stack size, should &gt;&#x3D; 64KB</span><br><span class="line"># default value is 256KB</span><br><span class="line"># 线程栈的大小，应当大于 64KB，默认为 256KB</span><br><span class="line">thread_stack_size &#x3D; 256KB</span><br><span class="line"></span><br><span class="line"># if use connection pool</span><br><span class="line"># default value is false</span><br><span class="line"># since V4.05</span><br><span class="line"># 是否使用连接池</span><br><span class="line">use_connection_pool &#x3D; false</span><br><span class="line"></span><br><span class="line"># connections whose the idle time exceeds this time will be closed</span><br><span class="line"># unit: second</span><br><span class="line"># default value is 3600</span><br><span class="line"># since V4.05</span><br><span class="line"># 连接池的最大空闲时间</span><br><span class="line">connection_pool_max_idle_time &#x3D; 3600</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<hr>
+<h2 id="0x0n-入坑-amp-出坑"><a href="#0x0n-入坑-amp-出坑" class="headerlink" title="0x0n 入坑&amp;出坑"></a>0x0n 入坑&amp;出坑</h2><p><strong>问题1.在启动Fastdfs时Storage启动报<code>one MUST be an inner IP and another is a outer IP, or two different types of inner IP addresses</code>错误!</strong></p>
+<ul>
+<li>错误信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ERROR - file: ../client/client_func.c, line: 168, conf file: /etc/fdfs/storage.conf, tracker_s</span><br><span class="line">erver is invalid, error info: invalid ip addresses 10.10.107.225 and 10.10.107.226, one MUST be an inner IP and another is a outer IP, or two different types of inner IP addresses</span><br><span class="line">[2021-10-30 15:27:42] CRIT - <span class="built_in">exit</span> abnormally!</span><br></pre></td></tr></table></figure></li>
+<li>错误原因: 由于<code>/etc/fdfs/storage.conf</code>中的 <code>stracker_server = 10.10.107.225,10.10.107.226:22122</code> 配置了同一个网段的地址，而非一个是内部地址，另外一个是外部地址。</li>
+<li>解决办法:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># tracker server 地址以及端口(如果有多个则填写多个tracker_server)</span></span><br><span class="line">tracker_server = 10.10.107.225:22122</span><br><span class="line">tracker_server = 10.10.107.226:22122</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><strong>问题2.tracker端工具链接storage时报无法连接到 storage 服务器</strong></p>
+<ul>
+<li>错误信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[2019-07-25 10:40:54] ERROR - file: ../client/storage_client.c, line: 996, fdfs_recv_response fail, result: 107</span><br><span class="line">upload file fail, error no: 107, error info: Transport endpoint is not connected</span><br><span class="line">[2019-07-25 10:40:54] ERROR - file: tracker_proto.c, line: 37, server: 10.20.172.192:23000, recv data fail, errno: 107, error info: Transport endpoint is not connected</span><br></pre></td></tr></table></figure></li>
+<li>解决办法: 首先是在 tracker.conf 配置文件中添加允许访问的 IP ,其次是系统添加防火墙规则，例如: <code>ufw allow 23000/tcp</code></li>
+</ul>
+<p><br></p>
+<p><strong>问题3. 当 storage 服务器磁盘存储空间用尽时报<code>tracker_query_storage fail, error no: 28, error info: No space left on device</code>错误。</strong></p>
+<ul>
+<li>错误信息: <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[2019-07-26 16:16:45] ERROR - file: tracker_proto.c, line: 48, server: 10.10.107.232:22122, response status 28 != 0</span><br><span class="line">[2019-07-26 16:16:45] ERROR - file: ../client/tracker_client.c, line: 907, fdfs_recv_response fail, result: 28</span><br><span class="line">tracker_query_storage fail, error no: 28, error info: No space left on device</span><br></pre></td></tr></table></figure></li>
+<li>错误原因: 当 storage 服务器设定的上传存储目录所在的分区磁盘用尽将会出现无剩余空间的错误日志</li>
+<li>解决办法: 增加 storage 存储磁盘空间或者临时解决办法设置tracker配置文件中的<code>reserved_storage_space = 10%</code>参数。</li>
+</ul>
+<p><br></p>
+<p><strong>问题4.当 storage 服务器磁盘存储空间用尽时报<code>bind port 22122 failed, errno: 98, error info: Address already in use.</code>错误</strong></p>
+<ul>
+<li>错误信息: 使用<code>service fdfs_trackerd restart</code>重启 tracker 或者 storage 服务时会报错，会提示端口已经占用。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[2019-07-25 10:36:55] INFO - FastDFS v5.12, base_path=/home/dfs, run_by_group=, run_by_user=, connect_timeout=10s, network_timeout=60s, port=22122, bind_addr=, max_connections=1024, accept_threads=1, work_threads=4, min_buff_size=8,192, max_buff_size=131,072, store_lookup=2, store_group=, store_server=0, store_path=0, reserved_storage_space=10.00%, download_server=0, allow_ip_count=-1, sync_log_buff_interval=10s, check_active_interval=120s, thread_stack_size=256 KB, storage_ip_changed_auto_adjust=1, storage_sync_file_max_delay=86400s, storage_sync_file_max_time=300s, use_trunk_file=0, slot_min_size=256, slot_max_size=16 MB, trunk_file_size=64 MB, trunk_create_file_advance=0, trunk_create_file_time_base=02:00, trunk_create_file_interval=86400, trunk_create_file_space_threshold=20 GB, trunk_init_check_occupying=0, trunk_init_reload_from_binlog=0, trunk_compress_binlog_min_interval=0, use_storage_id=0, id_type_in_filename=ip, storage_id_count=0, rotate_error_log=0, error_log_rotate_time=00:00, rotate_error_log_size=0, log_file_keep_days=0, store_slave_file_use_link=0, use_connection_pool=0, g_connection_pool_max_idle_time=3600s</span><br><span class="line">[2019-07-25 10:36:55] ERROR - file: sockopt.c, line: 868, <span class="built_in">bind</span> port 22122 failed, errno: 98, error info: Address already <span class="keyword">in</span> use.</span><br><span class="line">[2019-07-25 10:36:55] CRIT - <span class="built_in">exit</span> abnormally!</span><br></pre></td></tr></table></figure></li>
+<li>解决办法:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分别暂停 fdfs_trackerd 和 fdfs_storaged 服务即可。</span></span><br><span class="line">/usr/bin/fdfs_trackerd /etc/fdfs/tracker.conf stop</span><br><span class="line">/usr/bin/fdfs_storaged /etc/fdfs/storage.conf stop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 最终解决的方案就是使用 kill -9 命令杀死 tracker 服务或者 storage 服务，然后再重新启动相应服务即可。 (不到万不得已千万不要用)</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><strong>问题5.当启动storage服务器报<code>fdht_client/fdht_func.c, line: 361, invalid group count: 0 &lt;= 0!</code>错误</strong></p>
+<ul>
+<li>错误信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2021-10-30 23:06:15] ERROR - file: fdht_client/fdht_func.c, line: 361, invalid group count: 0 &lt;= 0!</span><br><span class="line">[2021-10-30 23:06:15] CRIT - <span class="built_in">exit</span> abnormally!</span><br></pre></td></tr></table></figure></li>
+<li>错误原因: 由于 fast_dht 未正确配置或者启动导致。</li>
+<li>解决办法: 在 storage.conf 中进行配置禁用重复文件校验。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">check_file_duplicate = 0</span><br><span class="line">file_signature_method = <span class="built_in">hash</span></span><br><span class="line">keep_alive = 0</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><strong>问题6.启动 Nginx 时报 <code>load conf file &quot;/etc/fdfs/mod_fastdfs.conf&quot; fail, ret code: 2</code>错误</strong></p>
+<ul>
+<li>错误信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[2021-10-30 21:51:31] ERROR - file: shared_func.c, line: 1214, file /etc/fdfs/mod_fastdfs.conf not exist</span><br><span class="line">[2021-10-30 21:51:31] ERROR - file: /usr/<span class="built_in">local</span>/src/fastdfs-nginx-module/src/common.c, line: 163, load conf file <span class="string">"/et</span></span><br><span class="line"><span class="string">c/fdfs/mod_fastdfs.conf"</span> fail, ret code: 2</span><br><span class="line">2021/10/30 21:51:31 [alert] 1302417<span class="comment">#0: worker process 1302418 exited with fatal code 2 and cannot be respawned</span></span><br></pre></td></tr></table></figure></li>
+<li>解决办法: 将拉取的fastdfs-nginx-module项目中的mod_fastdfs.conf复制到/etc/fdfs中。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp /usr/<span class="built_in">local</span>/src/fastdfs-nginx-module/src/mod_fastdfs.conf /etc/fdfs/mod_fastdfs.conf</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><strong>问题7.启动 Nginx 时报 <code>the &quot;user&quot; directive makes sense only if the master process runs with super-user privileges</code>警告</strong></p>
+<ul>
+<li>错误信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ more /usr/<span class="built_in">local</span>/nginx/logs/error.log</span><br><span class="line">2021/10/30 21:51:31 [warn] 1302406<span class="comment">#0: the "user" directive makes sense only if the master process runs with super-us</span></span><br><span class="line">er privileges, ignored <span class="keyword">in</span> /usr/<span class="built_in">local</span>/nginx/conf/nginx.conf:2</span><br><span class="line">ngx_http_fastdfs_process_init pid=1302418</span><br></pre></td></tr></table></figure></li>
+<li>错误原因: 由于我是采用systemd管理的nginx服务而我在其unit service文件中指定一个与nginx.conf配置文件中的相同的低权限用户。</li>
+<li>解决办法: 在 <code>/usr/lib/systemd/system/nginx.service</code> 权限指定的 User 和 Group 字段或者将其设置root。</li>
+</ul>
+<p><br/></p>
+<p><strong>问题7.在进行<code>FastDHT</code>安装配置时安装berkeley-dbb报错<code>cp: cannot stat &#39;bdb-sql&#39;: No such file or directory</code>。</strong></p>
+<ul>
+<li>问题信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cp: cannot <span class="built_in">stat</span> <span class="string">'bdb-sql'</span>: No such file or directory</span><br><span class="line">cp: cannot <span class="built_in">stat</span> <span class="string">'gsg_db_server'</span>: No such file or directory</span><br><span class="line">Makefile:1307: recipe <span class="keyword">for</span> target <span class="string">'install_docs'</span> failed</span><br><span class="line">make: *** [install_docs] Error 1</span><br></pre></td></tr></table></figure></li>
+<li>问题原因: 18.1.40 版本的BUG</li>
+<li>解决办法:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方法1，此问题为18.1.40的问题，回退版本至18.1.38即可成功安装。</span></span><br><span class="line">https://download.oracle.com/otn/berkeley-db/db-18.1.32.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法2，将18.1.38中的docs文件夹拷到当前目录下之后重新make install</span></span><br><span class="line">tar -xzvf db-18.1.32.tar.gz</span><br><span class="line">tar -xzvf db-18.1.40.tar.gz</span><br><span class="line">cp -rp db-18.1.32/docs/bdb-sql db-18.1.40/docs/</span><br><span class="line">cp -rp db-18.1.32/docs/gsg_db_server db-18.1.40/docs/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方法3，就是本文上面的方法</span></span><br><span class="line"><span class="comment"># 防止编译错误，这是db-18.1.40版本的Bug。</span></span><br><span class="line">mkdir -vp /usr/<span class="built_in">local</span>/src/db-18.1.40/docs/&#123;bdb-sql,gsg_db_server&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>错误参考: <a href="https://stackoverflow.com/questions/64707079/berkeley-db-make-install-fails-on-linux" target="_blank" rel="noopener">https://stackoverflow.com/questions/64707079/berkeley-db-make-install-fails-on-linux</a></p>
+<p><br/></p>
+<p><strong>问题8.在进行<code>FastDHT</code>安装配置时报<code>fatal error: db.h: No such file or directory</code>错误</strong></p>
+<ul>
+<li>问题信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cc -Wall -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -g -O -DDEBUG_FLAG -c -o db_op.o db_op.c  -I../common -I/usr/include/fastcommon -I/usr/<span class="built_in">local</span>/include</span><br><span class="line">db_op.c:9:10: fatal error: db.h: No such file or directory</span><br><span class="line">    9 | <span class="comment">#include &lt;db.h&gt;</span></span><br><span class="line">      |          ^~~~~~</span><br><span class="line">compilation terminated.</span><br><span class="line">make: *** [Makefile:25: db_op.o] Error 1</span><br></pre></td></tr></table></figure></li>
+<li>解决办法:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 解决db.h文件不存在的错误问题</span></span><br><span class="line">vim /usr/<span class="built_in">local</span>/src/fastdht/make.sh</span><br><span class="line">27 行: CFLAGS=<span class="string">'-Wall -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -I/usr/local/berkeley-db/include/ -L/usr/local/berkeley-db/lib/'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 拷贝库文件并重新加载库文件否则启动时将会报错</span></span><br><span class="line">cp /usr/<span class="built_in">local</span>/berkeley-db/lib/libdb-18.so /usr/lib/ &amp;&amp; cp /usr/<span class="built_in">local</span>/berkeley-db/lib/libdb-18.so /usr/lib64/</span><br><span class="line">ldconfig </span><br><span class="line"><span class="comment"># ldd /usr/local/bin/fdhtd</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><strong>问题9.在启动FastDHT后又重启FastDFS的storage服务时报<code>dht_client/fdht_func.c, line: 361, invalid group count: 0 &lt;= 0</code>错误</strong></p>
+<ul>
+<li>错误信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">more /home/fdfs/storage/logs/storaged.log</span><br><span class="line">[2021-11-02 21:17:23] ERROR - file: fdht_client/fdht_func.c, line: 361, invalid group count: 0 &lt;= 0!</span><br><span class="line">[2021-11-02 21:17:23] CRIT - <span class="built_in">exit</span> abnormally!</span><br></pre></td></tr></table></figure></li>
+<li>错误原因: 通常两个原因，FastDHT 未配置成功（需要进一步验证是否正常运行），到成功运行工作时，验证storage接入FastDHT的参数是否有误。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">$ cat /etc/fdht/fdht_servers.conf</span><br><span class="line">group_count = 1</span><br><span class="line">group0 = 10.10.107.225:11411</span><br><span class="line"></span><br><span class="line"><span class="comment"># group_count = 3</span></span><br><span class="line"><span class="comment"># group0 = CentOSA:11411</span></span><br><span class="line"><span class="comment"># group1 = CentOSB:11411</span></span><br><span class="line"><span class="comment"># group2 = CentOSC:11411</span></span><br><span class="line"></span><br><span class="line">$ cat /etc/fdht/fdht_servers.conf</span><br><span class="line">...</span><br><span class="line">check_file_duplicate = 1</span><br><span class="line">file_signature_method = <span class="built_in">hash</span></span><br><span class="line">key_namespace = FastDFS</span><br><span class="line">keep_alive = 1</span><br><span class="line"><span class="comment">#include /etc/fdht/fdht_servers.conf   #我是此处出错导致。</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:06.301Z" itemprop="dateUpdated">2022-03-29 13:39:06</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/系统运维/系统架构/分布式/FastDFS/2.FastDFS分布式的文件存储系统进阶配置与入坑出坑.md" target="_blank" rel="noopener noreferrer">_posts/系统运维/系统架构/分布式/FastDFS/2.FastDFS分布式的文件存储系统进阶配置与入坑出坑.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/5-23-117.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/5-23-117.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5-23-117.html&title=《2.FastDFS分布式的文件存储系统进阶配置与入坑出坑》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5-23-117.html&title=《2.FastDFS分布式的文件存储系统进阶配置与入坑出坑》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/5-23-117.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《2.FastDFS分布式的文件存储系统进阶配置与入坑出坑》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/5-23-117.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/5-23-117.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/5-23-580.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">3.FastDFS分布式的文件存储系统进阶API使用实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/5-22-204.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Snap容器基础入门使用</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-进阶使用"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 进阶使用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-FastDFS-重复文件处理"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">1.FastDFS 重复文件处理</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-FastDFS-原始文件名恢复"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">2.FastDFS 原始文件名恢复</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-FastDFS-资源防盗链功能"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">3.FastDFS 资源防盗链功能</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-FastDFS-从文件的使用技巧"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">4.FastDFS 从文件的使用技巧</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-容灾恢复"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 容灾恢复</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-主从同步异常恢复测试"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.主从同步异常恢复测试</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-集群数据整体迁移-思路"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.集群数据整体迁移(思路)</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-测试优化"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 测试优化</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-1-测试工具"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">3.1 测试工具</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-2-优化参数"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">3.2 优化参数</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x0n-入坑-amp-出坑"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x0n 入坑&amp;出坑</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5-23-117.html&title=《2.FastDFS分布式的文件存储系统进阶配置与入坑出坑》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5-23-117.html&title=《2.FastDFS分布式的文件存储系统进阶配置与入坑出坑》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/5-23-117.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《2.FastDFS分布式的文件存储系统进阶配置与入坑出坑》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/5-23-117.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/5-23-117.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACMklEQVR42u3aQXLDIAwF0Nz/0u62Myn2F3I6MTxWHXcMvCxkkPR6xeP4NZL/Hm9j9Fa+yg0DAwPjsYzjdFS3NXprtPX35+frDveAgYGxAaM6dcJLlu+zMTAwMKpBMNnW+UYxMDAwPhFwz+c5v6B+0XcDAwPj6xlJ6Kym3vrpuY/cxTEwMB7IyLPu///3R+obGBgYj2IcxVGdLS9MHo2BgYGxNiMPcHOHuU7rRrn5AwMDYzNGXpic22iegMufYGBg7MDIF86DY570vyHlh4GBsSijXwZINtSHXayLgYGxNKNzpKs+zy+u1R8CAwNjB0aefK82bCUX4P6cGBgYazOql9Icf1cxIHoLAwNjA0ZSGMiLBMk1tVpsuJgHAwNjaUZ+CMvbLKoBunq6i9rUMDAwlmYkG82vqZ1E29yBFQMDYz1GftjqLFZlJyH4jxMuBgbGoozqC/kltto20fo+YGBgLM2oJr/yUDt3uMwTfBgYGPsw8kRb/qR/+KuWHzAwMHZgVFP8+dEwby/LZxjuEwMDYwPGXOp/LrB2SqfDYyIGBsaWjDxEVn+OQsNEnpLDwMBYlHEUR3JlzTfaaTsbnm0xMDCWY3SqhP0wXW3OuCFkY2BgPJZRTmydIqtNYPll+CKgY2BgbMDIA1+/dazTEDZcCwMDAyMOfHMBt9pgMUy6YWBgYMSFzDwB1yk53PbdwMDAeAijWgzovzWHvOEujoGB8UBGp1Ojc/nM55xLAmJgYCzB+AF2s/oIeh0EbAAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

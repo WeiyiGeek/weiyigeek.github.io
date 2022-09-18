@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 6.Redis数据库性能测试及优化配置|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Redis">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>6.Redis数据库性能测试及优化配置</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">6.Redis数据库性能测试及优化配置</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-04-17T13:35:30.000Z" itemprop="datePublished" class="page-time">
+  2019-04-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-数据存储/Redis/6.Redis数据库性能测试及优化配置"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">6.Redis数据库性能测试及优化配置</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-04-17 21:35:30" datetime="2019-04-17T13:35:30.000Z"  itemprop="datePublished">2019-04-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<p><strong>前置知识学习补充</strong><br>Redis数据库基础入门介绍与安装 - <a href="https://blog.weiyigeek.top/2019/4-17-49.html">https://blog.weiyigeek.top/2019/4-17-49.html</a><br>Redis数据库基础数据类型介绍与使用 - <a href="https://blog.weiyigeek.top/2020/5-17-50.html">https://blog.weiyigeek.top/2020/5-17-50.html</a><br>Redis基础运维之原理介绍和主从配置 - <a href="https://blog.weiyigeek.top/2019/4-17-97.html">https://blog.weiyigeek.top/2019/4-17-97.html</a><br>Redis基础运维之哨兵和集群安装配置 - <a href="https://blog.weiyigeek.top/2019/4-17-576.html">https://blog.weiyigeek.top/2019/4-17-576.html</a><br>Redis基础运维之在K8S中的安装与配置 - <a href="https://blog.weiyigeek.top/2019/4-17-524.html">https://blog.weiyigeek.top/2019/4-17-524.html</a><br>Redis数据库性能测试及优化配置 - <a href="https://blog.weiyigeek.top/2019/4-17-527.html">https://blog.weiyigeek.top/2019/4-17-527.html</a><br>Redis数据库容灾备份企业实战 - <a href="https://blog.weiyigeek.top/2019/4-17-51.html">https://blog.weiyigeek.top/2019/4-17-51.html</a><br>Redis数据库客户端操作实践及入坑出坑 - <a href="https://blog.weiyigeek.top/2019/4-17-577.html">https://blog.weiyigeek.top/2019/4-17-577.html</a></p>
+<h2 id="0x00-Redis-性能指标监控"><a href="#0x00-Redis-性能指标监控" class="headerlink" title="0x00 Redis 性能指标监控"></a>0x00 Redis 性能指标监控</h2><h3 id="1-性能指标"><a href="#1-性能指标" class="headerlink" title="(1) 性能指标"></a>(1) 性能指标</h3><p>Redis 服务端常见指标参数:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -a password info &gt; redis-Performance.txt <span class="comment"># 我们可以将redis服务端info相关信息导出到文件之中</span></span><br><span class="line">  <span class="comment"># 2.clients:</span></span><br><span class="line">  <span class="comment"># 3.memory：</span></span><br><span class="line">  <span class="comment"># 4.persistence：</span></span><br><span class="line">  <span class="comment"># 5.stats：通用统计数据</span></span><br><span class="line">  <span class="comment"># 6.Replication：</span></span><br><span class="line">  <span class="comment"># 7.CPU：CPU使用情况</span></span><br><span class="line">  <span class="comment"># 8.cluster：</span></span><br><span class="line">  <span class="comment"># 9.Keypass：键值对统计数量信息</span></span><br><span class="line">  </span><br><span class="line">10.20.172.108:6379&gt; info  <span class="comment"># (1) Redis 服务端信息交互式查看</span></span><br><span class="line"><span class="comment"># Server 服务器运行的环境参数</span></span><br><span class="line">redis_version:6.2.5</span><br><span class="line">redis_git_sha1:00000000</span><br><span class="line">redis_git_dirty:0</span><br><span class="line">redis_build_id:cb556a016f8668d</span><br><span class="line">redis_mode:standalone</span><br><span class="line">os:Linux 5.11.0-25-generic x86_64</span><br><span class="line">arch_bits:64</span><br><span class="line">multiplexing_api:epoll</span><br><span class="line">atomicvar_api:c11-builtin</span><br><span class="line">gcc_version:9.3.0</span><br><span class="line">process_id:187640</span><br><span class="line">process_supervised:no</span><br><span class="line">run_id:97838216d4fe0de4739e7814b5a2e1d0d32d0982</span><br><span class="line">tcp_port:6379</span><br><span class="line">server_time_usec:1630241617439942</span><br><span class="line">uptime_in_seconds:10930</span><br><span class="line">uptime_in_days:0</span><br><span class="line">hz:10</span><br><span class="line">configured_hz:10</span><br><span class="line">lru_clock:2851665</span><br><span class="line">executable:/opt/databases/redis-6.2.5/src/./redis-server</span><br><span class="line">config_file:/home/weiyigeek/redis/6379/redis-6379.conf</span><br><span class="line">io_threads_active:0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Clients 客户端相关信息</span></span><br><span class="line">connected_clients:7</span><br><span class="line">cluster_connections:0</span><br><span class="line">maxclients:10000</span><br><span class="line">client_recent_max_input_buffer:32</span><br><span class="line">client_recent_max_output_buffer:0</span><br><span class="line">blocked_clients:0</span><br><span class="line">tracking_clients:0</span><br><span class="line">clients_in_timeout_table:0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Memory 服务器运行内存统计数据</span></span><br><span class="line">used_memory:2050432</span><br><span class="line">used_memory_human:1.96M</span><br><span class="line">used_memory_rss:5140480</span><br><span class="line">used_memory_rss_human:4.90M</span><br><span class="line">used_memory_peak:2253512</span><br><span class="line">used_memory_peak_human:2.15M</span><br><span class="line">used_memory_peak_perc:90.99%</span><br><span class="line">used_memory_overhead:1982152</span><br><span class="line">used_memory_startup:810376</span><br><span class="line">used_memory_dataset:68280</span><br><span class="line">used_memory_dataset_perc:5.51%</span><br><span class="line">allocator_allocated:2204376</span><br><span class="line">allocator_active:2555904</span><br><span class="line">allocator_resident:5230592</span><br><span class="line">total_system_memory:12442619904</span><br><span class="line">total_system_memory_human:11.59G</span><br><span class="line">used_memory_lua:37888</span><br><span class="line">used_memory_lua_human:37.00K</span><br><span class="line">used_memory_scripts:0</span><br><span class="line">used_memory_scripts_human:0B</span><br><span class="line">number_of_cached_scripts:0</span><br><span class="line">maxmemory:0</span><br><span class="line">maxmemory_human:0B</span><br><span class="line">maxmemory_policy:noeviction</span><br><span class="line">allocator_frag_ratio:1.16</span><br><span class="line">allocator_frag_bytes:351528</span><br><span class="line">allocator_rss_ratio:2.05</span><br><span class="line">allocator_rss_bytes:2674688</span><br><span class="line">rss_overhead_ratio:0.98</span><br><span class="line">rss_overhead_bytes:-90112</span><br><span class="line">mem_fragmentation_ratio:2.59</span><br><span class="line">mem_fragmentation_bytes:3153776</span><br><span class="line">mem_not_counted_for_evict:124</span><br><span class="line">mem_replication_backlog:1048576</span><br><span class="line">mem_clients_slaves:0</span><br><span class="line">mem_clients_normal:123000</span><br><span class="line">mem_aof_buffer:128</span><br><span class="line">mem_allocator:jemalloc-5.1.0</span><br><span class="line">active_defrag_running:0</span><br><span class="line">lazyfree_pending_objects:0</span><br><span class="line">lazyfreed_objects:0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Persistence 持久化数据相关信息</span></span><br><span class="line">loading:0</span><br><span class="line">current_cow_size:0</span><br><span class="line">current_cow_size_age:0</span><br><span class="line">current_fork_perc:0.00</span><br><span class="line">current_save_keys_processed:0</span><br><span class="line">current_save_keys_total:0</span><br><span class="line">rdb_changes_since_last_save:3</span><br><span class="line">rdb_bgsave_in_progress:0</span><br><span class="line">rdb_last_save_time:1630230687</span><br><span class="line">rdb_last_bgsave_status:ok</span><br><span class="line">rdb_last_bgsave_time_sec:-1</span><br><span class="line">rdb_current_bgsave_time_sec:-1</span><br><span class="line">rdb_last_cow_size:0</span><br><span class="line">aof_enabled:1</span><br><span class="line">aof_rewrite_in_progress:0</span><br><span class="line">aof_rewrite_scheduled:0</span><br><span class="line">aof_last_rewrite_time_sec:0</span><br><span class="line">aof_current_rewrite_time_sec:-1</span><br><span class="line">aof_last_bgrewrite_status:ok</span><br><span class="line">aof_last_write_status:ok</span><br><span class="line">aof_last_cow_size:462848</span><br><span class="line">module_fork_in_progress:0</span><br><span class="line">module_fork_last_cow_size:0</span><br><span class="line">aof_current_size:150</span><br><span class="line">aof_base_size:92</span><br><span class="line">aof_pending_rewrite:0</span><br><span class="line">aof_buffer_length:0</span><br><span class="line">aof_rewrite_buffer_length:0</span><br><span class="line">aof_pending_bio_fsync:0</span><br><span class="line">aof_delayed_fsync:0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Stats 通用统计数据信息</span></span><br><span class="line">total_connections_received:25</span><br><span class="line">total_commands_processed:50482</span><br><span class="line">instantaneous_ops_per_sec:4</span><br><span class="line">total_net_input_bytes:2758703</span><br><span class="line">total_net_output_bytes:22330756</span><br><span class="line">instantaneous_input_kbps:0.23</span><br><span class="line">instantaneous_output_kbps:0.55</span><br><span class="line">rejected_connections:0</span><br><span class="line">sync_full:0</span><br><span class="line">sync_partial_ok:0</span><br><span class="line">sync_partial_err:0</span><br><span class="line">expired_keys:0</span><br><span class="line">expired_stale_perc:0.00</span><br><span class="line">expired_time_cap_reached_count:0</span><br><span class="line">expire_cycle_cpu_milliseconds:0</span><br><span class="line">evicted_keys:0</span><br><span class="line">keyspace_hits:1</span><br><span class="line">keyspace_misses:0</span><br><span class="line">pubsub_channels:1</span><br><span class="line">pubsub_patterns:0</span><br><span class="line">latest_fork_usec:310</span><br><span class="line">total_forks:1</span><br><span class="line">migrate_cached_sockets:0</span><br><span class="line">slave_expires_tracked_keys:0</span><br><span class="line">active_defrag_hits:0</span><br><span class="line">active_defrag_misses:0</span><br><span class="line">active_defrag_key_hits:0</span><br><span class="line">active_defrag_key_misses:0</span><br><span class="line">tracking_total_keys:0</span><br><span class="line">tracking_total_items:0</span><br><span class="line">tracking_total_prefixes:0</span><br><span class="line">unexpected_error_replies:0</span><br><span class="line">total_error_replies:8</span><br><span class="line">dump_payload_sanitizations:0</span><br><span class="line">total_reads_processed:48899</span><br><span class="line">total_writes_processed:97139</span><br><span class="line">io_threaded_reads_processed:0</span><br><span class="line">io_threaded_writes_processed:0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Replication 主从相关指标信息</span></span><br><span class="line">role:master</span><br><span class="line">connected_slaves:0</span><br><span class="line">master_failover_state:no-failover</span><br><span class="line">master_replid:32da05299a5a36de431b4c05122f7d2b93eca169</span><br><span class="line">master_replid2:3e15749ad586d60bd0d1c93854f6f719a22316ce</span><br><span class="line">master_repl_offset:8915</span><br><span class="line">second_repl_offset:829</span><br><span class="line">repl_backlog_active:1</span><br><span class="line">repl_backlog_size:1048576</span><br><span class="line">repl_backlog_first_byte_offset:1</span><br><span class="line">repl_backlog_histlen:8915</span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU 处理器模式占用信息</span></span><br><span class="line">used_cpu_sys:12.012184</span><br><span class="line">used_cpu_user:9.453505</span><br><span class="line">used_cpu_sys_children:0.002158</span><br><span class="line">used_cpu_user_children:0.000000</span><br><span class="line">used_cpu_sys_main_thread:11.802969</span><br><span class="line">used_cpu_user_main_thread:9.286577</span><br><span class="line"></span><br><span class="line"><span class="comment"># Modules 模块加载情况</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Errorstats 错误状态信息</span></span><br><span class="line">errorstat_NOAUTH:count=6</span><br><span class="line">errorstat_READONLY:count=1</span><br><span class="line">errorstat_WRONGPASS:count=1</span><br><span class="line"></span><br><span class="line"><span class="comment"># Cluster 集群信息</span></span><br><span class="line">cluster_enabled:0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Keyspace 库id与键数量相关信息</span></span><br><span class="line">db0:keys=1,expires=0,avg_ttl=0</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="1-基本活动指标：Basic-activity"><a href="#1-基本活动指标：Basic-activity" class="headerlink" title="1.基本活动指标：Basic activity"></a>1.基本活动指标：Basic activity</h4><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>connected_clients</td>
+<td>客户端连接数</td>
+</tr>
+<tr>
+<td>conected_laves</td>
+<td>slave数量</td>
+</tr>
+<tr>
+<td>master_last_io_seconds_ago</td>
+<td>最近一次主从交互之后的秒数</td>
+</tr>
+<tr>
+<td>keyspace</td>
+<td>数据库中的key值总数</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">grep -En <span class="string">"connected_clients|conected_laves|master_last_io_seconds_ago|keyspace"</span> redis-Performance.txt</span><br><span class="line">27:connected_clients:7 <span class="comment"># # 客户端连接数量</span></span><br><span class="line">28:connected_slaves:1  <span class="comment"># # slave连接数量</span></span><br><span class="line">128:keyspace_hits:1</span><br><span class="line">129:keyspace_misses:0</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="2-性能指标：Performance"><a href="#2-性能指标：Performance" class="headerlink" title="2.性能指标：Performance"></a>2.性能指标：Performance</h4><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>latency</td>
+<td>Redis响应一个请求的时间</td>
+</tr>
+<tr>
+<td>instantaneous_ops_per_sec</td>
+<td>平均每秒处理请求总数</td>
+</tr>
+<tr>
+<td>hi rate(calculated)</td>
+<td>缓存命中率（计算出来的)</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">grep -En <span class="string">"latency|instantaneous_ops_per_sec|hi rate"</span> redis-Performance.txt</span><br><span class="line">114:instantaneous_ops_per_sec:3</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="3-内存指标-Memory"><a href="#3-内存指标-Memory" class="headerlink" title="3.内存指标: Memory"></a>3.内存指标: Memory</h4><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>used_memory</td>
+<td>已使用内存</td>
+</tr>
+<tr>
+<td>mem_fragmentation_ratio</td>
+<td>内存碎片率</td>
+</tr>
+<tr>
+<td>evicted_keys</td>
+<td>由于最大内存限制被移除的key的数量</td>
+</tr>
+<tr>
+<td>blocked_clients</td>
+<td>由于BLPOP,BRPOP,or BRPOPLPUSH而备阻塞的客户端</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">grep -En <span class="string">"used_memory|mem_fragmentation_ratio|evicted_keys|blocked_clients"</span> redis-Performance.txt</span><br><span class="line">32:blocked_clients:0</span><br><span class="line">37:used_memory:2050432</span><br><span class="line">38:used_memory_human:1.96M      <span class="comment"># # 内存分配器从操作系统分配的内存总量</span></span><br><span class="line">39:used_memory_rss:5234688     </span><br><span class="line">40:used_memory_rss_human:4.99M  <span class="comment"># # 操作系统看到的内存占用，top命令看到的内存</span></span><br><span class="line">41:used_memory_peak:2253512</span><br><span class="line">42:used_memory_peak_human:2.15M <span class="comment"># # redis内存消耗的峰值</span></span><br><span class="line">43:used_memory_peak_perc:90.99%</span><br><span class="line">44:used_memory_overhead:1982152</span><br><span class="line">45:used_memory_startup:810376</span><br><span class="line">46:used_memory_dataset:68280</span><br><span class="line">47:used_memory_dataset_perc:5.51%</span><br><span class="line">53:used_memory_lua:37888</span><br><span class="line">54:used_memory_lua_human:37.00K <span class="comment">#  # lua脚本引擎占用的内存大小</span></span><br><span class="line">55:used_memory_scripts:0</span><br><span class="line">56:used_memory_scripts_human:0B</span><br><span class="line">67:mem_fragmentation_ratio:2.63</span><br><span class="line">127:evicted_keys:0</span><br></pre></td></tr></table></figure>
+<h4 id="4-持久性指标-Persistence"><a href="#4-持久性指标-Persistence" class="headerlink" title="4.持久性指标: Persistence"></a>4.持久性指标: Persistence</h4><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rdb_last_save_time</td>
+<td>最后一次持久化保存磁盘的时间戳</td>
+</tr>
+<tr>
+<td>rdb_changes_sice_last_save</td>
+<td>自最后一次持久化以来数据库的更改数</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">grep -En &quot;rdb_last_save_time|rdb_changes_sice_last_save&quot; redis-Performance.txt</span><br><span class="line">88:rdb_last_save_time:1630230687</span><br><span class="line">89:rdb_changes_since_last_save:0   # 自最后一次持久化以来数据库的更改数</span><br></pre></td></tr></table></figure>
+<h4 id="5-错误指标：Error"><a href="#5-错误指标：Error" class="headerlink" title="5.错误指标：Error"></a>5.错误指标：Error</h4><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rejected_connections</td>
+<td>由于达到maxclient限制而被拒绝的连接数</td>
+</tr>
+<tr>
+<td>keyspace_misses</td>
+<td>key值查找失败(没有命中)次数</td>
+</tr>
+<tr>
+<td>master_link_down_since_seconds</td>
+<td>主从断开的持续时间（以秒为单位)</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">grep -En &quot;rejected_connections|master_link_down_since_seconds&quot; redis-Performance.txt</span><br><span class="line">9:master_link_down_since_seconds:10937</span><br><span class="line">119:rejected_connections:0</span><br><span class="line">keyspace_misses:0    # key值查找失败(没有命中)次数，出现多次可能是被Hacker Attack</span><br></pre></td></tr></table></figure>
+<p><br/> </p>
+<h4 id="6-其他指标说明"><a href="#6-其他指标说明" class="headerlink" title="6.其他指标说明"></a>6.其他指标说明</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.复制积压缓冲区如果设置得太小，会导致里面的指令被覆盖掉找不到偏移量，从而触发全量同步</span></span><br><span class="line">repl_backlog_size: 1048576</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.通过查看sync_partial_err变量的次数来决定是否需要扩大积压缓冲区，它表示主从半同步复制失败的次数</span></span><br><span class="line">sync_partial_err:1</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h3 id="2-性能测试工具"><a href="#2-性能测试工具" class="headerlink" title="(2) 性能测试工具"></a>(2) 性能测试工具</h3><h4 id="1-redis-benchmark-命令"><a href="#1-redis-benchmark-命令" class="headerlink" title="1.redis-benchmark 命令"></a>1.redis-benchmark 命令</h4><p>描述: Redis 性能测试是通过同时执行多个命令实现的,该命令是在 redis 的目录下执行的;</p>
+<p>官网参考: <a href="https://redis.io/topics/benchmarks" target="_blank" rel="noopener">https://redis.io/topics/benchmarks</a></p>
+<p><strong>语法参数:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Usage: redis-benchmark [-h &lt;host&gt;] [-p &lt;port&gt;] [-c &lt;clients&gt;] [-n &lt;requests]&gt; [-k &lt;boolean&gt;]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数说明:</span></span><br><span class="line"> -h &lt;hostname&gt;      Server hostname (default 127.0.0.1)</span><br><span class="line"> -p &lt;port&gt;          Server port (default 6379)</span><br><span class="line"> -s &lt;socket&gt;        Server socket (overrides host and port)</span><br><span class="line"> -a &lt;password&gt;      Password <span class="keyword">for</span> Redis Auth</span><br><span class="line"> -c &lt;clients&gt;       Number of parallel connections (default 50)</span><br><span class="line"> -n &lt;requests&gt;      Total number of requests (default 100000)</span><br><span class="line"> -d &lt;size&gt;          Data size of SET/GET value <span class="keyword">in</span> bytes (default 2)</span><br><span class="line"> --dbnum &lt;db&gt;       SELECT the specified db number (default 0)</span><br><span class="line"> -k &lt;boolean&gt;       1=keep alive 0=reconnect (default 1)</span><br><span class="line"> -r &lt;keyspacelen&gt;   对SET/GET/INCR使用随机键，对SADD使用随机值使用此选项基准将扩展参数内的字符串_rand_int _uu），该参数的指定范围为0到keyspacelen-1之间的12位数字。</span><br><span class="line"> -P &lt;numreq&gt;        Pipeline &lt;numreq&gt; requests. Default 1 (no pipeline).</span><br><span class="line"> -q                 Quiet. Just show query/sec values</span><br><span class="line"> --csv              Output <span class="keyword">in</span> CSV format</span><br><span class="line"> -l                 Loop. Run the tests forever</span><br><span class="line"> -t &lt;tests&gt;         Only run the comma separated list of tests. The <span class="built_in">test</span> names are the same as the ones produced as output.</span><br><span class="line"> -I                 Idle mode. Just open N idle connections and <span class="built_in">wait</span>.</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>基础实例:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 同时执行 10000 个请求来检测性能(所有默认测试),通过 -q 参数让结果只显示每秒执行的请求数</span></span><br><span class="line">$ ./redis-benchmark -h 127.0.0.1 -p 6379 -t <span class="built_in">set</span>,lpush -n 10000 -q</span><br><span class="line">$ ./redis-benchmark -n 10000  -q </span><br><span class="line">   <span class="comment"># PING_INLINE: 41493.78 requests per second</span></span><br><span class="line">   <span class="comment"># PING_BULK: 44843.05 requests per second</span></span><br><span class="line">   <span class="comment"># SET: 42194.09 requests per second</span></span><br><span class="line">   <span class="comment"># GET: 44052.86 requests per second</span></span><br><span class="line">   <span class="comment"># INCR: 43290.04 requests per second</span></span><br><span class="line">   <span class="comment"># LPUSH: 42194.09 requests per second</span></span><br><span class="line">   <span class="comment"># RPUSH: 42372.88 requests per second</span></span><br><span class="line">   <span class="comment"># LPOP: 42194.09 requests per second</span></span><br><span class="line">   <span class="comment"># RPOP: 42194.09 requests per second</span></span><br><span class="line">   <span class="comment"># SADD: 43668.12 requests per second</span></span><br><span class="line">   <span class="comment"># HSET: 42372.88 requests per second</span></span><br><span class="line">   <span class="comment"># SPOP: 44843.05 requests per second</span></span><br><span class="line">   <span class="comment"># LPUSH (needed to benchmark LRANGE): 42553.19 requests per second</span></span><br><span class="line">   <span class="comment"># LRANGE_100 (first 100 elements): 21367.52 requests per second</span></span><br><span class="line">   <span class="comment"># LRANGE_300 (first 300 elements): 9451.80 requests per second</span></span><br><span class="line">   <span class="comment"># LRANGE_500 (first 450 elements): 6807.35 requests per second</span></span><br><span class="line">   <span class="comment"># LRANGE_600 (first 600 elements): 5350.46 requests per second</span></span><br><span class="line">   <span class="comment"># MSET (10 keys): 36363.64 requests per second</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 运行指定项目的测试，例如我们要求在安静模式下仅运行测试 SET 和 LPUSH 命令</span></span><br><span class="line">$ redis-benchmark -t <span class="built_in">set</span>,lpush -n 100000 -q</span><br><span class="line">  <span class="comment"># SET: 74239.05 requests per second</span></span><br><span class="line">  <span class="comment"># LPUSH: 79239.30 requests per second</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 指定eval脚本命令进行基准测试</span></span><br><span class="line">$ redis-benchmark -n 100000 -q script load <span class="string">"redis.call('set','foo','bar')"</span></span><br><span class="line">  <span class="comment"># script load redis.call('set','foo','bar'): 69881.20 requests per second</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 选择密钥空间的大小,默认情况下基准测试针对单个密钥运行,而我们通常可以通过使用大键来模拟更真实的工作负载空间。</span></span><br><span class="line"><span class="comment"># 例如，如果我想运行 100 万次 SET 操作，在 10 万个可能的密钥中为每个操作使用一个随机密钥，</span></span><br><span class="line">$ redis-cli flushall</span><br><span class="line">$ redis-benchmark -t <span class="built_in">set</span> -r 100000 -n 1000000</span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) 默认情况下，每个客户端仅在收到上一个命令的回复时发送下一个命令, Redis 支持流水线，因此可以一次发送多个命令可以想象为并行。</span></span><br><span class="line"><span class="comment"># 例如: 使用 16 个命令的流水线在 MacBook Air 11" 中运行基准测试</span></span><br><span class="line">redis-benchmark -n 1000000 -t <span class="built_in">set</span>,get -P 16 -q</span><br><span class="line">  <span class="comment"># SET: 403063.28 requests per second</span></span><br><span class="line">  <span class="comment"># GET: 508388.41 requests per second</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (6) 使用 Unix 域套接字形式进行基准测试</span></span><br><span class="line">$ numactl -C 6 ./redis-benchmark -q -n 100000 -s /tmp/redis.sock -d 256</span><br><span class="line"></span><br><span class="line"><span class="comment"># (7) 使用 使用 TCP loopback</span></span><br><span class="line">$ numactl -C 6 ./redis-benchmark -q -n 100000 -d 256</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=6.Redis数据库性能测试及优化配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190417221118.png" target="_blank" title="WeiyiGeek.redis-benchmark" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190417221118.png" alt="WeiyiGeek.redis-benchmark" title="" class=""></a>
+                <p>WeiyiGeek.redis-benchmark</p>
+            </figure>
+<p><br></p>
+<p><strong>在Redis、Memcached内存数据库基准测试对比:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># BIN=./redis-benchmark</span></span><br><span class="line">BIN=./mc-benchmark</span><br><span class="line">payload=32</span><br><span class="line">iterations=100000</span><br><span class="line">keyspace=100000</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> clients <span class="keyword">in</span> 1 5 10 20 30 40 50 60 70 80 90 100 200 300</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    SPEED=0</span><br><span class="line">    <span class="keyword">for</span> dummy <span class="keyword">in</span> 0 1 2</span><br><span class="line">    <span class="keyword">do</span></span><br><span class="line">        S=$(<span class="variable">$BIN</span> -n <span class="variable">$iterations</span> -r <span class="variable">$keyspace</span> -d <span class="variable">$payload</span> -c <span class="variable">$clients</span> | grep <span class="string">'per second'</span> | tail -1 | cut -f 1 -d<span class="string">'.'</span>)</span><br><span class="line">        <span class="keyword">if</span> [ $((<span class="variable">$S</span> &gt; <span class="variable">$SPEED</span>)) != <span class="string">"0"</span> ]</span><br><span class="line">        <span class="keyword">then</span></span><br><span class="line">            SPEED=<span class="variable">$S</span></span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"<span class="variable">$clients</span> <span class="variable">$SPEED</span>"</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
+<p>最后以下是使用<code>gnuplot</code>生成的图形形式的结果：<br><figure class="image-box">
+                <a rel=6.Redis数据库性能测试及优化配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210905114621.png" target="_blank" title="WeiyiGeek.Redis、Memcached内存数据库基准测试" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210905114621.png" alt="WeiyiGeek.Redis、Memcached内存数据库基准测试" title="" class=""></a>
+                <p>WeiyiGeek.Redis、Memcached内存数据库基准测试</p>
+            </figure></p>
+<p><br></p>
+<p><strong>影响基准测试要素</strong></p>
+<ul>
+<li>1) 工作负载(连接的客户端的数量)</li>
+<li>2) 不同版本的Redis</li>
+<li>3) 提供服务的服务器物理配置(磁盘、网络、CPU、内存)，在多 CPU 插槽服务器上，Redis 性能取决于 NUMA 配置和进程位置。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不同虚拟化和裸机服务器上的基准测试结果。</span></span><br><span class="line">* 该测试由 50 个同时执行 200 万个请求的客户端完成。</span><br><span class="line">* 使用环回接口执行测试。</span><br><span class="line">* 使用 100 万个密钥的密钥空间执行测试。</span><br><span class="line">* 测试在使用和不使用流水线（16 个命令流水线）的情况下执行。</span><br><span class="line"></span><br><span class="line"><span class="comment"># Intel(R) Xeon(R) CPU E5520 @ 2.27GHz（带流水线）/ （无流水线）</span></span><br><span class="line">$ ./redis-benchmark -r 1000000 -n 2000000 -t get,<span class="built_in">set</span>,lpush,lpop -P 16 -q <span class="comment"># 优于无流水线。</span></span><br><span class="line">  SET: 552028.75 requests per second</span><br><span class="line">  GET: 707463.75 requests per second</span><br><span class="line">  LPUSH: 767459.75 requests per second</span><br><span class="line">  LPOP: 770119.38 requests per second</span><br><span class="line"></span><br><span class="line">$ ./redis-benchmark -r 1000000 -n 2000000 -t get,<span class="built_in">set</span>,lpush,lpop -q</span><br><span class="line">  SET: 122556.53 requests per second</span><br><span class="line">  GET: 123601.76 requests per second</span><br><span class="line">  LPUSH: 136752.14 requests per second</span><br><span class="line">  LPOP: 132424.03 requests per second</span><br></pre></td></tr></table></figure></li>
+<li>4) 与使用相同硬件不使用虚拟化的情况相比，Redis 在 VM 上运行速度较慢(<code>推荐物理机按照Redis为首选</code>)</li>
+<li>5) 根据平台的不同，unix 域套接字可以实现比 TCP/IP 环回（例如在 Linux 上）多约 50% 的吞吐量。</li>
+<li>6) 与 TCP/IP 环回相比，Unix 域套接字的性能优势在大量使用流水线（即长流水线）时趋于降低。</li>
+<li>7) 当使用以太网网络访问 Redis 时，当数据大小保持在以太网数据包大小（约 1500 字节）以下时，使用流水线聚合命令特别有效, 在处理 10 字节、100 字节或 1000 字节的查询几乎会产生相同的吞吐量。</li>
+</ul>
+<p><br></p>
+<h4 id="2-redisbench-工具"><a href="#2-redisbench-工具" class="headerlink" title="2.redisbench 工具"></a>2.redisbench 工具</h4><p>描述: 官方推荐的<code>redis-benchmark</code>在进行集群的基准测试时，没有办法指定集群模式，此处引入 Redis &amp; Redis Cluster benchmark Tool 更方便对集群基准测试的处理。下载地址: <a href="https://github.com/panjiang/redisbench" target="_blank" rel="noopener">https://github.com/panjiang/redisbench</a></p>
+<p><br></p>
+<p><strong>redisbench 特点</strong></p>
+<ul>
+<li>以 Golang 开发构建</li>
+<li>可以测试redis单实例</li>
+<li>可以测试redis集群</li>
+<li>可以利用多核</li>
+<li>支持同时在多台机器上运行，用于测试大型redis集群（需要相同的机器硬件）</li>
+</ul>
+<p><br></p>
+<p><strong>格式语法:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">./redisbench -h</span><br><span class="line">-a string   <span class="comment">#Redis instance address or Cluster addresses. IP:PORT[,IP:PORT]</span></span><br><span class="line">-c int      <span class="comment">#Clients number for concurrence (default 1)</span></span><br><span class="line">-cluster    <span class="comment">#true: cluster mode, false: instance mode</span></span><br><span class="line">-d int      <span class="comment">#Data size in bytes (default 1000)</span></span><br><span class="line">-ma string  <span class="comment">#addresses for run multiple testers at the same time</span></span><br><span class="line">-mo int     <span class="comment">#the order current tester is in multiple testers</span></span><br><span class="line">-n int      <span class="comment">#Testing times at every client (default 1)</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>基础示例:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试单实例模式</span></span><br><span class="line">./redisbench -a 127.0.0.1:6379 -c 200 -n 20000 -d 3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试集群</span></span><br><span class="line">./redisbench -cluster=<span class="literal">true</span> -a 192.168.1.11:6379,192.168.1.11:6380 -c 500 -n 2000 -d 3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用多个测试节点</span></span><br><span class="line">./redisbench -cluster=<span class="literal">true</span> -a 192.168.1.11:6379,192.168.1.11:6380 -c 500 -n 2000 -d 3 -ma 192.168.1.11:9001,192.168.1.11:9002,192.168.1.11:9003 -mo 1 &amp;</span><br><span class="line">./redisbench -cluster=<span class="literal">true</span> -a 192.168.1.11:6379,192.168.1.11:6380 -c 500 -n 2000 -d 3 -ma 192.168.1.11:9001,192.168.1.11:9002,192.168.1.11:9003 -mo 2 &amp;</span><br><span class="line">./redisbench -cluster=<span class="literal">true</span> -a 192.168.1.11:6379,192.168.1.11:6380 -c 500 -n 2000 -d 3 -ma 192.168.1.11:9001,192.168.1.11:9002,192.168.1.11:9003 -mo 3</span><br></pre></td></tr></table></figure></p>
+<p>Tips: 测试结果会自动打印出：请求值，请求时间，TPS 此处不实际演示使用了，感兴趣的朋友可以自行下载测试。</p>
+<p><br/></p>
+<h4 id="3-rdb-内存分析工具"><a href="#3-rdb-内存分析工具" class="headerlink" title="3.rdb 内存分析工具"></a>3.rdb 内存分析工具</h4><p>描述: RDR 是解析 redis rdbfile 工具。与redis-rdb-tools相比，RDR 是由golang 实现的，速度更快。</p>
+<ul>
+<li>分析 Redis 内存中那个 Key 值占用的内存最多</li>
+<li>分析出 Redis 内存中那一类开头的 Key 占用最多，有利于内存优化</li>
+<li>Redis Key 值以 Dashboard 展示，这样更直观</li>
+</ul>
+<p>安装下载地址: <a href="https://github.com/xueqiu/rdr/releases" target="_blank" rel="noopener">https://github.com/xueqiu/rdr/releases</a></p>
+<p><em>注意事项:</em></p>
+<ul>
+<li>1.linux和windows使用前先添加可执行权限 <code>chmod +x rdr_linux</code></li>
+</ul>
+<p>基础语法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># RDR 参数解释</span></span><br><span class="line">show 网页显示 rdbfile 的统计信息</span><br><span class="line">keys 从 rdbfile 获取所有 key</span><br><span class="line"><span class="built_in">help</span> 帮助</span><br></pre></td></tr></table></figure></p>
+<p>基础实例(以Linux为例):<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.分析统计多个 Redis rdb中各种类型的使用占比 </span></span><br><span class="line">./rdr-linux keys *.rdb</span><br><span class="line">SEARCH:PROJECTS_BY_ID:68</span><br><span class="line">SEARCH:PROJECTS_BY_ID:64</span><br><span class="line">SEARCH:PROJECTS_BY_PARENTID_LIST:0</span><br><span class="line">SEARCH:PROJECTS_BY_PARENTID_LIST:64</span><br><span class="line">SEARCH:PROJECTS_BY_PARENTID_LIST:66</span><br><span class="line">SEARCH:PROJECTS_BY_PARENTID_LIST:68</span><br><span class="line">SEARCH:PROJECTS_BY_ID:66</span><br><span class="line">SEARCH:PROJECTSINFO_BY_PARENTID_LIST:64</span><br><span class="line">ALLOW:SEARCH_BY_SFZH:230103197805153637</span><br><span class="line"></span><br><span class="line">./rdr-linux dump dump.rdb</span><br><span class="line">&#123;<span class="string">"CurrentInstance"</span>: <span class="string">"dump.rdb"</span>,</span><br><span class="line"><span class="string">"LargestKeyPrefixes"</span>: &#123;</span><br><span class="line">   <span class="string">"list"</span>: [</span><br><span class="line">   &#123;</span><br><span class="line">      <span class="string">"Type"</span>: <span class="string">"list"</span>,</span><br><span class="line">      <span class="string">"Key"</span>: <span class="string">"site"</span>,</span><br><span class="line">      <span class="string">"Bytes"</span>: 144,</span><br><span class="line">      <span class="string">"Num"</span>: 1</span><br><span class="line">   &#125;</span><br><span class="line">],</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#2.网页显示分析结果</span></span><br><span class="line">./rdr-linux show -p 8080 *.rdb</span><br><span class="line">start parsing...</span><br><span class="line">parse dump.rdb  <span class="keyword">done</span></span><br><span class="line">parsing finished, please access http://&#123;<span class="variable">$IP</span>&#125;:8080</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="3-基准测试实践"><a href="#3-基准测试实践" class="headerlink" title="(3) 基准测试实践"></a>(3) 基准测试实践</h3><h4 id="3-1-K8s中单实例redis测试"><a href="#3-1-K8s中单实例redis测试" class="headerlink" title="3.1 K8s中单实例redis测试"></a>3.1 K8s中单实例redis测试</h4><p><strong>环境说明:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 运行该Pod的主机节点</span></span><br><span class="line">osImage: Ubuntu 20.04.1 LTS</span><br><span class="line">kernelVersion: 5.4.0-42-generic</span><br><span class="line">kubeProxyVersion: v1.19.6</span><br><span class="line">kubeletVersion: v1.19.6</span><br><span class="line">containerRuntimeVersion: docker://19.3.14</span><br><span class="line"></span><br><span class="line">$ Server 相关信息</span><br><span class="line">redis_version:6.2.5</span><br><span class="line">os:Linux 5.4.0-42-generic x86_64</span><br><span class="line">arch_bits:64</span><br><span class="line">gcc_version:10.3.1</span><br><span class="line">process_id:1</span><br><span class="line">process_supervised:no</span><br><span class="line">tcp_port:6379</span><br><span class="line">hz:10</span><br><span class="line">configured_hz:10</span><br><span class="line">lru_clock:3627023</span><br><span class="line">io_threads_active:0</span><br><span class="line"></span><br><span class="line">$ redis 配置的内存限额</span><br><span class="line">maxmemory:1073741824</span><br><span class="line">maxmemory_human:1.00G</span><br><span class="line">maxmemory_policy:volatile-lru</span><br><span class="line"></span><br><span class="line">$ cpu 相关信息</span><br><span class="line">Model name: Intel(R) Xeon(R) CPU E3-1220 V2 @ 3.10GHz</span><br><span class="line">物理CPU数: 1</span><br><span class="line">逻辑CPU数: 4</span><br><span class="line">CPU核心数: 4</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>基准测试:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试1.执行1千万次set命令与get命令，其中每次读取得大小为256字节, 请求客户端数默认50。</span></span><br><span class="line">~$ redis-benchmark -h 10.102.39.181 -a 123456 -d 256 -t <span class="built_in">set</span>,get -n 10000000 -q                            </span><br><span class="line">SET: 42445.36 requests per second</span><br><span class="line">GET: 49504.70 requests per second</span><br><span class="line"><span class="comment"># - 测试时 Pod 资源峰值</span></span><br><span class="line">very 1.0s: kubectl top pod -n database redis-cm-0  Tue Sep  7 20:36:50 2021</span><br><span class="line">NAME         CPU(cores)   MEMORY(bytes)</span><br><span class="line">redis-cm-0   848          18Mi</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试2.同样执行1千万次set命令与get命令，其中每次读取得大小为256字节，唯一不同的是采用 流水线 -P 16 进行测试（可以看出每秒set、get请求数显著提升）。</span></span><br><span class="line">~$ redis-benchmark -h 10.102.39.181 -a 123456 -d 256 -t <span class="built_in">set</span>,get -n 10000000 -P 16 -q                            </span><br><span class="line">SET: 96019.98 requests per second</span><br><span class="line">GET: 316575.91 requests per second</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 测试时 Pod 资源峰值</span></span><br><span class="line">very 1.0s: kubectl top pod -n database redis-cm-0  Tue Sep  7 20:46:50 2021</span><br><span class="line">NAME         CPU(cores)   MEMORY(bytes)</span><br><span class="line">redis-cm-0   457m         337Mi</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>实践测试</strong></p>
+<ul>
+<li><p>1) 通过shell pipe 与 redis pipe插入10万数据进行对比</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## Shell-pipe.sh</span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"开始时间: <span class="variable">$(date +%s)</span>"</span></span><br><span class="line"><span class="keyword">for</span> ((i=0;i&lt;100000;i++));<span class="keyword">do</span></span><br><span class="line">  <span class="built_in">echo</span> -en <span class="string">"helloworld-redis-<span class="variable">$&#123;i&#125;</span>"</span> | redis-cli -h 10.102.39.181 --no-auth-warning -a 123456 -x <span class="built_in">set</span> username<span class="variable">$&#123;i&#125;</span> &gt;&gt; ok.txt</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"完成时间: <span class="variable">$(date +%s)</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## redis-pipe.sh</span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"开始时间: <span class="variable">$(date +%s)</span>"</span></span><br><span class="line">python3 redis-set.py &gt;&gt; <span class="built_in">set</span>-command.txt</span><br><span class="line">cat <span class="built_in">set</span>-command.txt | redis-cli -h 10.102.39.181 -a 123456 --no-auth-warning --pipe</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"完成时间: <span class="variable">$(date +%s)</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## redis-set.py</span></span><br><span class="line">tee redis-set.py &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(100000):</span><br><span class="line">  <span class="built_in">print</span>(<span class="string">'set name'</span>+str(i)+<span class="string">' helloworld-redis-'</span>+str(i))</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>2) 利用time命令记录了脚本插入的执行效率</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## redis pipe 方式插入数据</span></span><br><span class="line">~/k8s/benchmark$ time ./redis-pipe.sh</span><br><span class="line">  <span class="comment"># 开始时间:1631020862</span></span><br><span class="line">  <span class="comment"># All data transferred. Waiting for the last reply...</span></span><br><span class="line">  <span class="comment"># Last reply received from server.</span></span><br><span class="line">  <span class="comment"># errors: 0, replies: 100000</span></span><br><span class="line">  <span class="comment"># 完成时间: 1631020862</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># real    0m0.466s</span></span><br><span class="line">  <span class="comment"># user    0m0.126s</span></span><br><span class="line">  <span class="comment"># sys     0m0.035s</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Keyspace</span></span><br><span class="line">db0:keys=100000,expires=0,avg_ttl=0</span><br><span class="line"></span><br><span class="line"><span class="comment">## shell pipe 方式插入数据</span></span><br><span class="line">~/k8s/benchmark$ time ./shell-pip.sh</span><br><span class="line">  <span class="comment"># 开始时间: 1631021312</span></span><br><span class="line">  <span class="comment"># 完成时间: 1631021921</span></span><br><span class="line">  <span class="comment"># real    10m9.265s # 程序开始至结束总用时(包括CPU)。</span></span><br><span class="line">  <span class="comment"># user    3m44.411s # 程序本身以及调用子进程的时间。</span></span><br><span class="line">  <span class="comment"># sys     1m55.435s # 由程序本身或者间接调用的系统调用执行时间。</span></span><br><span class="line"><span class="comment"># Keyspace</span></span><br><span class="line">db0:keys=200000,expires=0,avg_ttl=0</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips : 可以从上面的结果看出两种方式real总耗时量相差之巨大，redis pipe方式效率相比较普通shell pipe方式不是一个量级，所以在开发程序中尽量使用<code>redis pipe</code>管道方式进行提交数据。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为了方便后续演示，握又向数据库中插入了80W条数据，只用了大约4s。</span></span><br><span class="line">开始时间: 1631022423</span><br><span class="line">All data transferred. Waiting <span class="keyword">for</span> the last reply...</span><br><span class="line">Last reply received from server.</span><br><span class="line">errors: 0, replies: 800000</span><br><span class="line">完成时间: 1631022427</span><br><span class="line">real    0m4.023s</span><br><span class="line">user    0m0.885s</span><br><span class="line">sys     0m0.187s</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h2 id="0x01-Redis-安全优化"><a href="#0x01-Redis-安全优化" class="headerlink" title="0x01 Redis 安全优化"></a>0x01 Redis 安全优化</h2><h3 id="1-Security"><a href="#1-Security" class="headerlink" title="1.Security"></a>1.Security</h3><p>描述: Redis提供的访问控制、代码安全问题、选择恶意输入可从外部触发的攻击等功能，需要我们运维人员进行相应的配置提高安全性。</p>
+<h4 id="非特权运行"><a href="#非特权运行" class="headerlink" title="非特权运行"></a>非特权运行</h4><p>描述: Redis 不需要 root 权限即可运行，建议以仅用于此目的的非特权redis用户身份运行它，此种方式能最大程度防止<code>CONFIG SET/GET</code> 目录和其他类似运行时配置指令的可能性。。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#设置一个单独的redis账户很有必要，redis crackit就利用到了root用户的特性来重置authorized_keys。首先创建一个redis账户，然后通过该账户启动。</span></span><br><span class="line">$ useradd redis</span><br><span class="line">$ setsid sudo -u redis redis-server /etc/redis.conf</span><br><span class="line">$ ps -elf|grep redis   <span class="comment">#可以看到是redis用户启动</span></span><br><span class="line">  <span class="comment"># 4 S root      9048     1  0  80   0 - 59753 poll_s 19:43 ?        00:00:00 sudo -u redis redis-server /etc redis.conf</span></span><br><span class="line">  <span class="comment"># 4 S redis     9049  9048  0  80   0 - 38471 ep_pol 19:43 ?        00:00:00 redis-server</span></span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="文件权限"><a href="#文件权限" class="headerlink" title="文件权限"></a>文件权限</h4><p>描述: 因为redis密码明文存储在配置文件中，所以我们需要限制redis文件目录访问权限，如设置redis的主目录权限为700<code>(rwx------)</code>,如果redis.conf配置文件独立于redis主目录权限修过为600<code>(rw-------)</code>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 文件权限</span></span><br><span class="line">chmod 700 /opt/redis/redis-5.0.4/</span><br><span class="line">chmod 600 /etc/redis.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 所属者、组</span></span><br><span class="line">chown redis:redis /etc/redis.conf</span><br><span class="line">chown redis:redis /opt/redis/redis-5.0.4/</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h4 id="接口绑定"><a href="#接口绑定" class="headerlink" title="接口绑定"></a>接口绑定</h4><p>描述: 除了网络中受信任的客户端之外，每个人都应该拒绝访问 Redis 端口，因此运行 Redis 的服务器应该只能由使用 Redis 实现应用程序的计算机直接访问。</p>
+<p>假如服务器有两个网络接口(一个A区域、一个B区域)，如果只需要A区域的机器访问则只绑定到A区域网络接口中，如服务器自身访问则只绑定到本地回环接口上。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过在redis.conf文件中添加如下一行，可以将 Redis 绑定到单个接口：</span></span><br><span class="line"><span class="built_in">bind</span> 127.0.0.1 192.168.1.200</span><br></pre></td></tr></table></figure></p>
+<p>Tips：注意除了您可以绑定IPV4以为你还可绑定IPV6</p>
+<p><br></p>
+<h4 id="更改默认服务端口"><a href="#更改默认服务端口" class="headerlink" title="更改默认服务端口"></a>更改默认服务端口</h4><p>描述: 除了我们可以指定绑定的接口外，我们还可以更改默认的redis服务端口，可以防止黑客针对于Redis服务扫描探测。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将默认的服务断开从6379变成63791</span></span><br><span class="line">port 63791</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h4 id="认证配置"><a href="#认证配置" class="headerlink" title="认证配置"></a>认证配置</h4><p>描述: 为Redis服务端设置一个认证密码是非常必须，下面讲解 Redis 配置密码认证的几种方式总结:</p>
+<p><strong>操作流程:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.通过redis.conf文件中进行配置，此种方式修改后需要重启Redis。</span></span><br><span class="line">vim /etc/redis.conf</span><br><span class="line">requirepass WeiyiGeek  <span class="comment"># WeiyiGeek 即认证密码</span></span><br><span class="line">masterauth  WeiyiGeek  <span class="comment"># 配置主节点认证密码, 注意若master配置了密码则slave也要配置相应的密码参数否则无法进行正常复制的</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.通过命令行进行配置，此种方式的优点无需重启Redis。</span></span><br><span class="line">redis 127.0.0.1:6379[1]&gt; config <span class="built_in">set</span> requirepass my_redis  </span><br><span class="line">OK  </span><br><span class="line">redis 127.0.0.1:6379[1]&gt; config get requirepass  </span><br><span class="line">1) <span class="string">"requirepass"</span> </span><br><span class="line">2) <span class="string">"my_redis"</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>使用密码验证登陆Redis服务器:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1:密码明文会被记录到系统命令执行历史中(极其不推荐/不安全)</span></span><br><span class="line">redis-cli -h 127.0.0.1 -p 6379 -a WeiyiGeek</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2:交互式进行配置</span></span><br><span class="line">redis-cli -h 127.0.0.1 -p 6379</span><br><span class="line">redis 127.0.0.1:6379&gt; auth WeiyiGeek <span class="comment"># OK</span></span><br></pre></td></tr></table></figure></p>
+<p>非常注意: AUTH 命令与其他所有 Redis 命令一样，以未加密的方式发送，因此它无法防范对网络有足够访问权限以执行窃听的攻击者, 所以对应高敏感的数据建议配置TLS 支持(Redis 在所有通信通道上都可选地支持 TLS)以加密数据与命令传输。</p>
+<p><br/></p>
+<h4 id="禁用特定命令"><a href="#禁用特定命令" class="headerlink" title="禁用特定命令"></a>禁用特定命令</h4><p>描述: 我们可以禁用 Redis 中的命令或将它们重命名为不可猜测的名称，以便普通客户端仅限于指定的一组命令，比如漏洞就利用config/save两个命令完成攻击 。 </p>
+<p>由于redis无用户权限限制，建议将危险的命令使用rename配置项进行禁用或重命名，这样外部不了解重命名规则攻击者，就不能执行这类命令<code>FLUSHDB, FLUSHALL, KEYS, PEXPIRE, DEL, CONFIG, SHUTDOWN, BGREWRITEAOF, BGSAVE, SAVE, SPOP, SREM, RENAME, DEBUG, EVAL</code></p>
+<p>例如: 普通用户可能无法调用Redis <code>CONFIG 命令</code>来更改实例的配置，但提供和删除实例的系统应该能够这样做。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># redis.conf 配置文件</span></span><br><span class="line"><span class="comment"># 方式1.CONFIG / FLUSHALL命令被重命名为一个不可猜测的名称</span></span><br><span class="line">rename-command CONFIG b840fc02d524045429941cc15f59e41cb7be6c52</span><br><span class="line">rename-command FLUSHALL b840fc02d524045429941cc15f59e41cb7be6c53</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2.通过将其重命名为空字符串来完全禁用它（或任何其他命令）</span></span><br><span class="line">rename-command CONFIG <span class="string">""</span></span><br><span class="line">rename-command FLUSHALL  <span class="string">""</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips: 注意配置后需要重新redis-server服务。</p>
+<p><br></p>
+<h4 id="日志记录"><a href="#日志记录" class="headerlink" title="日志记录"></a>日志记录</h4><p>描述: 为Redis创建访问(或Debug)日志(根据需求设置)，在建立Redis蜜罐时，如果有攻击尝试时，就开业及时发现监控redis安全状态, 以及可以监控<code>cmdstat_*</code>指标信息报警;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 执行info commandstats 看出命令执行的次数、命令耗费的 CPU 时间(单位毫秒)、执行每个命令耗费的平均 CPU 时间(单位毫秒)</span></span><br><span class="line">cmdstat_get:calls=2,usec=15,usec_per_call=7.50</span><br><span class="line">cmdstat_select:calls=1,usec=9,usec_per_call=9.00</span><br><span class="line">cmdstat_keys:calls=4,usec=1948,usec_per_call=487.00</span><br><span class="line">cmdstat_auth:calls=3123,usec=8291,usec_per_call=2.65</span><br></pre></td></tr></table></figure></p>
+<p><strong>日志记录配置:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">logfile <span class="string">"/usr/local/redis/redis.log"</span> <span class="comment">#日志文件存放目录</span></span><br><span class="line">loglevel verbose  <span class="comment">#记录访问信息</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="防范字符串转义和-NoSQL-注入"><a href="#防范字符串转义和-NoSQL-注入" class="headerlink" title="防范字符串转义和 NoSQL 注入"></a>防范字符串转义和 NoSQL 注入</h4><p>描述: Redis 协议没有字符串转义的概念，所以一般情况下使用普通客户端库是不可能注入的, 但有可能会通过EVAL和EVALSHA命令执行的 Lua 脚本来构造恶意脚本。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; <span class="built_in">eval</span> <span class="string">"return &#123;KEYS[1],KEYS[2],ARGV[1],ARGV[2]&#125;"</span> 2 key1 key2 first second</span><br></pre></td></tr></table></figure></p>
+<p>解决办法: 应用程序应该避免使用从不受信任的来源获得的字符串来组成 Lua 脚本的主体。</p>
+<p>Tips : EVALSHA 通过其 SHA1 摘要评估缓存在服务器端的脚本。脚本使用SCRIPT LOAD命令缓存在服务器端。该命令在其他方面与EVAL相同。</p>
+<p><br/></p>
+<h4 id="防范由外部客户端精心挑选的输入触发的攻击"><a href="#防范由外部客户端精心挑选的输入触发的攻击" class="headerlink" title="防范由外部客户端精心挑选的输入触发的攻击"></a>防范由外部客户端精心挑选的输入触发的攻击</h4><p>描述: 有可能攻击者构造恶意的数据结构插入到 Redis 数据库中, 这可能会触发Redis 内部实现的数据结构的病态（最坏情况）算法复杂性。</p>
+<p>例如，攻击者可以通过 Web 表单将一组已知散列到同一桶的字符串提供到散列表中，以便将 O(1)预期时间（平均时间）变为O(N )最坏的情况，消耗比预期更多的 CPU，并最终导致拒绝服务。</p>
+<p>解决办法: 为了防止这种特定的攻击，Redis 对哈希函数使用了每次执行的伪随机种子。</p>
+<p><br/></p>
+<h4 id="防火墙限制访问"><a href="#防火墙限制访问" class="headerlink" title="防火墙限制访问"></a>防火墙限制访问</h4><p>描述: 前面针对Redis-server服务层面进行安全配置，此处针对网络层面进行限制，只允许指定的IP地址进行访问，在主机上配置防火墙的优点是防止同一网段的东西流量。</p>
+<p>在Linux上系统防火墙设置命令:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -s x.x.x.x -p tcp --dport 6379 -j ACCEPT  <span class="comment">#如果需要其他机器访问或者设置了slave模式，那就记得加上相应的防火墙设置(Centos6)</span></span><br><span class="line">firewall-cmd --add-rich-rule=<span class="string">"rule family="</span>ipv4<span class="string">" source address="</span>x.x.x.x<span class="string">" port protocol="</span>tcp<span class="string">" port="</span>6379<span class="string">" accept"</span> --permanent  <span class="comment">#(Centos7)</span></span><br></pre></td></tr></table></figure></p>
+<p>在Windows上系统防火墙设置命令:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">New-NetFirewallRule -Name <span class="string">"redis-server-access"</span> -DisplayName <span class="string">"redis-server"</span> -Description <span class="string">"redis-server 客户端访问防火墙规则"</span> -Direction Inbound -LocalPort 6379 -RemoteAddress x.x.x.x -Protocol TCP -Action Allow -Enabled True</span><br><span class="line">Get-NetFirewallRule -Name <span class="string">"redis-server-access"</span>  | Format-Table</span><br></pre></td></tr></table></figure><br><br></p>
+<h4 id="禁止redis中存储敏感的明文数据"><a href="#禁止redis中存储敏感的明文数据" class="headerlink" title="禁止redis中存储敏感的明文数据"></a>禁止redis中存储敏感的明文数据</h4><p>描述: Redis设计旨在提供高性能的KV服务，至少目前在权限访问控制和数据持久化方面比较弱化，所以从应用层面上，不建议使用Redis来存储敏感信息，例如鉴权的密码。</p>
+<p><br></p>
+<h4 id="Redis-安全配置总结示例"><a href="#Redis-安全配置总结示例" class="headerlink" title="Redis 安全配置总结示例"></a>Redis 安全配置总结示例</h4><p>安全配置示例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置文件 vim /etc/redis/redis.conf</span></span><br><span class="line"><span class="comment"># 1.信任的内网运行,尽量避免有公网访问（如果存在内网中其他固定IP则需要设置防火墙）</span></span><br><span class="line"><span class="built_in">bind</span> 127.0.0.1 </span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.绑定redis监听的网络接口(通过redis配置项bind,可同时绑定多个IP), 把6379改为其他得端口(或者采用unix管道进行数据管理)</span></span><br><span class="line">port 63791  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.开启redis密码认证,并设置高复杂度密码设置，因查询效率高，auth这种命令每秒能处理10w次以上(所以需要增加强度)</span></span><br><span class="line"><span class="comment"># echo -e "weiyigeek"|sha256sum </span></span><br><span class="line">requirepass 097575a79efcd7ea7b1efa2bcda78a4fc7cbd0820736b2f2708e72c3d21f8b61</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.日志文件存放目录以及记录redis访问信息。</span></span><br><span class="line"><span class="comment"># debug (a lot of information, useful for development/testing)</span></span><br><span class="line"><span class="comment"># verbose (many rarely useful info, but not a mess like the debug level)</span></span><br><span class="line"><span class="comment"># notice (moderately verbose, what you want in production probably) 默认</span></span><br><span class="line"><span class="comment"># warning (only very important / critical messages are logged)</span></span><br><span class="line">logfile <span class="string">"/usr/local/redis/redis.log"</span> </span><br><span class="line">loglevel verbose  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.默认情况下，启用保护模式。只有在以下情况下才应禁用(no)它</span></span><br><span class="line"><span class="comment"># - 您确定希望其他主机的客户端连接到Redis</span></span><br><span class="line"><span class="comment"># - 即使没有配置身份验证，也没有特定的接口集</span></span><br><span class="line"><span class="comment"># - 使用“bind”指令显式列出。</span></span><br><span class="line">protected-mode yes</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.重命名特殊命令（根据需求）</span></span><br><span class="line"><span class="comment"># `FLUSHDB, FLUSHALL, KEYS, PEXPIRE, DEL, CONFIG, SHUTDOWN, BGREWRITEAOF, BGSAVE, SAVE, SPOP, SREM, RENAME, DEBUG, EVAL`</span></span><br><span class="line">rename-command CONFIG b840fc02d524045429941cc15f59e41cb7be6c52</span><br><span class="line">rename-command FLUSHDB b840fc02d524045429941cc15f59e41cb7be6c53</span><br><span class="line">rename-command FLUSHALL b840fc02d524045429941cc15f59e41cb7be6c54</span><br><span class="line">rename-command EVAL b840fc02d524045429941cc15f59e41cb7be6c55</span><br><span class="line">rename-command DEBUG b840fc02d524045429941cc15f59e41cb7be6c56</span><br><span class="line">rename-command SHUTDOWN b840fc02d524045429941cc15f59e41cb7be6c7</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="2-Performance-Optimization"><a href="#2-Performance-Optimization" class="headerlink" title="2.Performance Optimization"></a>2.Performance Optimization</h3><p>描述: Redis开发和运维人员更加关注的是Redis本身的一些配置优化，例如AOF和RDB的配置优化、数据结构的配置优化等，但是对于操作系统是否需要针对Redis做一些配置优化不甚了解或者不太关心，然而事实证明一个良好的系统操作配置能够为Redis服务良好运行保驾护航。</p>
+<h4 id="关键优化项"><a href="#关键优化项" class="headerlink" title="关键优化项"></a>关键优化项</h4><ul>
+<li><strong>Step 1.vm.overcommit_memory 最佳实践</strong><br>Redis在启动时可能会出现这样的日志, 然后弄清楚什么是overcommit?<br>描述: Linux 操作系统对大部分申请内存的请求都回复yes以便能运行更多的程序。因为申请内存后并不会马上使用内存，这种技术叫做overcommit。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如果Redis在启动时有上面的日志，说明`vm.overcommit_memory=0`，Redis提示把它设置为1。</span></span><br><span class="line"><span class="comment"># WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the </span></span><br><span class="line"><span class="built_in">command</span> <span class="string">'sysctl -w vm.overcommit_memory=1'</span> <span class="keyword">for</span> this to take effect.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 注意：本文的可用内存代表物理内存与swap之和。</span></span><br><span class="line"><span class="comment"># 最佳实践</span></span><br><span class="line">- Redis建议把这个值设置为1是为了让fork能够在低内存下也执行成功(设置合理的maxmemory保证机器有20%~30%的闲置内存)。</span><br><span class="line">- 集中化管理aof重写和rdb的bgsave。</span><br></pre></td></tr></table></figure>
+Tips : 日志中的 Background save 代表的是 bgsave 和 bgrewriteaof，如果当前可用内存不足，操作系统应该如何处理fork。如果vm.overcommit_memory=0，代表如果没有可用内存，就申请内存失败，对应到Redis就是fork执行失败，在Redis的日志会出现：<code>Cannot allocate memory</code></li>
+</ul>
+<p><br/></p>
+<ul>
+<li><strong>Step 2.vm.swapniess 最佳实践</strong><br>描述: swap对于操作系统来比较重要，当物理内存不足时，可以swap out一部分内存页，以解燃眉之急。但世界上没有免费午餐，swap空间由硬盘提供，对于需要高并发、高吞吐的应用来说，磁盘IO通常会成为系统瓶颈。在Linux中，并不是要等到所有物理内存都使用完才会使用到swap，系统参数swppiness会决定操作系统使用swap的倾向程度。swappiness的取值范围是0~100，swappiness的值越大，说明操作系统可能使用swap的概率越高，swappiness值越低，表示操作系统更加倾向于使用物理内存。</li>
+</ul>
+<p>如果Linux &gt; 3.5的情况下 vm.swapniess=1 (<code>宁愿swap也不要OOM killer</code>) 否则 vm.swapniess=0 (<code>宁愿OOM killer也不用swap</code>) 从而实现如下两个目标：</p>
+<blockquote>
+<p>1.物理内存充足时候，使Redis足够快。<br>2.物理内存不足时候，避免Redis死掉(如果当前Redis为高可用，死掉比阻塞更好)。</p>
+</blockquote>
+<p>运维提示：OOM(Out Of Memory) killer机制是指Linux操作系统发现可用内存不足时，强制杀死一些用户进程（非内核进程），来保证系统有足够的可用内存进行分配。</p>
+<p><br/></p>
+<ul>
+<li><strong>Step 3.kernel.mm.transparent_hugepage.enabled 最佳实践</strong><br>Redis在启动时可能会看到如下日志：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">WARNING you have Transparent Huge Pages (THP) support enabled <span class="keyword">in</span> your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the <span class="built_in">command</span> <span class="string">'echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled'</span> as root, and add it to your /etc/rc.local <span class="keyword">in</span> order to retain the setting after a reboot. Redis must be restarted after THP is disabled.</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips : 从提示看Redis建议修改Transparent Huge Pages (THP)的相关配置，Linux kernel在2.6.38内核增加了Transparent Huge Pages (THP)特性 ，支持大内存页(2MB)分配，默认开启。当开启时可以降低fork子进程的速度，但fork之后，每个内存页从原来4KB变为2MB，会大幅增加重写期间父进程内存消耗。同时每次写命令引起的复制内存页单位放大了512倍，会拖慢写操作的执行时间，导致大量写操作慢查询。</p>
+<p>因此Redis日志中建议将此特性进行禁用，禁用方法如下：<code>echo never &gt;  /sys/kernel/mm/transparent_hugepage/enabled</code></p>
+<p><br/></p>
+<ul>
+<li><strong>Step 4.Transparent Huge Pages</strong><br>Redis在启动时可能会看到如下日志：<code>WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command &#39;echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled&#39; as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled.</code></li>
+</ul>
+<p>从提示看Redis建议修改Transparent Huge Pages (THP)的相关配置，Linux kernel在2.6.38内核增加了Transparent Huge Pages (THP)特性 ，支持大内存页(2MB)分配，默认开启。当开启时可以降低fork子进程的速度，但fork之后，每个内存页从原来4KB变为2MB，会大幅增加重写期间父进程内存消耗。同时每次写命令引起的复制内存页单位放大了512倍，会拖慢写操作的执行时间，导致大量写操作慢查询。例如简单的incr命令也会出现在慢查询中。因此Redis日志中建议将此特性进行禁用，禁用方法如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 配置机器重启后THP配置依然生效</span></span><br><span class="line">tee -a /etc/rc.local &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="built_in">echo</span> never &gt;  /sys/kernel/mm/transparent_hugepage/enabled</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li><strong>Step 5.OOM killer 优化配置</strong><br>OOM killer会在可用内存不足时选择性的杀掉用户进程,它会为每个用户进程设置一个权值，这个权值越高，被“下手”的概率就越高，反之概率越低。每个进程的权值存放在<code>/proc/{progress_id}/oom_score</code>中，这个值是受<code>/proc/{progress_id}/oom_adj</code>的控制，oom_adj在不同的Linux版本的最小值不同，可以参考Linux源码中oom.h(从-15到-17)</li>
+</ul>
+<p>当<code>oom_adj</code>设置为最小值时，该进程将不会被OOM killer杀掉，设置方法如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 命令</span></span><br><span class="line"><span class="built_in">echo</span> &#123;value&#125; &gt; /proc/<span class="variable">$&#123;process_id&#125;</span>/oom_adj</span><br><span class="line"></span><br><span class="line"><span class="comment"># 脚本</span></span><br><span class="line"><span class="keyword">for</span> redis_pid <span class="keyword">in</span> $(pgrep -f <span class="string">"redis-server"</span>)</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  <span class="built_in">echo</span> -17 &gt; /proc/<span class="variable">$&#123;redis_pid&#125;</span>/oom_adj</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<ul>
+<li><strong>Step 6.设置其打开文件数句柄数以及单个用户最大进程数</strong><br>描述: 下面得参数主要设置是单个进程能够使用得Linux最大文件句柄数, 解决在高并发的情况下不会异常报错。在Redis官方提到的建议<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># You requested maxclients of 10000 requiring at least 10032 max file descriptors.</span></span><br><span class="line">第一行：Redis建议把open files至少设置成10032，那么这个10032是如何来的呢？因为maxclients的默认是10000，这些是用来处理客户端连接的，除此之外，Redis内部会使用最多32个文件描述符，所以这里的10032 = 10000 + 32。</span><br><span class="line"></span><br><span class="line"><span class="comment"># Redis can’t set maximum open files to 10032 because of OS error: Operation not permitted.</span></span><br><span class="line">第二行：Redis不能将open files设置成10032，因为它没有权限设置。</span><br><span class="line"></span><br><span class="line"><span class="comment"># Current maximum open files is 4096. Maxclients has been reduced to 4064 to compensate for low ulimit. If you need higher maxclients increase ‘ulimit –n’.</span></span><br><span class="line">第三行：当前系统的open files是4096，所以maxclients被设置成4096-32=4064个，如果你想设置更高的maxclients，请使用<span class="built_in">ulimit</span> -n来设置。从上面的三行日志分析可以看出open files的限制优先级比maxclients大。</span><br></pre></td></tr></table></figure>
+解决办法:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 临时</span></span><br><span class="line"><span class="built_in">ulimit</span> –Sn 10032</span><br><span class="line"><span class="comment"># 永久</span></span><br><span class="line">tee etc/security/limits.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">*  soft    nofile          10032</span><br><span class="line">*  hard    nofile          10032</span><br><span class="line">*  soft    nproc           65535</span><br><span class="line">*  hard    nproc           65535</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li><strong>Step 7.TCP backlog 日志队列优化</strong><br>描述: Redis 默认的 tcp-backlog 为511 我们可以通过修改配置 tcp-backlog 进行调整，如果Linux的tcp-backlog 小于Redis设置的 tcp-backlog，那么在Redis启动时会看到如下日志：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.</span></span><br></pre></td></tr></table></figure>
+解决方法:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看</span></span><br><span class="line">cat /proc/sys/net/core/somaxconn</span><br><span class="line">128</span><br><span class="line"></span><br><span class="line"><span class="comment"># 修改</span></span><br><span class="line"><span class="built_in">echo</span> 511 &gt; /proc/sys/net/core/somaxconn</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li><strong>Step 8.保证Redis服务器时钟的一致性</strong><br>描述: 我们知道像Redis Sentinel和Redis Cluster这两种需要多个Redis实例的类型，可能会涉及多台服务器。虽然Redis并没有对多个服务器的时钟有严格的要求，但是假如多个Redis实例所在的服务器时钟不一致，对于一些异常情况的日志排查是非常困难的，例如Redis Cluster的故障转移，如果日志时间不一致，对于我们排查问题带来很大的困扰(注：但不会影响集群功能，集群节点依赖各自时钟)。一般公司里都会有NTP服务用来提供标准时间服务，从而达到纠正时钟的效果</li>
+</ul>
+<p>例如：每小时的同步1次NTP服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0 * * * * /usr/sbin/ntpdate ntp.xx.com &gt; /dev/null 2&gt;&amp;1</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="Redis-性能优化总结示例"><a href="#Redis-性能优化总结示例" class="headerlink" title="Redis 性能优化总结示例"></a>Redis 性能优化总结示例</h4><p><strong>系统优化配置</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - 设置内存分配策略</span></span><br><span class="line">sudo sysctl -w vm.overcommit_memory=1</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 尽量使用物理内存(速度快)针对内核版本大于&gt;=3.x （宁愿swap也不要OOM killer）</span></span><br><span class="line">sudo sysctl -w vm.swapniess=1</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 禁用 THP 特性减少内存消耗</span></span><br><span class="line"><span class="built_in">echo</span> never &gt; /sys/kernel/mm/transparent_hugepage/enabled</span><br><span class="line"></span><br><span class="line"><span class="comment"># - OOM killer 特性优化</span></span><br><span class="line"><span class="keyword">for</span> redis_pid <span class="keyword">in</span> $(pgrep -f <span class="string">"redis-server"</span>)</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  <span class="built_in">echo</span> -17 &gt; /proc/<span class="variable">$&#123;redis_pid&#125;</span>/oom_adj</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - 设置其打开文件数句柄数以及单个用户最大进程数</span></span><br><span class="line">tee etc/security/limits.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">*  soft    nofile          10032</span><br><span class="line">*  hard    nofile          10032</span><br><span class="line">*  soft    nproc           65535</span><br><span class="line">*  hard    nproc           65535</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># - SYN队列长度设置此参数可以容纳更多等待连接的网络。</span></span><br><span class="line"><span class="built_in">echo</span> 511 &gt; /proc/sys/net/core/somaxconn</span><br><span class="line">sudo sysctl -w net.ipv4.tcp_max_syn_backlog=2048 </span><br><span class="line"></span><br><span class="line"><span class="comment"># - 每个小时同步一次时间</span></span><br><span class="line">0 * * * * /usr/sbin/ntpdate ntp.xx.com &gt; /dev/null 2&gt;&amp;1</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>应用配置优化</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 最大客户端上限连接数（需根据实际情况调整与系统的open files有关，其数量值为open files(10032) - 32）</span></span><br><span class="line">maxclients 10000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 集群配置优化关键项</span></span><br><span class="line"><span class="comment"># 集群超时时间，如果此时间设置太小时由于网络波动可能会导致进行重新选Master的操作</span></span><br><span class="line">cluster-node-timeout 5000</span><br><span class="line"><span class="comment"># 主节点写入后必须同步到一台从上，防止数据丢失的有效方法(要求是其从节点必须&gt;=1)</span></span><br><span class="line">min‐replicas‐to‐write 1</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>应用使用中优化</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 查询执行时间指的是不包括像客户端响应(talking)、发送回复等 IO 操作，而单单是执行一个查询命令所耗费的时间</span></span><br><span class="line">redis&gt; SLOWLOG LEN   <span class="comment"># 管理 redis 的慢日志查看当前日志的数量 </span></span><br><span class="line">redis&gt; SLOWLOG RESET <span class="comment"># 清空 slowlog 此时上面 LEN 变成 0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 断开耗时连接</span></span><br><span class="line"><span class="comment"># 列出所有已连接客户端</span></span><br><span class="line">redis 127.0.0.1:6379&gt; CLIENT LIST</span><br><span class="line">addr=127.0.0.1:43501 fd=5 age=10 idle=0 flags=N db=0 sub=0 psub=0 multi=-1 qbuf=0 qbuf-free=32768 obl=0 oll=0 omem=0 events=r cmd=client</span><br><span class="line"><span class="comment"># 杀死当前客户端的连接</span></span><br><span class="line">redis 127.0.0.1:6379&gt; CLIENT KILL 127.0.0.1:43501</span><br><span class="line">OK</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-04-14T02:16:30.959Z" itemprop="dateUpdated">2022-04-14 10:16:30</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/数据存储/Redis/6.Redis数据库性能测试及优化配置.md" target="_blank" rel="noopener noreferrer">_posts/数据存储/Redis/6.Redis数据库性能测试及优化配置.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/4-17-527.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/4-17-527.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-17-527.html&title=《6.Redis数据库性能测试及优化配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-17-527.html&title=《6.Redis数据库性能测试及优化配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-17-527.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《6.Redis数据库性能测试及优化配置》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-17-527.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-17-527.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/4-17-577.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">8.Redis数据库客户端操作实践及入坑出坑</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/4-17-51.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">7.Redis数据库容灾备份企业实战</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-Redis-性能指标监控"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Redis 性能指标监控</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-性能指标"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">(1) 性能指标</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-基本活动指标：Basic-activity"><span class="post-toc-number">1.1.1.</span> <span class="post-toc-text">1.基本活动指标：Basic activity</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-性能指标：Performance"><span class="post-toc-number">1.1.2.</span> <span class="post-toc-text">2.性能指标：Performance</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-内存指标-Memory"><span class="post-toc-number">1.1.3.</span> <span class="post-toc-text">3.内存指标: Memory</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-持久性指标-Persistence"><span class="post-toc-number">1.1.4.</span> <span class="post-toc-text">4.持久性指标: Persistence</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-错误指标：Error"><span class="post-toc-number">1.1.5.</span> <span class="post-toc-text">5.错误指标：Error</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#6-其他指标说明"><span class="post-toc-number">1.1.6.</span> <span class="post-toc-text">6.其他指标说明</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-性能测试工具"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">(2) 性能测试工具</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-redis-benchmark-命令"><span class="post-toc-number">1.2.1.</span> <span class="post-toc-text">1.redis-benchmark 命令</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-redisbench-工具"><span class="post-toc-number">1.2.2.</span> <span class="post-toc-text">2.redisbench 工具</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-rdb-内存分析工具"><span class="post-toc-number">1.2.3.</span> <span class="post-toc-text">3.rdb 内存分析工具</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-基准测试实践"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">(3) 基准测试实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-1-K8s中单实例redis测试"><span class="post-toc-number">1.3.1.</span> <span class="post-toc-text">3.1 K8s中单实例redis测试</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-Redis-安全优化"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 Redis 安全优化</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-Security"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.Security</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#非特权运行"><span class="post-toc-number">2.1.1.</span> <span class="post-toc-text">非特权运行</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#文件权限"><span class="post-toc-number">2.1.2.</span> <span class="post-toc-text">文件权限</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#接口绑定"><span class="post-toc-number">2.1.3.</span> <span class="post-toc-text">接口绑定</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#更改默认服务端口"><span class="post-toc-number">2.1.4.</span> <span class="post-toc-text">更改默认服务端口</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#认证配置"><span class="post-toc-number">2.1.5.</span> <span class="post-toc-text">认证配置</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#禁用特定命令"><span class="post-toc-number">2.1.6.</span> <span class="post-toc-text">禁用特定命令</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#日志记录"><span class="post-toc-number">2.1.7.</span> <span class="post-toc-text">日志记录</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#防范字符串转义和-NoSQL-注入"><span class="post-toc-number">2.1.8.</span> <span class="post-toc-text">防范字符串转义和 NoSQL 注入</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#防范由外部客户端精心挑选的输入触发的攻击"><span class="post-toc-number">2.1.9.</span> <span class="post-toc-text">防范由外部客户端精心挑选的输入触发的攻击</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#防火墙限制访问"><span class="post-toc-number">2.1.10.</span> <span class="post-toc-text">防火墙限制访问</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#禁止redis中存储敏感的明文数据"><span class="post-toc-number">2.1.11.</span> <span class="post-toc-text">禁止redis中存储敏感的明文数据</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Redis-安全配置总结示例"><span class="post-toc-number">2.1.12.</span> <span class="post-toc-text">Redis 安全配置总结示例</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-Performance-Optimization"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.Performance Optimization</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#关键优化项"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">关键优化项</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Redis-性能优化总结示例"><span class="post-toc-number">2.2.2.</span> <span class="post-toc-text">Redis 性能优化总结示例</span></a></li></ol></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-17-527.html&title=《6.Redis数据库性能测试及优化配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-17-527.html&title=《6.Redis数据库性能测试及优化配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-17-527.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《6.Redis数据库性能测试及优化配置》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-17-527.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-17-527.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACMUlEQVR42u3aQY4CMQwFUe5/aWbLCBHVt8OMEldWqIFOXi/csePHA4/ny3i9sv72/fr7PdezbB4yZMg4lvFcDrLQ9MqatH4cH6kyZMgYwKjdeh0oyfR9tgwZMmTwbdyuECxDhgwZewMuSVZJUP7n94YMGTIOYZAklhfXSKGNlOe+kovLkCHjQAavuv/956+cb8iQIeMoxjMcu8pz/ZX8uqcMGTKuZvAA1ynu84S2th4ZMmRMYKQFNX4w2S/A8SsyZMiYzCBlMp76dg4bUFiXIUPGdYw0sSTbuH4TGE+YZciQMYGxN8kkU/JSHX8QMmTImMCopa9koenmMj1y2JCFy5Ah4yhGLfflTVqdII7+JUOGjEsZe1sreHjlj2O9KhkyZMxh8FIXSUd58Y7MFXeLyJAh4zpGv9BPFlortKHWChkyZAxgrLdcxY1aWCyrheCPO1wZMmRcx0iDJl90MGXn/VCL/TJkyDiQUevOeIaDH2HyZgsZMmTMYfSLYjwEp60YvBQoQ4aMuxkkia0dRtbaOGqlOhkyZExj9I8Kghi//H2wNhkyZAxmdJJPHmQ7h6wyZMi4m9EpmXUaLEhgJfPKkCFjAqN/tJkeLfDgzqkyZMiYwEiDLN+08WJcmiTHbw8ZMmRcwUiT23SyYEGl7i8ZMmTISLd9acDljReo2UKGDBnjGTzUkmV1kuHW1lCGDBkHMnhBjQTWXeH1K+U2GTJkHMhodWrgX/IDTp4wy5AhYwDjB1YbiYdaP4F+AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 1.Go语言项目性能调优实践|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Go">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>1.Go语言项目性能调优实践</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">1.Go语言项目性能调优实践</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-04-26T03:16:58.000Z" itemprop="datePublished" class="page-time">
+  2020-04-26
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Development/">Development</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Development/Programming/">Programming</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-编程世界/Go/Extension/1.Go语言项目性能调优实践"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">1.Go语言项目性能调优实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-04-26 11:16:58" datetime="2020-04-26T03:16:58.000Z"  itemprop="datePublished">2020-04-26</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Development/">Development</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Development/Programming/">Programming</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><p>在计算机性能调试领域里 <code>profiling</code> 是指对应用程序的画像，画像就是应用程序使用 CPU 和内存的情况。 </p>
+<p>Go语言是一个对性能特别看重的语言，所以其自带了 profiling 的库，本章将主要讲解怎么在 golang 中做 profiling。</p>
+<p><br/></p>
+<p>Go语言项目中的性能优化主要有以下几个方面：<br><code>CPU profile</code>：报告程序的 CPU 使用情况，按照一定频率去采集应用程序在 CPU 和寄存器上面的数据。<br><code>Memory Profile（Heap Profile）</code>：报告程序的内存使用情况。<br><code>Block Profiling</code>：报告 goroutines 不在运行状态的情况，可以用来分析和查找死锁等性能瓶颈。<br><code>Goroutine Profiling</code>：报告 goroutines 的使用情况，以及 goroutine调用关系。</p>
+<p><br></p>
+<p><strong>Q: 那如何进行程序性能数据的采集?</strong><br>Go语言内置了获取程序的运行数据的工具，包括以下两个标准库：</p>
+<ul>
+<li><code>runtime/pprof</code>：采集<code>工具型应用</code>运行数据进行分析</li>
+<li><code>net/http/pprof</code>：采集<code>服务型应用</code>运行时数据进行分析</li>
+</ul>
+<p>Tips: 当pprof被引用开启后，每隔一段时间（10ms）就会收集下当前的堆栈信息，获取各个函数占用的CPU以及内存资源；最后通过对这些采样数据进行分析，形成一个性能分析报告。</p>
+<p>Tips: 通常在我们进行性能测试时会与基准测试联用，找出程序最需要优化的点，【非常注意】我们只在进行性能测试的时候才在代码中引入pprof。</p>
+<p><br/></p>
+<h2 id="0x01-性能调试工具实践"><a href="#0x01-性能调试工具实践" class="headerlink" title="0x01 性能调试工具实践"></a>0x01 性能调试工具实践</h2><h3 id="1-工具型应用"><a href="#1-工具型应用" class="headerlink" title="1.工具型应用"></a>1.工具型应用</h3><p>描述: 如果你的应用程序是运行一段时间就结束退出类型。那么最好的办法是在应用退出的时候把 profiling 的报告保存到文件中，进行分析。对于这种情况可以使用runtime/pprof库。</p>
+<p>首先在你测试的代码中导入<code>runtime/pprof</code>工具: <code>import &quot;runtime/pprof&quot;</code>, 其主要包含了CPU 和 内存等性能分析。</p>
+<p><strong>CPU性能分析:</strong> 它会在应用执行结束后生成一个文件，保存了程序执行过程中的 <code>CPU profiling</code> 数据, 得到采样数据之后，我们可以使用<code>go tool pprof</code>工具进行CPU性能分析。<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 开启CPU性能分析：</span></span><br><span class="line">pprof.StartCPUProfile(w io.Writer)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 停止CPU性能分析：</span></span><br><span class="line">pprof.StopCPUProfile()</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>内存性能优化</strong> 得到采样数据之后，使用go tool pprof工具进行内存性能分析。<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 记录程序的堆栈信息</span></span><br><span class="line">pprof.WriteHeapProfile(w io.Writer)</span><br></pre></td></tr></table></figure></p>
+<p>Tips: 默认它是使用<code>-inuse_space</code>进行统计，还可以使用<code>-inuse-objects</code>查看分配对象的数量。</p>
+<p><br></p>
+<h3 id="2-服务型应用"><a href="#2-服务型应用" class="headerlink" title="2.服务型应用"></a>2.服务型应用</h3><p>描述: 如果你的应用程序是一直运行的，比如 web 应用，那么可以使用net/http/pprof库，它能够在提供 HTTP 服务进行分析。</p>
+<p>首先，你需要在<code>web server</code>端代码中按如下方式导入<code>net/http/pprof</code>, 例如 <code>import _ &quot;net/http/pprof&quot;</code>, 它表示只加载init方法而不是使用其的方法。</p>
+<p>如果你的<code>Web Server</code>使用了默认的 <code>http.DefaultServeMux</code> 通常是代码直接使用 `http.ListenAndServe(“0.0.0.0:8000”, nil) , 按照上述要求导入即可。</p>
+<p>如果你使用自定义的 Mux，则需要手动注册一些路由规则：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">r.HandleFunc(<span class="string">"/debug/pprof/"</span>, pprof.Index)</span><br><span class="line">r.HandleFunc(<span class="string">"/debug/pprof/cmdline"</span>, pprof.Cmdline)</span><br><span class="line">r.HandleFunc(<span class="string">"/debug/pprof/profile"</span>, pprof.Profile)</span><br><span class="line">r.HandleFunc(<span class="string">"/debug/pprof/symbol"</span>, pprof.Symbol)</span><br><span class="line">r.HandleFunc(<span class="string">"/debug/pprof/trace"</span>, pprof.Trace)</span><br></pre></td></tr></table></figure></p>
+<p>如果你使用的是gin框架，那么推荐使用<code>github.com/gin-contrib/pprof</code>，在代码中通过以下命令注册pprof相关路由: <code>pprof.Register(router)</code></p>
+<p>Tips: 总之,不管是那种方式，你的 HTTP 服务都拥有<code>/debug/pprof</code> endpoint，访问它会得到Server端程序相关的Allocs、Goroutine以及Heap等信息： </p>
+<ul>
+<li><code>/debug/pprof/profile</code>：CPU profiling的路径，访问此链接会持续记录 30s并生成一个文件供下载。</li>
+<li><code>/debug/pprof/heap</code>： Memory Profiling 的路径，访问这个链接会得到一个内存 Profiling 结果的文件。</li>
+<li><code>/debug/pprof/block</code>：block Profiling 的路径</li>
+<li><code>/debug/pprof/goroutines</code>：记录运行的 goroutines 列表，以及调用关系。</li>
+</ul>
+<p><br></p>
+<h3 id="3-pprof-命令语法"><a href="#3-pprof-命令语法" class="headerlink" title="3.pprof 命令语法"></a>3.pprof 命令语法</h3><p>描述: 不管是工具型应用还是服务型应用，我们使用相应的pprof库获取数据之后，下一步的都要对这些数据进行分析，我们可以使用<code>go tool pprof</code>命令行工具。</p>
+<p>go tool pprof 最简单的使用方式为 <code>go tool pprof [binary] [source]</code> ,其中</p>
+<ul>
+<li>binary 是应用的二进制文件，用来解析各种符号；</li>
+<li>source 表示 profile 数据的来源，可以是本地的文件，也可以是 http 地址。</li>
+</ul>
+<p>Tips: 非常注意获取的 Profiling 数据是动态的，要想获得有效的数据，请保证应用处于较大的负载（比如正在生成中运行的服务，或者通过其他工具模拟访问压力）。<code>如果应用处于空闲状态，得到的结果可能没有任何意义</code>。</p>
+<p><br></p>
+<p><strong>pprof与性能测试结合</strong><br>描述: go test, 命令有两个参数和 pprof 相关，它们分别指定生成的 <code>CPU 和 Memory profiling</code> 保存的文件：</p>
+<ul>
+<li>-cpuprofile：cpu profiling 数据要保存的文件地址</li>
+<li>-memprofile：memory profiling 数据要报文的文件地址</li>
+</ul>
+<p>比如下面执行测试的同时，也会执行 CPU profiling，并把结果保存在 cpu.prof 文件中：<code>go test -bench . -cpuprofile=cpu.prof</code></p>
+<p>比如下面执行测试的同时，也会执行 Mem profiling，并把结果保存在 cpu.prof 文件中：<code>go test -bench . -memprofile=./mem.prof</code></p>
+<p>Tips: 特别注意Profiling 一般和性能测试一起使用,在前文我们也提到过，只有应用在负载高的情况下 Profiling 才有意义。<br><br></p>
+<p><strong>实践案例:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">➜ go <span class="built_in">test</span> -bench . -cpuprofile=cpu.prof</span><br><span class="line">  <span class="comment"># goos: linux</span></span><br><span class="line">  <span class="comment"># goarch: amd64</span></span><br><span class="line">  <span class="comment"># pkg: weiyigeek.top/studygo/Day08/07perfomance/testdemo</span></span><br><span class="line">  <span class="comment"># cpu: Intel(R) Core(TM) i5-3570 CPU @ 3.40GHz</span></span><br><span class="line">  <span class="comment"># BenchmarkFib1-4           365628              3098 ns/op</span></span><br><span class="line">  <span class="comment"># BenchmarkFibOpt1-4        592876              1946 ns/op</span></span><br><span class="line">  <span class="comment"># BenchmarkFib2-4             4468            230122 ns/op</span></span><br><span class="line">  <span class="comment"># BenchmarkFibOpt2-4          8101            142212 ns/op</span></span><br><span class="line">  <span class="comment"># PASS</span></span><br><span class="line">  <span class="comment"># ok      weiyigeek.top/studygo/Day08/07perfomance/testdemo       4.720s</span></span><br><span class="line"></span><br><span class="line">➜ go tool pprof cpu.prof   </span><br><span class="line">  <span class="comment"># File: testdemo.test</span></span><br><span class="line">  <span class="comment"># Type: cpu</span></span><br><span class="line">  <span class="comment"># Time: Nov 29, 2021 at 10:58am (CST)</span></span><br><span class="line">  <span class="comment"># Duration: 4.72s, Total samples = 4.58s (97.12%)</span></span><br><span class="line">  <span class="comment"># Entering interactive mode (type "help" for commands, "o" for options)</span></span><br><span class="line">  <span class="comment"># (pprof) top3</span></span><br><span class="line">  <span class="comment"># Showing nodes accounting for 4.55s, 99.34% of 4.58s total</span></span><br><span class="line">  <span class="comment"># Dropped 31 nodes (cum &lt;= 0.02s)</span></span><br><span class="line">  <span class="comment"># Showing top 3 nodes out of 10</span></span><br><span class="line">  <span class="comment">#       flat  flat%   sum%        cum   cum%</span></span><br><span class="line">  <span class="comment">#     4.55s 99.34% 99.34%      4.55s 99.34%  weiyigeek.top/studygo/Day08/07perfomance/testdemo.calcStep</span></span><br><span class="line">  <span class="comment">#         0     0% 99.34%      4.56s 99.56%  testing.(*B).launch</span></span><br><span class="line">  <span class="comment">#         0     0% 99.34%      4.57s 99.78%  testing.(*B).runN</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="4-简单示例"><a href="#4-简单示例" class="headerlink" title="4.简单示例"></a>4.简单示例</h3><p><strong>示例1.首先我们来写一段有问题的代码</strong><br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// weiyigeek.top/studygo/Day08/07perfomance/pporftest/main.go</span></span><br><span class="line"><span class="comment">// 进行Go语言性能测试的用例代码。</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">"flag"</span></span><br><span class="line">  <span class="string">"fmt"</span></span><br><span class="line">  <span class="string">"os"</span></span><br><span class="line">  <span class="string">"runtime/pprof"</span></span><br><span class="line">  <span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// logicCode 函数中包含一段有问题的代码</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">logicCode</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">var</span> c <span class="keyword">chan</span> <span class="keyword">int</span> <span class="comment">// 未对通道c进行初始化 make(chan int)</span></span><br><span class="line">  <span class="keyword">for</span> &#123;</span><br><span class="line">    <span class="keyword">select</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> v := &lt;-c: <span class="comment">// 此时处于阻塞的状态</span></span><br><span class="line">      fmt.Printf(<span class="string">"recv from chan, value:%v\n"</span>, v)</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="comment">// time.Sleep(time.Second)  // 问题解决办法</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// main 性能测试入口函数</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 开发规范一致性</span></span><br><span class="line">  <span class="keyword">var</span> (</span><br><span class="line">    isCPUPprof, isMemPprof <span class="keyword">bool</span></span><br><span class="line">  )</span><br><span class="line">  <span class="comment">// flag包主要接收命令行参数以及解析，此时我们可以在命令行控制是否开启CPU和Mem的性能分析</span></span><br><span class="line">  flag.BoolVar(&amp;isCPUPprof, <span class="string">"cpu"</span>, <span class="literal">false</span>, <span class="string">"turn cpu pprof on"</span>)</span><br><span class="line">  flag.BoolVar(&amp;isMemPprof, <span class="string">"mem"</span>, <span class="literal">false</span>, <span class="string">"turn mem pprof on"</span>)</span><br><span class="line">  flag.Parse()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 是否进行CPU心理测试</span></span><br><span class="line">  <span class="keyword">if</span> isCPUPprof &#123;</span><br><span class="line">    <span class="comment">// 在当前可执行程序下创建一个cpu.pprof文件</span></span><br><span class="line">    f1, err := os.Create(<span class="string">"./cpu.pprof"</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      fmt.Printf(<span class="string">"create cpu pprof failed, err:%v\n"</span>, err)</span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 往文件中记录CPU Profile信息</span></span><br><span class="line">    pprof.StartCPUProfile(f1)</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      pprof.StopCPUProfile()</span><br><span class="line">      f1.Close()</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 进行性能测试的函数调用，此处时并发</span></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">8</span>; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> logicCode()</span><br><span class="line">  &#125;</span><br><span class="line">  time.Sleep(<span class="number">20</span> * time.Second)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 是否进行内存分析?</span></span><br><span class="line">  <span class="keyword">if</span> isMemPprof &#123;</span><br><span class="line">    f2, err := os.Create(<span class="string">"./mem.pprof"</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      fmt.Printf(<span class="string">"create mem pprof failed, err:%v\n"</span>, err)</span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    pprof.WriteHeapProfile(f2)</span><br><span class="line">    f2.Close()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>编译执行:<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">➜  pporftest <span class="keyword">go</span> build                             </span><br><span class="line">➜  pporftest ./pporftest -cpu <span class="literal">true</span>  <span class="comment">// 等待30秒后会在当前目录下生成一个cpu.pprof文件。</span></span><br><span class="line">➜  pporftest ls</span><br><span class="line">cpu.pprof  main.<span class="keyword">go</span>  pporftest</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>当执行<code>pporftest</code>程序生成<code>cpu.pprof</code>文件后，我们可以通过下面的两种方式进行查看分析结果。</p>
+<ul>
+<li>第一种，是使用go工具链里的pprof来进入交互界面查看分析结果。</li>
+<li>第二种，是使用graphviz图形化工具，通过svg图的方式查看程序中详细的CPU占用情况</li>
+</ul>
+<p><br/></p>
+<p><strong>命令行交互界面</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.分析程序的cpu.pprof文件</span></span><br><span class="line">$ go tool pprof cpu.pprof</span><br><span class="line">File: pporftest</span><br><span class="line">Type: cpu</span><br><span class="line">Time: Nov 27, 2021 at 2:14pm (CST)</span><br><span class="line">Duration: 20.17s, Total samples = 57.72s (286.19%)</span><br><span class="line">Entering interactive mode (<span class="built_in">type</span> <span class="string">"help"</span> <span class="keyword">for</span> commands, <span class="string">"o"</span> <span class="keyword">for</span> options)</span><br><span class="line">(pprof) top  <span class="comment"># 来查看程序中占用CPU前几位的函数：</span></span><br><span class="line">Showing nodes accounting <span class="keyword">for</span> 57.71s, 100% of 57.72s total</span><br><span class="line">Dropped 5 nodes (cum &lt;= 0.29s)</span><br><span class="line">      flat  flat%   sum%        cum   cum%</span><br><span class="line">    22.36s 38.74% 38.74%     41.66s 72.18%  runtime.selectnbrecv</span><br><span class="line">    19.30s 33.44% 72.18%     19.30s 33.44%  runtime.chanrecv</span><br><span class="line">    16.05s 27.81%   100%     57.71s   100%  main.logicCode   <span class="comment"># 罪魁祸首其占用的CPU耗时累计已达到100%</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 结果中五个关键参数浅析</span></span><br><span class="line">  <span class="comment"># * flat：当前函数占用CPU的耗时</span></span><br><span class="line">  <span class="comment"># * flat：:当前函数占用CPU的耗时百分比</span></span><br><span class="line">  <span class="comment"># * sun%：函数占用CPU的耗时累计百分比</span></span><br><span class="line">  <span class="comment"># * cum：当前函数加上调用当前函数的函数占用CPU的总耗时</span></span><br><span class="line">  <span class="comment"># * cum%：当前函数加上调用当前函数的函数占用CPU的总耗时百分比</span></span><br><span class="line">  <span class="comment"># * 最后一列：函数名称</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.使用list 函数名命令查看具体的函数分析，例如执行list logicCode查看我们编写的函数的详细分析。</span></span><br><span class="line">(pprof)  list logicCode</span><br><span class="line">Total: 57.72s</span><br><span class="line">ROUTINE ======================== main.logicCode <span class="keyword">in</span> /home/weiyigeek/app/program/project/go/src/weiyigeek.top/studygo/Day08/07perfomance/pporftest/main.go</span><br><span class="line">  16.05s     57.71s (flat, cum)   100% of Total</span><br><span class="line">        .          .     12:// logicCode 函数中包含一段有问题的代码</span><br><span class="line">        .          .     13:func <span class="function"><span class="title">logicCode</span></span>() &#123;</span><br><span class="line">        .          .     14:   var c chan int // 未对通道c进行初始化</span><br><span class="line">        .          .     15:   <span class="keyword">for</span> &#123;</span><br><span class="line">        .          .     16:           select &#123;</span><br><span class="line">  16.05s     57.71s     17:           <span class="keyword">case</span> v := &lt;-c: // 此时处于阻塞的状态   <span class="comment"># 可以看到就是此行有问题。</span></span><br><span class="line">        .          .     18:                   fmt.Printf(<span class="string">"recv from chan, value:%v\n"</span>, v)</span><br><span class="line">        .          .     19:           default:</span><br><span class="line">        .          .     20:</span><br><span class="line">        .          .     21:           &#125;</span><br><span class="line">        .          .     22:   &#125;</span><br></pre></td></tr></table></figure></p>
+<p>Tips: 在大多数的情况下，我们可以通过分析上面五列(关键指标)得出一个应用程序的运行情况，并对程序进行优化。</p>
+<p>总结：通过上面的结果分析发现大部分CPU资源被17行占用，我们分析出<code>select语句中的default</code>没有内容会导致上面的<code>case v:=&lt;-c:</code>一直执行, 我们在default分支添加一行<code>time.Sleep(time.Second)</code>即可, 此时我们再次查看分析结果:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">➜ go build</span><br><span class="line">➜ ./pporftest -cpu <span class="literal">true</span></span><br><span class="line">➜ go tool pprof cpu.pprof      </span><br><span class="line">(pprof) top</span><br><span class="line">Showing nodes accounting <span class="keyword">for</span> 0, 0% of 0 total</span><br><span class="line">      flat  flat%   sum%        cum   cum%</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>graphviz 可视化图形工具</strong><br>项目地址: <a href="https://graphviz.gitlab.io/" target="_blank" rel="noopener">https://graphviz.gitlab.io/</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.graphviz工具安装(它会自动设置环境变量)</span></span><br><span class="line">➜ sudo apt install graphviz <span class="comment"># // Ubuntu</span></span><br><span class="line">brew install graphviz     <span class="comment"># // Mac</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.验证工具是否安装配置成功</span></span><br><span class="line">➜ dot -version</span><br><span class="line">dot - graphviz version 2.43.0 (0)</span><br><span class="line">libdir = <span class="string">"/usr/lib/x86_64-linux-gnu/graphviz"</span></span><br><span class="line">Activated plugin library: libgvplugin_dot_layout.so.6</span><br><span class="line">Using layout: dot:dot_layout</span><br><span class="line">Activated plugin library: libgvplugin_core.so.6</span><br><span class="line">Using render: dot:core</span><br><span class="line">Using device: dot:dot:core</span><br><span class="line">The plugin configuration file:</span><br><span class="line">        /usr/lib/x86_64-linux-gnu/graphviz/config6a</span><br><span class="line">                was successfully loaded.</span><br><span class="line">    render      :  cairo dot dot_json fig gd json json0 map mp pic pov ps svg tk visio vml vrml xdot xdot_json</span><br><span class="line">    layout      :  circo dot fdp neato nop nop1 nop2 osage patchwork sfdp twopi</span><br><span class="line">    textlayout  :  textlayout</span><br><span class="line">    device      :  canon cmap cmapx cmapx_np dot dot_json eps fig gd gd2 gif gv imap imap_np ismap jpe jpeg jpg json json0 mp pdf pic plain plain-ext png pov ps ps2 svg svgz tk vdx vml vmlz vrml wbmp webp x11 xdot xdot1.2 xdot1.4 xdot_json xlib</span><br><span class="line">    loadimage   :  (lib) eps gd gd2 gif jpe jpeg jpg png ps svg webp xbm</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.此时我们通过dot生成的图片查看程序的CPU占用情况。</span></span><br><span class="line">➜ go build &amp;&amp; ./pporftest -cpu <span class="literal">true</span> &amp;&amp; go tool pprof cpu.pprof</span><br><span class="line">File: pporftest</span><br><span class="line">Type: cpu</span><br><span class="line">(pprof) gif</span><br><span class="line">Generating report <span class="keyword">in</span> profile001.gif</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=1.Go语言项目性能调优实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211127145003.png" target="_blank" title="WeiyiGeek.graphviz可视化性能占比查看" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211127145003.png" alt="WeiyiGeek.graphviz可视化性能占比查看" title="" class=""></a>
+                <p>WeiyiGeek.graphviz可视化性能占比查看</p>
+            </figure></p>
+<p>补充说明: 除了分析CPU性能数据，pprof也支持分析内存性能数据.<br>比如，使用下面的命令分析http服务的heap性能数据，查看当前程序的内存占用以及热点内存对象使用的情况。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看内存占用数据</span></span><br><span class="line">go tool pprof -inuse_space http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go tool pprof -inuse_objects http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line"><span class="comment"># 查看临时内存分配数据</span></span><br><span class="line">go tool pprof -alloc_space http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go tool pprof -alloc_objects http://127.0.0.1:8080/debug/pprof/heap</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h2 id="0x02-第三方性能调试工具实践"><a href="#0x02-第三方性能调试工具实践" class="headerlink" title="0x02 第三方性能调试工具实践"></a>0x02 第三方性能调试工具实践</h2><h3 id="1-Go-torch"><a href="#1-Go-torch" class="headerlink" title="1.Go-torch"></a>1.Go-torch</h3><p>描述: 火焰图（Flame Graph）是 Bredan Gregg 创建的一种性能分析图表，因为它的样子近似 🔥 而得名;<br>上面的 profiling 结果也是转换成火焰图，所以这里我们要介绍一个工具<code>go-torch</code>，它 是 uber 开源的一个工具，可以直接读取 golang profiling 数据，并生成一个火焰图的 svg 文件。</p>
+<p>火焰图 svg 文件可以通过浏览器打开，它对于调用图的最优点是它是动态的，我们可以通过点击每个方块来 zoom in 分析它上面的内容。</p>
+<p>火焰图的调用顺序从下到上，每个方块代表一个函数，它上面一层表示这个函数会调用哪些函数，方块的大小代表了占用 CPU 使用的长短。</p>
+<p>Tips: 火焰图的配色并没有特殊的意义，默认的红、黄配色是为了更像火焰而已。</p>
+<p><br/></p>
+<p><strong>环境安装:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 go-torch</span></span><br><span class="line">go get -v github.com/uber/go-torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 FlameGraph</span></span><br><span class="line"><span class="comment"># Perl 安装 https://www.perl.org/get.html</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line"><span class="comment"># 将FlameGraph目录加入到操作系统的环境变量中。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 最后在go-torch目录下执行</span></span><br><span class="line">go install</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>工具参数浅析:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">go-torch 格式与参数:</span><br><span class="line"><span class="comment"># -u –url：要访问的 URL，这里只是主机和端口部分</span></span><br><span class="line"><span class="comment"># -s –suffix：pprof profile 的路径，默认为 /debug/pprof/profile</span></span><br><span class="line"><span class="comment"># –seconds：要执行 profiling 的时间长度，默认为 30s</span></span><br><span class="line">go-torch -u http://localhost:8080 -s /debug/pprof/profile –seconds 30</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>工具使用实践:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 压测工具wrk</span></span><br><span class="line">https://github.com/adjust/go-wrk</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用wrk进行压测:</span></span><br><span class="line">go-wrk -n 50000 http://127.0.0.1:8080/book/list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在上面压测进行的同时，打开另一个终端执行, 然后30秒之后终端会初夏如下提示：Writing svg to torch.svg:</span></span><br><span class="line">go-torch -u http://127.0.0.1:8080 -t 30</span><br><span class="line"></span><br><span class="line"><span class="comment"># 此外还可以借助火焰图分析内存性能数据：</span></span><br><span class="line">go-torch -inuse_space http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go-torch -inuse_objects http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go-torch -alloc_space http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go-torch -alloc_objects http://127.0.0.1:8080/debug/pprof/heap</span><br></pre></td></tr></table></figure></p>
+<p>然后我们使用浏览器打开<code>torch.svg</code>就能看到如下火焰图了。 </p>
+<p><a rel=1.Go语言项目性能调优实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211129113617.png" target="_blank" title="WeiyiGeek.Flame Graph" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211129113617.png" alt="WeiyiGeek.Flame Graph"></a></p>
+<p><br/></p>
+<p><strong>Q: 如分析 Flame Graph 火焰图?</strong></p>
+<blockquote>
+<p>描述: 火焰图的<code>y轴</code>表示cpu调用方法的先后，<code>x轴</code>表示在每个采样调用时间内方法所占的时间百分比，越宽代表占据cpu时间越多。<br>通过火焰图我们就可以更清楚的找出耗时长的函数调用，然后不断的修正代码，重新采样，不断优化。</p>
+</blockquote>
+<p><br></p>
+<h3 id="2-Go-wrk-压测工具"><a href="#2-Go-wrk-压测工具" class="headerlink" title="2.Go-wrk 压测工具"></a>2.Go-wrk 压测工具</h3><p>压测工具 wrk 后面使用到再介绍 推荐使用<a href="https://github.com/wg/wrk" target="_blank" rel="noopener">https://github.com/wg/wrk</a> 或 <a href="https://github.com/adjust/go-wrk" target="_blank" rel="noopener">https://github.com/adjust/go-wrk</a></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:06.304Z" itemprop="dateUpdated">2022-03-29 13:39:06</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/编程世界/Go/Extension/1.Go语言项目性能调优实践.md" target="_blank" rel="noopener noreferrer">_posts/编程世界/Go/Extension/1.Go语言项目性能调优实践.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/4-26-605.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/4-26-605.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Go/" rel="tag">Go</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/4-26-605.html&title=《1.Go语言项目性能调优实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/4-26-605.html&title=《1.Go语言项目性能调优实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/4-26-605.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《1.Go语言项目性能调优实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/4-26-605.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/4-26-605.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/4-26-604.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">2.Go语言编程学习课后实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/4-25-469.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">2-Kubernetes入门之CentOS安装部署集群</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-性能调试工具实践"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 性能调试工具实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-工具型应用"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.工具型应用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-服务型应用"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.服务型应用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-pprof-命令语法"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">3.pprof 命令语法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-简单示例"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">4.简单示例</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-第三方性能调试工具实践"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 第三方性能调试工具实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-Go-torch"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">1.Go-torch</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-Go-wrk-压测工具"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">2.Go-wrk 压测工具</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/4-26-605.html&title=《1.Go语言项目性能调优实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/4-26-605.html&title=《1.Go语言项目性能调优实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/4-26-605.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《1.Go语言项目性能调优实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/4-26-605.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/4-26-605.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACPElEQVR42u3aSW7EMAxEUd//0g6QVQBH6qqiHETU96pheHpasMXhuuTj/j6ev3+eeV7zPD965ug5iw8YMGBsy7inx5wxv35+ZbYcQyoMGDAOYChBdvRiN0C/ci8MGDBgmMHXPQMDBgwYbwRcPXF1t3owYMCAUUli54UwpbjmhuBXcnEYMGBsyKg0Bt7+/Uf9DRgwYPxjxm0eq1qPbmj+8FUwYMBozVAKXkqLMdvkVVLlS5/dgAEDRmuGPhLhhlS3LSotNAwYMA5j1NPaetnOXiAYMGC0ZrjhL0tl3cUKC3MwYMBoxzBSRGEl3OalMtghDY3BgAHjMIZemlfCtH6v/oRfSDBgwGjNsIvvZilfT0fdobFhCxMGDBjtGFkodJNPN0Ar20oYMGCcxsjK8dkYmdsSkMYyYMCAcQDD/TgdYHcnsvYDDBgwjmG4n+Ju79wRNOMbYMCA0ZrhFuiV4Jhd6bY2PzQGYMCA0Y6RDYcpL3aLbvXBDhgwYPRm6KmmVAIrbP70hYABA8YJjGw7WCn0Z4G49C8BAwaMFoysieiGYL0JMQcPx8JgwIDRlKG8OEt0lZELd+DM3tvCgAGjBWPtCIUSUt0to5QSw4ABozUjC3NuWd8NoHqYhgEDxjkMJchmH62EyyykhmOsMGDA2JyRJbf1zV8l6NtrCQMGjAMY+pCE22DQw71UNYQBA8bxDHc7WGknhC1MGDBgNGXogxGVJuWqxNhuZMKAAWNzRqUxoLMrm85l4xowYMDYj/EFExMi4EC2gRYAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

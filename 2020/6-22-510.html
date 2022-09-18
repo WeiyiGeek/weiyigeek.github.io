@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 Harbor之企业级私有镜像存储仓库入门实践|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Docker,Harbor">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Harbor之企业级私有镜像存储仓库入门实践</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">Harbor之企业级私有镜像存储仓库入门实践</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-06-22T09:37:47.000Z" itemprop="datePublished" class="page-time">
+  2020-06-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/">kubernetes</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/Containers/OperationTools/">OperationTools</a></li></ul></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Harbor/Harbor之企业级私有镜像存储仓库入门学习"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Harbor之企业级私有镜像存储仓库入门实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-06-22 17:37:47" datetime="2020-06-22T09:37:47.000Z"  itemprop="datePublished">2020-06-22</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/">kubernetes</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/kubernetes/Containers/OperationTools/">OperationTools</a></li></ul></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h3 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h3><p><strong>Q: 什么是Harbor?</strong></p>
+<blockquote>
+<p>答: Harbor(Harbor)是一个开源受信任的云本地注册项目(<code>cloud native registry project</code>)，它存储、签署和扫描内容。Harbor通过添加用户通常需要的功能（如安全、身份和管理）来扩展开源 Docker 分发。使注册表更接近生成和运行环境可以提高映像传输效率。港湾支持在注册表之间复制映像，还提供高级安全功能，如用户管理、访问控制和活动审核。<br>其目标是成为 Kubernetes 值得信赖的云原生存储库<br>官网地址: <a href="https://goharbor.io/" target="_blank" rel="noopener">https://goharbor.io/</a><br>项目地址: <a href="https://github.com/goharbor/harbor" target="_blank" rel="noopener">https://github.com/goharbor/harbor</a></p>
+</blockquote>
+<p><br></p>
+<p>Q: 为啥要使用选择Harbor?</p>
+<blockquote>
+<p>答: HHarbor 是一个云原生计算基金会毕业项目，Harbor是VMware公司开源的企业级<code>Docker Registry</code>项目即企业级 Docker 私有仓库;其目标是帮助用户迅速搭建一个企业级的Docker Registry服务，它是以Docker公司开源的registry为基础，但其提供了可视化管理界面以及高级安全功能，如用户管理、访问控制和活动审核。</p>
+</blockquote>
+<p><strong>Harbor 特性</strong></p>
+<ul>
+<li>(1) 本地Registry ：通过同时支持容器映像和Helm图表，港湾可充当云本机环境（如容器运行时和业务流程平台）的注册表。</li>
+<li>(2) 基于角色控制：用户通过”项目”访问不同的存储库，用户可以对项目下的图像或 Helm 图表具有不同的权限。</li>
+<li>(3) 基于策略的复制：可以使用筛选器（存储库、标记和标签）在多个注册表实例之间复制（同步）图像和图表。如果复制遇到任何错误，港湾会自动重新复制。这可用于在混合和多云方案中帮助负载平衡、实现高可用性和辅助多数据中心部署。</li>
+<li>(4) 漏洞扫描：港港定期扫描图像是否存在漏洞，并进行策略检查，以防止部署易受攻击的图像。</li>
+<li>(5) 至此LDAP/AD认证方式: 港与现有企业 LDAP/AD 集成，用于用户身份验证和管理，并支持将 LDAP 组导入港，然后可授予特定项目的权限。</li>
+<li>(6) OIDC 支持：港湾利用 OpenID 连接 （OIDC） 来验证由外部授权服务器或身份提供商验证的用户的身份。可以启用单点登录以登录到港口门户。</li>
+<li>(7) 图像删除和垃圾回收：系统管理员可以运行垃圾回收作业，以便可以删除图像（悬空清单和未引用的 Blob），并可以定期释放其空间。</li>
+<li>(8) 签名认证: 支持使用 Docker 内容信任（利用公证）对容器映像进行签名，以保证真实性和来源性。在附加中，还可以激活阻止未签名映像部署的策略。</li>
+<li>(9) 图形化UI界面管理: 用户可以轻松地浏览、搜索存储库和管理项目并且支持中文原生。</li>
+<li>(10) 轻松部署: Harbor提供了online、offline安装，Harbor的每个组件都是以Docker容器的形式构建的，使用Docker-Compose来对它进行部署;</li>
+<li>(11) 日志审核(Auditlogging): 通过日志跟踪存储库的所有操作。</li>
+<li>(12) RESTful API: 提供 RESTful API 以方便管理操作，并且易于用于与外部系统集成</li>
+</ul>
+<p><br/></p>
+<p><strong>Harbor 组成</strong><br>描述: 用于部 署Harbor 的 Docker Compose模板位于 /Deployer/docker-compose.yml，由5个容器组成，这几个容器通过Docker link的形式连接在一起，在容器之间通过容器名字互相访问。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 依赖镜像</span></span><br><span class="line">Loaded image: goharbor/harbor-db:v2.4.1</span><br><span class="line">Loaded image: goharbor/redis-photon:v2.4.1</span><br><span class="line">Loaded image: goharbor/notary-signer-photon:v2.4.1</span><br><span class="line">Loaded image: goharbor/clair-photon:v2.4.1</span><br><span class="line">Loaded image: goharbor/clair-adapter-photon:v2.4.1</span><br><span class="line">Loaded image: goharbor/harbor-core:v2.4.1</span><br><span class="line">Loaded image: goharbor/harbor-portal:v2.4.1</span><br><span class="line">Loaded image: goharbor/harbor-log:v2.4.1</span><br><span class="line">Loaded image: goharbor/nginx-photon:v2.4.1</span><br><span class="line">Loaded image: goharbor/prepare:v2.4.1</span><br><span class="line">Loaded image: goharbor/harbor-registryctl:v2.4.1</span><br><span class="line">Loaded image: goharbor/notary-server-photon:v2.4.1</span><br><span class="line">Loaded image: goharbor/trivy-adapter-photon:v2.4.1</span><br><span class="line">Loaded image: goharbor/harbor-jobservice:v2.4.1</span><br><span class="line">Loaded image: goharbor/chartmuseum-photon:v2.4.1</span><br><span class="line">Loaded image: goharbor/registry-photon:v2.4.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装配置文件</span></span><br><span class="line">~/harbor/common/config$ tree</span><br><span class="line">.</span><br><span class="line">├── core</span><br><span class="line">│   ├── app.conf</span><br><span class="line">│   ├── certificates</span><br><span class="line">│   └── env</span><br><span class="line">├── db</span><br><span class="line">│   └── env</span><br><span class="line">├── jobservice</span><br><span class="line">│   ├── config.yml</span><br><span class="line">│   └── env</span><br><span class="line">├── <span class="built_in">log</span></span><br><span class="line">│   ├── logrotate.conf</span><br><span class="line">│   └── rsyslog_docker.conf</span><br><span class="line">├── nginx</span><br><span class="line">│   ├── conf.d</span><br><span class="line">│   └── nginx.conf</span><br><span class="line">├── portal</span><br><span class="line">│   └── nginx.conf</span><br><span class="line">├── registry</span><br><span class="line">│   ├── config.yml</span><br><span class="line">│   ├── passwd</span><br><span class="line">│   └── root.crt</span><br><span class="line">├── registryctl</span><br><span class="line">│   ├── config.yml</span><br><span class="line">│   └── env</span><br><span class="line">└── shared</span><br><span class="line">    └── trust-certificates</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>UI：即架构中的 core services 构成此容器的代码是 Harbor 项目的主体。</li>
+<li>Proxy：由 Nginx 服务器构成的反向代理。</li>
+<li>Registry：由 Docker官方的开源 registry 镜像构成的容器实例。</li>
+<li>Postgresql：由官方 POSTGRESQL 镜像构成的数据库容器。</li>
+<li>Redis : 由官方 Redis 镜像构成的缓存数据库容器。</li>
+<li>Log：运行着 rsyslogd的容器，通过 log-driver的形式收集其他容器的日志</li>
+</ul>
+<p><br/></p>
+<p><strong>Harbor认证过程</strong></p>
+<ul>
+<li>a、dockerdaemon从dockerregistry拉取镜像。</li>
+<li>b、如果dockerregistry需要进行授权时，registry将会返回401 Unauthorized响应，同时在响应中包含了docker client如何进行认证的信息。</li>
+<li>c、dockerclient根据registry返回的信息，向auth server发送请求获取认证token。</li>
+<li>d、auth server则根据自己的业务实现去验证提交的用户信息是否存符合业务要求。</li>
+<li>e、用户数据仓库返回用户的相关信息。</li>
+<li>f、auth server将会根据查询的用户信息，生成token令牌，以及当前用户所具有的相关权限信息.上述就是完整的授权过程.当用户完成上述过程以后便可以执行相关的pull/push操作。认证信息会每次都带在请求头中</li>
+</ul>
+<p><br/></p>
+<p><strong>Harbor认证流程</strong></p>
+<ul>
+<li>a、首先，请求被代理容器监听拦截，并跳转到指定的认证服务器。</li>
+<li>b、 如果认证服务器配置了权限认证，则会返回401。通知dockerclient在特定的请求中需要带上一个合法的</li>
+<li>token。而认证的逻辑地址则指向架构图中的core services。</li>
+<li>c、 当dockerclient接受到错误code。client就会发送认证请求(带有用户名和密码)到coreservices进行basic</li>
+<li>auth认证。</li>
+<li>d、 当C的请求发送给ngnix以后，ngnix会根据配置的认证地址将带有用户名和密码的请求发送到core</li>
+<li>serivces。</li>
+<li>e、 coreservices获取用户名和密码以后对用户信息进行认证(自己的数据库或者介入LDAP都可以)。成功以</li>
+<li>后，返回认证成功的信息</li>
+</ul>
+<hr>
+<h3 id="0x01-安装配置"><a href="#0x01-安装配置" class="headerlink" title="0x01 安装配置"></a>0x01 安装配置</h3><p>系统要求 &amp; System requirements:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">On a Linux host: docker 17.06.0-ce+ and docker-compose 1.18.0+ and Python 2.7+</span><br></pre></td></tr></table></figure></p>
+<p>安装方式: Download binaries of <a href="https://github.com/goharbor/harbor/releases" target="_blank" rel="noopener">Harbor release</a></p>
+<ul>
+<li>(1) 源码编译安装</li>
+<li>(2) 二进制在线或者离线安装(推荐-实际上还是docker镜像安装)</li>
+</ul>
+<p><strong>安装环境声明:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Ubuntu 20.04.1 LTS (GNU/Linux 5.4.0-52-generic x86_64)</span><br><span class="line">Docker 19.03.13</span><br><span class="line">Docker-Compose 1.27.4</span><br><span class="line">Harbor v2.4.1</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-本地安装"><a href="#1-本地安装" class="headerlink" title="(1) 本地安装"></a>(1) 本地安装</h4><p><strong>安装流程:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.我也安装Docker环境此处不再累述docker安装过程(请自行docker官网查阅)，下面进行安装docker-compose</span></span><br><span class="line"><span class="comment"># 方式1: https://github.com/docker/compose/releases/</span></span><br><span class="line">sudo wget https://github.com/docker/compose/releases/download/1.27.4/docker-compose-`uname -s`-`uname -m` -O /usr/bin/docker-compose</span><br><span class="line">sudo chmod a+x /usr/bin/docker-compose</span><br><span class="line"><span class="comment"># 方式2: 建议使用阿里云的源 https://developer.aliyun.com/mirror/docker-ce </span></span><br><span class="line"><span class="comment"># apt install -y docker-compose</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.下载harbor-offline安装包: https://github.com/goharbor/harbor/releases</span></span><br><span class="line">wget https://github.com/goharbor/harbor/releases/download/v2.4.1/harbor-offline-installer-v2.4.1.tgz</span><br><span class="line">tar -zxf harbor-offline-installer-v2.4.1.tgz &amp;&amp; ls harbor/</span><br><span class="line">  <span class="comment"># common.sh  harbor.v2.4.1.tar.gz  harbor.yml.tmpl  install.sh  LICENSE  prepare</span></span><br><span class="line">docker load -i harbor.v2.4.1.tar.gz</span><br><span class="line"><span class="built_in">echo</span> <span class="string">'192.168.1.2 harbor.weiyigeek.top'</span> &gt;&gt; /etc/hosts</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.harbor.yml.tmpl配置文件进行基础安装配置并将修改的配置输入到harbor.yaml之中(注意还有这一步)</span></span><br><span class="line">$ egrep -v <span class="string">"^#|^  #"</span> harbor.yml.tmpl  | tee harbor.yml</span><br><span class="line"><span class="comment"># 目标的主机名或者完全限定域名(注意不能是127.0.0.1) </span></span><br><span class="line">hostname: harbor.weiyigeek.top</span><br><span class="line"></span><br><span class="line">db_password：用于db_auth的MySQL数据库的根密码。更改此密码进行任何生产用途</span><br><span class="line">max_job_workers：对于每个映像复制作业，</span><br><span class="line"></span><br><span class="line">customize_crt：（on或off。默认为on）当此属性打开时，prepare脚本将为注册表的令牌的生成/验证创建私钥和根证书</span><br><span class="line">ssl_cert：SSL证书的路径，仅当协议设置为https时才应用</span><br><span class="line">ssl_cert_key：SSL密钥的路径，仅当协议设置为https时才应用</span><br><span class="line">secretkey_path：用于在复制策略中加密或解密远程注册表的密码的密钥路径</span><br><span class="line"></span><br><span class="line"><span class="comment"># 非SSL端口</span></span><br><span class="line">http:</span><br><span class="line">  port: 80</span><br><span class="line"><span class="comment"># SSL端口以及证书配置</span></span><br><span class="line">https:</span><br><span class="line">  port: 443</span><br><span class="line">  certificate: /etc/harbor/pki/server.crt</span><br><span class="line">  private_key: /etc/harbor/pki/server.key</span><br><span class="line"><span class="comment"># harbor管理密码</span></span><br><span class="line">harbor_admin_password: Harbor12345</span><br><span class="line"><span class="comment"># harbor的Postgre数据密码</span></span><br><span class="line">database:</span><br><span class="line">  password: root123</span><br><span class="line">  max_idle_conns: 50</span><br><span class="line">  max_open_conns: 1000</span><br><span class="line"><span class="comment"># harbor数据存储目录</span></span><br><span class="line">data_volume: /data/harbor</span><br><span class="line"></span><br><span class="line">clair:</span><br><span class="line">  updaters_interval: 12</span><br><span class="line"></span><br><span class="line">trivy:</span><br><span class="line">  ignore_unfixed: <span class="literal">false</span></span><br><span class="line">  skip_update: <span class="literal">false</span></span><br><span class="line">  insecure: <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认值为3 对于每个映像复制作业服务中的复制工作人员的最大数量。 </span></span><br><span class="line"><span class="comment"># 工作人员将存储库的所有标签同步到远程目标，但是由于每个工作人员都会消耗一定数量的网络/ CPU/IO资源，请根据主机的硬件资源仔细选择该属性的值；</span></span><br><span class="line">jobservice:</span><br><span class="line">  max_job_workers: 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 提醒最大数</span></span><br><span class="line">notification:</span><br><span class="line">  webhook_job_max_retry: 10</span><br><span class="line"></span><br><span class="line">chart:</span><br><span class="line">  absolute_url: disabled</span><br><span class="line"></span><br><span class="line"><span class="comment"># 日志记录设置</span></span><br><span class="line"><span class="built_in">log</span>:</span><br><span class="line">  level: info</span><br><span class="line">  <span class="built_in">local</span>:</span><br><span class="line">    <span class="comment"># 在删除日志文件之前，将log_rotate_count旋转几次。如果count为0，则删除旧版本，而不是旋转。</span></span><br><span class="line">    rotate_count: 50</span><br><span class="line">    <span class="comment"># 只有当日志文件的大小大于log_rotate_size字节时，才会对其进行旋转。如果size后面跟着k，则假设size的单位为千字节。</span></span><br><span class="line">    rotate_size: 200M</span><br><span class="line">    location: /var/<span class="built_in">log</span>/harbor</span><br><span class="line"></span><br><span class="line">_version: 2.0.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 代理设置</span></span><br><span class="line">proxy:</span><br><span class="line">  http_proxy:</span><br><span class="line">  https_proxy:</span><br><span class="line">  no_proxy:</span><br><span class="line">  components:</span><br><span class="line">    - core</span><br><span class="line">    - jobservice</span><br><span class="line">    - clair</span><br><span class="line">    - trivy</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.基础环境与创建 https 证书以及配置相关目录权限</span></span><br><span class="line">sudo mkdir -pv /data/harbor /etc/harbor/pki/</span><br><span class="line">openssl genrsa -des3 -out server.key 2048</span><br><span class="line">openssl req -new -key server.key -out server.csr</span><br><span class="line"><span class="comment"># Country Name (2 letter code) [AU]:CN</span></span><br><span class="line"><span class="comment"># State or Province Name (full name) [Some-State]:ChongQing</span></span><br><span class="line"><span class="comment"># Locality Name (eg, city) []:ChongQing</span></span><br><span class="line"><span class="comment"># Organization Name (eg, company) [Internet Widgits Pty Ltd]: weiyigeek</span></span><br><span class="line"><span class="comment"># Organizational Unit Name (eg, section) []: weiyigeek</span></span><br><span class="line"><span class="comment"># Common Name (e.g. server FQDN or YOUR name) []:harbor.weiyigeek.top</span></span><br><span class="line"><span class="comment"># Email Address []:master@weiyigeek.top</span></span><br><span class="line">cp server.key server.key.org &amp;&amp; openssl rsa -<span class="keyword">in</span> server.key.org -out server.key</span><br><span class="line">openssl x509 -req -days 365 -<span class="keyword">in</span> server.csr -signkey server.key -out server.crt</span><br><span class="line"><span class="comment"># Signature ok</span></span><br><span class="line"><span class="comment"># subject=C = CN, ST = ChongQing, L = ChongQing, O = weiyigeek, OU = weiyigeek.top, CN = harbor.weiyigeek.top, emailAddress = master@weiyigeek.top</span></span><br><span class="line"><span class="comment"># Getting Private key</span></span><br><span class="line">sudo cp server.key server.crt /etc/harbor/pki/</span><br><span class="line"><span class="comment"># 可读权限即可</span></span><br><span class="line">sudo chmod -R 644 /etc/harbor/pki/</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.执行安装脚本install.sh</span></span><br><span class="line">$ sudo ./install.sh</span><br><span class="line">  [Step 0]: checking <span class="keyword">if</span> docker is installed ...</span><br><span class="line">  Note: docker version: 19.03.13</span><br><span class="line"></span><br><span class="line">  [Step 1]: checking docker-compose is installed ...</span><br><span class="line">  Note: docker-compose version: 1.25.0</span><br><span class="line"></span><br><span class="line">  [Step 2]: loading Harbor images ...</span><br><span class="line">    Loaded image: goharbor/harbor-db:v2.4.1</span><br><span class="line">    Loaded image: goharbor/redis-photon:v2.4.1</span><br><span class="line">    Loaded image: goharbor/notary-signer-photon:v2.4.1</span><br><span class="line">    Loaded image: goharbor/clair-photon:v2.4.1</span><br><span class="line">    Loaded image: goharbor/clair-adapter-photon:v2.4.1</span><br><span class="line">    Loaded image: goharbor/harbor-core:v2.4.1</span><br><span class="line">    Loaded image: goharbor/harbor-portal:v2.4.1</span><br><span class="line">    Loaded image: goharbor/harbor-log:v2.4.1</span><br><span class="line">    Loaded image: goharbor/nginx-photon:v2.4.1</span><br><span class="line">    Loaded image: goharbor/prepare:v2.4.1</span><br><span class="line">    Loaded image: goharbor/harbor-registryctl:v2.4.1</span><br><span class="line">    Loaded image: goharbor/notary-server-photon:v2.4.1</span><br><span class="line">    Loaded image: goharbor/trivy-adapter-photon:v2.4.1</span><br><span class="line">    Loaded image: goharbor/harbor-jobservice:v2.4.1</span><br><span class="line">    Loaded image: goharbor/chartmuseum-photon:v2.4.1</span><br><span class="line">    Loaded image: goharbor/registry-photon:v2.4.1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  [Step 3]: preparing environment ...</span><br><span class="line"></span><br><span class="line">  [Step 4]: preparing harbor configs ...</span><br><span class="line">    prepare base dir is <span class="built_in">set</span> to /home/weiyigeek/harbor</span><br><span class="line">    Generated configuration file: /config/portal/nginx.conf</span><br><span class="line">    Generated configuration file: /config/<span class="built_in">log</span>/logrotate.conf</span><br><span class="line">    Generated configuration file: /config/<span class="built_in">log</span>/rsyslog_docker.conf</span><br><span class="line">    Generated configuration file: /config/nginx/nginx.conf</span><br><span class="line">    Generated configuration file: /config/core/env</span><br><span class="line">    Generated configuration file: /config/core/app.conf</span><br><span class="line">    Generated configuration file: /config/registry/config.yml</span><br><span class="line">    Generated configuration file: /config/registryctl/env</span><br><span class="line">    Generated configuration file: /config/registryctl/config.yml</span><br><span class="line">    Generated configuration file: /config/db/env</span><br><span class="line">    Generated configuration file: /config/jobservice/env</span><br><span class="line">    Generated configuration file: /config/jobservice/config.yml</span><br><span class="line">    Generated and saved secret to file: /data/secret/keys/secretkey</span><br><span class="line">    Successfully called func: create_root_cert</span><br><span class="line">    Generated configuration file: /compose_location/docker-compose.yml</span><br><span class="line">    Clean up the input dir</span><br><span class="line"></span><br><span class="line">  [Step 5]: starting Harbor ...</span><br><span class="line">  ✔ ----Harbor has been installed and started successfully.----  <span class="comment"># 表示安装成功</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="2-基础配置"><a href="#2-基础配置" class="headerlink" title="(2) 基础配置"></a>(2) 基础配置</h4><p><strong>1.利用内部 DNS 域名解析 <code>harbor.weiyigeek.top</code> 配置将k8s集群中的机器DNS设置为内部DNS地址</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">~$ ansible k8s -m shell -a <span class="string">"sudo sed -i 's#127.0.0.53#192.168.12.253#g' /etc/resolv.conf"</span></span><br><span class="line">~$ ansible k8s -m shell -a <span class="string">"ping harbor.weiyigeek.top -c 2"</span></span><br><span class="line"><span class="comment"># WeiyiGeek-224 | CHANGED | rc=0 &gt;&gt;</span></span><br><span class="line"><span class="comment"># PING harbor.weiyigeek.top (192.168.12.108) 56(84) bytes of data.</span></span><br><span class="line"><span class="comment"># 64 bytes from WeiyiGeek-108 (192.168.12.108): icmp_seq=1 ttl=64 time=0.227 ms</span></span><br><span class="line"><span class="comment"># 64 bytes from WeiyiGeek-108 (192.168.12.108): icmp_seq=2 ttl=64 time=0.167 ms</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="0x02-基础使用"><a href="#0x02-基础使用" class="headerlink" title="0x02 基础使用"></a>0x02 基础使用</h3><p><strong>Harbor 访问测试</strong><br>Step 1.访问 harbor.weiyigeek.top 使用Harbor的默认账号密码登陆</p>
+<blockquote>
+<p>账号密码 : admin / Harbor12345</p>
+</blockquote>
+<figure class="image-box">
+                <a rel=Harbor之企业级私有镜像存储仓库入门实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201106095852.png" target="_blank" title="WeiyiGeek.harbor-login" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201106095852.png" alt="WeiyiGeek.harbor-login" title="" class=""></a>
+                <p>WeiyiGeek.harbor-login</p>
+            </figure>
+<p>Step 2.用户创建与项目创建: 系统管理 -&gt; 用户管理</p>
+<p>Step 3.普通用户项目创建:</p>
+<blockquote>
+<p>项目 -&gt; 新建项目 -&gt; 项目名称与访问级别</p>
+</blockquote>
+<figure class="image-box">
+                <a rel=Harbor之企业级私有镜像存储仓库入门实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201106102054.png" target="_blank" title="WeiyiGeek.项目创建" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201106102054.png" alt="WeiyiGeek.项目创建" title="" class=""></a>
+                <p>WeiyiGeek.项目创建</p>
+            </figure>
+<p>PS: 项目如果设置为私有则必须采用所属用户进行验证登陆后才能进行拉取;</p>
+<p>Step 4.管理员才能可以进行垃圾回收:  系统管理 -&gt; 垃圾清理</p>
+<p>Step 5.镜像构建与上传测试<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.配置本地docker的insecure-registries的Harbor仓库地址</span></span><br><span class="line"><span class="comment"># 自签证书需要忽略的不安全证书验证 "insecure-registries"</span></span><br><span class="line">sudo tee /etc/docker/daemon.json &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"registry-mirrors"</span>: [<span class="string">"https://xlx9erfu.mirror.aliyuncs.com"</span>],</span><br><span class="line">  <span class="string">"exec-opts"</span>: [<span class="string">"native.cgroupdriver=systemd"</span>],</span><br><span class="line">  <span class="string">"log-driver"</span>: <span class="string">"json-file"</span>,</span><br><span class="line">  <span class="string">"log-opts"</span>: &#123;</span><br><span class="line">    <span class="string">"max-size"</span>: <span class="string">"100m"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"insecure-registries"</span>: [<span class="string">"harbor.weiyigeek.top"</span>]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">sudo systemctl daemon-reload  &amp;&amp; sudo systemctl restart docker</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.指定Harbor仓库认证</span></span><br><span class="line">docker login harbor.weiyigeek.top</span><br><span class="line">  <span class="comment"># Username: weiyigeek</span></span><br><span class="line">  <span class="comment"># Password:</span></span><br><span class="line">  <span class="comment"># WARNING! Your password will be stored unencrypted in /home/weiyigeek/.docker/config.json.Configure a credential helper to remove this warning. See</span></span><br><span class="line">  <span class="comment"># https://docs.docker.com/engine/reference/commandline/login/#credentials-store</span></span><br><span class="line">  <span class="comment"># Login Succeeded</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.测试本地镜像上传到haibor中</span></span><br><span class="line"><span class="comment"># 下载镜像</span></span><br><span class="line">$ docker pull nginx</span><br><span class="line"><span class="comment"># 镜像重新打标签</span></span><br><span class="line">$ docker tag nginx:latest harbor.weiyigeek.top/<span class="built_in">test</span>/nginx:v1.1</span><br><span class="line">$ docker images | grep <span class="string">"nginx"</span></span><br><span class="line">  <span class="comment"># harbor.weiyigeek.top/test/nginx                                  v1.1                c39a868aad02        12 hours ago        133MB</span></span><br><span class="line">  <span class="comment"># nginx                                                            latest              c39a868aad02        12 hours ago        133MB</span></span><br><span class="line"><span class="comment"># push 镜像到harbor</span></span><br><span class="line">$ docker push harbor.weiyigeek.top/<span class="built_in">test</span>/nginx:v1.1</span><br><span class="line">  <span class="comment"># The push refers to repository [harbor.weiyigeek.top/test/nginx]</span></span><br><span class="line">  <span class="comment"># 7b5417cae114: Pushed</span></span><br><span class="line">  <span class="comment"># aee208b6ccfb: Pushed</span></span><br><span class="line">  <span class="comment"># 2f57e21e4365: Pushed</span></span><br><span class="line">  <span class="comment"># 2baf69a23d7a: Pushed</span></span><br><span class="line">  <span class="comment"># d0fe97fa8b8c: Pushed</span></span><br><span class="line">  <span class="comment"># v1.1: digest: sha256:34f3f875e745861ff8a37552ed7eb4b673544d2c56c7cc58f9a9bec5b4b3530e size: 1362</span></span><br></pre></td></tr></table></figure></p>
+<p>Step 6.在Harbor上查看WeiyiGeek用户上传的镜像</p>
+<figure class="image-box">
+                <a rel=Harbor之企业级私有镜像存储仓库入门实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201106204434.png" target="_blank" title="WeiyiGeek.Harbor" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201106204434.png" alt="WeiyiGeek.Harbor" title="" class=""></a>
+                <p>WeiyiGeek.Harbor</p>
+            </figure>
+<p>Step 7.在其它节点拉取我们上传测试的镜像<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.同样需要修改Docker的守护进程</span></span><br><span class="line"><span class="string">"insecure-registries"</span>: [<span class="string">"harbor.weiyigeek.top"</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.拉取镜像测试</span></span><br><span class="line">$ docker pull harbor.weiyigeek.top/<span class="built_in">test</span>/nginx:v1.1</span><br><span class="line">  <span class="comment"># v1.1: Pulling from test/nginx</span></span><br><span class="line">  <span class="comment"># bb79b6b2107f: Pull complete</span></span><br><span class="line">  <span class="comment"># 5a9f1c0027a7: Pull complete</span></span><br><span class="line">  <span class="comment"># b5c20b2b484f: Pull complete</span></span><br><span class="line">  <span class="comment"># 166a2418f7e8: Pull complete</span></span><br><span class="line">  <span class="comment"># 1966ea362d23: Pull complete</span></span><br><span class="line">  <span class="comment"># Digest: sha256:34f3f875e745861ff8a37552ed7eb4b673544d2c56c7cc58f9a9bec5b4b3530e</span></span><br><span class="line">  <span class="comment"># Status: Downloaded newer image for harbor.weiyigeek.top/test/nginx:v1.1</span></span><br><span class="line">  <span class="comment"># harbor.weiyigeek.top/test/nginx:v1.1</span></span><br><span class="line">$ docker images | grep <span class="string">"nginx"</span></span><br><span class="line">  <span class="comment"># harbor.weiyigeek.top/test/nginx                                               v1.1                c39a868aad02        19 hours ago        133MB</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h3 id="0x03-扩展安装"><a href="#0x03-扩展安装" class="headerlink" title="0x03 扩展安装"></a>0x03 扩展安装</h3><p><strong>添加支持Chart仓库扩展</strong><br>描述: 安装chart图表仓库操作流程:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 当前harbor环境已具备</span></span><br><span class="line">~/harbor$ sudo docker-compose  ps</span><br><span class="line">  <span class="comment"># [sudo] password for weiyigeek:</span></span><br><span class="line">  <span class="comment">#       Name                     Command                  State                          Ports</span></span><br><span class="line">  <span class="comment"># ---------------------------------------------------------------------------------------------------------------</span></span><br><span class="line">  <span class="comment"># harbor-core         /harbor/entrypoint.sh            Up (healthy)</span></span><br><span class="line">  <span class="comment"># harbor-db           /docker-entrypoint.sh            Up (healthy)</span></span><br><span class="line">  <span class="comment"># harbor-jobservice   /harbor/entrypoint.sh            Up (healthy)</span></span><br><span class="line">  <span class="comment"># harbor-log          /bin/sh -c /usr/local/bin/ ...   Up (healthy)   127.0.0.1:1514-&gt;10514/tcp</span></span><br><span class="line">  <span class="comment"># harbor-portal       nginx -g daemon off;             Up (healthy)</span></span><br><span class="line">  <span class="comment"># nginx               nginx -g daemon off;             Up (healthy)   0.0.0.0:80-&gt;8080/tcp, 0.0.0.0:443-&gt;8443/tcp</span></span><br><span class="line">  <span class="comment"># redis               redis-server /etc/redis.conf     Up (healthy)</span></span><br><span class="line">  <span class="comment"># registry            /home/harbor/entrypoint.sh       Up (healthy)</span></span><br><span class="line">  <span class="comment"># registryctl         /home/harbor/start.sh            Up (healthy)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 安装目录</span></span><br><span class="line">~/harbor$ ls</span><br><span class="line">  <span class="comment"># common     docker-compose.yml  harbor.v2.4.1.tar.gz  harbor.yml.tmpl  LICENSE  server.crt  server.key</span></span><br><span class="line">  <span class="comment"># common.sh  harbor_install.log  harbor.yml            install.sh       prepare  server.csr  server.key.org</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 添加 chart 图表支持</span></span><br><span class="line">~/harbor$ sudo ./install.sh --with-chartmuseum</span><br><span class="line">  <span class="comment"># [Step 0]: checking if docker is installed ...</span></span><br><span class="line">  <span class="comment"># Note: docker version: 19.03.13</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># [Step 1]: checking docker-compose is installed ...</span></span><br><span class="line">  <span class="comment"># Note: docker-compose version: 1.25.0</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># [Step 2]: loading Harbor images ...</span></span><br><span class="line">  <span class="comment"># Loaded image: goharbor/harbor-db:v2.4.1</span></span><br><span class="line">  <span class="comment"># .....</span></span><br><span class="line">  <span class="comment"># Loaded image: goharbor/registry-photon:v2.4.1</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># [Step 3]: preparing environment ...</span></span><br><span class="line">  <span class="comment"># [Step 4]: preparing harbor configs ...</span></span><br><span class="line">  <span class="comment"># prepare base dir is set to /home/weiyigeek/harbor</span></span><br><span class="line">  <span class="comment"># Clearing the configuration file: /config/db/env</span></span><br><span class="line">  <span class="comment"># ......</span></span><br><span class="line">  <span class="comment"># Clearing the configuration file: /config/registryctl/config.yml</span></span><br><span class="line">  <span class="comment"># Generated configuration file: /config/portal/nginx.conf</span></span><br><span class="line">  <span class="comment"># .....</span></span><br><span class="line">  <span class="comment"># Generated configuration file: /compose_location/docker-compose.yml</span></span><br><span class="line">  <span class="comment"># Clean up the input dir</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Note: stopping existing Harbor instance ...</span></span><br><span class="line">  <span class="comment"># Stopping harbor-jobservice ... done</span></span><br><span class="line">  <span class="comment"># ....</span></span><br><span class="line">  <span class="comment"># Removing network harbor_harbor</span></span><br><span class="line">  <span class="comment"># Removing network harbor_harbor-chartmuseum</span></span><br><span class="line">  <span class="comment"># WARNING: Network harbor_harbor-chartmuseum not found.</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># [Step 5]: starting Harbor ...</span></span><br><span class="line">  <span class="comment"># Creating network "harbor_harbor" with the default driver</span></span><br><span class="line">  <span class="comment"># Creating network "harbor_harbor-chartmuseum" with the default driver</span></span><br><span class="line">  <span class="comment"># Creating harbor-log ... done</span></span><br><span class="line">  <span class="comment"># Creating registryctl   ... done</span></span><br><span class="line">  <span class="comment"># Creating chartmuseum   ... done</span></span><br><span class="line">  <span class="comment"># Creating registry      ... done</span></span><br><span class="line">  <span class="comment"># Creating harbor-db     ... done</span></span><br><span class="line">  <span class="comment"># Creating harbor-portal ... done</span></span><br><span class="line">  <span class="comment"># Creating redis         ... done</span></span><br><span class="line">  <span class="comment"># Creating harbor-core   ... done</span></span><br><span class="line">  <span class="comment"># Creating harbor-jobservice ... done</span></span><br><span class="line">  <span class="comment"># Creating nginx             ... done</span></span><br><span class="line">  <span class="comment"># ✔ ----Harbor has been installed and started successfully.----</span></span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Harbor之企业级私有镜像存储仓库入门实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201126130800.png" target="_blank" title="WeiyiGeek.Helm Charts已安装完成" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201126130800.png" alt="WeiyiGeek.Helm Charts已安装完成" title="" class=""></a>
+                <p>WeiyiGeek.Helm Charts已安装完成</p>
+            </figure>
+<p>温馨提示: 如果想安装公正服务 notary 以及漏洞扫描器 trivy ，我们在执行<code>./install.sh</code>后添加如下参数。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo ./install.sh --with-notary --with-trivy --with-chartmuseum</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="0x04-补充说明"><a href="#0x04-补充说明" class="headerlink" title="0x04 补充说明"></a>0x04 补充说明</h3><h4 id="1-Harbor证书到期如何进行更新替换"><a href="#1-Harbor证书到期如何进行更新替换" class="headerlink" title="1.Harbor证书到期如何进行更新替换?"></a>1.Harbor证书到期如何进行更新替换?</h4><p>描述: 当 Harbor 证书到期后我们需要续签证书或者重新申请证书,并替换掉配置 harbor.yml 文件中的 certificate、private_key 配置项。</p>
+<p><strong>操作流程:</strong><br>步骤 01.创建CA并签发harbor证书<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.打印config模板文件从而进行修改其中有两个配置.</span></span><br><span class="line">cfssl <span class="built_in">print</span>-defaults config &gt; ca-config.json</span><br><span class="line">vim ca-config.json</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"signing"</span>: &#123;</span><br><span class="line">    <span class="string">"default"</span>: &#123;</span><br><span class="line">        <span class="string">"expiry"</span>: <span class="string">"8760h"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"profiles"</span>: &#123;</span><br><span class="line">      <span class="string">"harbor"</span>: &#123;</span><br><span class="line">          <span class="string">"expiry"</span>: <span class="string">"87600h"</span>,</span><br><span class="line">          <span class="string">"usages"</span>: [</span><br><span class="line">              <span class="string">"signing"</span>,</span><br><span class="line">              <span class="string">"key encipherment"</span>,</span><br><span class="line">              <span class="string">"server auth"</span>,</span><br><span class="line">              <span class="string">"client auth"</span></span><br><span class="line">          ]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">cfssl <span class="built_in">print</span>-defaults csr &gt; ca-csr.json</span><br><span class="line">vim ca-csr.json</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"CN"</span>: <span class="string">"weiyigeek.top"</span>,</span><br><span class="line">  <span class="string">"key"</span>: &#123;</span><br><span class="line">    <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">    <span class="string">"size"</span>: 2048</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"names"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"L"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"ST"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"O"</span>: <span class="string">"weiyigeek"</span>,</span><br><span class="line">      <span class="string">"OU"</span>: <span class="string">"weiyigeek.top"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.准备一份harbor证书配置请求文件。</span></span><br><span class="line">tee harbor-csr.json &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"CN"</span>: <span class="string">"harbor.weiyigeek.top"</span>,</span><br><span class="line">  <span class="string">"hosts"</span>: [</span><br><span class="line">    <span class="string">"127.0.0.1"</span>,</span><br><span class="line">    <span class="string">"192.168.12.108"</span>,</span><br><span class="line">    <span class="string">"harbor.weiyigeek.top"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"key"</span>: &#123;</span><br><span class="line">    <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">    <span class="string">"size"</span>: 2048</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"names"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"L"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"ST"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"O"</span>: <span class="string">"weiyigeek"</span>,</span><br><span class="line">      <span class="string">"OU"</span>: <span class="string">"weiyigeek.top"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.利用CA签发 harbor 仓库使用的服务端证书。</span></span><br><span class="line">$ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=harbor harbor-csr.json | cfssljson -bare harbor</span><br><span class="line">$ ls harbor*</span><br><span class="line">harbor.csr  harbor-csr.json  harbor-key.pem  harbor.pem</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.将生成证书与密钥改个后缀。</span></span><br><span class="line">cp harbor.pem /etc/harbor/pki/harbor.crt</span><br><span class="line">cp harbor-key.pem /etc/harbor/pki/harbor.key</span><br></pre></td></tr></table></figure><br><br/></p>
+<p>步骤 02.修改替换对应的证书文件。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.配置修改</span></span><br><span class="line">$ im harbor.yml</span><br><span class="line"><span class="comment"># 非SSL端口</span></span><br><span class="line">http:</span><br><span class="line">  port: 80</span><br><span class="line"><span class="comment"># SSL端口以及证书配置</span></span><br><span class="line">https:</span><br><span class="line">  port: 443</span><br><span class="line">  certificate: /etc/harbor/pki/harbor.crt</span><br><span class="line">  private_key: /etc/harbor/pki/harbor.key</span><br></pre></td></tr></table></figure><br><br/></p>
+<p>步骤 03.利用docker-compose停止harbor相关容器,更新预加载配置后再重启。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /opt/harbor &amp;&amp; docker-compose down</span><br><span class="line">/opt/harbor<span class="comment"># ./prepare</span></span><br><span class="line">  prepare base dir is <span class="built_in">set</span> to /opt/harbor</span><br><span class="line">  Clearing the configuration file: /config/portal/nginx.conf</span><br><span class="line">  ........</span><br><span class="line">  Clearing the configuration file: /config/nginx/nginx.conf</span><br><span class="line">  Generated configuration file: /config/portal/nginx.conf</span><br><span class="line">  ........</span><br><span class="line">  Generated configuration file: /config/jobservice/config.yml</span><br><span class="line">  loaded secret from file: /data/secret/keys/secretkey</span><br><span class="line">  Generated configuration file: /compose_location/docker-compose.yml</span><br><span class="line">  Clean up the input dir</span><br><span class="line">/opt/harbor<span class="comment"># docker-compose up -d</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>步骤 04.浏览器访问验证或者利用cfssl命令验证配置的证书, 注意如果没有配置公网和内部解析, 请在/etc/hosts指定对应的IP地址。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cfssl certinfo -domain harbor.weiyigeek.top</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="2-如何更新旧版本的Harbor到指定的新版本"><a href="#2-如何更新旧版本的Harbor到指定的新版本" class="headerlink" title="2.如何更新旧版本的Harbor到指定的新版本?"></a>2.如何更新旧版本的Harbor到指定的新版本?</h4><p>描述: 如果您是从以前版本的 Harbor 升级，您可能需要更新配置文件并迁移您的数据以适应更高版本的数据库架构。</p>
+<p>Harbor 更新参考地址: <a href="https://goharbor.io/docs/2.4.0/administration/upgrade/" target="_blank" rel="noopener">https://goharbor.io/docs/2.4.0/administration/upgrade/</a></p>
+<p>温馨提示: 如果要升级使用 Helm 部署的 Harbor 实例，请参阅升级使用 Helm 部署的 Harbor 【<a href="https://goharbor.io/docs/2.4.0/administration/upgrade/helm-upgrade/" target="_blank" rel="noopener">https://goharbor.io/docs/2.4.0/administration/upgrade/helm-upgrade/</a> 】。</p>
+<p><br/></p>
+<p><strong>环境说明</strong><br>当前Harbor版本(v2.1.3)及其旧的离线安装包 <code>harbor-offline-installer-v2.1.3.tgz</code><br>更新Harbor版本(v2.4.1)及其当前时间最新的离线安装包 <code>harbor-offline-installer-v2.4.1.tgz</code></p>
+<p>温馨提示: 截至2022年2月10日，目前最新的Harbor版本为[v2.4.1], 我们可以访问harbor的releases获取最新的Harbor(<a href="https://github.com/goharbor/harbor/releases" target="_blank" rel="noopener">https://github.com/goharbor/harbor/releases</a>)</p>
+<p><br/></p>
+<p><strong>升级前重要提示</strong></p>
+<ul>
+<li>1.在任何数据迁移之前备份Harbor相关数据，例如<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># harbor 安装配置目录</span></span><br><span class="line">cp /op/harbor&#123;,.bak&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># harbor 数据库目录</span></span><br><span class="line">cp -a /data/harbor&#123;,.bak&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>2.在v2.0中项目的元数据存储在数据库中，当升级后首次启动 Harbor 时，它将遍历注册表存储中的项目以将项目的元数据提取到数据库中, <code>如果注册表中存在大量项目，则此过程可能需要相对较长的时间</code>，尤其是在将注册表配置为使用外部存储（如 S3）时。 可以查看 harbor-core registry 日志验证是否在进行安装。</p>
+</li>
+<li><p>3.在 v2.2 之后Clair漏洞扫描仪将被移除, 建议在升级后使用 Trivy 作为默认扫描仪，或将 Clair 添加为外部扫描仪。</p>
+</li>
+<li><p>4.在 v2.3 使用 PostgreSQL v13.2 , 在升级过程中 Harbor 将删除旧的 PostgreSQL 数据，并将其迁移到兼容的新版本 PostgreSQL 的新目标位置, 所以在升级到v2.3.0 必须进行 PostgreSQL 数据备份。</p>
+</li>
+</ul>
+<p><br></p>
+<p><strong>快速升级Harbor或者迁移数据</strong><br>步骤 01.停止 Harbor 所有组件运行实例。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 我的安装目录是 /opt/harbor,你可根据实际情况进入对应的harbor解压目录</span></span><br><span class="line"><span class="built_in">cd</span> /opt/harbor &amp;&amp; docker-compose down</span><br></pre></td></tr></table></figure></p>
+<p>步骤 02.备份 Harbor 相关数据(生产环境必须要、测试环境看你自己)，以便在必要时可以回滚到当前版本。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 备份 harbor 安装配置目录</span></span><br><span class="line">cp -a /opt/harbor&#123;,.bak&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 备份 harbor 数据库目录</span></span><br><span class="line">cp -a /data/harbor&#123;,.bak&#125;</span><br></pre></td></tr></table></figure></p>
+<p>步骤 03.从Harbor官方的Github中获取最新的Harbor版本包并将其解压缩(<a href="https://github.com/goharbor/harbor/releases)" target="_blank" rel="noopener">https://github.com/goharbor/harbor/releases)</a>, 国内环境推荐采用离线安装包的方式进行安装部署。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 后台下载+断点续传</span></span><br><span class="line">wget -b -c https://github.com/goharbor/harbor/releases/download/v2.4.1/harbor-offline-installer-v2.4.1.tgz</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示：建议通过迅雷进行下载，国内在服务器上采用wget直接下载太慢了。</p>
+<p>步骤 04.解压下载的脱机安装程序包到harbor目录之中,并导入harbor对应版本的相关组件镜像到docker本地注册表中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进入 脱机安装程序包 所在的目录执行解压操作</span></span><br><span class="line"><span class="built_in">cd</span> /opt/ &amp;&amp; tar zxf harbor-offline-installer-v2.4.1.tgz</span><br><span class="line">ls /opt/harbor </span><br><span class="line">certs  common  common.sh  docker-compose.yml  harbor.v2.4.1.tar.gz  harbor.yml  harbor.yml.tmpl  install.sh  LICENSE  prepare</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导入镜像 &amp;&amp; 查看导入的镜像</span></span><br><span class="line">docker load -i harbor/harbor.v2.4.1.tar.gz</span><br><span class="line">docker images --filter label=build-date=20211206</span><br><span class="line">  <span class="comment"># REPOSITORY                      TAG       IMAGE ID       CREATED       SIZE</span></span><br><span class="line">  <span class="comment"># goharbor/harbor-exporter        v2.4.1    0ee361b5454a   8 weeks ago   82.7MB</span></span><br><span class="line">  <span class="comment"># goharbor/chartmuseum-photon     v2.4.1    337a9d03b197   8 weeks ago   174MB</span></span><br><span class="line">  <span class="comment"># goharbor/redis-photon           v2.4.1    2bbe19b8cc5d   8 weeks ago   156MB</span></span><br><span class="line">  <span class="comment"># goharbor/trivy-adapter-photon   v2.4.1    d39fd42c93f0   8 weeks ago   151MB</span></span><br><span class="line">  <span class="comment"># goharbor/notary-server-photon   v2.4.1    e75c68b6638b   8 weeks ago   111MB</span></span><br><span class="line">  <span class="comment"># goharbor/notary-signer-photon   v2.4.1    17a627caf6dd   8 weeks ago   108MB</span></span><br><span class="line">  <span class="comment"># goharbor/harbor-registryctl     v2.4.1    bff3d2665456   8 weeks ago   137MB</span></span><br><span class="line">  <span class="comment"># goharbor/registry-photon        v2.4.1    b46e45c49d6f   8 weeks ago   79.2MB</span></span><br><span class="line">  <span class="comment"># goharbor/nginx-photon           v2.4.1    78aad8c8ef41   8 weeks ago   45.7MB</span></span><br><span class="line">  <span class="comment"># goharbor/harbor-log             v2.4.1    c86562daee64   8 weeks ago   160MB</span></span><br><span class="line">  <span class="comment"># goharbor/harbor-jobservice      v2.4.1    d8baceb5f1f6   8 weeks ago   220MB</span></span><br><span class="line">  <span class="comment"># goharbor/harbor-core            v2.4.1    80a4e3e60403   8 weeks ago   198MB</span></span><br><span class="line">  <span class="comment"># goharbor/harbor-portal          v2.4.1    1c9ed1cc3cb9   8 weeks ago   54.7MB</span></span><br><span class="line">  <span class="comment"># goharbor/harbor-db              v2.4.1    417d0a840247   8 weeks ago   222MB</span></span><br><span class="line">  <span class="comment"># goharbor/prepare                v2.4.1    e9158d34970b   8 weeks ago   257MB</span></span><br></pre></td></tr></table></figure></p>
+<p>步骤 05.升级迁移(migrate - 英 [maɪˈɡreɪt] ）harbor指定版本并生成最新harbor.yml 配置文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ docker run -it --rm -v /:/hostfs goharbor/prepare:v2.4.1 migrate -i /opt/harbor/harbor.yml</span><br><span class="line">  <span class="comment"># migrating to version 2.1.0</span></span><br><span class="line">  <span class="comment"># migrating to version 2.2.0</span></span><br><span class="line">  <span class="comment"># migrating to version 2.3.0</span></span><br><span class="line">  <span class="comment"># migrating to version 2.4.0</span></span><br><span class="line">  <span class="comment"># Written new values to /opt/harbor/harbor.yml</span></span><br></pre></td></tr></table></figure></p>
+<p>步骤 06.最新执行安装更新Harbor操作,此处我安装 notary(公证服务)、Trivy 和 chart(图表存储库)等服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo ./install.sh --with-notary --with-trivy --with-chartmuseum</span><br><span class="line">  <span class="comment"># Creating harbor-log ... done</span></span><br><span class="line">  <span class="comment"># Creating chartmuseum   ... done</span></span><br><span class="line">  <span class="comment"># Creating registryctl   ... done</span></span><br><span class="line">  <span class="comment"># Creating harbor-db     ... done</span></span><br><span class="line">  <span class="comment"># Creating redis         ... done</span></span><br><span class="line">  <span class="comment"># Creating harbor-portal ... done</span></span><br><span class="line">  <span class="comment"># Creating registry      ... done</span></span><br><span class="line">  <span class="comment"># Creating notary-signer ... done</span></span><br><span class="line">  <span class="comment"># Creating harbor-core   ... done</span></span><br><span class="line">  <span class="comment"># Creating trivy-adapter ... done</span></span><br><span class="line">  <span class="comment"># Creating notary-server ... done</span></span><br><span class="line">  <span class="comment"># Creating harbor-jobservice ... done</span></span><br><span class="line">  <span class="comment"># Creating nginx             ... done</span></span><br><span class="line"><span class="comment"># 出现如下提示表明更新,如有错误请查看错误信息,并进行Google解决。</span></span><br><span class="line">✔ ----Harbor has been installed and started successfully.----</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=Harbor之企业级私有镜像存储仓库入门实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/2/20220210205310.png" target="_blank" title="WeiyiGeek.升级Harbor服务器到v2.4.1" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/2/20220210205310.png" alt="WeiyiGeek.升级Harbor服务器到v2.4.1" title="" class=""></a>
+                <p>WeiyiGeek.升级Harbor服务器到v2.4.1</p>
+            </figure>
+<p>至此，完成了harbor从v2.1.3版本更新迁移到v2.4.1版本。</p>
+<p><br></p>
+<h4 id="3-Harbor仓库忘记管理员密码如何重置"><a href="#3-Harbor仓库忘记管理员密码如何重置" class="headerlink" title="3.Harbor仓库忘记管理员密码如何重置?"></a>3.Harbor仓库忘记管理员密码如何重置?</h4><p>描述: 在 Harbor 初始化安装时我们会在harbor.yaml文件中设定admin用户密码，当我们登录更改其密码后忘记设定的密码，如何进行重置密码?</p>
+<p>版本环境说明: v2.4.x</p>
+<p><br/></p>
+<p><strong>操作流程:</strong></p>
+<p>步骤01.通过<code>docker exec -it harbor-db /bin/bash</code>命令进入harbor-db容器内部</p>
+<p>步骤02.执行如下postgresql命令行<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">psql -h postgresql -d postgres -U postgres        <span class="comment"># 这要输入默认密码：root123</span></span><br><span class="line">psql -U postgres -d postgres -h 127.0.0.1 -p 5432 <span class="comment"># 或者用这个可以不输入密码</span></span><br></pre></td></tr></table></figure></p>
+<p>步骤03.然后切换到harbor所在的数据库,执行 <code>\c registry</code> 命令</p>
+<p>步骤04.执行SQL语句<code>select * from harbor_user;</code>查看harbor_user表</p>
+<p>步骤05.例如修改admin的密码，修改为初始化密码 Harbor12345 修改好了之后再可以从web ui上再改一次。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如下此方法不行</span></span><br><span class="line">update harbor_user <span class="built_in">set</span> password=<span class="string">'a71a7d0df981a61cbb53a97ed8d78f3e'</span>,salt=<span class="string">'ah3fdh5b7yxepalg9z45bu8zb36sszmr'</span> <span class="built_in">where</span> username=<span class="string">'admin'</span>;    </span><br><span class="line"></span><br><span class="line"><span class="comment"># 正确做法</span></span><br><span class="line">update harbor_user <span class="built_in">set</span> salt=<span class="string">''</span>, password=<span class="string">''</span> <span class="built_in">where</span> username=<span class="string">'admin'</span>;</span><br></pre></td></tr></table></figure>
+<p>步骤06.执行 <code>\q</code> 退出postgresql，再执行 <code>exit</code> 退出容器。</p>
+<p>步骤07.重启harbor服务，以配置中的默认密码进行登陆。</p>
+<figure class="image-box">
+                <a rel=Harbor之企业级私有镜像存储仓库入门实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/2/20220212152733.png" target="_blank" title="WeiyiGeek.重置Harbor仓库管理员密码" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/2/20220212152733.png" alt="WeiyiGeek.重置Harbor仓库管理员密码" title="" class=""></a>
+                <p>WeiyiGeek.重置Harbor仓库管理员密码</p>
+            </figure>
+<p><br></p>
+<h4 id="4-Harbor仓库迁移提示协议必须为https在安装组件时"><a href="#4-Harbor仓库迁移提示协议必须为https在安装组件时" class="headerlink" title="4.Harbor仓库迁移提示协议必须为https在安装组件时"></a>4.Harbor仓库迁移提示协议必须为https在安装组件时</h4><p>错误信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo ./install.sh --with-notary --with-trivy --with-chartmuseum</span><br><span class="line">prepare base dir is <span class="built_in">set</span> to /opt/harbor</span><br><span class="line">Error happened <span class="keyword">in</span> config validation...</span><br><span class="line">ERROR:root:Error: the protocol must be https when Harbor is deployed with Notary</span><br></pre></td></tr></table></figure><br>错误原因: 错误root错误,当Harbor与公证人一起部署时，协议必须是https<br>解决办法: 启用443以及设置证书，或者取消公证人Notary安装即可解决。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># https related config</span></span><br><span class="line">https:</span><br><span class="line">  <span class="comment"># https port for harbor, default is 443</span></span><br><span class="line">  port: 443</span><br><span class="line">  <span class="comment"># The path of cert and key files for nginx</span></span><br><span class="line">  certificate: /etc/harbor/pki/server.crt</span><br><span class="line">  private_key: /etc/harbor/pki/server.key</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-08-20T04:48:50.428Z" itemprop="dateUpdated">2022-08-20 12:48:50</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Harbor/Harbor之企业级私有镜像存储仓库入门学习.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Harbor/Harbor之企业级私有镜像存储仓库入门学习.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/6-22-510.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/6-22-510.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Harbor/" rel="tag">Harbor</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/6-22-510.html&title=《Harbor之企业级私有镜像存储仓库入门实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/6-22-510.html&title=《Harbor之企业级私有镜像存储仓库入门实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/6-22-510.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Harbor之企业级私有镜像存储仓库入门实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/6-22-510.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/6-22-510.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/6-22-188.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Linux系统自定义制作ISO安装镜像</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/6-17-565.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Linux内核参数使用与优化介绍</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#0x01-安装配置"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 安装配置</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-本地安装"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">(1) 本地安装</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-基础配置"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">(2) 基础配置</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#0x02-基础使用"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 基础使用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#0x03-扩展安装"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 扩展安装</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#0x04-补充说明"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 补充说明</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-Harbor证书到期如何进行更新替换"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">1.Harbor证书到期如何进行更新替换?</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-如何更新旧版本的Harbor到指定的新版本"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">2.如何更新旧版本的Harbor到指定的新版本?</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-Harbor仓库忘记管理员密码如何重置"><span class="post-toc-number">5.3.</span> <span class="post-toc-text">3.Harbor仓库忘记管理员密码如何重置?</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-Harbor仓库迁移提示协议必须为https在安装组件时"><span class="post-toc-number">5.4.</span> <span class="post-toc-text">4.Harbor仓库迁移提示协议必须为https在安装组件时</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/6-22-510.html&title=《Harbor之企业级私有镜像存储仓库入门实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/6-22-510.html&title=《Harbor之企业级私有镜像存储仓库入门实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/6-22-510.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Harbor之企业级私有镜像存储仓库入门实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/6-22-510.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/6-22-510.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACL0lEQVR42u3aS24bMRAFQN3/0gqQVQLZk/eakpEhiytBgsmpWbTZn8cjXs/f68/Pr+v11+/2SdbjEwsDA+O2jGS7162vD7t+rOv9k1f2xekYGBgHMJIge/24CSmPmfmzYWBgYMyCcvt59vowMDAw8uvadWDNk94f/b+BgYFxQ8asiLb+zfUpH8nFMTAwbsiYNQZ+5vPH+xsYGBj/PeO5sFaaBG1g/ccOGBgYWzPawv3KgyYp66xJgIGBsTejTVzzhmV+0WwHNb54EgwMjAMYs+GJPN2dheOiMYCBgbE1o00gZ03H/LHahgEGBsY5jPz4tqm53gaoW5gYGBgHMFYC3yzdbUcr6skRDAyMmzNmLcn1sYz2UlhUDTEwMA5gJBG6Lcnl+w+TYQwMjK0Z683FPK2tZ0DK0zEwME5mzC5tK+W8WWEOAwNjV0YbBNtj1qnFRRADA2NTRj5skf/tShuyfRHfZuQYGBgbMdpifRuaVwJxkSpjYGBszXhXS7Idm1hvFdQYDAyMmzOuS/l55jhLj/MyXFR0w8DA2JqRB803HBm8groMh4GBsTWjLW8lCWqbjrbBfTgzgoGBcUPGs1xtISy/dLaDF399g4GBsTVjva6e/LpOwsDAwFgp37edh9kVMNoHAwPjAMYsyM4aAHW8T3gYGBgYyw2DWXO0uNtiYGBgBMevBOWV4QwMDIxzGHkzIE9WZ4Ma+RAGBgbGOYy2MdA2LPMm5dtmRjAwMPZh/ALSX5Nhpo2aWQAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

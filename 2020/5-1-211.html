@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 Linux之PAM系统模块详解说明|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Linux">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Linux之PAM系统模块详解说明</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">Linux之PAM系统模块详解说明</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-05-01T06:34:30.000Z" itemprop="datePublished" class="page-time">
+  2020-05-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/SystemOperation/">SystemOperation</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Linux/运维知识/Linux之PAM系统认证模块说明"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Linux之PAM系统模块详解说明</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-05-01 14:34:30" datetime="2020-05-01T06:34:30.000Z"  itemprop="datePublished">2020-05-01</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/SystemOperation/">SystemOperation</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言介绍"><a href="#0x00-前言介绍" class="headerlink" title="0x00 前言介绍"></a>0x00 前言介绍</h2><p><em>Q:什么是PAM?</em><br>答:PAM 的全称为可插拔认证模块(Pluggable Authentication Modules:简称 PAM <code>/pæm/</code> ),Linux中的一种安全验证方式是基于<code>模块化设计、具有可插入功能的一种独立于应用程序之外</code>的验证方式；设计的初衷是将不同的底层认证机制集中到一个高层次的API中，从而省去开发人员自己去设计和实现各种繁杂的认证机制的麻烦。 PAM 机制最初由 Sun 公司提出，并在其 Solaris 系统上实现，后来各个版本的 UNIX 以及 Linux 也陆续增加了对它的支持。</p>
+<p><em>Q:为什么要使用PAM?</em><br>描述：服务器的系统安全确实是一件让用户头痛的事情，比如下面所列问题常规的安全措施并不能妥善地解决特别是在应用之中。</p>
+<ul>
+<li>如何确保系统中使用应用程序或服务的用户确是用户本人？</li>
+<li>如何给这些用户指定限制访问服务的时间段？</li>
+<li>以及如何限制各种应用程序或服务对系统资源的使用率等等？<br>如果没有 PAM 认证功能只能写在各个应用程序中，一旦要修改某个认证方法，开发人员可能不得不重写程序，然后重新编译程序并安装；有了 PAM 认证的工作都交给 PAM ，程序主体便可以不再关注认证问题了“ PAM 允许你进来，那你就进来吧。”<br>在从RedHat系列发行版Linux 3.x(&gt;=内核中)已经集成了PAM安全验证方式, 并且能够使用它来解决上面所示的相关问题;</li>
+</ul>
+<p><em>PAM特点&amp;功能:</em></p>
+<ul>
+<li>给程序的开发人员提供一套统一的认证接口， 即应用程序可以不需要集成验证功能；</li>
+<li>具有很大的灵活性可以通过它为应用程序自由选择需要使用的验证方式。</li>
+<li>增强 Linux 服务器的安全性能。</li>
+</ul>
+<p><em>Q:如何使用PAM?</em><br>答:当 LINUX 服务器中的某个应用程序或服务需要使用 PAM 来进行验证时，只要此应用程序或服务支持 PAM 验证功能，就可以通过修改其相应的 PAM 配置文件(<code>所有验证功能都是通过一些库文件来提供的</code>)来配置相应的验证方式，<code>当重新启用些服务或应用程序时 PAM 模块就会通过其专用 API 来读取它的配置文件</code>，根据配置文件中的内容来提供相应的验证功能;</p>
+<p>我们先用一个例子来直观感受一下 PAM:</p>
+<blockquote>
+<p>su 是一个很常用的 Linux 命令，可以让我们从一个用户切换到另一个用户。我们都知道，当用户使用 root 账号登录时，su 到别的用户是不需要密码的，而从其他用户 su 到 root 则需要输入密码。在用 su 命令切换用户的过程中， su 做了两件事：认证(是否是 root、不是 root 的话是否有目标用户的密码)和启动相应的 Shell。</p>
+</blockquote>
+<blockquote>
+<p>让我们来关注一下 su 的认证功能。按照正常的逻辑， su 的开发人员很可能会自己写出认证的功能：先判断是不是 root，是则判定认证通过；不是则要求用户输入目标账号的密码，匹配成功则认证通过，否则不通过。这套逻辑并不复杂，开发人员开发出来便是了。</p>
+</blockquote>
+<blockquote>
+<p>过了几天，用户提出了这样的一个需求：运维团队都属于 wheel 组，能不能让 wheel 组的用户也能不输入密码而使用 su 切换？看起来也不是什么特别困难的需求，开发人员本可以满足就是了。但是如果再过几天，运维小张考虑到安全想要 su 有短信验证码功能，而用户小王为了方便测试想要一个完全不用密码的 su。认证需求的差异化越来越明显，开发人员的工作也变得越来越困难。</p>
+</blockquote>
+<blockquote>
+<p>这时PAM 出现了对开发人员说：“认证的事情交给我，你只要告诉我你想做用户认证就好，余下的事情由我来解决，能不能通过由我来说了算。”它又对运维人员说：“你们来我这里编写你们想要的针对 su 的认证策略吧，我将充分保证功能的灵活。”</p>
+</blockquote>
+<blockquote>
+<p>从此su 的开发人员可以专注地为用户启动 Shell 服务，而不需要关心用户认证的细节了；用户或复杂、或简单的认证需求也都得到了满足。真是皆大欢喜。</p>
+</blockquote>
+<p><em>注意事项:</em></p>
+<ul>
+<li>Linux系统下的应用程序如果需要得到PAM功能的支持，需要将支持PAM功能的代码集成到了源代码之中；如果你能够得到一个应用程序的原代码，你也可以自行将支持 PAM 的功能代码加入其中。</li>
+<li>查看应用程序是否支持 PAM 验证功能，使用ldd命令进行查看动态链接库中有木有 <code>libpam 和 libpam.misc</code>名称;<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ldd `<span class="built_in">which</span> sshd` | grep <span class="string">"libpam"</span></span><br><span class="line">  libpam.so.0 =&gt; /lib64/libpam.so.0 (0x00007fa969d54000)</span><br></pre></td></tr></table></figure></li>
+<li>PAM 不仅仅在用户登录时才发挥作用<code>sudo命令，su命令，passwd命令</code>都会用到 PAM。前文中所有提及“登录”的地方都仅仅是举例，您完全可以用其他需要用户认证的服务(或者命令)去举例，从而更全面地理解 PAM。</li>
+</ul>
+<hr>
+<h2 id="0x01-基础配置"><a href="#0x01-基础配置" class="headerlink" title="0x01 基础配置"></a>0x01 基础配置</h2><p>描述:在Linux发行版的系统中每个支持PAM验证的应用程序或者服务都一个与之对应的PAM的配置文件；<br>默认PAM 的各个模块路径: <code>/lib/security/ 和 /lib64/security/</code>以动态库文件的形式存在文件名格式一般为pam_*.so(取决于操作系统位数);<br>默认PAM 配置文件路径:<code>/etc/pam.conf(在时下的发行版可能没有)</code>或者 <code>/etc/pam.d/</code>单个应用;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">ls -alh /etc/pam.d/</span><br><span class="line">总用量 112K</span><br><span class="line">-rw-r--r--.  1 root root  192 4月   1 12:51 chfn</span><br><span class="line">-rw-r--r--.  1 root root  192 4月   1 12:51 chsh</span><br><span class="line">-rw-r--r--.  1 root root  232 4月   1 11:59 config-util</span><br><span class="line">-rw-r--r--.  1 root root  287 8月   9 2019 crond</span><br><span class="line">lrwxrwxrwx.  1 root root   19 6月   2 14:15 fingerprint-auth -&gt; fingerprint-auth-ac</span><br><span class="line">-rw-r--r--.  1 root root  702 6月   2 14:15 fingerprint-auth-ac</span><br><span class="line">-rw-r--r--.  1 root root  796 4月   1 12:51 login</span><br><span class="line">-rw-r--r--.  1 root root  154 4月   1 11:59 other</span><br><span class="line">-rw-r--r--.  1 root root  188 4月   1 11:57 passwd</span><br><span class="line">lrwxrwxrwx.  1 root root   16 6月   2 14:15 password-auth -&gt; password-auth-ac</span><br><span class="line">-rw-r--r--.  1 root root 1.1K 6月   2 14:15 password-auth-ac</span><br><span class="line">-rw-r--r--.  1 root root  155 4月   1 12:07 polkit-1</span><br><span class="line">lrwxrwxrwx.  1 root root   12 6月   2 14:15 postlogin -&gt; postlogin-ac</span><br><span class="line">-rw-r--r--.  1 root root  330 6月   2 14:15 postlogin-ac</span><br><span class="line">-rw-r--r--.  1 root root  681 4月   1 12:51 remote</span><br><span class="line">-rw-r--r--.  1 root root  143 4月   1 12:51 runuser</span><br><span class="line">-rw-r--r--.  1 root root  138 4月   1 12:51 runuser<span class="_">-l</span></span><br><span class="line">lrwxrwxrwx.  1 root root   17 6月   2 14:15 smartcard-auth -&gt; smartcard-auth-ac</span><br><span class="line">-rw-r--r--.  1 root root  752 6月   2 14:15 smartcard-auth-ac</span><br><span class="line">lrwxrwxrwx.  1 root root   25 6月   2 14:12 smtp -&gt; /etc/alternatives/mta-pam</span><br><span class="line">-rw-r--r--.  1 root root   76 4月   1 12:08 smtp.postfix</span><br><span class="line">-rw-r--r--.  1 root root  904 8月   9 2019 sshd</span><br><span class="line">-rw-r--r--.  1 root root  540 4月   1 12:51 su</span><br><span class="line">-rw-r--r--.  1 root root  200 4月   1 12:37 sudo</span><br><span class="line">-rw-r--r--.  1 root root  178 4月   1 12:37 sudo-i</span><br><span class="line">-rw-r--r--.  1 root root  137 4月   1 12:51 su<span class="_">-l</span></span><br><span class="line">lrwxrwxrwx.  1 root root   14 6月   2 14:15 system-auth -&gt; system-auth-ac  <span class="comment">#Linux系统认证相关pam(默认采用)</span></span><br><span class="line">-rw-r--r--.  1 root root 1.1K 6月   2 14:15 system-auth-ac</span><br><span class="line">-rw-r--r--.  1 root root  129 5月  12 23:45 systemd-user</span><br><span class="line">-rw-r--r--.  1 root root   84 10月 31 2018 vlock</span><br></pre></td></tr></table></figure>
+<p>pam的重要文件如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/usr/lib/libpam.so.*     <span class="comment">## PAM核心库</span></span><br><span class="line">/etc/pam.conf            <span class="comment">## PAM配置文件</span></span><br><span class="line">/etc/pam.d/*             <span class="comment">## PAM各个模块的配置文件</span></span><br><span class="line">/lib/security/pam_*.so   <span class="comment">## 可动态加载的PAM模块</span></span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p>Linux-PAM中<code>/etc/pam.conf</code>类型的格式如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">服务名称  工作类别  控制模式  模块路径  模块参数</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>PAM配置文件<code>/etc/pam.d/</code>中使用如下所示的语法格式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">工作类别  控制模式      模块路径        模块参数</span><br><span class="line">Type     Control-flag   Module-path     Module-arguments</span><br><span class="line"></span><br><span class="line"><span class="comment">#%PAM-1.0</span></span><br><span class="line">auth       required     pam_sepermit.so</span><br><span class="line">session    required     pam_selinux.so    open env_params</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>其中每行代表一个独立的验证方式每个配置文件可以由<code>多种验证规则相互叠加而成</code>。<br>验证时 PAM-API 会按照从上往下的方式一一读取这些验证规则，并根据其中的控制标志做出相应的动作。</p>
+<p>PAM配置文件特殊字符说明:</p>
+<ul>
+<li><code># 表示注释</code>。</li>
+<li>每一行代表一条规则。但也可以用<code>\</code> 来放在行末，来连接该行和下一行。</li>
+<li>例子的最后一行开头有一个短横线 <code>- 意思是如果找不到这个模块，导致无法被加载时，这一事件不会被记录在日志中</code>。这个功能适用于那些认证时非必需的、安装时可能没被安装进系统的模块。</li>
+</ul>
+<p><em>注意事项:</em></p>
+<ul>
+<li>在进行应用或者系统相关服务的PAM配置的时候需要小心谨慎，由于规则验证有严格的上下顺序之分所以配置时候需要核验，因为一旦出错可导致系统或者功能不能正常访问;</li>
+<li>不难看出<code>/etc/pam.conf与/etc/pam.d/</code>类型的配置文件中的不同，文件夹形式的配置文件中只是没有了服务名称这一列<code>服务名称已经是文件名</code>了。</li>
+</ul>
+<p><br></p>
+<h3 id="1-配置简要说明"><a href="#1-配置简要说明" class="headerlink" title="1.配置简要说明"></a>1.配置简要说明</h3><p>描述:要正常配置 PAM 配置文件就应当了解配置文件方法格式中每列的所包括的内容，下面是这些列的简短说明：</p>
+<p><strong>Type 列|Module-type</strong><br>备注:主要用来指定需要验证的类型共有<code>以下四种验证类型</code>;</p>
+<ul>
+<li>auth: 主要负责验证使用者身份以及用户权限授予; 例如你的验证方式有很多比如一次性密码、指纹、虹膜等等，都应该添加在 auth 下以及比如赋给用户某个组的组员身份等等。</li>
+<li>account:  主要负责在用户能不能使用某服务上具有发言权，但不负责身份认证; 例如验证帐户的此操作是否已经过期,权限多大,拥有此权限的时间期限是否已经过期等等</li>
+<li>password: 主要负责和密码有关的工作; 例如控制密码的使用期限，重复输入的次数，密码锁定后的解禁时限以及保存密码的加密放方式等; (等保必须要做的)</li>
+<li>session: 主要负责对每个会话进行跟踪和记录，例如记录的内容包括登录的用户名及登录的时间和次数等等</li>
+</ul>
+<p><br></p>
+<p><strong>Control-flag 列|Control-flag</strong><br>备注:主要用来控制在验证过程中动作和返回结果的方式, 简单的说用于定义各个认证模块在给出各种结果时 PAM 的行为，或者调用在别的配置文件中定义的认证流程栈；</p>
+<p>它有两种类型的表达方式<code>关键字模式</code>与<code>“用方括号 [] 包含的“返回值=行为”模式</code>:</p>
+<ul>
+<li>(1) “关键字”模式下，有以下几种控制模式：<ul>
+<li>required: 当使用此控制标志时，当验证失败时仍然会继续进行其下的验证过程，它会返回一个错误信息，但是由于它不会由于验证失败而停止继续验证过程，因此用户不会知道是哪个规则项验证失败;</li>
+<li>requisite: 与required 的验证方式大体相似，但是只要某个规则项验证失败则立即结束整个验证过程，并返回一个错误信息。使用此关键字可以防止一些通过暴力猜解密码的攻击，但是由于它会返回信息给用户，因此它也有可能将系统的用户结构信息透露给攻击者。</li>
+<li>sufficient: 只要有此控制标志的一个规则项验证成功，那么 PAM 构架将会立即终止其后所有的验证，并且不论其前面的 required 标志的项没有成功验证，它依然将被忽略然后验证通过。</li>
+<li>optional: 表明对验证的成功或失败都是可有可无的，所有的都会被忽略。(<code>通常用于 session 类型</code>)</li>
+<li>include: 将其他配置文件中的流程栈包含在当前的位置，就好像将其他配置文件中的内容复制粘贴到这里一样。</li>
+<li>substack：运行其他配置文件中的流程，并将整个运行结果作为该行的结果进行输出。该模式和 include 的不同点在于认证结果的作用域：如果某个流程栈 include 了一个带 requisite 的栈，这个 requisite 失败将直接导致认证失败同时退出栈；而某个流程栈 substack 了同样的栈时，requisite 的失败只会导致这个子栈返回失败信号，母栈并不会在此退出。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>(2) 复杂的控制标志能够让管理员可以指定在验证过程中发生某种事件时可以执行的动作, 复杂的可以使用方括号来嵌套控制标志并可在方括号中使用 <code>value=action</code> 的方式表达。<ul>
+<li>查看PAM中可用的Value列表值:<code>/usr/include/security/_pam_types.h</code>有 <code>success、user_unknown、new_authtok_reqd、default</code> 等等数十种<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#其格式如下:[value1=action1 value2=action2]</span></span><br><span class="line">auth [user_unknown=ignore success=ok ignore=ignore default=bad] pam_securetty.so</span><br><span class="line"></span><br><span class="line"><span class="comment">#流程栈中很可能有多个验证规则，每条验证的返回值可能不尽相同，那么到底哪一个验证规则能作为最终的结果呢?</span></span><br><span class="line">ignore：在一个栈中有多个认证条目的情况下，如果标记 ignore 的返回值被命中，那么这条返回值不会对最终的认证结果产生影响。</span><br><span class="line">bad：标记 bad 的返回值被命中时，最终的认证结果注定会失败。此外，如果这条 bad 的返回值是整个栈的第一个失败项，那么整个栈的返回值一定是这个返回值，后面的认证无论结果怎样都改变不了现状了。</span><br><span class="line">die：标记 die 的返回值被命中时，马上退出栈并宣告失败。整个返回值为这个 die 的返回值。</span><br><span class="line">ok：在一个栈的运行过程中，如果 ok 前面没有返回值，或者前面的返回值为 PAM_SUCCESS，那么这个标记了 ok 的返回值将覆盖前面的返回值。但如果前面执行过的验证中有最终将导致失败的返回值，那 ok 标记的值将不会起作用。</span><br><span class="line"><span class="keyword">done</span>：在前面没有 bad 值被命中的情况下，<span class="keyword">done</span> 值被命中之后将马上被返回，并退出整个栈。</span><br><span class="line">N(一个自然数)：功效和 ok 类似，并且会跳过接下来的 N 个验证步骤。如果 N = 0 则和 ok 完全相同。</span><br><span class="line">reset：清空之前生效的返回值，并且从下面的验证起重新开始。</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<p>PS:实际上关键字模式可以等效地用<code>返回值=行为</code>模式来表示,具体的对应如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">required：  [success=ok new_authtok_reqd=ok ignore=ignore default=bad]</span><br><span class="line">requisite： [success=ok new_authtok_reqd=ok ignore=ignore default=die]</span><br><span class="line">sufficient：[success=<span class="keyword">done</span> new_authtok_reqd=<span class="keyword">done</span> default=ignore]</span><br><span class="line">optional：  [success=ok new_authtok_reqd=ok default=ignore]</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>Module-path|Module-path</strong><br>描述:用来为要验证的服务提供需要使用的验证模块，前我们说过引用的动态链接库处于 <code>/lib/security/</code> 或 <code>/lib64/security/</code> 目录中;</p>
+<p>注意事项:</p>
+<ul>
+<li>使用时如果模块在默认路径之中则只填写其完整的动态链接库名称，如要引用的模块不存在这两个默认的保存目录，就必需在模块的完整名称前加上完整的模块路径名<code>/usr/lib/security/pam-test.so</code></li>
+</ul>
+<p><br></p>
+<p><strong>Module-arguments|Arguments</strong><br>描述:用来为引用的模块指定特殊的选项, 模块参数用空格与模块路径相隔。该参数将只和特定模块相关，因此某个模块的文档中一定包含其参数的信息。</p>
+<p>注意事项:</p>
+<ul>
+<li>如果需要在单个参数中使用空格可以将整个参数用方括号 [] 包裹起来, 当选项超过一行时用 \ 符号连接下一行;</li>
+</ul>
+<p><br></p>
+<h3 id="2-常用模块说明"><a href="#2-常用模块说明" class="headerlink" title="2.常用模块说明"></a>2.常用模块说明</h3><p>描述:要想掌握PAM的使用，就必须了解常用的PAM验证模块的作用，毕竟PAM 的具体验证功能都是由这些可插入的验证模块来完成的。<br>每个PAM验证模块的使用对象总是与PAM验证类型是相对应即(白话:<code>动态链接库名称包含Type关键字相关关联的名称或者应用相关关键字</code>)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ls</span> /usr/lib64/security/</span><br><span class="line">pam_access.so    pam_debug.so  pam_faildelay.so  pam_group.so    pam_listfile.so   pam_motd.so        pam_pwhistory.so  pam_selinux_permit.so  pam_succeed_if.so  pam_tty_audit.so    pam_unix_session.so  pam_xauth.so</span><br><span class="line">pam_cap.so       pam_deny.so   pam_faillock.so   pam_issue.so    pam_localuser.so  pam_namespace.so   pam_pwquality.so  pam_selinux.so         pam_systemd.so     pam_umask.so        pam_unix.so</span><br><span class="line">pam_chroot.so    pam_echo.so   pam_filter        pam_keyinit.so  pam_loginuid.so   pam_nologin.so     pam_rhosts.so     pam_sepermit.so        pam_tally2.so      pam_unix_acct.so    pam_userdb.so</span><br><span class="line">pam_console.so   pam_env.so    pam_filter.so     pam_lastlog.so  pam_mail.so       pam_permit.so      pam_rootok.so     pam_shells.so          pam_time.so        pam_unix_auth.so    pam_warn.so</span><br><span class="line">pam_cracklib.so  pam_exec.so   pam_ftp.so        pam_limits.so   pam_mkhomedir.so  pam_postgresok.so  pam_securetty.so  pam_stress.so          pam_timestamp.so   pam_unix_passwd.so  pam_wheel.so</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="1-pam-access-登陆访问限制模块"><a href="#1-pam-access-登陆访问限制模块" class="headerlink" title="(1) pam_access|登陆访问限制模块"></a>(1) pam_access|登陆访问限制模块</h4><p>描述:它主要用于对访问进入管理，提供基于登录名、主机名或域名、公网 IP 地址或网络号，以及非网络登录时的 tty 名称的访问控制。<br>该验证模块一般与<code>account 验证(Type)类型</code>一同使用, 它主要是根据 <code>/etc/security/access.conf</code> 配置文件中的内容，来进行相应的验证工作的;</p>
+<p>配置文件说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/security/access.conf</span><br><span class="line"><span class="comment">## 每一行都由如下三个字段构成  permission:users:origins </span></span><br><span class="line">permission  (权限)字段可以用 + 即表示允许访问， - 禁止访问来表示相应的权限。</span><br><span class="line">users/groups(用户或组)字段可以是一个或几个登录名、组名及 ALL (表示任何人)的一个清单。</span><br><span class="line">origins     (来源)字段可以是非网络登录时的 tty 名称、主机名、域名(以.开始)、主机地址、网络号(以.结束)、带有子网掩码的公网 IP 地址，以及 ALL 表示任何主机和 LOCAL 只要不包含.的所有字符)</span><br></pre></td></tr></table></figure></p>
+<p>基础示例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.Disallow non-root logins on tty1</span></span><br><span class="line">-:ALL EXCEPT root:tty1  <span class="comment">#EXCEPT 表示排除 PS补充网络登陆`pts/0`</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.除了少数帐户，不允许控制台登录所有帐户</span></span><br><span class="line">-:ALL EXCEPT wheel shutdown sync:LOCAL</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.有些ws相关帐户不允许从任何地方登录:</span></span><br><span class="line">-:wsbscaro wsbsecr wscosor wstaiwde:ALL</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.用户“根”应该被允许从ip地址的主机访问。</span></span><br><span class="line">+:root:192.168.200.1 192.168.200.4 192.168.200.9</span><br><span class="line">+:root:192.168.201.  <span class="comment">#The same is 192.168.201.0/24 or 192.168.201.0/255.255.255.0</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.用户“根”应该能够从域访问。也使用字符串匹配。</span></span><br><span class="line">+:root:.foo.bar.org</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.User "john" should get access from ipv6 net/mask</span></span><br><span class="line">+:john:2001:4ca0:0:101::/64</span><br></pre></td></tr></table></figure></p>
+<p>注意事项:</p>
+<ul>
+<li>1.如果 access.conf 文件不在缺省的 /etc/security/ 目录，你可以在其后使用 accessfile 参数指定自定义配置文件的绝对路径。</li>
+</ul>
+<p><br></p>
+<h4 id="2-pam-cracklib-密码策略验证模块（old）"><a href="#2-pam-cracklib-密码策略验证模块（old）" class="headerlink" title="(2) pam_cracklib | 密码策略验证模块（old）"></a>(2) pam_cracklib | 密码策略验证模块（old）</h4><p>描述:该模块通常与password验证类型一起使用，通过插入 password 堆栈为特殊的应用提供可插入式密码强度性检测,它是PAM 配置接口的基本模块。<br>它的工作方式就是先提示用户输入密码，然后使用一个系统字典和一套规则来检测输入的密码是否不能满足强壮性要求。</p>
+<p>温馨提示: 在最新的centos 8 与Ubuntu 22.04 中使用的是 pam_faillock 模块。</p>
+<p>密码的强度检测分二次进行:</p>
+<ul>
+<li>1.第一次只是检测密码是否是提供的对比字典中的一部分</li>
+<li>2.如果检测结果是否定的，那么就会提供一些附加的检测来进一步检测其强度，(<code>例如检测新密码中的字符占旧密码字符的比例，密码的长度，所用字符大小写状况，以及是否使用了特殊字符等等。</code>)</li>
+</ul>
+<p>pam_cracklib 选项:</p>
+<ul>
+<li><code>debug</code>：此选项表示将模块信息写入系统日志;</li>
+<li><code>type=xxx</code> ：此选项用来修改缺省的密码提示文本;(<code>默认是 &quot;New UNIX password: &quot; and &quot;Retype UNIX password: &quot;</code>)</li>
+<li><code>retry=N</code>: 定义用户在重试输入多少次密码后，返回一个错误信息，然后不准继续输入;(缺省一次)</li>
+<li><code>difok=N:</code> 此选项用来定义新密码中必须有几个字符要与旧密码不同,缺省是1/2以上的字符与旧密码不同时就OK;</li>
+<li><code>maxlen=N</code>:此选项用来设置新密码的最大长度</li>
+<li><code>minlen=N</code>:此选项用来设置新密码的最小长度。</li>
+<li><code>dcredit=N</code>:此选项用来设定新密码中可以包含数字的最大数目。</li>
+<li><code>ucredit=N</code>:此选项用来设定新密码中可以包含的大写字母的最大数目。</li>
+<li><code>lcredit=N</code>:此选项用来设定新密码中可以包含的小写字母的最大数目。</li>
+<li><code>ocredit=N</code>:此选项用来设定新密码中可以包含的特殊字符的最大数目。</li>
+<li><code>minclass=N</code>:此选项用来规定新密码中的字符类别的最小数目，字符一般有四种类别：数字、大写字母、小写字母，以及特殊字符。</li>
+<li><code>dictpath=/path/to/dict</code>: 指定 cracklib 目录路径。</li>
+<li><code>use_authtok</code>:在某个与密码相关的验证模块后使用此选项,例如 pam_unix.so 验证模块，可以强迫此模块不提示输入密码而使用上面设置的另一种方式;</li>
+</ul>
+<p><br></p>
+<h4 id="3-pam-limit-资源服务限制模块"><a href="#3-pam-limit-资源服务限制模块" class="headerlink" title="(3) pam_limit|资源服务限制模块"></a>(3) pam_limit|资源服务限制模块</h4><p>描述:该模块通常与session验证类别一同使用，它主要用来限制用户在会话过程中对系统资源的使用，即使 UID=0 的用户也受它的限制；<br>默认独立的配置文件: /etc/security/limits.conf<br>模块参数选项: <code>conf</code>选项指定自定义配置文件即<code>sudo:session    required     pam_limits.so conf=/etc/custom_limits.conf</code></p>
+<p>配置文件格式如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## &lt;domain&gt;        &lt;type&gt;  &lt;item&gt;  &lt;value&gt;</span></span><br><span class="line">- &lt;domain&gt; : 可以是用户名、采用@group 语法的组名，还可以用通配符 * 来表示任何用户, 以及使用 “%” 通配符来只限制 maxlogins ，并可以采用 %group 的语法格式。</span><br><span class="line"></span><br><span class="line">- &lt;<span class="built_in">type</span>&gt; : </span><br><span class="line">  - soft : 用来设置对系统资源的软限制，它允许用户所使用的系统资源可以在设定的硬限制值的规定范围来上下浮动</span><br><span class="line">  - hard : 用来设置对系统资源的硬限制，这些硬限制由超级用户设置，并由系统内核来执行。(`普通用户对系统资源的使用率不能超过设置的硬限制设定值`)</span><br><span class="line">  - <span class="string">"-"</span> : 表示无限制系统资源;</span><br><span class="line"></span><br><span class="line">- &lt;item&gt; &lt;value&gt; : 两者总是成对使用的,<span class="string">"Item"</span>表示某类具体的系统资源,而<span class="string">"Value"</span>就是<span class="string">"Item"</span>的值;</span><br><span class="line">  * as  <span class="comment"># 地址空间限制( KB )</span></span><br><span class="line">  * core  <span class="comment"># 核心文件的大小  (KB)</span></span><br><span class="line">  * data  <span class="comment"># 最大的数据包大小 (KB)</span></span><br><span class="line">  * fsize  <span class="comment"># 最大的文件大小 (KB)</span></span><br><span class="line">  * memlock  <span class="comment"># 最大可用的内存空间 (KB)</span></span><br><span class="line">  * rss  <span class="comment"># 最大的可驻留空间 (KB)</span></span><br><span class="line">  * stack  <span class="comment"># 最大的堆栈空间 (KB)</span></span><br><span class="line">  * cpu  <span class="comment"># 最大的 CPU 占用时间( minutes )</span></span><br><span class="line">  * nproc  <span class="comment"># 最大允许运行的进程数量</span></span><br><span class="line">  * maxlogins  <span class="comment"># 用户可以登录到系统的最多次数， UID=0 的用户除外</span></span><br><span class="line">  * priority  <span class="comment"># 优先运行的用户进程(负值越高的进程优先)</span></span><br><span class="line">  * sigpending  <span class="comment"># 最大数量的等待信号( Linux2.6 及以上内核)</span></span><br><span class="line">  * msqqueue   <span class="comment"># POSIX 信息队列的最大可使用的内存( bytes )( Linux2.6 及以上内核)</span></span><br><span class="line">  * nofile  <span class="comment"># 最大可以打开的文件数量</span></span><br><span class="line">  * locks  <span class="comment"># 最大可锁定文件的数目( Linux2.4 及以上内核的系统)</span></span><br></pre></td></tr></table></figure></p>
+<p><em>注意事项:</em></p>
+<ul>
+<li>1.上面item项目中是一些对系统资源使用情况非常有用的但它仅仅是一部分，可能随着内核的升级会加入某些新的item,你可以通过查看其帮助文档来了解；</li>
+<li>2.十分注意用户的限制优先级要高于组的限制,如果你为一个组设置了某种系统资源限制，但是其中的某个用户设置了另一级别的系统资源限制，那么系统将会优先按用户级别的限制处理;</li>
+</ul>
+<p><br></p>
+<h4 id="4-pam-time-日期时间终端限制模块"><a href="#4-pam-time-日期时间终端限制模块" class="headerlink" title="(4) pam_time|日期时间终端限制模块"></a>(4) pam_time|日期时间终端限制模块</h4><p>描述:该模块通常与 account 验证类型一起使用，它并不对用户提供验证服务，而是用<code>来限制用户在指定的日期、时间及终端线路上对系统或特定应用程序进行访问</code>。<br>默认配置文件路径:/etc/security/time.conf<br>配置文件语法格式:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#最初主要基于shadow package (shadow-960129)。</span></span><br><span class="line"><span class="comment">#基础语法: services;ttys;users;times</span></span><br><span class="line">- services 字段：表示应用 PAM 功能的服务名称。</span><br><span class="line">- ttys 字段：应用此规则的终端名，可以*号表示任何终端,!表示非。</span><br><span class="line">- users 字段：应用此规则的用户名单或网络组名，可以 “*” 号表示任何用户，!表示非。</span><br><span class="line">- <span class="built_in">times</span> 字段：指定时间，通常使用日期 / 时间范围的格式来表示</span><br><span class="line">  - 日期:  <span class="comment">#Mo 、 Tu 、 We 、 Th 、 Fr 、 Sa 、 Su 、 Wk 、 Wd 、 Al ， Mo 到 Su 分别指从星期一到星期天(Wk 指每一天/Wd 指周末/ Al 也指每一天)，</span></span><br><span class="line">  - 时间：<span class="comment">#采用 24 小时制，即 HHMM (时分)的形式</span></span><br><span class="line">  - 日期 / 时间范围前可有 ! 表表除此以外的所有日期 / 时间 , 还可以用 － 连接指定的时间范围；</span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#示例1. MoMo 表示任何一天都没有，Al1800-0800 就是指每天下午 6 点整到第二天的早晨 8 点整。</span></span><br><span class="line">xsh;tty*;root;!MoMo1800-0600</span><br><span class="line"></span><br><span class="line"><span class="comment">#实例2.用户'root'被拒绝xsh访问终端,在周末和星期1</span></span><br><span class="line">xsh;ttyp*;root;!WdMo0000-2400</span><br><span class="line"></span><br><span class="line"><span class="comment">#示例3.在tty*(任何ttyXXX设备)上运行用户you和me一直被拒绝服务</span></span><br><span class="line">blank;tty* &amp; !ttyp*;you|me;!Al0000-2400</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="5-pam-listfile-文件服务访问验证模块"><a href="#5-pam-listfile-文件服务访问验证模块" class="headerlink" title="(5) pam_listfile|文件服务访问验证模块"></a>(5) pam_listfile|文件服务访问验证模块</h4><p>描述:该验证模块通常与 auth 验证类型一起使用，此模块提供根据某个指定的文件来允许或禁止用户访问某个应用程序或服务的功能，这些被指定的文件必需事先存在，然后通过 file 参数来指定该文件。<br>该模块可以根据用户名、 tty 、 rhost 、 ruser 、用户组、使用的 shell 来对用户进行访问控制。</p>
+<p>模块选项:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">* item=[tty|user|rhost|ruser|group|shell] : 设置访问控制的对象类型。</span><br><span class="line">* apply=[user|@group] ：用指定使用非用户和组类别时，这些规则所适用的对象。当 item=[user|ruser|group] 时该选项没有任何意义，只有当 item=[tty|rhost|shell] 时才有意思。</span><br><span class="line">* sense=allow|deny : 用来指定当在保存 <span class="string">"item"</span> 对象的文件中找不到 item 指定的对象时的动作方式，如果在文件中找不到相应的对象则执行相反的动作。</span><br><span class="line">* onerr=succeed|fail : 用来指定当某类事件(如无法打开配置文件)发生时的返回值。</span><br><span class="line">* file=filename : 指定保存有 <span class="string">"item"</span> 对象的文件位置。</span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#示例1.auth验证类型依赖于pam_listfile.so(如有错误继续执行)，访问对象为user组且与ftpusers文件中的用户一一对应否则阻止，当产生某类事件时候返回succeed;</span></span><br><span class="line">vsftpd:auth       required      pam_listfile.so item=user sense=deny file=/etc/vsftpd/ftpusers onerr=succeed</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="6-pam-unix-认证类型验证模块"><a href="#6-pam-unix-认证类型验证模块" class="headerlink" title="(6) pam_unix|认证类型验证模块"></a>(6) pam_unix|认证类型验证模块</h4><p>描述：该模块提供基于 /etc/passwd  和  /etc/shadow 文件的类 UNIX 风格的认证，它适用所有的验证类型，包括: <code>auth 、 account 、  password 、 session</code>。</p>
+<p>模块选项:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">- debug: 将调试信息写入系统日志，当pam_unix 验证模块与所有验证类别使用时都有效。</span><br><span class="line">- audit: 提供比 debug 更多诊断调试，它只有当与auth 、 account 及 password 验证类型使用时有效。</span><br><span class="line">- nullok: 默认情况下如果密码为空那么就不允许用户访某项服务，而使用此项后将则覆盖这个默认动作。它只有当与 auth 、和 password 验证类型使用时有效。</span><br><span class="line">- nodelay ：当用户验证失败后，系统在给出错误信息时会有一个延迟，默认为 2 秒钟。当使用此选项后，将取消这个延迟。它只有当与  auth 验证类型使用时有效 </span><br><span class="line">- use_first_pass ：当与 auth 验证类型一起使用时，使用该选项将在提示用户输入密码前，直接使用以往的密码验证方式来对用户进行验证。而当与 password 验证类型一起使用时，该选项主要用来防止用户新设定的密码与前面 password 提供的密码相同。</span><br><span class="line">- try_first_pass ：当与 auth 验证类型一起使用时，使用该选项将在提示用户输入密码前，尝试使用以往的密码验证方式来对用户进行验证。而当与 password 验证类型一起使用时，该选项主要用来防止用户新设定的密码与以前的旧密码相同</span><br><span class="line">- use_authok ：当用户修改时使用此选项强制用户使用前面堆叠验证模块提供的密码，例如由 pam_cracklib 验证模块提供的新密码。当与 password 验证类型一起使用时有效。</span><br><span class="line">- md5 : 采用 md5 对用户密码进行加密，当与 password 验证类型一起使用时有效。</span><br><span class="line">- shadow : 使用用 shadow 密码，当与 password 验证类型一起使用时有效。</span><br><span class="line">- sha256 : 使用此选项，当下次修改密码时将用 SHA256 算法加密，如果 SHA256 的 libcrypt 不存在，就会重新使用 MD5 加密密码。</span><br><span class="line">- Sha512 : 与此选项相同，只是加密强大不同而已。当与 password 验证类型一起使用时有效。</span><br><span class="line">- rounds=n : 用来指定使用 SHA256 和 SHA512 算法加密密码时重复哈希算法的次数。当与 password 验证类型一起使用时有效。</span><br><span class="line">- remember=n : 使用此选项将会将 n 个使用过的旧密码，以 MD5 的方式加密后保存到 /etc/security/opasswd 文件中。当与 password 验证类型一起使用时有效。</span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#登陆时尝试使用以往的密码验证方式来对用户进行验证，可以输入空密码</span></span><br><span class="line">system-auth-ac:auth        sufficient    pam_unix.so nullok try_first_pass</span><br><span class="line">system-auth-ac:account     required      pam_unix.so</span><br><span class="line"><span class="comment">#使用512加密方式的 shadow 密码，并用户修改时使用此选项强制用户使用前面堆叠验证模块提供的密码</span></span><br><span class="line">system-auth-ac:password    sufficient    pam_unix.so sha512 shadow nullok try_first_pass use_authtok</span><br><span class="line">system-auth-ac:session     required      pam_unix.so</span><br></pre></td></tr></table></figure></p>
+<p><em>注意事项:</em></p>
+<ul>
+<li>1.与 auth 验证类型一起使用时，此模块可以使用的选项<code>有 debug 、 audit 、 use_first_pass 、 try_first_pass 、 nullok 和 nodelay</code> ，主要功能是验证用户密码的有效性，在缺省情况下(即不带任何参数时)，该模块的主要功能是禁止密码为空的用户提供服务；</li>
+<li>2.在作为 account 类型使用时，此时该模块可识别的参数有 <code>debug 、 audit</code> ，该模块主要执行建立用户帐号和密码状态的任务，然后执行提示用户修改密码，用户采用新密码后才提供服务之类的任务；</li>
+<li>3.在作为 password 类型使用时，此时该模块可识别的参数有 <code>debug 、  audit 、  nullok; 、 not_set_pass 、 use_authtok 、 try_first_pass 、 use_first_pass 、 md5 、 bigcrypt 、 shadow 、 nis 、remember</code> ，该模块完成让用户更改密码的任务；</li>
+<li>4.在作为 session 类型使用时，此时该模块没有可识别的参数，该模块仅仅完成记录用户名和服务名到日志文件的工作。</li>
+</ul>
+<p><br></p>
+<h4 id="7-pam-deny-配置访问验证模块"><a href="#7-pam-deny-配置访问验证模块" class="headerlink" title="(7) pam_deny|配置访问验证模块"></a>(7) pam_deny|配置访问验证模块</h4><p>描述:该验证模块可以用来禁止所有的访问，当你设置 PAM 配置文件时，为了安全，在开始的行可以使用它来禁止所有的访问，以减少错误配置引起的安全风险。<br>而 pam_permit 验证模块却总是允许所有的访问，你要谨慎的使用此验证模块。它们都适用于所有的验证类型。</p>
+<p><br></p>
+<h4 id="8-pam-rootok-验证模块"><a href="#8-pam-rootok-验证模块" class="headerlink" title="(8) pam_rootok|验证模块"></a>(8) pam_rootok|验证模块</h4><p>描述:该验证模块允许 /etc/pam.d/su 中的用户不需要任何验证就可以登录系统。因此你应当小心设置 /etc/pam.d/su 文件，并且在使用时要与 pam_wheel 验证模块一同使用，以保证 root 权限只允许在 pam_wheel 的限制中进行。它只适用于 auth 验证类型。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ cat /etc/pam.d/su</span><br><span class="line"><span class="comment">#%PAM-1.0</span></span><br><span class="line">auth            sufficient      pam_rootok.so</span><br><span class="line"><span class="comment"># Uncomment the following line to implicitly trust users in the "wheel" group.</span></span><br><span class="line"><span class="comment">#auth           sufficient      pam_wheel.so trust use_uid</span></span><br><span class="line"><span class="comment"># Uncomment the following line to require a user to be in the "wheel" group.</span></span><br><span class="line"><span class="comment">#auth           required        pam_wheel.so use_uid</span></span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="9-pam-security-验证模块"><a href="#9-pam-security-验证模块" class="headerlink" title="(9) pam_security|验证模块"></a>(9) pam_security|验证模块</h4><p>描述:该验证模块只对 root 用户有影响。当 root 用户登录时， pam_security 验证模块会参考 <code>/etc/securetty</code> 目录中的控制终端列表，来保证 root 用户不会从不安全的终端登录,它一般与 auth 验证类型一现使用。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">$ cat /etc/securetty</span><br><span class="line">console</span><br><span class="line">vc/1</span><br><span class="line">vc/2</span><br><span class="line">vc/3</span><br><span class="line">vc/4</span><br><span class="line">vc/5</span><br><span class="line">vc/6</span><br><span class="line">vc/7</span><br><span class="line">vc/8</span><br><span class="line">vc/9</span><br><span class="line">vc/10</span><br><span class="line">vc/11</span><br><span class="line">tty1</span><br><span class="line">tty2</span><br><span class="line">tty3</span><br><span class="line">tty4</span><br><span class="line">tty5</span><br><span class="line">tty6</span><br><span class="line">tty7</span><br><span class="line">tty8</span><br><span class="line">tty9</span><br><span class="line">tty10</span><br><span class="line">tty11</span><br><span class="line">ttyS0</span><br><span class="line">ttysclp0</span><br><span class="line">sclp_line0</span><br><span class="line">3270/tty1</span><br><span class="line">hvc0</span><br><span class="line">hvc1</span><br><span class="line">hvc2</span><br><span class="line">hvc3</span><br><span class="line">hvc4</span><br><span class="line">hvc5</span><br><span class="line">hvc6</span><br><span class="line">hvc7</span><br><span class="line">hvsi0</span><br><span class="line">hvsi1</span><br><span class="line">hvsi2</span><br><span class="line">xvc0</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="10-pam-nologin-验证模块"><a href="#10-pam-nologin-验证模块" class="headerlink" title="(10) pam_nologin|验证模块"></a>(10) pam_nologin|验证模块</h4><p>描述:该验证模块如果 /etc/nologin 文件存在，此模块将禁止所有的登录。它一般与 auth 和 account 验证类型一同使用。</p>
+<p><br></p>
+<h4 id="11-pam-echo-验证模块"><a href="#11-pam-echo-验证模块" class="headerlink" title="(11) pam_echo|验证模块"></a>(11) pam_echo|验证模块</h4><p>描述:该验证模块用来给用户显示通过 file 选项指定的文件中的内容，它适用于所有的验证类型。</p>
+<p><br></p>
+<h4 id="12-pam-motd-验证模块"><a href="#12-pam-motd-验证模块" class="headerlink" title="(12) pam_motd 验证模块"></a>(12) pam_motd 验证模块</h4><p>允许将 /etc/motd 文件中的内容显示给用户，它只适用于 session 验证类型。</p>
+<p><br></p>
+<h4 id="13-pam-lastlog-验证模块"><a href="#13-pam-lastlog-验证模块" class="headerlink" title="(13) pam_lastlog|验证模块"></a>(13) pam_lastlog|验证模块</h4><p>描述:显示用户上次登录的日期和时间，它主要通过读取 /var/log/lastlog 文件来显示。它只适用与 session 验证类型。</p>
+<p><br></p>
+<h4 id="14-pam-warn-验证模块"><a href="#14-pam-warn-验证模块" class="headerlink" title="(14) pam_warn|验证模块"></a>(14) pam_warn|验证模块</h4><p>描述:将刚登录的信息记录到系统日志当中，它一般与 auth 和 password 验证类型一同使用。</p>
+<p><br></p>
+<h4 id="15-pam-wheel-验证模块"><a href="#15-pam-wheel-验证模块" class="headerlink" title="(15) pam_wheel|验证模块"></a>(15) pam_wheel|验证模块</h4><p>描述:当使用此验证模块后，只有加入到了一个 wheel group 中的的根用户，并且提交的密码有效，才能访问指定的服务或系统。将它与 pam_rootok 一同使用能增加对根用户的限制。它只适用于 auth 和 account 验证类型。</p>
+<p><br></p>
+<h4 id="16-pam-passwdqc-密码策略验证模块"><a href="#16-pam-passwdqc-密码策略验证模块" class="headerlink" title="(16) pam_passwdqc|密码策略验证模块"></a>(16) pam_passwdqc|密码策略验证模块</h4><p>描述:该模块与pam_cracklib差不多，主要用来设置Linux用户密码的复杂度;</p>
+<p>模块选项说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">* mix: 设置口令字最小长度，默认值是 mix=disabled 。</span><br><span class="line">* max: 设置口令字的最大长度，默认值是 max=40 。</span><br><span class="line">* passphrase: 设置口令短语中单词的最少个数，默认值是 passphrase=3 ，如果为 0 则禁用口令短语。</span><br><span class="line">* atch: 设置密码串的常见程序，默认值是 match=4 。</span><br><span class="line">* similar: 设置当我们重设口令时，重新设置的新口令能否与旧口令相似，它可以是permit 允许相似或 deny 不允许相似。</span><br><span class="line">* random: 设置随机生成口令字的默认长度。默认值是 random=42 ,设为 0 则禁止该功能。</span><br><span class="line">* retry: 设置用户输入口令字时允许重试的次数，默认值是 retry=3</span><br><span class="line">* enforce: 设置约束范围</span><br><span class="line">  - enforce=none 表示只警告弱口令字，但不禁止它们使用;</span><br><span class="line">  - enforce=users 将对系统上的全体非根用户实行这一限制;</span><br><span class="line">  - enforce=everyone 将对包括根用户在内的全体用户实行这一限制。</span><br><span class="line">* non-unix: 它告诉这个模块不要使用传统的 getpwnam 函数调用获得用户信息，</span><br></pre></td></tr></table></figure></p>
+<p>PS:PAM 管理员指南来得到它们的详细说明。</p>
+<p><br></p>
+<h4 id="17-pam-faillock-在指定间隔内对身份验证失败进行计数模块"><a href="#17-pam-faillock-在指定间隔内对身份验证失败进行计数模块" class="headerlink" title="(17) pam_faillock | 在指定间隔内对身份验证失败进行计数模块"></a>(17) pam_faillock | 在指定间隔内对身份验证失败进行计数模块</h4><p>描述: 该模块 pam_faillock 与 pam_tally2 模块使用类似提供了身份验证和帐户模块类型, 但pam堆栈中pam_faillock的设置不同于pam_ tally2模块设置。</p>
+<blockquote>
+<p>即: 该模块在指定的时间间隔内维护每个用户的失败身份验证尝试列表，并在连续多次拒绝失败身份验证的情况下锁定帐户。<br>简单说: 其都是记录用户登陆失败次数, 超过此阈值将在有效时间内锁定该用户.</p>
+</blockquote>
+<p>帮助文档: <code>man pam_faillock</code></p>
+<p>模块语法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 语法</span></span><br><span class="line">auth ... pam_faillock.so &#123;preauth|authfail|authsucc&#125; [conf=/path/to/config-file]</span><br><span class="line">                          [dir=/path/to/tally-directory] [even_deny_root] [deny=n]</span><br><span class="line">                          [fail_interval=n] [unlock_time=n] [root_unlock_time=n]</span><br><span class="line">                          [admin_group=name] [audit] [silent] [no_log_info]</span><br><span class="line"></span><br><span class="line">account ... pam_faillock.so [dir=/path/to/tally-directory] [no_log_info]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数</span></span><br><span class="line">&#123;preauth|authfail|authsucc&#125; </span><br><span class="line">- preauth ：在请求用户凭据(如密码)的模块之前调用模块时必须使用preauth参数(预授权阶段), 该模块仅检查是否应阻止用户访问服务，以防最近出现异常数量的失败连续身份验证尝试 (前置检查)。</span><br><span class="line">- authfail ：在确定身份验证结果的模块失败后调用模块时，必须使用authfail参数。(中途检查)</span><br><span class="line">- authsucc ：在确定身份验证结果的模块成功后调用模块时，必须使用authsucc参数。(认证成功)</span><br><span class="line"></span><br><span class="line">conf=/path/to/config-file : 指定该模块的外置配置文件，默认为 `/etc/security/faillock.conf`。</span><br><span class="line">dir=/path/to/tally-directory ： 指定该模块的失败次数记录文件目录，每个用户都将创建日志记录，默认为`/var/run/faillock/`。</span><br><span class="line">silent : 静默不显示详细的错误信息,防止攻击者判断系统上是否存在该用户。</span><br><span class="line">audit  : 如果登录的用户没有找到，则将用户名信息记录到系统日志中</span><br><span class="line">no_log_info : 不通过syslog记录日志信息</span><br><span class="line">deny=n ：登陆失败次数</span><br><span class="line">fail_interval=n ：在时间范围内登陆失败次数</span><br><span class="line">unlock_time=n : 锁定时间</span><br><span class="line">root_unlock_time=n : root 锁定时间</span><br></pre></td></tr></table></figure></p>
+<p><strong>使用示例:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 示例1.使用 pam_faillock.so 配置文件配置参数</span></span><br><span class="line">$ cat /etc/pam.d/common-auth</span><br><span class="line"><span class="comment"># here are the per-package modules (the "Primary" block)</span></span><br><span class="line">auth [success=1 default=ignore] pam_unix.so nullok</span><br><span class="line">auth     [default=die]  pam_faillock.so authfail</span><br><span class="line">auth     sufficient     pam_faillock.so authsucc</span><br><span class="line"></span><br><span class="line">$ vim /etc/security/faillock.conf</span><br><span class="line"><span class="comment"># 静默，在15分钟输错三次锁定10分钟，也启用root用户登陆失败锁定限制</span></span><br><span class="line">dir = /var/run/faillock</span><br><span class="line">audit</span><br><span class="line">silent</span><br><span class="line">deny = 3</span><br><span class="line">fail_interval = 900</span><br><span class="line">unlock_time = 600</span><br><span class="line">even_deny_root</span><br><span class="line">root_unlock_time = 900</span><br><span class="line"><span class="comment"># 针对使用该规则组包含的成员生效</span></span><br><span class="line">admin_group = &lt;admin_group_name&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例2.直接在模块后设置 pam_faillock.so 模块参数</span></span><br><span class="line">$ cat /etc/pam.d/common-auth</span><br><span class="line"><span class="comment"># here are the per-package modules (the "Primary" block)</span></span><br><span class="line">auth [success=1 default=ignore] pam_unix.so nullok</span><br><span class="line"></span><br><span class="line"><span class="comment"># login fail record and lock login user (关键点)</span></span><br><span class="line">auth [default=die] pam_faillock.so authfail silent audit dir=/var/run/faillock fail_interval=300 deny=6 unlock_time=600 even_deny_root root_unlock_time=600</span><br><span class="line">auth sufficient pam_faillock.so authsucc</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: 在百度中捡了一圈垃圾后发现其<code>required pam_faillock.so preauth ...</code>配置并不适用于Ubuntu 22.04系统，不得不说还是得看官方文档。</p>
+<p>温馨提示: faillock 模块会因中途输入正确密码而重置错误次数，失败则会错误次数会不断累加。</p>
+<p>结果验证：分别打开两个shell终端，一个运行<code>faillock --user ubuntu</code>观察，一个运行ssh命令连接到其服务器尝试6次输错密码。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ faillock --user ubuntu</span><br><span class="line">ubuntu:</span><br><span class="line">When                Type  Source                                           Valid</span><br><span class="line">2022-08-21 04:02:23 RHOST 10.20.176.101                                        V</span><br><span class="line">2022-08-21 04:02:27 RHOST 10.20.176.101                                        V</span><br><span class="line">2022-08-21 04:02:30 RHOST 10.20.176.101                                        V</span><br><span class="line">2022-08-21 04:02:34 RHOST 10.20.176.101                                        V</span><br><span class="line">2022-08-21 04:02:39 RHOST 10.20.176.101                                        V</span><br><span class="line">2022-08-21 04:02:45 RHOST 10.20.176.101                                        V</span><br><span class="line"></span><br><span class="line">$ faillock --user ubuntu --reset   <span class="comment"># 重置后便可登陆</span></span><br><span class="line">$ faillock --user ubuntu</span><br><span class="line">ubuntu:</span><br><span class="line">When                Type  Source                                           Valid</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h2 id="0x02-PAM应用"><a href="#0x02-PAM应用" class="headerlink" title="0x02 PAM应用"></a>0x02 PAM应用</h2><p>描述:在说到PAM实例应用的使用，我们来复用一哈/etc/passwd文件中用户相关信息;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ cat /etc/passwd</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line"><span class="comment">#用户名称:x:用户id:用户组id:用户描述:用户家目录:用户将登录shell类型</span></span><br><span class="line"></span><br><span class="line">$ cat /etc/shadow</span><br><span class="line">web:<span class="variable">$6</span><span class="variable">$s15TWGyS4h9vSto8</span><span class="variable">$Te5j92jO6FLTRbI5CE2f0ECM66rPl4yJQm9GMPpYNrTGBtR2WbkpZJxfJEdw</span>.ieSat5eWRiI0jQzwk9cbuO2a.::0:99999:7:::</span><br><span class="line"><span class="comment">#用户名称:用户密码(sha512)无密码*:上次修改密码时间(天为单位):限制多少天才可以更改密码(0表示不限制):限制密码使用多长时间后必须设置修改(9999表示无限制):密码到期前7天提醒用户:账户失效时间:到此时间自动取消:系统保留</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="1-密码复杂度"><a href="#1-密码复杂度" class="headerlink" title="1.密码复杂度"></a>1.密码复杂度</h3><p>描述:Linux 用户密码的有效期是否可以修改密码可以通过 login.defs 文件控制,注意对 login.defs 文件修只影响后续建立的用户,如果要改变以前建立的用户的有效期等可以使用 chage 命令。</p>
+<p>Linux 用户密码的复杂度可以通过 <code>pam_cracklib</code>  或 <code>pam_passwdqc</code> 模块控制 , 两者不能同时使用个人感觉 pam_passwdqc 更好用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/login.defs</span><br><span class="line"><span class="comment"># 依赖参见 /etc/pam.d/system-auth</span></span><br><span class="line"><span class="comment"># *REQUIRED*</span></span><br><span class="line"><span class="comment">#   Directory where mailboxes reside, _or_ name of file, relative to the home directory.  If you _do_ define both, MAIL_DIR takes precedence.</span></span><br><span class="line"><span class="comment">#   QMAIL_DIR is for Qmail</span></span><br><span class="line"><span class="comment">#QMAIL_DIR      Maildir</span></span><br><span class="line">MAIL_DIR        /var/spool/mail</span><br><span class="line"><span class="comment">#MAIL_FILE      .mail</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Password aging controls: 密码策略设置</span></span><br><span class="line">PASS_MAX_DAYS   99999  <span class="comment"># 密码的最大有效期 99999永久有期</span></span><br><span class="line">PASS_MIN_DAYS   0</span><br><span class="line">PASS_MIN_LEN    5</span><br><span class="line">PASS_WARN_AGE   7   <span class="comment">#失效前多少天提醒</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Min/max values for automatic uid selection in useradd : 用户ID起始值</span></span><br><span class="line">UID_MIN                  1000</span><br><span class="line">UID_MAX                 60000</span><br><span class="line"><span class="comment"># System accounts : 系统用户ID起始值</span></span><br><span class="line">SYS_UID_MIN               201</span><br><span class="line">SYS_UID_MAX               999</span><br><span class="line"></span><br><span class="line"><span class="comment"># Min/max values for automatic gid selection in groupadd : 组用户起始值</span></span><br><span class="line">GID_MIN                  1000</span><br><span class="line">GID_MAX                 60000</span><br><span class="line"><span class="comment"># System accounts : 系统组用户起始值</span></span><br><span class="line">SYS_GID_MIN               201</span><br><span class="line">SYS_GID_MAX               999</span><br><span class="line"></span><br><span class="line"><span class="comment"># If defined, this command is run when removing a user.</span></span><br><span class="line"><span class="comment"># It should remove any at/cron/print jobs etc. owned by</span></span><br><span class="line"><span class="comment"># the user to be removed (passed as the first argument).</span></span><br><span class="line"><span class="comment">#USERDEL_CMD    /usr/sbin/userdel_local</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># If useradd should create home directories for users by default</span></span><br><span class="line"><span class="comment"># On RH systems, we do. This option is overridden with the -m flag on</span></span><br><span class="line"><span class="comment"># useradd command line.</span></span><br><span class="line">CREATE_HOME     yes</span><br><span class="line"></span><br><span class="line"><span class="comment"># The permission mask is initialized to this value. If not specified,  the permission mask will be initialized to 022.</span></span><br><span class="line"><span class="comment"># 权限掩码初始化，否则默认为022</span></span><br><span class="line">UMASK           077</span><br><span class="line"></span><br><span class="line"><span class="comment"># This enables userdel to remove user groups if no members exist. : 允许userdel在不存在成员的情况下删除用户组。</span></span><br><span class="line">USERGROUPS_ENAB yes</span><br><span class="line"></span><br><span class="line"><span class="comment"># Use SHA512 to encrypt password : 加密方式</span></span><br><span class="line">ENCRYPT_METHOD SHA512</span><br></pre></td></tr></table></figure>
+<p>密码复杂度通过 <code>/etc/pam.d/system-auth</code> 实施:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.要使用 pam_cracklib 将注释去掉 , 把 pam_passwdqc.so 注释掉即可;</span></span><br><span class="line"><span class="comment">#password requisite /lib/security/$ISA/pam_cracklib.so retry=3 difok=1 #新密码至少有一位与原来的不同，尝试三次;</span></span><br><span class="line">password requisite /lib/security/<span class="variable">$ISA</span>/pam_passwdqc.so min=disabled,24,12,8,7 passphrase=3</span><br><span class="line">password sufficient /lib/security/<span class="variable">$ISA</span>/pam_unix.so nullok use_authtok md5 shadow</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.基础使用说明</span></span><br><span class="line">password required pam_cracklib.so retry=3 minlen=12 difok=4 <span class="comment">#密码最小长度12且新旧密码四位不同;</span></span><br><span class="line">password required pam_unix.so sha512 remember=12 use_authtok  <span class="comment">#记住12次密码不允许用户重复使用旧的密码</span></span><br></pre></td></tr></table></figure></p>
+<p>注意事项:</p>
+<ul>
+<li>1.第一步是建立一个空文件用来存储旧密码 <code>/etc/security/opasswd</code> ，如果你没有建立文件却使用了历史密码记录功能的话，所有的密码更新都会失败因为 pam_unix 模块会报错。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.建立和赋值密码记录文件</span></span><br><span class="line"><span class="keyword">if</span> [[ ! -f <span class="string">"/etc/security/opasswd"</span> || <span class="string">"<span class="variable">$(ls -l /etc/security/opasswd | egrep -c '\-rw\-\-\-\-\-\-\-')</span>"</span> != <span class="string">"1"</span> ]];<span class="keyword">then</span></span><br><span class="line">  <span class="comment"># 手动创建/etc/security/opasswd，解决首次登录修改密码时提示"passwd: Authentication token manipulation error"</span></span><br><span class="line">  mv /etc/security/opasswd /etc/security/opasswd.old &gt; /dev/null 2&gt;&amp;1</span><br><span class="line">  touch /etc/security/opasswd</span><br><span class="line">  chown root:root /etc/security/opasswd</span><br><span class="line">  chmod +600 /etc/security/opasswd</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#2.opasswd 文件内容格式如下：</span></span><br><span class="line">hal:1000::,,..., <span class="comment">#以 : 分割，第一列是用户名，第二列是用户 ID ，第三列是目前记录了该用户多少个旧密码， hashN 是每次密码的 sha512 值， opasswd 在某些系统安装 PAM 模块时会自动建立</span></span><br></pre></td></tr></table></figure></li>
+<li>2.检查用户设置的密码是不是违反系统内部的密码字典，不同的发行版密码字典存放地址是不一样的，在<code>Debian:/var/cache/cracklib</code>与<code>CentOS:/usr/share/cracklib</code> 目录下，而且每天晚上 update-cracklib 脚本会自动的 rebuild 密码字典。</li>
+<li>3.在密码管理方面 one time password(OTP) 也很有效果，动态密码管理，有兴趣的同学可以研究一下。</li>
+</ul>
+<hr>
+<h3 id="2-访问锁定"><a href="#2-访问锁定" class="headerlink" title="2.访问锁定"></a>2.访问锁定</h3><p>描述:下面主要正对于ssh多次登录失败锁定用户;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">1 、修改配置文件</span><br><span class="line"><span class="comment"># vi /etc/pam.d/system-auth</span></span><br><span class="line">auth required pam_tally.so deny=3 <span class="comment">#（增加deny=N 为登录失败 N 次后锁定用户）</span></span><br><span class="line">auth required pam_tally2.so deny=3 unlock_time=5 even_deny_root root_unlock_time=10</span><br><span class="line"></span><br><span class="line">2 、在客户端测试</span><br><span class="line"><span class="comment"># ssh user@192.168.1.1 （ user 为服务器端的用户 ,192.168.1.1 为主机 IP 地址）</span></span><br><span class="line"></span><br><span class="line">3 、3 次后再次测试并用正确密码登录会发现仍不能登录</span><br><span class="line">4 、解除锁定方法</span><br><span class="line"><span class="comment"># 在服务器端以 root 用户登录执行命令：</span></span><br><span class="line">方式1: pam_tally.so </span><br><span class="line"><span class="comment"># faillog –a //// 查看用户登录错误次数</span></span><br><span class="line"><span class="comment"># 如果超过三次的话，用户不能登录并且此后登录用户错误登录次数还是会增加。</span></span><br><span class="line"><span class="comment"># 在登录错误次数不满三次时，登录成功后，则这个用户登录错误值将清零，退出后重新 ssh 登录将采用新的计数。</span></span><br><span class="line"><span class="comment"># faillog -u user –r //// 清空指定用户 user 的错误登录次数</span></span><br><span class="line"><span class="comment"># faillog –r //// 清空所有用户错误登录次数</span></span><br><span class="line"></span><br><span class="line">方式2: pam_tally2.so </span><br><span class="line"><span class="comment"># 使用pam_tally2命令来查看用户登录失败的信息</span></span><br><span class="line">pam_tally2 -u <span class="built_in">test</span></span><br><span class="line"><span class="comment"># Login  Failures Latest failure From</span></span><br><span class="line"><span class="comment"># test  1 06/20/17 14:18:19 192.168.56.1</span></span><br><span class="line"><span class="comment"># 也可用来解锁用户</span></span><br><span class="line">pam_tally2 -r -u <span class="built_in">test</span></span><br></pre></td></tr></table></figure>
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-08-24T01:09:43.165Z" itemprop="dateUpdated">2022-08-24 09:09:43</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/系统运维/Linux/运维知识/Linux之PAM系统认证模块说明.md" target="_blank" rel="noopener noreferrer">_posts/系统运维/Linux/运维知识/Linux之PAM系统认证模块说明.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/5-1-211.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/5-1-211.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5-1-211.html&title=《Linux之PAM系统模块详解说明》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5-1-211.html&title=《Linux之PAM系统模块详解说明》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/5-1-211.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Linux之PAM系统模块详解说明》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/5-1-211.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/5-1-211.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/5-2-472.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">n-Kubernetes入坑解决FAQ记录</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/5-1-213.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Linux基础命令行使用技巧</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言介绍</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-基础配置"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 基础配置</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-配置简要说明"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.配置简要说明</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-常用模块说明"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.常用模块说明</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-pam-access-登陆访问限制模块"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">(1) pam_access|登陆访问限制模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-pam-cracklib-密码策略验证模块（old）"><span class="post-toc-number">2.2.2.</span> <span class="post-toc-text">(2) pam_cracklib | 密码策略验证模块（old）</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-pam-limit-资源服务限制模块"><span class="post-toc-number">2.2.3.</span> <span class="post-toc-text">(3) pam_limit|资源服务限制模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-pam-time-日期时间终端限制模块"><span class="post-toc-number">2.2.4.</span> <span class="post-toc-text">(4) pam_time|日期时间终端限制模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-pam-listfile-文件服务访问验证模块"><span class="post-toc-number">2.2.5.</span> <span class="post-toc-text">(5) pam_listfile|文件服务访问验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#6-pam-unix-认证类型验证模块"><span class="post-toc-number">2.2.6.</span> <span class="post-toc-text">(6) pam_unix|认证类型验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#7-pam-deny-配置访问验证模块"><span class="post-toc-number">2.2.7.</span> <span class="post-toc-text">(7) pam_deny|配置访问验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#8-pam-rootok-验证模块"><span class="post-toc-number">2.2.8.</span> <span class="post-toc-text">(8) pam_rootok|验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#9-pam-security-验证模块"><span class="post-toc-number">2.2.9.</span> <span class="post-toc-text">(9) pam_security|验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#10-pam-nologin-验证模块"><span class="post-toc-number">2.2.10.</span> <span class="post-toc-text">(10) pam_nologin|验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#11-pam-echo-验证模块"><span class="post-toc-number">2.2.11.</span> <span class="post-toc-text">(11) pam_echo|验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#12-pam-motd-验证模块"><span class="post-toc-number">2.2.12.</span> <span class="post-toc-text">(12) pam_motd 验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#13-pam-lastlog-验证模块"><span class="post-toc-number">2.2.13.</span> <span class="post-toc-text">(13) pam_lastlog|验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#14-pam-warn-验证模块"><span class="post-toc-number">2.2.14.</span> <span class="post-toc-text">(14) pam_warn|验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#15-pam-wheel-验证模块"><span class="post-toc-number">2.2.15.</span> <span class="post-toc-text">(15) pam_wheel|验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#16-pam-passwdqc-密码策略验证模块"><span class="post-toc-number">2.2.16.</span> <span class="post-toc-text">(16) pam_passwdqc|密码策略验证模块</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#17-pam-faillock-在指定间隔内对身份验证失败进行计数模块"><span class="post-toc-number">2.2.17.</span> <span class="post-toc-text">(17) pam_faillock | 在指定间隔内对身份验证失败进行计数模块</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-PAM应用"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 PAM应用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-密码复杂度"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">1.密码复杂度</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-访问锁定"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">2.访问锁定</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5-1-211.html&title=《Linux之PAM系统模块详解说明》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5-1-211.html&title=《Linux之PAM系统模块详解说明》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/5-1-211.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Linux之PAM系统模块详解说明》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/5-1-211.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/5-1-211.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKElEQVR42u3aUW7DMAwE0dz/0ukJ7M5ykwCix1+GkSh8LsCSlF4vfL3BdfX5+zXTb1WXDBkyjmWQ4Ejo94FerUnu0a/LkCHjAQwSxD2ef+sedr/C5XMZMmTICO8JmKdpGTJkyJglXFIykjY1TdkyZMh4MiMNiBR/n0riH+7FZciQcSCDT91/f/+V/Q0ZMmQcxXiH12z0n255xlHJkCFjNYMnOBIELw35qyHryJAhYzejSalkTNYcDgueyJAhYzWjaVb7oT8vCnkMMmTI2MqYNY38yNcs+cbJWoYMGasZs9k76Y/7J03DLEOGjH0Mvtxs65En0OovIEOGjNUM8mN87MXxaWOMSkMZMmQsZcwW4kcu+gyJWlwZMmSsY5BSjKfItPmcjdL+2RKQIUPGOkbTyvZpl/83qKaDMmTIOJyRloPpMC5ta4evSYYMGasZZJOSJ8qgdEs77H6vVYYMGccyyEGudB2emmcDuMskK0OGjKWMpqXkh1z5y+KlarAHK0OGjBWMJiCefNMQeXEpQ4aM5zB+s1XJk3hMlSFDxmMYTWvafL4/OiZDhoytjHd4ke2E2dgu3RwNalsZMmQczmiOizVlZZrWm41SGTJk7GDwcdssRaYpOE30MmTIeA6DlGu8NEzT9OwQhgwZMmTwsixNo7OyEg3dZMiQIQOnSx50mqA/VhrKkCHjQMasyONBzzYpvzJukyFDxoEM3jrOth7TIGbJWoYMGUsZf2+Gapii4vr5AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

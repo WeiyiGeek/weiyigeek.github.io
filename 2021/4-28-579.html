@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 8.Prometheus监控之所遇问题解决总结|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Prometheus">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>8.Prometheus监控之所遇问题解决总结</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">8.Prometheus监控之所遇问题解决总结</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2021-04-28T12:39:47.000Z" itemprop="datePublished" class="page-time">
+  2021-04-28
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/monitor/">monitor</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/monitor/kubernetes/">kubernetes</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/monitor/kubernetes/OperationTools/">OperationTools</a></li></ul></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Kubernetes/功能组件/Prometheus/8.Prometheus监控之所遇问题解决总结"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">8.Prometheus监控之所遇问题解决总结</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2021-04-28 20:39:47" datetime="2021-04-28T12:39:47.000Z"  itemprop="datePublished">2021-04-28</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/monitor/">monitor</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/monitor/kubernetes/">kubernetes</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/monitor/kubernetes/OperationTools/">OperationTools</a></li></ul></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x01-Prometheus-安装异常整理"><a href="#0x01-Prometheus-安装异常整理" class="headerlink" title="0x01 Prometheus 安装异常整理"></a>0x01 Prometheus 安装异常整理</h2><h3 id="问题1-访问node-exporter程序的9100的-metrics提示context-deadline-exceeded错误"><a href="#问题1-访问node-exporter程序的9100的-metrics提示context-deadline-exceeded错误" class="headerlink" title="问题1.访问node_exporter程序的9100的/metrics提示context deadline exceeded错误"></a>问题1.访问node_exporter程序的9100的/metrics提示context deadline exceeded错误</h3><p>异常信息:<code>Get http://192.168.90.177:9100/metrics: context deadline exceeded</code><br>问题原因: 有可能是系统端口未开放。<br>解决办法：指定其他端口或者更改防火墙访问策略。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 解决方式1</span></span><br><span class="line">nohup ./node_exporter  --web.listen-address=<span class="string">":9100"</span> &amp; </span><br><span class="line"></span><br><span class="line"><span class="comment"># 解决方式2</span></span><br><span class="line"><span class="comment"># CentOS</span></span><br><span class="line">firewall-cmd --zone=public --add-port=9100/tcp --permanent <span class="comment">#永久生效没有permanent参数重启后失效</span></span><br><span class="line">firewall-cmd --reload <span class="comment">#重新载入配置生效</span></span><br><span class="line"><span class="comment"># Ubuntu</span></span><br><span class="line">sudo ufw allow 9100</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="问题2-采用Docker进行prometheus-server端安装报msg-quot-Failed-to-create-directory-for-logging-active-queries-quot-错误"><a href="#问题2-采用Docker进行prometheus-server端安装报msg-quot-Failed-to-create-directory-for-logging-active-queries-quot-错误" class="headerlink" title="问题2.采用Docker进行prometheus server端安装报msg=&quot;Failed to create directory for logging active queries&quot;错误;"></a>问题2.采用Docker进行prometheus server端安装报<code>msg=&quot;Failed to create directory for logging active queries&quot;</code>错误;</h3><ul>
+<li>异常信息: 在持久化映射目录下没有<code>prometheus.yml</code>文件因此会被临时创建一个目录文件导致出错或者因为持久化的数据目录权限问题。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ docker logs prometheus_server</span><br><span class="line">  <span class="comment"># prometheus_server | level=error ts=2021-04-30T07:50:11.241Z caller=query_logger.go:109 component=activeQueryTracker msg="Failed to create directory for logging active queries"</span></span><br><span class="line">  <span class="comment"># prometheus_server | level=error ts=2021-04-30T07:50:11.241Z caller=query_logger.go:87 component=activeQueryTracker msg="Error opening query log file" file=data/queries.active err="open data/queries.active: no such file or directory"</span></span><br><span class="line">  <span class="comment"># prometheus_server | panic: Unable to create mmap-ed active query log</span></span><br><span class="line">  <span class="comment"># component=activeQueryTracker msg="Error opening query log file" file=/prometheus/queries.active err="open /prometheus/queries.active: permission denied"</span></span><br><span class="line"><span class="comment"># panic: Unable to create mmap-ed active query log</span></span><br></pre></td></tr></table></figure></li>
+<li>解决办法: 在映射的持久化目录下创建<code>prometheus.yml</code>文件并进行相应权限配置。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">chmod +777 /nfsdisk-31/monitor/prometheus</span><br><span class="line">docker run -p 9090:9090 -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml \</span><br><span class="line">  -v /nfsdisk-31/monitor/prometheus:/prometheus \ </span><br><span class="line">  prom/prometheus</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips : 注意 Prometheus 2.x 版本容器的数据目录是<code>/prometheus而非/prometheus-data</code>目录;</p>
+<p><br></p>
+<h3 id="问题3-安装运行prometheus-server端时显示This-filesystem-is-not-supported-and-may-lead-to-data-corruption-and-data-loss警告。"><a href="#问题3-安装运行prometheus-server端时显示This-filesystem-is-not-supported-and-may-lead-to-data-corruption-and-data-loss警告。" class="headerlink" title="问题3.安装运行prometheus_server端时显示This filesystem is not supported and may lead to data corruption and data loss警告。"></a>问题3.安装运行prometheus_server端时显示<code>This filesystem is not supported and may lead to data corruption and data loss</code>警告。</h3><p>异常信息: 由于prometheus包括本地磁盘时间序列数据库，但也可以选择与远程存储系统集成，此文件系统不受支持可能导致数据损坏和数据丢失。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prometheus_server | level=warn ts=2021-05-10T05:46:49.843Z <span class="built_in">caller</span>=main.go:813 fs_type=NFS_SUPER_MAGIC msg=<span class="string">"This filesystem is not supported and may lead to data corruption and data loss. Please carefully read https://prometheus.io/docs/prometheus/latest/storage/ to learn more about supported filesystems."</span></span><br></pre></td></tr></table></figure><br>异常原因: Prometheus的本地存储不支持不兼容POSIX的文件系统，因为可能会发生不可恢复的损坏。不支持NFS文件系统（包括AWS的EFS）。NFS可能符合POSIX，但大多数实现均不符合。强烈建议使用本地文件系统以提高可靠性，所以此种共享存储文件的方式不推荐。<br>解决办法: 如果您的本地存储由于某种原因而损坏，解决该问题的最佳策略是关闭Prometheus，然后删除整个存储目录,您也可以尝试删除单个块目录或WAL目录以解决问题。如果数据没问题只是报警你使用了NFS共享存储文件的格式建议采用<code>FC SAN 存储直连</code>或者加大磁盘存储空间。</p>
+<p><br/></p>
+<h3 id="问题4-使用Prometheus监控外部k8s集群时提示-x509-certificate-signed-by-unknown-authority-错误"><a href="#问题4-使用Prometheus监控外部k8s集群时提示-x509-certificate-signed-by-unknown-authority-错误" class="headerlink" title="问题4.使用Prometheus监控外部k8s集群时提示 x509: certificate signed by unknown authority 错误"></a>问题4.使用Prometheus监控外部k8s集群时提示 <code>x509: certificate signed by unknown authority</code> 错误</h3><p>异常信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prometheus_server | level=error ts=2021-05-10T05:43:12.126Z <span class="built_in">caller</span>=klog.go:96 component=k8s_client_runtime func=ErrorDepth msg=<span class="string">"pkg/mod/k8s.io/client-go@v0.20.5/tools/cache/reflector.go:167: Failed to watch *v1.Pod: failed to list *v1.Pod: Get \"https://k8s-dev.weiyigeek:6443/api/v1/pods?limit=500&amp;resourceVersion=0\": x509: certificate signed by unknown authority"</span></span><br></pre></td></tr></table></figure><br>解决办法:  在prometheus.yaml主配置中在kubernetes_sd_file对象内的使用<code>insecure_skip_verify: true</code> 来跳过 tls 验证。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tls_config:</span><br><span class="line">  insecure_skip_verify: <span class="literal">true</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="问题5-使用Prometheus监控外部k8s集群时提示cannot-list-resource-quot-services-quot-in-API-group-错误"><a href="#问题5-使用Prometheus监控外部k8s集群时提示cannot-list-resource-quot-services-quot-in-API-group-错误" class="headerlink" title="问题5.使用Prometheus监控外部k8s集群时提示cannot list resource \&quot;services\&quot; in API group 错误"></a>问题5.使用Prometheus监控外部k8s集群时提示<code>cannot list resource \&quot;services\&quot; in API group</code> 错误</h3><p>异常信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prometheus_server | level=error ts=2021-05-10T09:09:30.960Z <span class="built_in">caller</span>=klog.go:96 component=k8s_client_runtime func=ErrorDepth msg=<span class="string">"pkg/mod/k8s.io/client-go@v0.20.5/tools/cache/reflector.go:167: Failed to watch *v1.Service: failed to list *v1.Service: services is forbidden: User \"system:serviceaccount:default:prometheus\" cannot list resource \"services\" in API group \"\" at the cluster scope"</span></span><br></pre></td></tr></table></figure><br>问题原因: 当前Token所属prometheus用户无该services查看浏览权限需要在<code>ClsuterRole</code>进行添加相对应的权限。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl get clusterrole prometheus -o yaml <span class="comment"># 采用yaml格式查看其权限集群角色权限</span></span><br><span class="line">  <span class="comment"># NAME         CREATED AT</span></span><br><span class="line">  <span class="comment"># prometheus   2021-05-14T08:29:08Z</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h2 id="0x02-Prometheus-使用异常整理"><a href="#0x02-Prometheus-使用异常整理" class="headerlink" title="0x02 Prometheus 使用异常整理"></a>0x02 Prometheus 使用异常整理</h2><h3 id="问题1-Warning-Error-fetching-server-time-Detected-82-30200004577637-seconds-time-difference-between-your-browser-and-the-server"><a href="#问题1-Warning-Error-fetching-server-time-Detected-82-30200004577637-seconds-time-difference-between-your-browser-and-the-server" class="headerlink" title="问题1.Warning: Error fetching server time: Detected 82.30200004577637 seconds time difference between your browser and the server."></a>问题1.Warning: Error fetching server time: Detected 82.30200004577637 seconds time difference between your browser and the server.</h3><ul>
+<li>异常信息: 服务器时间:检测到您的浏览器和服务器之间有82.30200004577637秒的时间差。Prometheus依赖于精确的时间，而时间漂移可能会导致意外的查询结果。</li>
+<li>问题原因: 服务器的时间与本地时间不一致从而导致, PS 在 Prometheus web 中偏差大于 5 min 时，无法查询到任何数据，当时间偏差小于 5min 时，可以查到数据，并且正常在 Grafana 中显示。</li>
+<li>解决办法: 服务器时间与本机时间设置一致即可;<figure class="image-box">
+                <a rel=8.Prometheus监控之所遇问题解决总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201208162527.png" target="_blank" title="WeiyiGeek.Prometheus-time-sync" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201208162527.png" alt="WeiyiGeek.Prometheus-time-sync" title="" class=""></a>
+                <p>WeiyiGeek.Prometheus-time-sync</p>
+            </figure>
+</li>
+</ul>
+<p><br/></p>
+<h3 id="问题2-在启动postgres-exporter监测失败"><a href="#问题2-在启动postgres-exporter监测失败" class="headerlink" title="问题2.在启动postgres_exporter监测失败"></a>问题2.在启动postgres_exporter监测失败</h3><p>解决办法: 在启动postgres_exporter的Linux用户下加入<code>DATA_SOURCE_NAME</code>环境变量<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 环境变量添加</span></span><br><span class="line">tee -a ~/.bash_profile &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="built_in">export</span> DATA_SOURCE_NAME=<span class="string">"postgresql://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable"</span></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 环境变量生效</span></span><br><span class="line"><span class="built_in">source</span> .bash_profile &amp;&amp; <span class="built_in">echo</span> <span class="variable">$DATA_SOURCE_NAME</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动 postgres 导出器</span></span><br><span class="line">./postgres_exporter</span><br></pre></td></tr></table></figure></p>
+<h2 id="0x03-AlertManager-使用异常整理"><a href="#0x03-AlertManager-使用异常整理" class="headerlink" title="0x03 AlertManager 使用异常整理"></a>0x03 AlertManager 使用异常整理</h2><h3 id="问题1-配置使用企业邮箱进行报警时显示email-loginAuth-failed-530-Must-issue-a-STARTTLS-command-first错误"><a href="#问题1-配置使用企业邮箱进行报警时显示email-loginAuth-failed-530-Must-issue-a-STARTTLS-command-first错误" class="headerlink" title="问题1.配置使用企业邮箱进行报警时显示email.loginAuth failed: 530 Must issue a STARTTLS command first错误"></a>问题1.配置使用企业邮箱进行报警时显示<code>email.loginAuth failed: 530 Must issue a STARTTLS command first</code>错误</h3><p>问题原因: 接入的邮件服务器必须使用tls并且进行有效身份校验。<br>解决办法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">smtp_require_tls: <span class="literal">true</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="问题2-配置使用企业邮箱进行报警时显示starttls-failed-x509-certificate-signed-by-unknown-authority错误"><a href="#问题2-配置使用企业邮箱进行报警时显示starttls-failed-x509-certificate-signed-by-unknown-authority错误" class="headerlink" title="问题2.配置使用企业邮箱进行报警时显示starttls failed: x509: certificate signed by unknown authority错误"></a>问题2.配置使用企业邮箱进行报警时显示<code>starttls failed: x509: certificate signed by unknown authority</code>错误</h3><p>问题原因: 未知机构签署的证书即客户端访问服务端时证书不受信赖<br>解决办法: 需要在 <code>email_configs</code> 下配置 insecure_skip_verify: true 来跳过 tls 验证<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">receivers:</span><br><span class="line">- name: <span class="string">'default-email'</span></span><br><span class="line">  email_configs:</span><br><span class="line">  - to: <span class="string">'master@weiyigeek.top'</span></span><br><span class="line">    insecure_skip_verify: <span class="literal">true</span></span><br><span class="line">    send_resolved: <span class="literal">true</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="问题3-邮件预警配置时遇到的错误记录"><a href="#问题3-邮件预警配置时遇到的错误记录" class="headerlink" title="问题3.邮件预警配置时遇到的错误记录"></a>问题3.邮件预警配置时遇到的错误记录</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - 当在global配置 smtp.weiyigeek.top:25</span></span><br><span class="line">报错信息：</span><br><span class="line">level=error ts=2020-04-08T06:02:44.036Z <span class="built_in">caller</span>=notify.go:372 component=dispatcher msg=“Error on notify” err=“send STARTTLS <span class="built_in">command</span>: x509: certificate is valid <span class="keyword">for</span> *.mxhichina.com, mxhichina.com, not smtp.weiyigeek.top” context_err=“context deadline exceeded”</span><br><span class="line">level=error ts=2020-04-08T06:02:44.036Z <span class="built_in">caller</span>=dispatch.go:301 component=dispatcher msg=“Notify <span class="keyword">for</span> alerts failed” num_alerts=1 err=“send STARTTLS <span class="built_in">command</span>: x509: certificate is valid <span class="keyword">for</span> *.mxhichina.com, mxhichina.com, not smtp.weiyigeek.top”</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 当在global配置</span></span><br><span class="line"><span class="comment"># smtp.weiyigeek.top</span></span><br><span class="line"><span class="comment"># smtp_require_tls:false</span></span><br><span class="line">报错信息：</span><br><span class="line">level=warn ts=2020-10-12T10:34:11.780Z <span class="built_in">caller</span>=notify.go:674 component=dispatcher receiver=mail-receiver integration=email[0] msg=“Notify attempt failed, will retry later” attempts=1 err=<span class="string">"*smtp.plainAuth auth: unencrypted connection"</span></span><br><span class="line">level=error ts=2020-10-12T10:34:21.581Z <span class="built_in">caller</span>=dispatch.go:309 component=dispatcher msg=“Notify <span class="keyword">for</span> alerts failed” num_alerts=1 err=“mail-receiver/email[0]: notify retry canceled after 7 attempts: *smtp.plainAuth auth: unencrypted connection”</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 配置smtp.qiye.aliyun.com:465</span></span><br><span class="line">报错信息：</span><br><span class="line">level=warn ts=2020-10-12T11:36:41.779Z <span class="built_in">caller</span>=notify.go:674 component=dispatcher receiver=mail-receiver integration=email[0] msg=“Notify attempt failed, will retry later” attempts=1 err=<span class="string">"‘require_tls’ is true (default) but “smtp.qiye.aliyun.com:465” does not advertise the STARTTLS extension"</span></span><br><span class="line">level=error ts=2020-10-12T11:36:51.578Z <span class="built_in">caller</span>=dispatch.go:309 component=dispatcher msg=“Notify <span class="keyword">for</span> alerts failed” num_alerts=1 err=“mail-receiver/email[0]: notify retry canceled after 8 attempts: ‘require_tls’ is <span class="literal">true</span> (default) but “smtp.qiye.aliyun.com:465” does not advertise the STARTTLS extension”tail: /opt/logs/alertmanager-9093.log: file truncated</span><br></pre></td></tr></table></figure>
+<p>解决办法: 配置以下两行发送邮件正常<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">smtp.qiye.aliyun.com:465</span><br><span class="line">smtp_require_tls: <span class="literal">false</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="问题4-邮件预警配置使用时报notify-retry-canceled-after-2-attempts-email-loginAuth-auth-535-Error-错误信息。"><a href="#问题4-邮件预警配置使用时报notify-retry-canceled-after-2-attempts-email-loginAuth-auth-535-Error-错误信息。" class="headerlink" title="问题4.邮件预警配置使用时报notify retry canceled after 2 attempts: *email.loginAuth auth: 535 Error:错误信息。"></a>问题4.邮件预警配置使用时报<code>notify retry canceled after 2 attempts: *email.loginAuth auth: 535 Error:</code>错误信息。</h3><p>错误信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">level=error ts=2021-05-20T14:34:43.637Z <span class="built_in">caller</span>=dispatch.go:309 component=dispatcher msg=<span class="string">"Notify for alerts failed"</span> num_alerts=2 err=<span class="string">"default-email/email[0]: notify retry canceled after 2 attempts: *email.loginAuth auth: 535 Error: \ufffd\ufffdʹ\ufffd\ufffd\ufffd\ufffdȨ\ufffd\ufffd\ufffd\ufffd¼\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd뿴: http://service.mail.qq.com/cgi-bin/help?subtype=1&amp;&amp;id=28&amp;&amp;no=1001256"</span></span><br></pre></td></tr></table></figure><br>错误原因: 邮箱认证密码未采用用于登录第三方客户端的专用密码或者设置的tmpl模板路径不正确,此时只需按照上述的地址进行申请发信邮箱的专用密码。（实际测试发现QQ邮箱必须要使用第三方专用密码，而企业邮箱可以直接用登陆密码进行认证<code>不推荐</code>）</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:03.652Z" itemprop="dateUpdated">2022-03-29 13:39:03</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Kubernetes/功能组件/Prometheus/8.Prometheus监控之所遇问题解决总结.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Kubernetes/功能组件/Prometheus/8.Prometheus监控之所遇问题解决总结.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2021/4-28-579.html" target="_blank" rel="external">https://blog.weiyigeek.top/2021/4-28-579.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Prometheus/" rel="tag">Prometheus</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/4-28-579.html&title=《8.Prometheus监控之所遇问题解决总结》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/4-28-579.html&title=《8.Prometheus监控之所遇问题解决总结》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/4-28-579.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《8.Prometheus监控之所遇问题解决总结》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/4-28-579.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/4-28-579.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2021/5-11-615.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Kubernetes之Kuboard多集群管理工具安装实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2021/4-28-578.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">7.Prometheus监控进阶之自定义监控业务应用</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-Prometheus-安装异常整理"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x01 Prometheus 安装异常整理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题1-访问node-exporter程序的9100的-metrics提示context-deadline-exceeded错误"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">问题1.访问node_exporter程序的9100的&#x2F;metrics提示context deadline exceeded错误</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题2-采用Docker进行prometheus-server端安装报msg-quot-Failed-to-create-directory-for-logging-active-queries-quot-错误"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">问题2.采用Docker进行prometheus server端安装报msg&#x3D;&quot;Failed to create directory for logging active queries&quot;错误;</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题3-安装运行prometheus-server端时显示This-filesystem-is-not-supported-and-may-lead-to-data-corruption-and-data-loss警告。"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">问题3.安装运行prometheus_server端时显示This filesystem is not supported and may lead to data corruption and data loss警告。</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题4-使用Prometheus监控外部k8s集群时提示-x509-certificate-signed-by-unknown-authority-错误"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">问题4.使用Prometheus监控外部k8s集群时提示 x509: certificate signed by unknown authority 错误</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题5-使用Prometheus监控外部k8s集群时提示cannot-list-resource-quot-services-quot-in-API-group-错误"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">问题5.使用Prometheus监控外部k8s集群时提示cannot list resource \&quot;services\&quot; in API group 错误</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-Prometheus-使用异常整理"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x02 Prometheus 使用异常整理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题1-Warning-Error-fetching-server-time-Detected-82-30200004577637-seconds-time-difference-between-your-browser-and-the-server"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">问题1.Warning: Error fetching server time: Detected 82.30200004577637 seconds time difference between your browser and the server.</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题2-在启动postgres-exporter监测失败"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">问题2.在启动postgres_exporter监测失败</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-AlertManager-使用异常整理"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x03 AlertManager 使用异常整理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题1-配置使用企业邮箱进行报警时显示email-loginAuth-failed-530-Must-issue-a-STARTTLS-command-first错误"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">问题1.配置使用企业邮箱进行报警时显示email.loginAuth failed: 530 Must issue a STARTTLS command first错误</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题2-配置使用企业邮箱进行报警时显示starttls-failed-x509-certificate-signed-by-unknown-authority错误"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">问题2.配置使用企业邮箱进行报警时显示starttls failed: x509: certificate signed by unknown authority错误</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题3-邮件预警配置时遇到的错误记录"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">问题3.邮件预警配置时遇到的错误记录</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题4-邮件预警配置使用时报notify-retry-canceled-after-2-attempts-email-loginAuth-auth-535-Error-错误信息。"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">问题4.邮件预警配置使用时报notify retry canceled after 2 attempts: *email.loginAuth auth: 535 Error:错误信息。</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/4-28-579.html&title=《8.Prometheus监控之所遇问题解决总结》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/4-28-579.html&title=《8.Prometheus监控之所遇问题解决总结》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/4-28-579.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《8.Prometheus监控之所遇问题解决总结》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/4-28-579.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/4-28-579.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLElEQVR42u3aQVKEQAwF0Ln/pXGrNUL9JIxWN4+Vhdj0YxHTSV6v+DrerrPfJs9/f+Z6nZsvDAyMZRnH5XX9TI452/r7/eS9v6yDgYHxAEa+dA92/cyEjYGBgVF9pndn8l4MDAyM0dLBAfXfAi4GBsaCjOQQWy29XW8iWfMjZ3EMDIwFGXnV/e9//kh/AwMDYynGUbzyQ+x1wjffyY81MTAwtmbkAa6XzFUPtJP9YGBg7MroHUTnG80LcNEdDAyMrRl5gaywXKvoX212nv7fwMDA2JRxvcUq794hsLy1gIGBsSsjCWrVlDEppd37ITAwMPZmJGEuH7+ofoi8eRk1ODEwMDZlVA+leSp5VzMg+isMDIwHMCYjF/MiWq9FMZoZwcDAWIqRJ2HVZDE5yt5cL8TAwHgMIwmmOW9SaOslrBgYGHszmuX4OETmzYYJGAMDY1dGNaWbD1VUE9NCqMXAwHgMo1f86pXJkuQy+ugYGBiPYSSBddK8rI5iJHgMDAyM3gvyNkB1hVMMBgbGgxm9tK96HM1bp6dpIgYGxgMYkxBZ/RzlgYn8EIuBgbEd4yhe+cEy2ehk7KwQajEwMBZnTEbEeolddWjj5pCNgYGxLKNc2IqRvSGwZETshkMsBgbGgozqkFaSzPXSxDz0Y2BgYPQGI3oBt9ccjb4EBgYGRpAOTtoJCQkDA+M5jOQQOw+RvbGzm8ttGBgYCzJGkxqt1kLeZsibmhgYGJsyvgCVM7JQIuWN1wAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

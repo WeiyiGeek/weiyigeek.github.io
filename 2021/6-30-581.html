@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 3.基于Containerd容器运行时的配置浅析与知识扩充实践|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Containerd">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>3.基于Containerd容器运行时的配置浅析与知识扩充实践</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">3.基于Containerd容器运行时的配置浅析与知识扩充实践</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2021-06-30T06:36:30.000Z" itemprop="datePublished" class="page-time">
+  2021-06-30
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Containerd/3.基于Containerd容器运行时的配置浅析与知识扩充实践"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">3.基于Containerd容器运行时的配置浅析与知识扩充实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2021-06-30 14:36:30" datetime="2021-06-30T06:36:30.000Z"  itemprop="datePublished">2021-06-30</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<p> Docker Runtime kubernetes 云原生 CNCF containerd.io containerd 容器运行时 WeiyiGeek 容器客户端工具</p>
+<h2 id="0x00-Containerd-容器运行时配置指南"><a href="#0x00-Containerd-容器运行时配置指南" class="headerlink" title="0x00 Containerd 容器运行时配置指南"></a>0x00 Containerd 容器运行时配置指南</h2><p>描述: containerd 是一个在任何系统上运行的简单守护程序。它提供了一个带有旋钮的最小配置，用于配置守护程序以及在必要时使用哪些插件。</p>
+<p>在当前最新的 Containerd v1.6.2版本中其<code>/etc/containerd/config.toml</code>配置文件项存在变化, 下面的文档中提供了常用配置以及CRI插件配置的说明。</p>
+<p>官方参考地址: <a href="https://github.com/containerd/containerd/blob/main/docs/cri/config.md" target="_blank" rel="noopener">https://github.com/containerd/containerd/blob/main/docs/cri/config.md</a></p>
+<p><br/></p>
+<h3 id="如何配置-Containerd-的-systemd-守护进程服务"><a href="#如何配置-Containerd-的-systemd-守护进程服务" class="headerlink" title="如何配置 Containerd 的 systemd 守护进程服务?"></a>如何配置 Containerd 的 systemd 守护进程服务?</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">$ cat /lib/systemd/system/containerd.service</span><br><span class="line"></span><br><span class="line">[Unit]</span><br><span class="line">Description=containerd container runtime</span><br><span class="line">Documentation=https://containerd.io</span><br><span class="line">After=network.target <span class="built_in">local</span>-fs.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStartPre=-/sbin/modprobe overlay</span><br><span class="line">ExecStart=/usr/bin/containerd</span><br><span class="line">Type=notify</span><br><span class="line"><span class="comment"># 允许 containerd 及其运行时管理它所创建的容器的 cgroups</span></span><br><span class="line">Delegate=yes</span><br><span class="line"><span class="comment"># 确保在 containerd 被关闭时仅终止 containerd 守护程序，而不终止任何子进程，如填充程序和容器</span></span><br><span class="line">KillMode=process</span><br><span class="line">Restart=always</span><br><span class="line">RestartSec=5</span><br><span class="line"><span class="comment"># Having non-zero Limit*s causes performance problems due to accounting overhead in the kernel. We recommend using cgroups to do container-local accounting.</span></span><br><span class="line">LimitNPROC=infinity</span><br><span class="line">LimitCORE=infinity</span><br><span class="line">LimitNOFILE=infinity</span><br><span class="line"><span class="comment"># Comment TasksMax if your systemd version does not supports it.Only systemd 226 and above support this version.</span></span><br><span class="line">TasksMax=infinity</span><br><span class="line">OOMScoreAdjust=-999</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h3 id="如何查看-Containerd-相关插件及其存目录"><a href="#如何查看-Containerd-相关插件及其存目录" class="headerlink" title="如何查看 Containerd 相关插件及其存目录?"></a>如何查看 Containerd 相关插件及其存目录?</h3><p>描述：在 containerd 配置文件中，您将找到持久性和运行时存储位置的设置，以及各种 API 的 grpc、调试和指标地址。<br>containerd 在主机系统上还有两个不同的存储位置, <code>一个用于持久性数据，另一个用于运行时状态</code>。</p>
+<ul>
+<li><p>root将用于存储容器的任何类型的持久性数据。快照、内容、容器和映像的元数据以及任何插件数据都将保留在此位置。根目录也为容器加载的插件提供了命名空间。每个插件都有自己的目录来存储数据。containerd本身实际上没有任何需要存储的持久性数据，其功能来自加载的插件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">/var/lib/containerd/</span><br><span class="line">├── io.containerd.content.v1.content</span><br><span class="line">│   ├── blobs</span><br><span class="line">│   └── ingest</span><br><span class="line">├── io.containerd.metadata.v1.bolt</span><br><span class="line">│   └── meta.db</span><br><span class="line">├── io.containerd.runtime.v2.task</span><br><span class="line">│   ├── default</span><br><span class="line">│   └── example</span><br><span class="line">├── io.containerd.snapshotter.v1.btrfs</span><br><span class="line">└── io.containerd.snapshotter.v1.overlayfs</span><br><span class="line">    ├── metadata.db</span><br><span class="line">    └── snapshots</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>state将用于存储任何类型的临时数据, 套接字、pids、运行时状态、挂载点和其他在重新启动之间不得保留的插件数据存储在此位置。</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">/run/containerd</span><br><span class="line">├── containerd.sock</span><br><span class="line">├── debug.sock</span><br><span class="line">├── io.containerd.runtime.v2.task</span><br><span class="line">│   └── default</span><br><span class="line">│       └── redis</span><br><span class="line">│           ├── config.json</span><br><span class="line">│           ├── init.pid</span><br><span class="line">│           ├── log.json</span><br><span class="line">│           └── rootfs</span><br><span class="line">│               ├── bin</span><br><span class="line">│               ├── data</span><br><span class="line">│               ├── dev</span><br><span class="line">│               ├── etc</span><br><span class="line">│               ├── home</span><br><span class="line">│               ├── lib</span><br><span class="line">│               ├── media</span><br><span class="line">│               ├── mnt</span><br><span class="line">│               ├── proc</span><br><span class="line">│               ├── root</span><br><span class="line">│               ├── run</span><br><span class="line">│               ├── sbin</span><br><span class="line">│               ├── srv</span><br><span class="line">│               ├── sys</span><br><span class="line">│               ├── tmp</span><br><span class="line">│               ├── usr</span><br><span class="line">│               └── var</span><br><span class="line">└── runc</span><br><span class="line">    └── default</span><br><span class="line">        └── redis</span><br><span class="line">            └── state.json</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h3 id="如何生成-Containerd-默认的-config-toml-配置文件"><a href="#如何生成-Containerd-默认的-config-toml-配置文件" class="headerlink" title="如何生成 Containerd 默认的 config.toml 配置文件?"></a>如何生成 Containerd 默认的 config.toml 配置文件?</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -vp /etc/containerd/ &amp;&amp; containerd config default &gt; /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h3 id="如何配置-Containerd-让其支持懒拉取-eStargz"><a href="#如何配置-Containerd-让其支持懒拉取-eStargz" class="headerlink" title="如何配置 Containerd 让其支持懒拉取 (eStargz)?"></a>如何配置 Containerd 让其支持懒拉取 (eStargz)?</h3><p>描述: 从 v1.4 版本开始 containerd 便支持懒拉取, <code>Stargz Snapshotter</code> 是使 containerd 能够处理 eStargz的插件，在 Kubernetes 上我们可以通过如下配置<code>/etc/containerd/config.toml</code>启用了此功能。</p>
+<p>Stargz Snapshotter插件（containerd-stargz-grpc二进制文件）也需要作为单独的进程运行, 其启动示例文件为:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># etc/systemd/system/stargz-snapshotter.service</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=stargz snapshotter (Rootless)</span><br><span class="line">PartOf=containerd.service</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Environment=PATH=/usr/<span class="built_in">local</span>/bin:/sbin:/usr/sbin:/usr/<span class="built_in">local</span>/elasticsearch-7.15.0/jdk/bin:/usr/<span class="built_in">local</span>/elasticsearch-7.15.0/bin:/usr/<span class="built_in">local</span>/sbin:/usr/<span class="built_in">local</span>/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/<span class="built_in">local</span>/games:/snap/bin</span><br><span class="line">Environment=IPFS_PATH=/home/weiyigeek/.<span class="built_in">local</span>/share/ipfs</span><br><span class="line">ExecStart=<span class="string">"/usr/local/bin/containerd-rootless-setuptool.sh"</span> nsenter -- containerd-stargz-grpc -address <span class="string">"/run/user/1000/containerd-stargz-grpc/containerd-stargz-grpc.sock"</span> -root <span class="string">"/home/weiyigeek/.local/share/containerd-stargz-grpc"</span> -config <span class="string">"/home/weiyigeek/.config/containerd-stargz-grpc/config.toml"</span></span><br><span class="line">ExecReload=/bin/<span class="built_in">kill</span> -s HUP <span class="variable">$MAINPID</span></span><br><span class="line">RestartSec=2</span><br><span class="line">Restart=always</span><br><span class="line">Type=simple</span><br><span class="line">KillMode=mixed</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=default.target</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: 官方systemd示例地址(<a href="https://github.com/containerd/stargz-snapshotter/blob/v0.6.0/script/config/etc/systemd/system/stargz-snapshotter.service" target="_blank" rel="noopener">https://github.com/containerd/stargz-snapshotter/blob/v0.6.0/script/config/etc/systemd/system/stargz-snapshotter.service</a>)</p>
+<p>修改 /etc/containerd/config.toml  配置文件示例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">version = 2</span><br><span class="line"><span class="comment"># Plug stargz snapshotter into containerd Containerd recognizes stargz snapshotter through specified socket address.</span></span><br><span class="line">[proxy_plugins]</span><br><span class="line">  [proxy_plugins.stargz]</span><br><span class="line">    <span class="built_in">type</span> = <span class="string">"snapshot"</span></span><br><span class="line">    address = <span class="string">"/run/containerd-stargz-grpc/containerd-stargz-grpc.sock"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Use stargz snapshotter through CRI</span></span><br><span class="line">[plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd]</span><br><span class="line">  snapshotter = <span class="string">"stargz"</span></span><br><span class="line">  disable_snapshot_annotations = <span class="literal">false</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="如何配置-Containerd-在-harbor-私有仓库拉取镜像"><a href="#如何配置-Containerd-在-harbor-私有仓库拉取镜像" class="headerlink" title="如何配置 Containerd 在 harbor 私有仓库拉取镜像?"></a>如何配置 Containerd 在 harbor 私有仓库拉取镜像?</h3><p>描述: 在k8s的1.20版本发布之后，对外宣称在1.23.x不再使用dokershim作为默认的底层容器运行时，而是通过<code>Container Runtime Interface(CRI)</code>使用containerd来作为容器运行时, 因此原来在docker中配置的个人仓库环境不再起作用，导致k8s配置pods时拉取镜像失败, 本节将进行演示如何在 <code>containerd</code> 配置从私有仓库拉取镜像。</p>
+<p>Step 1.kubernetes 使用 containerd 拉取harbor仓库中镜像配置说明, 项目地址介绍: <a href="https://github.com/containerd/cri/blob/master/docs/registry.md" target="_blank" rel="noopener">https://github.com/containerd/cri/blob/master/docs/registry.md</a></p>
+<p><br/></p>
+<p>Step 2.containerd 的配置文件 (相当于docker 的 daemon.json)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/containerd/config.toml</span><br><span class="line">[plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry]</span><br><span class="line">   [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.mirrors]</span><br><span class="line">      [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.mirrors.<span class="string">"docker.io"</span>]</span><br><span class="line">        endpoint = [<span class="string">"https://xlx9erfu.mirror.aliyuncs.com"</span>]                         <span class="comment"># 使用阿里镜像源到此为配置文件默认生成，之后为需要添加的内容</span></span><br><span class="line">      [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.mirrors.<span class="string">"harbor.weiyigeek.top"</span>] <span class="comment"># 内部私有仓库配置</span></span><br><span class="line">        endpoint = [<span class="string">"https://harbor.weiyigeek.top"</span>]                             </span><br><span class="line">   [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.configs]</span><br><span class="line">     [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.configs.<span class="string">"harbor.weiyigeek.to"</span>] </span><br><span class="line">       [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.configs.<span class="string">"harbor.weiyigeek.top"</span>.auth]   <span class="comment"># harbor 认证的账号密码 配置</span></span><br><span class="line">         username = <span class="string">"admin"</span>                                                      </span><br><span class="line">         password = <span class="string">"Harbor12345"</span></span><br><span class="line">         auth = <span class="string">""</span></span><br><span class="line">         identitytoken = <span class="string">""</span></span><br><span class="line">       [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.configs.<span class="string">"harbor.weiyigeek.top"</span>.tls]    <span class="comment"># harbor 证书认证配置</span></span><br><span class="line">         insecure_skip_verify = <span class="literal">false</span>                     <span class="comment"># 是否跳过证书认证</span></span><br><span class="line">         ca_file   = <span class="string">"/etc/containerd/harbor/ca.crt"</span>      <span class="comment"># CA 证书</span></span><br><span class="line">         cert_file = <span class="string">"/etc/containerd/harbor/harbor.crt"</span>  <span class="comment"># harbor 证书</span></span><br><span class="line">         key_file  = <span class="string">"/etc/containerd/harbor/harbor.key"</span>  <span class="comment"># harbor 私钥</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Step 3.重载 systemd 的 daemon守护进程并重启containerd.service服务, 然后k8s集群便可正常从 harbor.weiyigeek.top 拉取镜像了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload &amp;&amp; systemctl restart containerd.service</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Step 4.虽然上面的方式可以使k8s直接拉取镜像,但是在利用 ctl命令 进行手动拉取镜像此时会报如下错误（巨坑-经过无数次失败测试，原本以为是CA证书签发的harbor证书问题），即使你在config.toml中配置insecure_skip_verify为true也是不行的。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 错误信息</span></span><br><span class="line">$ ctr -n k8s.io i pull harbor.weiyigeek.top/devops/jenkins-jnlp:3.13.8-alpine</span><br><span class="line">INFO[0000] trying next host  error=<span class="string">"failed to do request: Head \"https://harbor.weiyigeek.top/v2/devops/jenkins-jnlp/manifests/3.13.8-alpine\": x509: certificate signed by unknown authority"</span> host=harbor.weiyigeek.top</span><br><span class="line">ctr: failed to resolve reference <span class="string">"harbor.weiyigeek.top/devops/jenkins-jnlp:3.13.8-alpine"</span>: failed to <span class="keyword">do</span> request: Head <span class="string">"https://harbor.weiyigeek.top/v2/devops/jenkins-jnlp/manifests/3.13.8-alpine"</span>: x509: certificate signed by unknown authority</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解决办法1.指定 -k 参数跳过证书校验。</span></span><br><span class="line">$ ctr -n k8s.io i pull -k harbor.weiyigeek.top/devops/jenkins-jnlp:3.13.8-alpine</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解决办法2.指定CA证书、Harbor相关证书文件路径。</span></span><br><span class="line">$ ctr -n k8s.io i pull --tlscacert ca.crt --tlscert harbor.crt --tlskey harbor.key  harbor.weiyigeek.top/devops/jenkins-jnlp:3.13.6-alpine</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="如何进行-Containerd-基本配置"><a href="#如何进行-Containerd-基本配置" class="headerlink" title="如何进行 Containerd 基本配置?"></a>如何进行 Containerd 基本配置?</h3><ul>
+<li>自定义配置 containerd 持久化目录和 containerd 运行时状态信息进行。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/containerd/config.toml</span><br><span class="line">version = 2</span><br><span class="line"><span class="comment"># containerd 持久化目录</span></span><br><span class="line">root = <span class="string">"/var/lib/containerd"</span></span><br><span class="line"><span class="comment"># containerd 运行时状态信息</span></span><br><span class="line">state = <span class="string">"/run/containerd"</span></span><br><span class="line">oom_score = 0</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ul>
+<li>由于国内环境原因我们需要将 sandbox_image 镜像源设置为阿里云google_containers镜像源。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/containerd/config.toml</span><br><span class="line">  [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>]</span><br><span class="line">  sandbox_image = <span class="string">"registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.6"</span></span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">$ sed -i <span class="string">"s#k8s.gcr.io/pause#registry.cn-hangzhou.aliyuncs.com/google_containers/pause#g"</span>  /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>为了快速docker.io镜像拉取速度,同样我们需要为其设置国内镜像源。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/containerd/config.toml</span><br><span class="line">  [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.mirrors]</span><br><span class="line">    [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.mirrors.<span class="string">"docker.io"</span>]</span><br><span class="line">      endpoint = [<span class="string">"https://xlx9erfu.mirror.aliyuncs.com"</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者执行</span></span><br><span class="line">sed -i <span class="string">'/registry.mirrors]/a\ \ \ \ \ \ \ \ [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]'</span> /etc/containerd/config.toml</span><br><span class="line">sed -i <span class="string">'/registry.mirrors."docker.io"]/a\ \ \ \ \ \ \ \ \ \ endpoint = ["https://xlx9erfu.mirror.aliyuncs.com"]'</span> /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>使用虽然 containerd 和 Kubernetes 默认使用旧版驱动程序来管理 cgroups，但建议在基于 systemd 的主机上使用该驱动程序，以符合 cgroup 的“单编写器”规则。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/containerd/config.toml</span><br><span class="line">[plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd.runtimes.runc.options]</span><br><span class="line">  SystemdCgroup = <span class="literal">true</span></span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">$ sed -i <span class="string">'s#SystemdCgroup = false#SystemdCgroup = true#g'</span> /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+<p>于此同时, 我们需要在K8S的KubeletConfiguration资源清单中, 还必须将 cgroup 驱动程序配置为使用 “systemd”。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kind: KubeletConfiguration</span><br><span class="line">apiVersion: kubelet.config.k8s.io/v1beta1</span><br><span class="line">cgroupDriver: <span class="string">"systemd"</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<ul>
+<li>设置CRI插件默认快照器设置为 overlayfs（类似于 Docker 的存储驱动程序）, 一般是无需更改默认即为overlayfs.</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/containerd/config.toml</span><br><span class="line">  [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd]</span><br><span class="line">    snapshotter = <span class="string">"overlayfs"</span></span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">sed -ri <span class="string">'s#snapshotter = "\w*"#snapshotter = "overlayfs"#'</span> /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>设置运行时类, 下面的示例将自定义运行时注册到 containerd 中：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 默认配置</span></span><br><span class="line">[plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd]</span><br><span class="line">  default_runtime_name = <span class="string">"runc"</span></span><br><span class="line"> [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd.runtimes]</span><br><span class="line">    [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd.runtimes.runc]</span><br><span class="line">      base_runtime_spec = <span class="string">""</span></span><br><span class="line">      container_annotations = []</span><br><span class="line">      pod_annotations = []</span><br><span class="line">      privileged_without_host_devices = <span class="literal">false</span></span><br><span class="line">      runtime_engine = <span class="string">""</span></span><br><span class="line">      runtime_root = <span class="string">""</span></span><br><span class="line">      runtime_type = <span class="string">"io.containerd.runc.v2"</span></span><br><span class="line">      </span><br><span class="line">      [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd.runtimes.runc.options]</span><br><span class="line">        BinaryName = <span class="string">""</span></span><br><span class="line">        CriuImagePath = <span class="string">""</span></span><br><span class="line">        CriuPath = <span class="string">""</span></span><br><span class="line">        CriuWorkPath = <span class="string">""</span></span><br><span class="line">        IoGid = 0</span><br><span class="line">        IoUid = 0</span><br><span class="line">        NoNewKeyring = <span class="literal">false</span></span><br><span class="line">        NoPivotRoot = <span class="literal">false</span></span><br><span class="line">        Root = <span class="string">""</span></span><br><span class="line">        ShimCgroup = <span class="string">""</span></span><br><span class="line">        SystemdCgroup = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 自定义别名为crun的运行时</span></span><br><span class="line">$ vim /etc/containerd/config.toml</span><br><span class="line">version = 2</span><br><span class="line">[plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd]</span><br><span class="line">  default_runtime_name = <span class="string">"crun"</span>   <span class="comment"># 注意别名</span></span><br><span class="line">  [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd.runtimes]</span><br><span class="line">    <span class="comment"># crun: https://github.com/containers/crun</span></span><br><span class="line">    [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd.runtimes.crun]</span><br><span class="line">      runtime_type = <span class="string">"io.containerd.runc.v2"</span></span><br><span class="line">      [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd.runtimes.crun.options]</span><br><span class="line">        BinaryName = <span class="string">"/usr/local/bin/crun"</span></span><br><span class="line">    <span class="comment"># gVisor: https://gvisor.dev/</span></span><br><span class="line">    [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd.runtimes.gvisor]</span><br><span class="line">      runtime_type = <span class="string">"io.containerd.runsc.v1"</span></span><br><span class="line">    <span class="comment"># Kata Containers: https://katacontainers.io/</span></span><br><span class="line">    [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.containerd.runtimes.kata]</span><br><span class="line">      runtime_type = <span class="string">"io.containerd.kata.v2"</span></span><br></pre></td></tr></table></figure>
+此外，还必须将以下RuntimeClass资源安装到具有该角色的群集中 cluster-admin<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">node.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RuntimeClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">crun</span></span><br><span class="line"><span class="attr">handler:</span> <span class="string">crun</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">node.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RuntimeClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">gvisor</span></span><br><span class="line"><span class="attr">handler:</span> <span class="string">gvisor</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">node.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">RuntimeClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">kata</span></span><br><span class="line"><span class="attr">handler:</span> <span class="string">kata</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>要将运行时类应用于 pod，请设置<code>.spec.runtimeClassName</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">spec:</span><br><span class="line">  runtimeClassName: crun</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<ul>
+<li>在 config.toml 中为容器设置私有仓库主机配置的简单示例<br>在配置路径处创建一个目录树, 其中包含一个表示要配置的主机命名空间的目录, 然后在中添加一个文件以配置主机命名空间。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 例如, 公共的 docker.io 镜像仓库为例</span></span><br><span class="line">$ tree /etc/containerd/certs.d</span><br><span class="line">/etc/containerd/certs.d</span><br><span class="line">└── docker.io</span><br><span class="line">    └── hosts.toml</span><br><span class="line">$ cat /etc/containerd/certs.d/docker.io/hosts.toml</span><br><span class="line">server = <span class="string">"https://docker.io"</span></span><br><span class="line">[host.<span class="string">"https://registry-1.docker.io"</span>]</span><br><span class="line">  capabilities = [<span class="string">"pull"</span>, <span class="string">"resolve"</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 例如, 私有的 hub.weiyigeek.top 镜像仓库配置</span></span><br><span class="line">$ mkdir -vp /etc/containerd/certs.d/hub.weiyigeek.top/</span><br><span class="line">$ touch /etc/containerd/certs.d/hub.weiyigeek.top/hosts.toml</span><br><span class="line">$ vim  /etc/containerd/certs.d/hub.weiyigeek.top/hosts.toml</span><br><span class="line">server = <span class="string">"https://hub.weiyigeek.top"</span></span><br><span class="line">[host.<span class="string">"https://hub.weiyigeek.top"</span>]</span><br><span class="line">  ca = <span class="string">"/path/to/ca.crt"</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Bolt 元数据插件允许在命名空间之间配置内容共享策略。<br>默认模式“shared”将使 Blob 在被拉入任何命名空间后在所有命名空间中都可用, 如果使用后端中已存在的“Expected”摘要打开编写器，则 Blob 将被拉入命名空间, 备用模式“隔离”要求客户端在将 Blob 添加到命名空间之前，通过向引入提供所有内容来证明它们有权访问内容。</li>
+</ul>
+<p>默认值为“共享”。虽然这在很大程度上是最需要的策略，但可以通过以下配置更改为“隔离”模式：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/containerd/config.toml</span><br><span class="line">version = 2</span><br><span class="line">[plugins.<span class="string">"io.containerd.metadata.v1.bolt"</span>]</span><br><span class="line">  content_sharing_policy = <span class="string">"isolated"</span></span><br></pre></td></tr></table></figure></p>
+<p>补充说明: 在“隔离”模式下，还可以通过将标签添加到特定命名空间来仅共享该命名空间的内容。这将使其 Blob 在所有其他命名空间中都可用，即使内容共享策略设置为“隔离”也是如此。如果标签值设置为 除 以外的任何内容，则不会共享命名空间内容。</p>
+<hr>
+<h2 id="0x01-使用-nerdctl-工具配合-Containerd-替代-Docker"><a href="#0x01-使用-nerdctl-工具配合-Containerd-替代-Docker" class="headerlink" title="0x01 使用 nerdctl 工具配合 Containerd 替代 Docker"></a>0x01 使用 nerdctl 工具配合 Containerd 替代 Docker</h2><p>描述: Containerd 是一个工业级标准的容器运行时，它强调简单性、健壮性和可移植性。Containerd 可以在宿主机中管理完整的容器生命周期：容器镜像的传输和存储、容器的执行和管理、存储和网络等</p>
+<p>学过Docker的童鞋都知道, 我们利用docker-cli与docker-compose工具能帮助快速的进行镜像和容器的相关操作。自从 Containerd 发布 1.5 以后，Kubernetes 的CRI接口使用 Containerd 来替代 dockershim 时, 我们便可以使用 nerdctl 工具(替代 docker cli) 配合 Containerd 的情况下基本已经可以替换掉 Docker 和 Docker Compose;</p>
+<p><br/></p>
+<h3 id="介绍-nerdctl-工具"><a href="#介绍-nerdctl-工具" class="headerlink" title="介绍 nerdctl 工具"></a>介绍 nerdctl 工具</h3><p><strong>什么是nerdctl?</strong><br>nerdctl 是 与 Docker 兼容的CLI for Containerd，其支持Compose、Rootless、eStargz、OCIcrypt和IPFS，与docker命令行语法类似，所以其上手使用非常简单😊。</p>
+<p>nerdctl 官方发布包包含两个安装版本:</p>
+<blockquote>
+<p>Minimal: 仅包含 nerdctl 二进制文件以及 rootless 模式下的辅助安装脚本<br>Full: 看名字就能知道是个全量包，其包含了 Containerd、CNI、runc、BuildKit 等完整组件</p>
+</blockquote>
+<p>项目地址： GitHub - containerd/nerdctl: Docker-compatible CLI for containerd, with support for Compose ( <a href="https://github.com/containerd/nerdctl" target="_blank" rel="noopener">https://github.com/containerd/nerdctl</a> )</p>
+<p><br></p>
+<h3 id="安装-nerdctl-工具"><a href="#安装-nerdctl-工具" class="headerlink" title="安装 nerdctl 工具"></a>安装 nerdctl 工具</h3><p>最新nerdctl版本releases下载地址: <a href="https://github.com/containerd/nerdctl/releases" target="_blank" rel="noopener">https://github.com/containerd/nerdctl/releases</a></p>
+<p>Step 1.从Github Release页面中下载适用于你系统的 Full 包，当前最新版本【2022年4月25日 11:22:59】为v.0.19.0。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 断点与后台下载</span></span><br><span class="line"><span class="comment"># 全量包</span></span><br><span class="line">wget -c -b https://github.com/containerd/nerdctl/releases/download/v0.19.0/nerdctl-full-0.19.0-linux-amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 仅包含 nerdctl 二进制</span></span><br><span class="line">wget -c -b https://github.com/containerd/nerdctl/releases/download/v0.19.0/nerdctl-0.19.0-linux-amd64.tar.gz</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>Step 2.下载完成后解压然后进行相应的安装操作。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.安装仅包含 nerdctl 二进制文件包 （Minimal - 不推荐）</span></span><br><span class="line">tar Cxzvvf /usr/<span class="built_in">local</span>/bin nerdctl-0.19.0-linux-amd64.tar.gz</span><br><span class="line">  <span class="comment"># -rwxr-xr-x root/root  27578368 2022-04-22 12:03 nerdctl</span></span><br><span class="line">  <span class="comment"># -rwxr-xr-x root/root     21562 2022-04-22 12:02 containerd-rootless-setuptool.sh</span></span><br><span class="line">  <span class="comment"># -rwxr-xr-x root/root      7032 2022-04-22 12:02 containerd-rootless.sh</span></span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/bin &amp;&amp; ./containerd-rootless-setuptool.sh install <span class="comment"># 注意不能以root用户运行</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.安装 nerdctl 全量包 (Full - 推荐)</span></span><br><span class="line">tar Cxzvvf /usr/<span class="built_in">local</span> nerdctl-full-0.19.0-linux-amd64.tar.gz</span><br><span class="line">  <span class="comment"># drwxr-xr-x 0/0               0 2022-04-22 12:16 bin/</span></span><br><span class="line">  <span class="comment"># -rwxr-xr-x 0/0        25371420 2015-10-21 08:00 bin/buildctl</span></span><br><span class="line">  <span class="comment"># -rwxr-xr-x 0/0        39651613 2015-10-21 08:00 bin/buildkitd</span></span><br><span class="line">  <span class="comment"># drwxr-xr-x 0/0               0 2022-04-22 12:16 share/doc/nerdctl-full/</span></span><br><span class="line">  <span class="comment"># -rw-r--r-- 0/0            1135 2022-04-22 12:16 share/doc/nerdctl-full/README.md</span></span><br><span class="line">  <span class="comment"># -rw-r--r-- 0/0            5425 2022-04-22 12:16 share/doc/nerdctl-full/SHA256SUMS</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.初始化安装以全量包为例,如出现如下命令表示安装成功。</span></span><br><span class="line">/usr/<span class="built_in">local</span>/bin$ ./containerd-rootless-setuptool.sh install</span><br><span class="line">  <span class="comment"># + systemctl --user enable containerd.service</span></span><br><span class="line">  <span class="comment"># Created symlink /home/weiyigeek/.config/systemd/user/default.target.wants/containerd.service → /home/weiyigeek/.config/systemd/user/containerd.service.</span></span><br><span class="line">  <span class="comment"># [INFO] Installed "containerd.service" successfully.</span></span><br><span class="line">  <span class="comment"># [INFO] To control "containerd.service", run: `systemctl --user (start|stop|restart) containerd.service`</span></span><br><span class="line">  <span class="comment"># [INFO] To run "containerd.service" on system startup automatically, run: `sudo loginctl enable-linger weiyigeek`</span></span><br><span class="line">  <span class="comment"># [INFO] ------------------------------------------------------------------------------------------</span></span><br><span class="line">  <span class="comment"># [INFO] Use `nerdctl` to connect to the rootless containerd.</span></span><br><span class="line">  <span class="comment"># [INFO] You do NOT need to specify $CONTAINERD_ADDRESS explicitly.</span></span><br></pre></td></tr></table></figure></p>
+<p>Step 3.启动 containerd 和 buildkitd 服务。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动 containerd &amp;&amp;  验证服务状态</span></span><br><span class="line">systemctl <span class="built_in">enable</span> --now containerd &amp;&amp; systemctl restart containerd &amp;&amp; systemctl status containerd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用 BuildKit 为了构建 Dockerfile，您需要使用以下命令启用 BuildKit。 </span></span><br><span class="line">/usr/<span class="built_in">local</span>/bin$ CONTAINERD_NAMESPACE=default containerd-rootless-setuptool.sh install-buildkit-containerd</span><br><span class="line">  <span class="comment"># [INFO] Creating "/home/weiyigeek/.config/systemd/user/default-buildkit.service"</span></span><br><span class="line">  <span class="comment"># [INFO] Starting systemd unit "default-buildkit.service"</span></span><br><span class="line">  <span class="comment"># + systemctl --user start default-buildkit.service</span></span><br><span class="line">  <span class="comment"># + sleep 3</span></span><br><span class="line">  <span class="comment"># + systemctl --user --no-pager --full status default-buildkit.service</span></span><br><span class="line">  <span class="comment"># ● default-buildkit.service - BuildKit (Rootless)</span></span><br><span class="line">  <span class="comment">#     Loaded: loaded (/home/weiyigeek/.config/systemd/user/default-buildkit.service; disabled; vendor preset: enabled)</span></span><br><span class="line">  <span class="comment">#     Active: active (running) since Mon 2022-04-25 13:05:25 CST; 3s ago</span></span><br><span class="line">  <span class="comment">#   Main PID: 329750 (buildkitd)</span></span><br><span class="line">  <span class="comment">#     CGroup: /user.slice/user-1000.slice/user@1000.service/default-buildkit.service</span></span><br><span class="line">  <span class="comment">#             └─329750 buildkitd --addr=unix:///run/user/1000/buildkit-default/buildkitd.sock --root=/home/weiyigeek/.local/share/buildkit-default --containerd-worker-namespace=default</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Apr 25 13:05:25 node-2 systemd[327840]: Started BuildKit (Rootless).</span></span><br><span class="line">  <span class="comment"># Apr 25 13:05:26 node-2 containerd-rootless-setuptool.sh[329750]: time="2022-04-25T13:05:26+08:00" level=info msg="found worker \"ffl4pd8j6x7fh6t9o85a70l11\", labels=map[org.mobyproject.buildkit.worker.containerd.namespace:default org.mobyproject.buildkit.worker.containerd.uuid:4f029882-9edc-4c20-ab49-0363abe0d40e org.mobyproject.buildkit.worker.executor:containerd org.mobyproject.buildkit.worker.hostname:node-2 org.mobyproject.buildkit.worker.network:host org.mobyproject.buildkit.worker.snapshotter:overlayfs], platforms=[linux/amd64 linux/amd64/v2 linux/amd64/v3 linux/386]"</span></span><br><span class="line">  <span class="comment"># Apr 25 13:05:26 node-2 containerd-rootless-setuptool.sh[329750]: time="2022-04-25T13:05:26+08:00" level=info msg="found 1 workers, default=\"ffl4pd8j6x7fh6t9o85a70l11\""</span></span><br><span class="line">  <span class="comment"># Apr 25 13:05:26 node-2 containerd-rootless-setuptool.sh[329750]: time="2022-04-25T13:05:26+08:00" level=warning msg="currently, only the default worker can be used."</span></span><br><span class="line">  <span class="comment"># Apr 25 13:05:26 node-2 containerd-rootless-setuptool.sh[329750]: time="2022-04-25T13:05:26+08:00" level=info msg="running server on /run/user/1000/buildkit-default/buildkitd.sock"</span></span><br><span class="line">  <span class="comment"># + systemctl --user enable default-buildkit.service</span></span><br><span class="line">  <span class="comment"># Created symlink /home/weiyigeek/.config/systemd/user/default.target.wants/default-buildkit.service → /home/weiyigeek/.config/systemd/user/default-buildkit.service.</span></span><br><span class="line">  <span class="comment"># [INFO] Installed "default-buildkit.service" successfully.</span></span><br><span class="line">  <span class="comment"># [INFO] To control "default-buildkit.service", run: `systemctl --user (start|stop|restart) default-buildkit.service`</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>Step 4.查看nerdctl工具执行结果及其版本，至此安装完毕<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~$ nerdctl --version</span><br><span class="line">nerdctl version 0.19.0</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="使用-nerdctl-工具"><a href="#使用-nerdctl-工具" class="headerlink" title="使用 nerdctl 工具"></a>使用 nerdctl 工具</h3><p>描述: 在某一个用户执行时nerdctl命令时，我们可以其家目录中创建一个如下路径文件<code>/home/weiyigeek/.config/nerdctl/nerdctl.toml</code>,该文件可配置包含nerdctl相关配置项目。</p>
+<p><strong>简述尝试</strong></p>
+<ul>
+<li><p>Step 1.镜像拉取与查看</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ nerdctl pull hello-world:latest</span><br><span class="line">  <span class="comment"># docker.io/library/hello-world:latest:                                             resolved       |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># index-sha256:10d7d58d5ebd2a652f4d93fdd86da8f265f5318c6a73cc5b6a9798ff6d2b2e67:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># manifest-sha256:f54a58bc1aac5ea1a25d796ae155dc228b3f0e11d046ae276b39c4bf2f13d8c4: done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># config-sha256:feb5d9fea6a5e9606aa995e879d862b825965ba48de054caab5ef356dc6b3412:   done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># layer-sha256:2db29710123e3e53a794f2694094b9b4338aa9ee5c40b930cb8063a1be392c54:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># elapsed: 34.3s                                                                    total:  6.9 Ki (205.0 B/s)</span></span><br><span class="line"></span><br><span class="line">$ nerdctl image ls</span><br><span class="line">  <span class="comment"># REPOSITORY     TAG       IMAGE ID        CREATED           PLATFORM       SIZE        BLOB SIZE</span></span><br><span class="line">  <span class="comment"># hello-world    latest    10d7d58d5ebd    31 seconds ago    linux/amd64    20.0 KiB    6.9 KiB</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 2.运行拉取的 hello-world 镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建并后台运行一个名为 hello-containerd 的容器</span></span><br><span class="line">$ nerdctl run -d --privileged --name hello-containerd hello-world:latest</span><br><span class="line">  <span class="comment"># 17cc212e69b2387b0aa1e4c4e679e41072eeeb14f909fff2acdb24d3c1033c0d</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 hello-containerd 容器日志</span></span><br><span class="line">$ nerdctl logs hello-containerd</span><br><span class="line">  <span class="comment"># Hello from Docker!</span></span><br><span class="line">  <span class="comment"># This message shows that your installation appears to be working correctly.</span></span><br><span class="line">  <span class="comment"># .......</span></span><br><span class="line">  <span class="comment"># Share images, automate workflows, and more with a free Docker ID: https://hub.docker.com/</span></span><br><span class="line">  <span class="comment"># For more examples and ideas, visit:https://docs.docker.com/get-started/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 3.查看创建的容器相关信息以及删除容器。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 容器查看</span></span><br><span class="line">$ nerdctl ps -a</span><br><span class="line">  <span class="comment"># CONTAINER ID    IMAGE                                   COMMAND     CREATED          STATUS                      PORTS    NAMES</span></span><br><span class="line">  <span class="comment"># 17cc212e69b2    docker.io/library/hello-world:latest    "/hello"    2 minutes ago    Exited (0) 2 minutes ago             hello-containerd</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 容器详细信息</span></span><br><span class="line">$ nerdctl inspect 17cc212e69b2</span><br><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">"Id"</span>: <span class="string">"17cc212e69b2387b0aa1e4c4e679e41072eeeb14f909fff2acdb24d3c1033c0d"</span>,</span><br><span class="line">    <span class="string">"Created"</span>: <span class="string">"2022-04-25T05:13:16.690822727Z"</span>,</span><br><span class="line">    <span class="string">"Path"</span>: <span class="string">"/hello"</span>,</span><br><span class="line">    <span class="string">"Args"</span>: null,</span><br><span class="line">    <span class="string">"State"</span>: &#123; <span class="string">"Status"</span>: <span class="string">"exited"</span>, <span class="string">"Running"</span>: <span class="literal">false</span>, <span class="string">"Paused"</span>: <span class="literal">false</span>,<span class="string">"Pid"</span>: 330226, <span class="string">"ExitCode"</span>: 0,<span class="string">"FinishedAt"</span>: <span class="string">"2022-04-25T05:13:17.251972898Z"</span>&#125;,</span><br><span class="line">    <span class="string">"Image"</span>: <span class="string">"docker.io/library/hello-world:latest"</span>,</span><br><span class="line">    <span class="string">"ResolvConfPath"</span>: <span class="string">"/home/weiyigeek/.local/share/nerdctl/1935db59/containers/default/17cc212e69b2387b0aa1e4c4e679e41072eeeb14f909fff2acdb24d3c1033c0d/resolv.conf"</span>,</span><br><span class="line">    <span class="string">"HostnamePath"</span>: <span class="string">"/home/weiyigeek/.local/share/nerdctl/1935db59/containers/default/17cc212e69b2387b0aa1e4c4e679e41072eeeb14f909fff2acdb24d3c1033c0d/hostname"</span>,</span><br><span class="line">    <span class="string">"LogPath"</span>: <span class="string">"/home/weiyigeek/.local/share/nerdctl/1935db59/containers/default/17cc212e69b2387b0aa1e4c4e679e41072eeeb14f909fff2acdb24d3c1033c0d/17cc212e69b2387b0aa1e4c4e679e41072eeeb14f909fff2acdb24d3c1033c0d-json.log"</span>,</span><br><span class="line">    <span class="string">"Name"</span>: <span class="string">"hello-containerd"</span>,</span><br><span class="line">    <span class="string">"Driver"</span>: <span class="string">"overlayfs"</span>,</span><br><span class="line">    <span class="string">"Platform"</span>: <span class="string">"linux"</span>,</span><br><span class="line">    <span class="string">"AppArmorProfile"</span>: <span class="string">""</span>,</span><br><span class="line">    <span class="string">"Mounts"</span>: null,</span><br><span class="line">    <span class="string">"NetworkSettings"</span>: null</span><br><span class="line">  &#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 移除 hello-containerd 容器</span></span><br><span class="line">$ nerdctl rm hello-containerd</span><br><span class="line">hello-containerd</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 4.删除指定 hello-world 镜像</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ nerdctl rmi hello-world</span><br><span class="line">Untagged: docker.io/library/hello-world:latest@sha256:10d7d58d5ebd2a652f4d93fdd86da8f265f5318c6a73cc5b6a9798ff6d2b2e67</span><br><span class="line">Deleted: sha256:e07ee1baac5fae6a26f30cabfe54a36d3402f96afda318fe0a96cec4ca393359</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Step 5.我们也可以拉取 nginx:alpine 镜像并创建、后台运行nginx容器、进入容器内部。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">$ sudo nerdctl run -d --name nginx -p 80:80 nginx:alpine</span><br><span class="line">  <span class="comment"># docker.io/library/nginx:alpine:                                                   resolved       |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># index-sha256:5a0df7fb7c8c03e4158ae9974bfbd6a15da2bdfdeded4fb694367ec812325d31:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># manifest-sha256:efc09388b15fb423c402f0b8b28ca70c7fd20fe31f8d7531ae1896bbb4944999: done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># config-sha256:51696c87e77e4ff7a53af9be837f35d4eacdb47b4ca83ba5fd5e4b5101d98502:   done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># layer-sha256:4071be97c256d6f5ab0e05ebdebcfec3d0779a5e199ad0d71a5fccba4b3e2ce4:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># layer-sha256:df9b9388f04ad6279a7410b85cedfdcb2208c0a003da7ab5613af71079148139:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># layer-sha256:5867cba5fcbd3ae827c5801e76d20e7dc91cbb626ac5c871ec6c4d04eb818b16:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># layer-sha256:4b639e65cb3ba47e77db93f93c6625a62ba1b9eec99160b254db380115ae009d:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># layer-sha256:061ed9e2b9762825b9869a899a696ce8b56e7e0ec1e1892b980969bf7bcda56a:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># layer-sha256:bc19f3e8eeb1bb75268787f8689edec9a42deda5cdecdf2f95b3c6df8eb57a48:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># elapsed: 33.7s                                                                    total:  9.7 Mi (294.8 KiB/s)</span></span><br><span class="line">  <span class="comment"># 98eb2f1d4639b173dc21c30e40be5f3e2c410e4ca325b6bd6bafcaab46ab6c11</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看创建的nginx容器</span></span><br><span class="line">$ sudo nerdctl ps</span><br><span class="line">  <span class="comment"># CONTAINER ID    IMAGE                             COMMAND                   CREATED              STATUS    PORTS                 NAMES</span></span><br><span class="line">  <span class="comment"># 98eb2f1d4639    docker.io/library/nginx:alpine    "/docker-entrypoint.…"    About an hour ago    Up        0.0.0.0:80-&gt;80/tcp    nginx</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入nginx容器内部</span></span><br><span class="line">$ nerdctl <span class="built_in">exec</span> -it nginx -- sh</span><br><span class="line">/ <span class="comment"># whoami</span></span><br><span class="line">root</span><br><span class="line">/ <span class="comment"># ip addr</span></span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0@if4: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue state UP</span><br><span class="line">    link/ether ee:e6:a6:9a:07:48 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.4.0.2/24 brd 10.4.0.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::ece6:a6ff:fe9a:748/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line">/usr/share/nginx/html <span class="comment"># hostname &gt; index.html</span></span><br><span class="line">/usr/share/nginx/html <span class="comment"># ip addr &gt;&gt; index.html</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 访问创建的nginx容器 或者 浏览器访问 10.10.107.227 宿主机</span></span><br><span class="line">$ curl -I localhost</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Step 6.nginx 容器详细信息查看与容器停止、删除。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ nerdctl inspect --format <span class="string">"&#123;&#123; .Name &#125;&#125; &#123;&#123; .Id &#125;&#125;"</span> nginx</span><br><span class="line">  <span class="comment"># nginx 98eb2f1d4639b173dc21c30e40be5f3e2c410e4ca325b6bd6bafcaab46ab6c11</span></span><br><span class="line"></span><br><span class="line">$ nerdctl stop nginx</span><br><span class="line">  <span class="comment"># nginx</span></span><br><span class="line">$ nerdctl ps  -a</span><br><span class="line">  <span class="comment"># CONTAINER ID    IMAGE                             COMMAND                   CREATED        STATUS                      PORTS                 NAMES</span></span><br><span class="line">  <span class="comment"># 98eb2f1d4639    docker.io/library/nginx:alpine    "/docker-entrypoint.…"    2 hours ago    Exited (0) 4 seconds ago    0.0.0.0:80-&gt;80/tcp    nginx</span></span><br><span class="line"></span><br><span class="line">$ nerdctl rm nginx</span><br><span class="line">nginx</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=3.基于Containerd容器运行时的配置浅析与知识扩充实践 href="https://gitee.com/WeiyiGeek/blogimage/raw/master/2022/2/20220425143905.png" target="_blank" title="WeiyiGeek.nerdctl-containerd" data-fancybox="images"><img src="https://gitee.com/WeiyiGeek/blogimage/raw/master/2022/2/20220425143905.png" alt="WeiyiGeek.nerdctl-containerd" title="" class=""></a>
+                <p>WeiyiGeek.nerdctl-containerd</p>
+            </figure>
+<p>温馨提示: 不知读者是否发现, 其子命令及其使用方法与docker客户端工具基本是类似的，所以前面说到其学习成本较低, 熟悉docker的朋友可以快速上手</p>
+<p><br></p>
+<h3 id="工具-nerdctl-命令"><a href="#工具-nerdctl-命令" class="headerlink" title="工具 nerdctl 命令"></a>工具 nerdctl 命令</h3><p>描述 : nerdctl 是 containerd 的命令行界面的工具。</p>
+<p><strong>命令参数:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Usage:</span></span><br><span class="line">  nerdctl [flags]</span><br><span class="line">  nerdctl [<span class="built_in">command</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># Management commands:</span></span><br><span class="line">  apparmor    Manage AppArmor profiles</span><br><span class="line">  builder     Manage builds</span><br><span class="line">  container   Manage containers</span><br><span class="line">  image       Manage images</span><br><span class="line">  ipfs        Distributing images on IPFS</span><br><span class="line">  namespace   Manage containerd namespaces</span><br><span class="line">  network     Manage networks</span><br><span class="line">  system      Manage containerd</span><br><span class="line">  volume      Manage volumes</span><br><span class="line">Commands:</span><br><span class="line">  build       Build an image from a Dockerfile. Needs buildkitd to be running.</span><br><span class="line">  commit      Create a new image from a container changes</span><br><span class="line">  completion  Generate the autocompletion script <span class="keyword">for</span> the specified shell</span><br><span class="line">  compose     Compose</span><br><span class="line">  cp          Copy files/folders between a running container and the <span class="built_in">local</span> filesystem.</span><br><span class="line">  create      Create a new container. Optionally specify <span class="string">"ipfs://"</span> or <span class="string">"ipns://"</span> scheme to pull image from IPFS.</span><br><span class="line">  events      Get real time events from the server</span><br><span class="line">  <span class="built_in">exec</span>        Run a <span class="built_in">command</span> <span class="keyword">in</span> a running container</span><br><span class="line">  <span class="built_in">help</span>        Help about any <span class="built_in">command</span></span><br><span class="line">  <span class="built_in">history</span>     Show the <span class="built_in">history</span> of an image</span><br><span class="line">  images      List images</span><br><span class="line">  info        Display system-wide information</span><br><span class="line">  inspect     Return low-level information on objects.</span><br><span class="line">  <span class="built_in">kill</span>        Kill one or more running containers</span><br><span class="line">  load        Load an image from a tar archive or STDIN</span><br><span class="line">  login       Log <span class="keyword">in</span> to a Docker registry</span><br><span class="line">  <span class="built_in">logout</span>      Log out from a Docker registry</span><br><span class="line">  logs        Fetch the logs of a container. Currently, only containers created with `nerdctl run -d` are supported.</span><br><span class="line">  pause       Pause all processes within one or more containers</span><br><span class="line">  port        List port mappings or a specific mapping <span class="keyword">for</span> the container</span><br><span class="line">  ps          List containers</span><br><span class="line">  pull        Pull an image from a registry. Optionally specify <span class="string">"ipfs://"</span> or <span class="string">"ipns://"</span> scheme to pull image from IPFS.</span><br><span class="line">  push        Push an image or a repository to a registry. Optionally specify <span class="string">"ipfs://"</span> or <span class="string">"ipns://"</span> scheme to push image to IPFS.</span><br><span class="line">  restart     Restart one or more running containers</span><br><span class="line">  rm          Remove one or more containers</span><br><span class="line">  rmi         Remove one or more images</span><br><span class="line">  run         Run a <span class="built_in">command</span> <span class="keyword">in</span> a new container. Optionally specify <span class="string">"ipfs://"</span> or <span class="string">"ipns://"</span> scheme to pull image from IPFS.</span><br><span class="line">  save        Save one or more images to a tar archive (streamed to STDOUT by default)</span><br><span class="line">  start       Start one or more running containers</span><br><span class="line">  stats       Display a live stream of container(s) resource usage statistics.</span><br><span class="line">  stop        Stop one or more running containers</span><br><span class="line">  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE</span><br><span class="line">  top         Display the running processes of a container</span><br><span class="line">  unpause     Unpause all processes within one or more containers</span><br><span class="line">  update      Update one or more running containers</span><br><span class="line">  version     Show the nerdctl version information</span><br><span class="line">  <span class="built_in">wait</span>        Block until one or more containers stop, <span class="keyword">then</span> <span class="built_in">print</span> their <span class="built_in">exit</span> codes.</span><br><span class="line"></span><br><span class="line"><span class="comment"># Flags:</span></span><br><span class="line">  -H, --H string                 Alias of --address (default <span class="string">"/run/containerd/containerd.sock"</span>)</span><br><span class="line">  -a, --a string                 Alias of --address (default <span class="string">"/run/containerd/containerd.sock"</span>)</span><br><span class="line">      --address string           containerd address, optionally with <span class="string">"unix://"</span> prefix [<span class="variable">$CONTAINERD_ADDRESS</span>] (default <span class="string">"/run/containerd/containerd.sock"</span>)</span><br><span class="line">      --cgroup-manager string    Cgroup manager to use (<span class="string">"cgroupfs"</span>|<span class="string">"systemd"</span>) (default <span class="string">"none"</span>)</span><br><span class="line">      --cni-netconfpath string   cni config directory [<span class="variable">$NETCONFPATH</span>] (default <span class="string">"/home/weiyigeek/.config/cni/net.d"</span>)</span><br><span class="line">      --cni-path string          cni plugins binary directory [<span class="variable">$CNI_PATH</span>] (default <span class="string">"/usr/local/libexec/cni"</span>)</span><br><span class="line">      --data-root string         Root directory of persistent nerdctl state (managed by nerdctl, not by containerd) (default <span class="string">"/home/weiyigeek/.local/share/nerdctl"</span>)</span><br><span class="line">      --debug                    debug mode</span><br><span class="line">      --debug-full               debug mode (with full output)</span><br><span class="line">  -h, --<span class="built_in">help</span>                     <span class="built_in">help</span> <span class="keyword">for</span> nerdctl</span><br><span class="line">      --host string              Alias of --address (default <span class="string">"/run/containerd/containerd.sock"</span>)</span><br><span class="line">      --hosts-dir strings        A directory that contains &lt;HOST:PORT&gt;/hosts.toml (containerd style) or &lt;HOST:PORT&gt;/&#123;ca.cert, cert.pem, key.pem&#125; (docker style) (default [/home/weiyigeek/.config/containerd/certs.d,/home/weiyigeek/.config/docker/certs.d])</span><br><span class="line">      --insecure-registry        skips verifying HTTPS certs, and allows falling back to plain HTTP</span><br><span class="line">  -n, --n string                 Alias of --namespace (default <span class="string">"default"</span>) , 支持名称空间。</span><br><span class="line">      --namespace string         containerd namespace, such as <span class="string">"moby"</span> <span class="keyword">for</span> Docker, <span class="string">"k8s.io"</span> <span class="keyword">for</span> Kubernetes [<span class="variable">$CONTAINERD_NAMESPACE</span>] (default <span class="string">"default"</span>)</span><br><span class="line">      --snapshotter string       containerd snapshotter [<span class="variable">$CONTAINERD_SNAPSHOTTER</span>] (default <span class="string">"overlayfs"</span>)</span><br><span class="line">      --storage-driver string    Alias of --snapshotter (default <span class="string">"overlayfs"</span>)</span><br><span class="line">  -v, --version                  version <span class="keyword">for</span> nerdctl</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>nerdctl 使用示例</strong></p>
+<ul>
+<li>仓库认证</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ nerdctl login -u weiyigeek index.docker.io</span><br><span class="line">  <span class="comment"># Enter Password:</span></span><br><span class="line">  <span class="comment"># WARNING: Your password will be stored unencrypted in /root/.docker/config.json. Configure a credential helper to remove this warning. See</span></span><br><span class="line">  <span class="comment"># https://docs.docker.com/engine/reference/commandline/login/#credentials-store</span></span><br><span class="line">  <span class="comment"># Login Succeeded</span></span><br><span class="line"></span><br><span class="line">$ nerdctl <span class="built_in">logout</span></span><br><span class="line">  <span class="comment"># Removing login credentials for https://index.docker.io/v1/</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>镜像操作</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 拉取</span></span><br><span class="line">nerdctl pull docker.io/library/nginx:alpine</span><br><span class="line">nerdctl -n k8s.io pull docker.io/library/nginx:alpine</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看</span></span><br><span class="line">nerdctl -n default image ls</span><br><span class="line">nerdctl -n default inspect nginx:alpine</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除</span></span><br><span class="line">nerdctl -n default rmi nginx:alpine</span><br></pre></td></tr></table></figure>
+<ul>
+<li>容器操作<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建运行容器</span></span><br><span class="line">sudo nerdctl -n default run -d --name nginx -p 80:80 nginx:alpine</span><br><span class="line">sudo nerdctl -n k8s.io run -d --privileged --restart=always --name rancher -p 80:80 -p 443:443 docker.io/cnrancher/rancher:v2.4.17-ent</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看容器</span></span><br><span class="line">sudo nerdctl -n k8s.io ps -a</span><br><span class="line">sudo nerdctl -n k8s.io inpsect rancher</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入容器内部</span></span><br><span class="line">sudo nerdctl -n k8s.io <span class="built_in">exec</span> rancher -- sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止容器</span></span><br><span class="line">sudo nerdctl -n k8s.io stop rancher</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除容器</span></span><br><span class="line">sudo nerdctl -n k8s.io rm rancher</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<h3 id="有趣的实验功能"><a href="#有趣的实验功能" class="headerlink" title="有趣的实验功能"></a>有趣的实验功能</h3><p>描述: 我在验证环境中使用时发现特别吸引人的最新功能一个是图像快速拉取（eStargz）, 另外一个是高速 rootless 模式。</p>
+<h4 id="1-使用懒加载加速图像拉取（eStargz）"><a href="#1-使用懒加载加速图像拉取（eStargz）" class="headerlink" title="1.使用懒加载加速图像拉取（eStargz）"></a>1.使用懒加载加速图像拉取（eStargz）</h4><p>描述: 在过去的一年中，可以在容器相关的工具（包括<code>Kubernetes，contained，nerdctl，CRI-O，Podman，BuildKit，Kaniko</code>等）上使用eStargz镜像的懒拉取功能, 在2021年懒拉取将成为越来越普遍的镜像分发技术，并且正在把eStargz增加到OCI容器镜像规范当中。</p>
+<p>从 1.4 版开始 Containered 支持懒拉取, Stargz Snapshotter 是使 containerd 能够处理eStargz的插件。 这是一种用于懒拉取的镜像分发技术。这使容器运行时无需等待整个镜像内容即可启动容器。取而代之的是，按需获取必要的内容块（例如单个文件）。这样可以将容器启动延迟从数十秒缩短到最佳的几秒。</p>
+<figure class="image-box">
+                <a rel=3.基于Containerd容器运行时的配置浅析与知识扩充实践 href="https://gitee.com/WeiyiGeek/blogimage/raw/master/2022/2/20220425154437.png" target="_blank" title="WeiyiGeek.eStargz加速拉取" data-fancybox="images"><img src="https://gitee.com/WeiyiGeek/blogimage/raw/master/2022/2/20220425154437.png" alt="WeiyiGeek.eStargz加速拉取" title="" class=""></a>
+                <p>WeiyiGeek.eStargz加速拉取</p>
+            </figure>
+<p>配置参考地址: <a href="https://github.com/containerd/nerdctl/blob/master/docs/rootless.md#stargz-snapshotter" target="_blank" rel="noopener">https://github.com/containerd/nerdctl/blob/master/docs/rootless.md#stargz-snapshotter</a></p>
+<p>我们将继续执行如下步骤, 以启用图像拉取的加速（延迟拉取）, 即加速镜像拉取。 </p>
+<p><br/></p>
+<p><strong>实践操作</strong></p>
+<p>1.安装与启用 Stargz 快照程序。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">/usr/<span class="built_in">local</span>/bin$ containerd-rootless-setuptool.sh install-stargz</span><br><span class="line">[INFO] Creating <span class="string">"/home/weiyigeek/.config/systemd/user/stargz-snapshotter.service"</span></span><br><span class="line">[INFO] Starting systemd unit <span class="string">"stargz-snapshotter.service"</span></span><br><span class="line">+ systemctl --user start stargz-snapshotter.service</span><br><span class="line">+ sleep 3</span><br><span class="line">+ systemctl --user --no-pager --full status stargz-snapshotter.service</span><br><span class="line">...........</span><br><span class="line">[INFO] Installed <span class="string">"stargz-snapshotter.service"</span> successfully.</span><br><span class="line">[INFO] To control <span class="string">"stargz-snapshotter.service"</span>, run: `systemctl --user (start|stop|restart) stargz-snapshotter.service`</span><br><span class="line">[INFO] Add the following lines to <span class="string">"/home/weiyigeek/.config/containerd/config.toml"</span> manually, and <span class="keyword">then</span> run `systemctl --user restart containerd.service`:</span><br><span class="line"><span class="comment">### BEGIN ###</span></span><br><span class="line">[proxy_plugins]</span><br><span class="line">  [proxy_plugins.<span class="string">"stargz"</span>]</span><br><span class="line">    <span class="built_in">type</span> = <span class="string">"snapshot"</span></span><br><span class="line">    address = <span class="string">"/run/user/1000/containerd-stargz-grpc/containerd-stargz-grpc.sock"</span></span><br><span class="line"><span class="comment">###  END  ###</span></span><br><span class="line">[INFO] Set `<span class="built_in">export</span> CONTAINERD_SNAPSHOTTER=<span class="string">"stargz"</span>` to use the stargz snapshotter.</span><br></pre></td></tr></table></figure></p>
+<p>2.准备一个包含以下 containerd 内容的配置, 为了安全我们可以指定一个用户, 例如使用 nerdctl 的用户的 UID 为 1000 的配置放置位置为<code>/run/user/1000</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 确认方法当前用户UID</span></span><br><span class="line">$ <span class="built_in">echo</span> <span class="variable">$UID</span></span><br><span class="line">1000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 containerd 配置文件中启用该插件</span></span><br><span class="line">tee ~/.config/containerd/config.toml  &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># Plug stargz snapshotter into containerd</span></span><br><span class="line"><span class="comment"># Containerd recognizes stargz snapshotter through specified socket address.</span></span><br><span class="line">[proxy_plugins]</span><br><span class="line">  [proxy_plugins.<span class="string">"stargz"</span>]</span><br><span class="line">    <span class="built_in">type</span> = <span class="string">"snapshot"</span></span><br><span class="line">    <span class="comment"># <span class="doctag">NOTE:</span> replace "1000" with your actual UID</span></span><br><span class="line">    address = <span class="string">"/run/user/1000/containerd-stargz-grpc/containerd-stargz-grpc.sock"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Use stargz snapshotter through CRI</span></span><br><span class="line"></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>3.重新启动 restargz-snapshotter 与 containerd 以使配置更改生效。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload </span><br><span class="line">systemctl --user start restargz-snapshotter.service &amp;&amp; systemctl --user restart containerd.service</span><br><span class="line">systemctl status stargz-snapshotter.service &amp;&amp; systemctl status containerd.service</span><br><span class="line"></span><br><span class="line">● stargz-snapshotter.service - stargz snapshotter (Rootless)</span><br><span class="line">     Loaded: loaded (/home/weiyigeek/.config/systemd/user/stargz-snapshotter.service; enabled; vendor preset: enabled)</span><br><span class="line">     Active: active (running) since Mon 2022-04-25 16:48:56 CST; 7s ago</span><br><span class="line">   Main PID: 360664 (containerd-star)</span><br><span class="line">     CGroup: /user.slice/user-1000.slice/user@1000.service/stargz-snapshotter.service</span><br><span class="line">             └─360664 containerd-stargz-grpc -address /run/user/1000/containerd-stargz-grpc/containerd-stargz-grpc.sock -root /home/weiyigeek/.<span class="built_in">local</span>/share/containerd-stargz-grpc -config /home/weiyigeek/.config/container&gt;</span><br><span class="line">Apr 25 16:48:56 node-2 systemd[358295]: Started stargz snapshotter (Rootless).</span><br></pre></td></tr></table></figure></p>
+<p>4.您可以选择执行以下命令,并指定使用<code>--snapshotter=stargz</code>进行快速图像拉取。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> CONTAINERD_SNAPSHOTTER=<span class="string">"stargz"</span></span><br><span class="line">nerdctl run --snapshotter=stargz ghcr.io/stargz-containers/python:3.10-esgz python -c <span class="string">"print('hello')"</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h4 id="2-配置高速的-rootless-模式"><a href="#2-配置高速的-rootless-模式" class="headerlink" title="2.配置高速的 rootless 模式"></a>2.配置高速的 rootless 模式</h4><p>描述: Rootless模式允许你在没有特权的情况下运行容器，具有安全优势，但它的缺点是容器外的通信速度比特权 Rootful 模式慢。 </p>
+<p>但是我们可以通过使用 bypass4netns, 使得 Rootless 的容器外通信速度将比 Rootful 更快, 操作如下所示:</p>
+<p>1.安装与启用 bypass4netns<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/<span class="built_in">local</span>/bin$ containerd-rootless-setuptool.sh install-bypass4netnsd</span><br></pre></td></tr></table></figure></p>
+<p>2.您可以选择执行如下命令，使用快速无根功能启动容器和以下<code>--label nerdctl/bypass4netns=true</code>参数快速图像拉取。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ nerdctl run --label nerdctl/bypass4netns=<span class="literal">true</span> ghcr.io/stargz-containers/python:3.10-esgz python -c <span class="string">"print('hello')"</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h3 id="实践-使用-containerd-amp-nerdctl-工具快速部署-redis-数据库服务容器"><a href="#实践-使用-containerd-amp-nerdctl-工具快速部署-redis-数据库服务容器" class="headerlink" title="实践.使用 containerd &amp; nerdctl 工具快速部署 redis 数据库服务容器"></a>实践.使用 containerd &amp; nerdctl 工具快速部署 redis 数据库服务容器</h3><p><strong>Step 1.准备 redis 数据库配置文件极其相关目录</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">mkdir -vp /app/redis/data</span><br><span class="line">tee /app/redis/redis.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># 绑定任意接口、服务端口、后台运行。</span></span><br><span class="line"><span class="built_in">bind</span> 0.0.0.0</span><br><span class="line">port 6379</span><br><span class="line"><span class="comment"># 容器里必须设置为no</span></span><br><span class="line">daemonize no</span><br><span class="line">supervised auto</span><br><span class="line"></span><br><span class="line"><span class="comment"># redis服务pid进程文件名</span></span><br><span class="line">pidfile <span class="string">"/var/run/redis.pid"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭保护模式，并配置使用密码访问</span></span><br><span class="line">protected-mode no</span><br><span class="line">requirepass <span class="string">"123456"</span></span><br><span class="line"><span class="comment"># echo -e "weiyigeek"|sha256sum </span></span><br><span class="line"><span class="comment"># requirepass 097575a79efcd7ea7b1efa2bcda78a4fc7cbd0820736b2f2708e72c3d21f8b61</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据文件保存路径，rdb/AOF文件也保存在这里</span></span><br><span class="line">dir <span class="string">"/data"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 日志文件记录文件(notice / verbose)</span></span><br><span class="line"><span class="comment"># logfile "/logs/redis.log"</span></span><br><span class="line"><span class="comment"># loglevel verbose  </span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 最大客户端连接数</span></span><br><span class="line">maxclients 10000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 客户端连接空闲多久后断开连接，单位秒，0表示禁用</span></span><br><span class="line">timeout 60</span><br><span class="line">tcp-keepalive 60 </span><br><span class="line"></span><br><span class="line"><span class="comment"># Redis 数据持久化(rdb/aof)配置</span></span><br><span class="line"><span class="comment"># RDB 文件名</span></span><br><span class="line">dbfilename <span class="string">"dump.rdb"</span></span><br><span class="line"><span class="comment"># 数据自动保存脚本条件例如300s中有10key发生变化</span></span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br><span class="line"><span class="comment"># 对RDB文件进行压缩，建议以（磁盘）空间换（CPU）时间。</span></span><br><span class="line">rdbcompression yes</span><br><span class="line"><span class="comment"># 版本5的RDB有一个CRC64算法的校验和放在了文件的最后。这将使文件格式更加可靠。</span></span><br><span class="line">rdbchecksum yes</span><br><span class="line"><span class="comment"># RDB自动触发策略是否启用，默认为yes</span></span><br><span class="line">rdb-save-incremental-fsync yes</span><br><span class="line"></span><br><span class="line"><span class="comment"># AOF开启</span></span><br><span class="line">appendonly yes</span><br><span class="line"><span class="comment"># AOF文件名</span></span><br><span class="line">appendfilename <span class="string">"appendonly.aof"</span></span><br><span class="line"><span class="comment"># 可选值 always， everysec，no，建议设置为everysec</span></span><br><span class="line">appendfsync everysec</span><br><span class="line"></span><br><span class="line"><span class="comment"># Redis风险命令重命名</span></span><br><span class="line"><span class="comment"># rename-command CONFIG b840fc02d524045429941cc15f59e41cb7be6c52</span></span><br><span class="line">rename-command FLUSHDB b840fc02d524045429941cc15f59e41cb7be6c53</span><br><span class="line">rename-command FLUSHALL b840fc02d524045429941cc15f59e41cb7be6c54</span><br><span class="line">rename-command EVAL b840fc02d524045429941cc15f59e41cb7be6c55</span><br><span class="line">rename-command DEBUG b840fc02d524045429941cc15f59e41cb7be6c56</span><br><span class="line"><span class="comment"># rename-command SHUTDOWN SHUTDOWN</span></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>Step 2.执行如下命令进行快速创建容器并运行redis服务。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ nerdctl run -d -p 6379:6379 \</span><br><span class="line"> -v /app/redis/redis.conf:/etc/redis/redis.conf \</span><br><span class="line"> -v /app/redis/data:/data \</span><br><span class="line"> --name redis-server redis:6.2.6-alpine3.15 redis-server /etc/redis/redis.conf</span><br><span class="line">5e854a58087ae1bba5a661b2941474560cbecc37f54c7f4e7a28afbaed6aebf0</span><br></pre></td></tr></table></figure>
+<p>Step 3.查看创建的容器并验证redis服务是否正常。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ nerdctl ps</span><br><span class="line">CONTAINER ID    IMAGE                                       COMMAND                   CREATED           STATUS    PORTS                     NAMES</span><br><span class="line">5e854a58087a    docker.io/library/redis:6.2.6-alpine3.15    <span class="string">"docker-entrypoint.s…"</span>    42 seconds ago    Up        0.0.0.0:6379-&gt;6379/tcp    redis-server</span><br><span class="line"></span><br><span class="line">$ nerdctl logs redis-server</span><br><span class="line">1:C 25 Apr 2022 13:22:59.597 <span class="comment"># oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo</span></span><br><span class="line">1:C 25 Apr 2022 13:22:59.597 <span class="comment"># Redis version=6.2.6, bits=64, commit=00000000, modified=0, pid=1, just started</span></span><br><span class="line">1:C 25 Apr 2022 13:22:59.597 <span class="comment"># Configuration loaded</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如下返回，表示 redis 服务状态是正常的</span></span><br><span class="line">$ nerdctl <span class="built_in">exec</span> -it redis-server redis-cli -a 123456 ping</span><br><span class="line">PONG</span><br><span class="line">$ nerdctl <span class="built_in">exec</span> -it redis-server redis-cli -a 123456 info</span><br><span class="line"><span class="comment"># Server</span></span><br><span class="line">redis_version:6.2.6</span><br><span class="line">redis_git_sha1:00000000</span><br><span class="line">redis_git_dirty:0</span><br><span class="line">redis_build_id:63421500bb103677</span><br><span class="line">redis_mode:standalone</span><br><span class="line">os:Linux 5.4.0-96-generic x86_64</span><br><span class="line">arch_bits:64</span><br><span class="line">multiplexing_api:epoll</span><br><span class="line">atomicvar_api:atomic-builtin</span><br></pre></td></tr></table></figure>
+<p>Step 4.这里我们直接用telnet工具连接创建的redis容器中的redis数据库服务。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ telnet 10.10.107.227 6379</span><br><span class="line">Trying 10.10.107.227...</span><br><span class="line">Connected to 10.10.107.227.</span><br><span class="line">Escape character is <span class="string">'^]'</span>.</span><br><span class="line">auth 123456  <span class="comment"># 认证</span></span><br><span class="line">+OK</span><br><span class="line">ping   <span class="comment"># 服务验证</span></span><br><span class="line">+PONG </span><br><span class="line"><span class="built_in">set</span> name weiyigeek <span class="comment"># 设置 字符串 类型的key</span></span><br><span class="line">+OK</span><br><span class="line">get name  <span class="comment"># 获取 key 的值</span></span><br><span class="line"><span class="variable">$9</span></span><br><span class="line">weiyigeek</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="入坑出坑"><a href="#入坑出坑" class="headerlink" title="入坑出坑"></a>入坑出坑</h3><ul>
+<li><p>错误1.安装nerdctl（Minimal）时执行containerd-rootless-setuptool.sh脚本安装时报<code>[ERROR] Refusing to install rootless containerd as the root user</code>错误<br>解决办法: 请切换到普通用户执行。</p>
+</li>
+<li><p>错误2.安装nerdctl（Minimal）时执行containerd-rootless-setuptool.sh脚本安装时报<code>containerd-rootless-setuptool.sh: 110: rootlesskit: Permission denied</code>错误</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/usr/<span class="built_in">local</span>/bin$ containerd-rootless-setuptool.sh install</span><br><span class="line">[INFO] Checking RootlessKit functionality</span><br><span class="line">/usr/<span class="built_in">local</span>/bin/containerd-rootless-setuptool.sh: 110: rootlesskit: Permission denied</span><br></pre></td></tr></table></figure>
+<p>问题原因: 由于未安装 rootlesskit 相关依赖工具<br>解决办法: 执行如下命令进行安装操作 <code>apt install -y rootlesskit rootlessctl</code></p>
+</li>
+</ul>
+<ul>
+<li>错误3.安装nerdctl (full) 时执行containerd-rootless-setuptool.sh脚本安装时报<code>exec: &quot;newuidmap&quot;: executable file not found in $PATH</code>错误<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./containerd-rootless-setuptool.sh install</span><br><span class="line">[INFO] Checking RootlessKit functionality</span><br><span class="line">[rootlesskit:parent] error: failed to setup UID/GID map: newuidmap 328299 [0 1000 1 1 100000 65536] failed: : <span class="built_in">exec</span>: <span class="string">"newuidmap"</span>: executable file not found <span class="keyword">in</span> <span class="variable">$PATH</span></span><br></pre></td></tr></table></figure>
+问题原因: newuidmap 在没有安装的环境下会出现上述错误，所以执行apt命令安装uidmap软件包。<br>解决版本: <code>sudo apt install uidmap</code></li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-04-26T02:24:10.796Z" itemprop="dateUpdated">2022-04-26 10:24:10</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Containerd/3.基于Containerd容器运行时的配置浅析与知识扩充实践.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Containerd/3.基于Containerd容器运行时的配置浅析与知识扩充实践.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2021/6-30-581.html" target="_blank" rel="external">https://blog.weiyigeek.top/2021/6-30-581.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Containerd/" rel="tag">Containerd</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/6-30-581.html&title=《3.基于Containerd容器运行时的配置浅析与知识扩充实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/6-30-581.html&title=《3.基于Containerd容器运行时的配置浅析与知识扩充实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/6-30-581.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《3.基于Containerd容器运行时的配置浅析与知识扩充实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/6-30-581.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/6-30-581.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2021/7-22-573.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Ceph分布式存储文件系统基础学习与实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2021/6-29-571.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">2.基于Containerd运行时搭建Kubernetes多控制平面集群实践</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-Containerd-容器运行时配置指南"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Containerd 容器运行时配置指南</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#如何配置-Containerd-的-systemd-守护进程服务"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">如何配置 Containerd 的 systemd 守护进程服务?</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#如何查看-Containerd-相关插件及其存目录"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">如何查看 Containerd 相关插件及其存目录?</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#如何生成-Containerd-默认的-config-toml-配置文件"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">如何生成 Containerd 默认的 config.toml 配置文件?</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#如何配置-Containerd-让其支持懒拉取-eStargz"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">如何配置 Containerd 让其支持懒拉取 (eStargz)?</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#如何配置-Containerd-在-harbor-私有仓库拉取镜像"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">如何配置 Containerd 在 harbor 私有仓库拉取镜像?</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#如何进行-Containerd-基本配置"><span class="post-toc-number">1.6.</span> <span class="post-toc-text">如何进行 Containerd 基本配置?</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-使用-nerdctl-工具配合-Containerd-替代-Docker"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 使用 nerdctl 工具配合 Containerd 替代 Docker</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#介绍-nerdctl-工具"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">介绍 nerdctl 工具</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装-nerdctl-工具"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">安装 nerdctl 工具</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#使用-nerdctl-工具"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">使用 nerdctl 工具</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#工具-nerdctl-命令"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">工具 nerdctl 命令</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#有趣的实验功能"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">有趣的实验功能</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-使用懒加载加速图像拉取（eStargz）"><span class="post-toc-number">2.5.1.</span> <span class="post-toc-text">1.使用懒加载加速图像拉取（eStargz）</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-配置高速的-rootless-模式"><span class="post-toc-number">2.5.2.</span> <span class="post-toc-text">2.配置高速的 rootless 模式</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#实践-使用-containerd-amp-nerdctl-工具快速部署-redis-数据库服务容器"><span class="post-toc-number">2.6.</span> <span class="post-toc-text">实践.使用 containerd &amp; nerdctl 工具快速部署 redis 数据库服务容器</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#入坑出坑"><span class="post-toc-number">2.7.</span> <span class="post-toc-text">入坑出坑</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/6-30-581.html&title=《3.基于Containerd容器运行时的配置浅析与知识扩充实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/6-30-581.html&title=《3.基于Containerd容器运行时的配置浅析与知识扩充实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/6-30-581.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《3.基于Containerd容器运行时的配置浅析与知识扩充实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/6-30-581.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/6-30-581.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLklEQVR42u3aQZICIRBEUe9/6Z6thiP+rKJnAvisDG2B1wsCKnk8cLueGvn1emuf/sVHmdBkyJCxLOMatvEzHPNp6u/fk3F/6UeGDBkHMO7omj/TYcuQIUNGyiDTGk9UhgwZMmYx+JDjA+o/L7gyZMhYikGWzrT01i/P3XIWlyFDxoIMXnX/+8+35BsyZMhYinGFrZ8bzprJS58yZMjYmsEXOLJZrE0aHVBJDzJkyNiUkR41+WAdTPyNDBkyjmH0L0aQoy+PRYNlXYYMGVsz0qsVtasYKYwfnuO6oAwZMhZkzE0S+qFm7UXIkCFjb0a/rJaGkbz/eOoyZMjYlMGVvAQ2t3iH/iVDhowDGOMJ8UAxPabykOBLPzJkyNiaUdtL8uhxPCGyiayFozJkyNiJkRbI0hiyU2jjL0iGDBnnMNJCGD+O8gJcMf6UIUPG1ox0BbtxyFqOkXYnQ4aMLRjptdTaYTXdXAbbRBkyZGzNSBdTUjJLn+exAboQJkOGjI0Y6dT5lQsCGC/KwdFahgwZBzBqBbJaPJle10AlPxkyZBzD4KFjWmKrFeCCI7QMGTI2ZVxh44W5tGxHXmW8t5UhQ8YWjFomyAfgS3BtmxhjZMiQsSxjVoGMbOM6wcOX/mXIkHEAo3NJa+42MV36ZciQIaMWHnQCTl6wQ29ChgwZxzPI9YtOnEBCUxkyZJzDIIdY/kx/eb2x3CZDhowFGa2bGpOihXRDWZyVDBky1mP8ANpHk2EliljnAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Nginx,webp">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2022-07-03T05:34:30.000Z" itemprop="datePublished" class="page-time">
+  2022-07-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4%E5%AE%9E%E8%B7%B5/">运维实践</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/Web/WebApp/Nginx/8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2022-07-03 13:34:30" datetime="2022-07-03T05:34:30.000Z"  itemprop="datePublished">2022-07-03</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4%E5%AE%9E%E8%B7%B5/">运维实践</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><strong>本章目录</strong></p>
+<p>[TOC]</p>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><p>描述: 最近公司业务中有这么一个需求就是在保证图像的清晰度的情况下, 减少其体积大小使得减轻外部请求流量带宽对网关的请访问压力，同时提高用户访问体验。所以在进行前期需求、运维成本等综合分析后，还是建议将图片格式转为Google推出的一种现代图像格式 Webp，考虑到 WebP图片已经是一种趋势了，现在已经有很知名的网站支持了这种格式的图片，当然你也可以使用 Google 出品的PageSpeed模块有一个功能，会自动将图像转换成WebP格式或者是浏览器所支持的其它格式(比较吃配置)。</p>
+<p>所以本章将主要针对webp格式的转换的相关命令进行实践使用，如果不想使用 Nginx+PageSpeed 模块，我们也可使用 Nginx+Lua 脚本针对请求非webp格式的图片进行自动转换后，并按照指定的分辨率进行显示。</p>
+<a id="more"></a>
+<p><br/></p>
+<h3 id="WebP-介绍"><a href="#WebP-介绍" class="headerlink" title="WebP 介绍"></a>WebP 介绍</h3><p><strong>An image format for the Web</strong><br>描述: WebP 由Google推出的一种现代图像格式，可为Web上的图像提供卓越的无损和有损压缩。与PNG相比WebP无损图像的尺寸小26%，WebP有损图像比同等SSIM质量指数下的同类JPEG图像小25-34%, 而无损 WebP 支持透明度（也称为 alpha 通道），而额外字节数仅为 22%。对于可接受有损 RGB 压缩的情况，有损 WebP 还支持透明度，通常提供比 PNG 小三倍的文件大小。</p>
+<p>温馨提示: 目前支持 <code>PNG / JPEG / GIF /PNM (PGM, PPM, PAM),/ TIFF</code>等图片格式转换为webp格式。</p>
+<p>官网地址: <a href="https://developers.google.com/speed/webp" target="_blank" rel="noopener">https://developers.google.com/speed/webp</a></p>
+<p><br/> </p>
+<p><strong>Webp 有何优点?</strong></p>
+<blockquote>
+<p>答: 使用WebP，网站管理员和Web开发人员可以创建更小，更丰富的图像，从而使Web解析访问更快。<br>WebP 可在 <code>Google Chrome，Safari，Firefox，Edge，Opera</code> 等主流浏览器以及许多其他工具和软件库(C/C++/Go/Python)中得到原生支持。</p>
+</blockquote>
+<p><br/></p>
+<p><strong>WebP 是如何工作的?</strong></p>
+<blockquote>
+<p>答： 有损WebP压缩使用预测编码对图像进行编码，与VP8视频编解码器压缩视频中关键帧的方法相同, 预测编码使用相邻像素块中的值来预测块中的数值，然后仅对差值进行编码。<br>而无损WebP压缩使用已经看到的图像片段，以便准确地重建新像素，如果没有发现有趣的匹配，它也可以使用本地调色板。</p>
+</blockquote>
+<p><strong>TIPS:</strong> WebP文件由VP8或VP8L图像数据以及基于RIFF的容器组成.</p>
+<hr>
+<h2 id="0X01-部署安装"><a href="#0X01-部署安装" class="headerlink" title="0X01 部署安装"></a>0X01 部署安装</h2><h3 id="实践环境说明"><a href="#实践环境说明" class="headerlink" title="实践环境说明"></a>实践环境说明</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 系统</span></span><br><span class="line">~$ cat /etc/issue.net</span><br><span class="line">Ubuntu 20.04.3 LTS</span><br><span class="line">~$ uname -a</span><br><span class="line">Linux weiyigeek.top 5.4.0-92-generic <span class="comment">#103-Ubuntu SMP Fri Nov 26 16:13:00 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 软件</span></span><br><span class="line">libwebp-1.2.3.tar.gz</span><br></pre></td></tr></table></figure>
+<p>温馨提示: 此处使用的是 Ubuntu 20.04 操作系统, 该系统已做安全加固和内核优化符合等保2.0要求【<a href="https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh" target="_blank" rel="noopener">SecOpsDev/Ubuntu-InitializeSecurity.sh at master · WeiyiGeek/SecOpsDev</a> 】, 如你的Linux未进行相应配置环境可能与读者有些许差异, 如需要进行(windows server、Ubuntu、CentOS)安全加固请参照如下加固脚本进行加固, 请大家疯狂的 star 。<br>加固脚本地址:【 <a href="https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh" target="_blank" rel="noopener">https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh</a> 】</p>
+<p style='color:red'> 为了节省大家的实践时间，我已经把需要用到的源码包上传到空间中，有需要的朋友可以看一下，下载地址: <a href="http://share.weiyigeek.top/d/36158960-50338508-7c5982?p=2088（访问密码：2088）" target="_blank" rel="noopener">http://share.weiyigeek.top/d/36158960-50338508-7c5982?p=2088（访问密码：2088）</a><br><br/>温馨提示: 如提示证书不对，请点击高级继续访问即可.</p>
+
+<figure class="image-box">
+                <a rel=8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220806093220.png" target="_blank" title="WeiyiGeek.Nginx及其模块下载" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220806093220.png" alt="WeiyiGeek.Nginx及其模块下载" title="" class=""></a>
+                <p>WeiyiGeek.Nginx及其模块下载</p>
+            </figure>
+<p><br/></p>
+<h3 id="WebP-工具库安装"><a href="#WebP-工具库安装" class="headerlink" title="WebP 工具库安装"></a>WebP 工具库安装</h3><p>Webp 包括轻量级编码和解码库libwebp[^libwebp]和命令行工具[cwebp][^cwebp]和[dwebp][^dwebp]，用于将多种互联网图像与WebP格式相互转换，以及用于查看，复用和动画化WebP图像的工具，完整的源代码可在<a href="https://developers.google.com/speed/webp/download" target="_blank" rel="noopener">下载页面</a>上获得。</p>
+<p>除此之外，我们还可下载适用于Linux、Windows或macOS的预编译cwebp转换工具（<a href="https://developers.google.com/speed/webp/docs/precompiled），将您喜爱的收藏从PNG和JPEG转换为WebP。" target="_blank" rel="noopener">https://developers.google.com/speed/webp/docs/precompiled），将您喜爱的收藏从PNG和JPEG转换为WebP。</a></p>
+<p><br/></p>
+<h4 id="二进制包方式安装"><a href="#二进制包方式安装" class="headerlink" title="二进制包方式安装"></a>二进制包方式安装</h4><p>描述: 用于Linux、Windows和macOS的预编译WebP实用程序和库。它们包括：</p>
+<ul>
+<li>libwebp 库 : 可用于将WebP编码或解码添加到程序中 (windows/Linux)。</li>
+<li><a href="https://developers.google.com/speed/webp/docs/cwebp" target="_blank" rel="noopener">cwebp</a> : WebP编码器工具</li>
+<li><a href="https://developers.google.com/speed/webp/docs/dwebp" target="_blank" rel="noopener">dwebp</a> : WebP解码器工具</li>
+<li><a href="https://developers.google.com/speed/webp/docs/vwebp" target="_blank" rel="noopener">vwebp</a> : WebP文件查看器</li>
+<li><a href="https://developers.google.com/speed/webp/docs/webpmux" target="_blank" rel="noopener">webpmux</a> : WebP复用工具</li>
+<li><a href="https://developers.google.com/speed/webp/docs/gif2webp" target="_blank" rel="noopener">gif2webp</a>: 用于将GIF图像转换为WebP的工具</li>
+</ul>
+<p><br></p>
+<p><strong>系统软件源方式</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Debian、Ubuntu</span></span><br><span class="line">sudo apt-get install webp</span><br><span class="line"></span><br><span class="line"><span class="comment"># CentOS</span></span><br><span class="line">yum install libwebp-tools webp</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h4 id="源代码编译方式安装"><a href="#源代码编译方式安装" class="headerlink" title="源代码编译方式安装"></a>源代码编译方式安装</h4><p>描述: libwebp 是谷歌官方提供的webp格式图片parser以及解码的库，以下记录在Ubuntu 20.04编译<code>libwebp</code>及其安装webp相关工具的过程。</p>
+<p>项目地址: <a href="https://github.com/webmproject/libwebp" target="_blank" rel="noopener">https://github.com/webmproject/libwebp</a><br>下载地址: <a href="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html" target="_blank" rel="noopener">https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html</a></p>
+<p>Step 1.要从<code>source code</code>进行构建，我们首先必须下载源码的压缩包。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src</span><br><span class="line">wget -c https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.3.tar.gz </span><br><span class="line">tar -zxf libwebp-1.2.3.tar.gz  &amp;&amp; <span class="built_in">cd</span> libwebp-1.2.3/</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>Step 2.在Ubuntu系统中安装编译libwebp前以及webp相关工具编译构建。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Prerequisites: a compiler (e.g., gcc), make, autoconf, automake, libtool.</span></span><br><span class="line">apt install -y gcc make autoconf automake libtool</span><br><span class="line"><span class="comment"># support webp、jpeg、tiff、gif</span></span><br><span class="line">apt install -y libwebp-dev libjpeg-dev libpng-dev libtiff-dev libgif-dev </span><br><span class="line"><span class="comment"># support vwebp</span></span><br><span class="line">apt install -y freeglut3-dev mesa-common-dev </span><br><span class="line"><span class="comment"># 预编译参数</span></span><br><span class="line">./configure --<span class="built_in">enable</span>-libwebpdecoder --<span class="built_in">enable</span>-libwebpextras  --<span class="built_in">enable</span>-swap-16bit-csp</span><br><span class="line"><span class="comment"># 自动编译构建</span></span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220731112616.png" target="_blank" title="WeiyiGeek.build libwebp" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220731112616.png" alt="WeiyiGeek.build libwebp" title="" class=""></a>
+                <p>WeiyiGeek.build libwebp</p>
+            </figure>
+<p><strong>温馨提示:</strong> 当你从git源代码构建时需要运行autogen.sh生成配置脚本 (When building from git sources, you will need to run autogen.sh to generate the<br>configure script.)</p>
+<p><strong>温馨提示:</strong> 如果在执行时出现如下错误 <code>cwebp: error while loading shared libraries: libwebpdemux.so.2: cannot open shared object file: No such file or directory</code>，我们可以执行如下命令进行解决该问题。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"export LD_LIBRARY_PATH=<span class="variable">$LD_LIBRARY_PATH</span>:/usr/local/lib"</span> &gt;&gt; ~/.bashrc</span><br><span class="line"><span class="built_in">export</span> LD_LIBRARY_PATH=<span class="variable">$LD_LIBRARY_PATH</span>:/usr/<span class="built_in">local</span>/lib</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$LD_LIBRARY_PATH</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2</span></span><br><span class="line">tee -a /etc/ld.so.conf.d/libc.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># libc default configuration</span></span><br><span class="line">/usr/<span class="built_in">local</span>/lib</span><br><span class="line">EOF</span><br><span class="line">sudo ldconfig</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>Step 3.在完成后您应该在如下目录中<code>/usr/local/bin/</code>，使用ls命令查看下述几个命令.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ls /usr/<span class="built_in">local</span>/bin/*webp*</span><br><span class="line">/usr/<span class="built_in">local</span>/bin/cwebp</span><br><span class="line">/usr/<span class="built_in">local</span>/bin/dwebp</span><br><span class="line">/usr/<span class="built_in">local</span>/bin/gif2webp</span><br><span class="line">/usr/<span class="built_in">local</span>/bin/vwebp</span><br><span class="line">/usr/<span class="built_in">local</span>/bin/webpmux</span><br><span class="line">/usr/<span class="built_in">local</span>/bin/img2webp  </span><br><span class="line">/usr/<span class="built_in">local</span>/bin/webpinfo</span><br></pre></td></tr></table></figure></p>
+<p><strong>命令介绍</strong>:</p>
+<ul>
+<li>cwebp: 用于将jpeg、png或TIFF编码格式图片转为webp格式图片。(可以理解为编码)</li>
+<li>dwebp: 用于将webp格式图片转换为png格式图片</li>
+<li>vwebp: 用于播放webp动图和静图的工具</li>
+<li>webpmux: 用于 WebP复用工具</li>
+<li>gif2webp：用于将GIF图像转换为WebP的工具</li>
+<li>img2webp：用于从一系列输入图像创建动画WebP文件。</li>
+<li>webpinfo: 打印WebP文件的区块级结构以及基本的完整性检查。</li>
+</ul>
+<p><br></p>
+<p>Step 4.验证安装的相关工具并进行查看其版本号。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~$ cwebp -version</span><br><span class="line">1.2.3</span><br><span class="line">~$ dwebp -version</span><br><span class="line">1.2.3</span><br></pre></td></tr></table></figure>
+<p>好的，二进制部署在此处实践部署到此就结束了。</p>
+<p><br/></p>
+<p>补充说明: 其它发行版可以从源码进行编译构建。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) tiff 扩展图像格式的支持 </span></span><br><span class="line">apt install -y libtiff-dev</span><br><span class="line">http://download.osgeo.org/libtiff/</span><br><span class="line">wget -c http://download.osgeo.org/libtiff/tiff-4.4.0.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) gif 图像格式的一个核心库,用于处理GIF的库和实用程序,giflib是一个用于读取和写入gif图像的库。</span></span><br><span class="line">apt install -y libgif-dev</span><br><span class="line">https://sourceforge.net/projects/giflib/files/latest/download</span><br><span class="line">wget -c https://onboardcloud.dl.sourceforge.net/project/giflib/giflib-5.2.1.tar.gz</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="0x02-工具命令浅析"><a href="#0x02-工具命令浅析" class="headerlink" title="0x02 工具命令浅析"></a>0x02 工具命令浅析</h2><h3 id="cwebp-命令-转换-webp-图片格式"><a href="#cwebp-命令-转换-webp-图片格式" class="headerlink" title="cwebp 命令 - 转换 webp 图片格式"></a>cwebp 命令 - 转换 webp 图片格式</h3><p><strong>语法参数:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Usage:</span></span><br><span class="line"> cwebp [-preset &lt;...&gt;] [options] in_file [-o out_file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># Options:</span></span><br><span class="line">  -q &lt;<span class="built_in">float</span>&gt; ............. quality factor (0:small..100:big), default=75 <span class="comment"># 图形质量</span></span><br><span class="line">  -alpha_q &lt;int&gt; ......... transparency-compression quality (0..100),</span><br><span class="line">                           default=100</span><br><span class="line">  -preset &lt;string&gt; ....... preset setting, one of:</span><br><span class="line">                            default, photo, picture,</span><br><span class="line">                            drawing, icon, text</span><br><span class="line">     -preset must come first, as it overwrites other parameters</span><br><span class="line">  -z &lt;int&gt; ............... activates lossless preset with given</span><br><span class="line">                           level <span class="keyword">in</span> [0:fast, ..., 9:slowest]</span><br><span class="line"></span><br><span class="line">  -m &lt;int&gt; ............... compression method (0=fast, 6=slowest), default=4</span><br><span class="line">  -segments &lt;int&gt; ........ number of segments to use (1..4), default=4</span><br><span class="line">  -size &lt;int&gt; ............ target size (<span class="keyword">in</span> bytes)                             <span class="comment"># 目标尺寸</span></span><br><span class="line">  -psnr &lt;<span class="built_in">float</span>&gt; .......... target PSNR (<span class="keyword">in</span> dB. typically: 42)                 <span class="comment"># 目标PSN</span></span><br><span class="line">  -s &lt;int&gt; &lt;int&gt; ......... input size (width x height) <span class="keyword">for</span> YUV</span><br><span class="line">  -sns &lt;int&gt; ............. spatial noise shaping (0:off, 100:max), default=50 <span class="comment"># 空间噪声整形</span></span><br><span class="line">  -f &lt;int&gt; ............... filter strength (0=off..100), default=60           <span class="comment"># 过滤器强度</span></span><br><span class="line">  -sharpness &lt;int&gt; ....... filter sharpness (0:most .. 7:least sharp), default=0</span><br><span class="line">  -strong ................ use strong filter instead of simple (default)</span><br><span class="line">  -nostrong .............. use simple filter instead of strong</span><br><span class="line">  -sharp_yuv ............. use sharper (and slower) RGB-&gt;YUV conversion</span><br><span class="line">  -partition_limit &lt;int&gt; . <span class="built_in">limit</span> quality to fit the 512k <span class="built_in">limit</span> on the first partition (0=no degradation ... 100=full)</span><br><span class="line">  -pass &lt;int&gt; ............ analysis pass number (1..10)</span><br><span class="line">  -qrange &lt;min&gt; &lt;max&gt; .... specifies the permissible quality range(default: 0 100)</span><br><span class="line">  -crop &lt;x&gt; &lt;y&gt; &lt;w&gt; &lt;h&gt; .. crop picture with the given rectangle</span><br><span class="line">  -resize &lt;w&gt; &lt;h&gt; ........ resize picture (*after* any cropping)             <span class="comment"># 调整图片大小（*任意裁剪后）</span></span><br><span class="line">  -mt .................... use multi-threading <span class="keyword">if</span> available</span><br><span class="line">  -low_memory ............ reduce memory usage (slower encoding)</span><br><span class="line">  -map &lt;int&gt; ............. <span class="built_in">print</span> map of extra info</span><br><span class="line">  -print_psnr ............ prints averaged PSNR distortion</span><br><span class="line">  -print_ssim ............ prints averaged SSIM distortion</span><br><span class="line">  -print_lsim ............ prints <span class="built_in">local</span>-similarity distortion</span><br><span class="line">  -d &lt;file.pgm&gt; .......... dump the compressed output (PGM file)</span><br><span class="line">  -alpha_method &lt;int&gt; .... transparency-compression method (0..1), default=1</span><br><span class="line">  -alpha_filter &lt;string&gt; . predictive filtering <span class="keyword">for</span> alpha plane,one of: none, fast (default) or best</span><br><span class="line">  -exact ................. preserve RGB values <span class="keyword">in</span> transparent area, default=off</span><br><span class="line">  -blend_alpha &lt;hex&gt; ..... blend colors against background color</span><br><span class="line">                           expressed as RGB values written <span class="keyword">in</span></span><br><span class="line">                           hexadecimal, e.g. 0xc0e0d0 <span class="keyword">for</span> red=0xc0</span><br><span class="line">                           green=0xe0 and blue=0xd0</span><br><span class="line">  -noalpha ............... discard any transparency information</span><br><span class="line">  -lossless .............. encode image losslessly, default=off <span class="comment"># 无损编码图像，默认为关闭</span></span><br><span class="line">  -near_lossless &lt;int&gt; ... use near-lossless image preprocessing (0..100=off), default=100</span><br><span class="line">  -hint &lt;string&gt; ......... specify image characteristics hint,one of: photo, picture or graph <span class="comment"># 指定图像特征提示，图片、图片或图形之一</span></span><br><span class="line">  -metadata &lt;string&gt; ..... comma separated list of metadata tocopy from the input to the output <span class="keyword">if</span> present. Valid values: all, none (default), exif, icc, xmp</span><br><span class="line"></span><br><span class="line">  -short ................. condense printed message</span><br><span class="line">  -quiet ................. don\<span class="string">'t print anything</span></span><br><span class="line"><span class="string">  -version ............... print version number and exit</span></span><br><span class="line"><span class="string">  -noasm ................. disable all assembly optimizations</span></span><br><span class="line"><span class="string">  -v ..................... verbose, e.g. print encoding/decoding times</span></span><br><span class="line"><span class="string">  -progress .............. report encoding progress</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Experimental Options:</span></span><br><span class="line"><span class="string">  -jpeg_like ............. roughly match expected JPEG size</span></span><br><span class="line"><span class="string">  -af .................... auto-adjust filter strength</span></span><br><span class="line"><span class="string">  -pre &lt;int&gt; ............. pre-processing filter</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>实践案例:</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.图形质量为75，将 picture.png 转换为 picture.webp</span></span><br><span class="line">$ cwebp -o picture.webp -- picture.png</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.图形质量为80，将 pictimageure.png 转换为 image.webp</span></span><br><span class="line">$ cwebp -q 80 image.png -o image.webp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.空间噪声整形为70，过滤器强度为50，尺寸大小为 60000 bytes</span></span><br><span class="line">$ cwebp -sns 70 -f 50 -size 60000 image.png -o image.webp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.无损压缩 wechat-search.png 为 wechat-search.png</span></span><br><span class="line">$ cwebp -lossless wechat-search.png -o image_lossless.webp</span><br><span class="line">  <span class="comment"># Saving file 'image_lossless.webp'</span></span><br><span class="line">  <span class="comment"># File:      wechat-search.png</span></span><br><span class="line">  <span class="comment"># Dimension: 438 x 200</span></span><br><span class="line">  <span class="comment"># Output:    16582 bytes (1.51 bpp)</span></span><br><span class="line">  <span class="comment"># Lossless-ARGB compressed size: 16582 bytes</span></span><br><span class="line">  <span class="comment">#   * Header size: 787 bytes, image data size: 15770</span></span><br><span class="line">  <span class="comment">#   * Lossless features used: SUBTRACT-GREEN</span></span><br><span class="line">  <span class="comment">#   * Precision Bits: histogram=3 transform=3 cache=10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.调整图片大小（*任意裁剪后）</span></span><br><span class="line">$ cwebp -resize 216 100  wechat-search.png -o image_resize.webp</span><br><span class="line">  <span class="comment"># Saving file 'image_resize.webp'</span></span><br><span class="line">  <span class="comment"># File:      wechat-search.png</span></span><br><span class="line">  <span class="comment"># Dimension: 216 x 100</span></span><br><span class="line">  <span class="comment"># Output:    4246 bytes Y-U-V-All-PSNR 39.27 42.31 39.42   39.68 dB</span></span><br><span class="line">  <span class="comment">#             (1.57 bpp)</span></span><br><span class="line">  <span class="comment"># block count:  intra4:         58  (59.18%)</span></span><br><span class="line">  <span class="comment">#               intra16:        40  (40.82%)</span></span><br><span class="line">  <span class="comment">#               skipped:         9  (9.18%)</span></span><br><span class="line">  <span class="comment"># bytes used:  header:            202  (4.8%)</span></span><br><span class="line">  <span class="comment">#               mode-partition:    331  (7.8%)</span></span><br><span class="line">  <span class="comment">#   Residuals bytes  |segment 1|segment 2|segment 3|segment 4|  total</span></span><br><span class="line">  <span class="comment">#     macroblocks:  |      13%|      16%|      45%|      26%|      98</span></span><br><span class="line">  <span class="comment">#       quantizer:  |      36 |      30 |      25 |      17 |</span></span><br><span class="line">  <span class="comment">#     filter level:  |      11 |       6 |       5 |       2 |</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.遍历某一目录中的图片格式进行批量转换为.webp格式图片到某一目录。</span></span><br><span class="line"><span class="comment"># 单个文件类型转换</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> $(find /tmp -name *.png; <span class="keyword">do</span> png_suffix=<span class="variable">$&#123;i/.png/.webp&#125;</span>; /usr/<span class="built_in">local</span>/bin/cwebp -q 80 <span class="variable">$i</span> -o <span class="variable">$&#123;png_suffix/image/convert&#125;</span>; <span class="keyword">done</span></span><br><span class="line"><span class="comment"># 多个文件类型转换</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> $(find /tmp -name *.png -o -name *.jpg -o -name *.jpeg -o -name *.tiff); <span class="keyword">do</span> </span><br><span class="line">img_pathname=<span class="variable">$&#123;i%%.*&#125;</span>; /usr/<span class="built_in">local</span>/bin/cwebp -short -q 80  <span class="variable">$i</span> -o <span class="variable">$&#123;img_pathname/image/convert&#125;</span>.webp ; </span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line">$ tree .</span><br><span class="line">.</span><br><span class="line">├── convert</span><br><span class="line">│   ├── 1.webp</span><br><span class="line">│   └── 2.webp</span><br><span class="line">└── image</span><br><span class="line">    ├── 1.jpg</span><br><span class="line">    └── 2.png</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h3 id="dwebp-命令-将webp格式转换为png格式-解码"><a href="#dwebp-命令-将webp格式转换为png格式-解码" class="headerlink" title="dwebp 命令 - 将webp格式转换为png格式(解码)"></a>dwebp 命令 - 将webp格式转换为png格式(解码)</h3><p><strong>语法参数:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Usage: dwebp in_file [options] [-o out_file]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用以下选项转换为其他图像格式：</span></span><br><span class="line">  -pam ......... save the raw RGBA samples as a color PAM</span><br><span class="line">  -ppm ......... save the raw RGB samples as a color PPM</span><br><span class="line">  -bmp ......... save as uncompressed BMP format</span><br><span class="line">  -tiff ........ save as uncompressed TIFF format</span><br><span class="line">  -pgm ......... save the raw YUV samples as a grayscale PGM file with IMC4 layout</span><br><span class="line">  -yuv ......... save the raw YUV samples <span class="keyword">in</span> flat layout</span><br><span class="line"> Other options are:</span><br><span class="line">  -version ..... <span class="built_in">print</span> version number and <span class="built_in">exit</span></span><br><span class="line">  -nofancy ..... don<span class="string">'t use the fancy YUV420 upscaler</span></span><br><span class="line"><span class="string">  -nofilter .... disable in-loop filtering</span></span><br><span class="line"><span class="string">  -nodither .... disable dithering</span></span><br><span class="line"><span class="string">  -dither &lt;d&gt; .. dithering strength (in 0..100)       # 抖动强度（0..100）</span></span><br><span class="line"><span class="string">  -alpha_dither  use alpha-plane dithering if needed  # 如果需要，使用alpha平面抖动</span></span><br><span class="line"><span class="string">  -mt .......... use multi-threading                  # 使用多线程</span></span><br><span class="line"><span class="string">  -crop &lt;x&gt; &lt;y&gt; &lt;w&gt; &lt;h&gt; ... crop output with the given rectangle  # 使用给定矩形裁剪输出</span></span><br><span class="line"><span class="string">  -resize &lt;w&gt; &lt;h&gt; ......... resize output (*after* any cropping)  # 尺寸大小</span></span><br><span class="line"><span class="string">  -flip ........ flip the output vertically                       # 垂直翻转输出</span></span><br><span class="line"><span class="string">  -alpha ....... only save the alpha plane                        # 仅保存alpha平面</span></span><br><span class="line"><span class="string">  -incremental . use incremental decoding (useful for tests)</span></span><br><span class="line"><span class="string">  -v ........... verbose (e.g. print encoding/decoding times)</span></span><br><span class="line"><span class="string">  -quiet ....... quiet mode, don'</span>t <span class="built_in">print</span> anything</span><br><span class="line">  -noasm ....... <span class="built_in">disable</span> all assembly optimizations</span><br></pre></td></tr></table></figure></p>
+<p><strong>简单示例:</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.Using dwebp to Convert Images from the WebP Format</span></span><br><span class="line">dwebp image.webp -o image.png</span><br><span class="line"></span><br><span class="line">  <span class="comment"># Decoded image.webp. Dimensions: 493 x 424 . Format: lossy. Now saving...</span></span><br><span class="line">  <span class="comment"># Saved file image.png</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.webp图垂直翻转输出</span></span><br><span class="line">dwebp image.webp -flip -o image.png</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.解码为ppm格式</span></span><br><span class="line">dwebp picture.webp -ppm -o output.ppm</span><br><span class="line">dwebp -o output.ppm -- ---picture.webp</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h3 id="gif2webp-命令-将gif格式图片转换为webp格式"><a href="#gif2webp-命令-将gif格式图片转换为webp格式" class="headerlink" title="gif2webp 命令 - 将gif格式图片转换为webp格式"></a>gif2webp 命令 - 将gif格式图片转换为webp格式</h3><p><strong>语法参数:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Usage:</span></span><br><span class="line">  gif2webp [options] gif_file -o webp_file</span><br><span class="line"><span class="comment"># Options:</span></span><br><span class="line">  -h / -<span class="built_in">help</span> ............. this <span class="built_in">help</span></span><br><span class="line">  -lossy ................. encode image using lossy compression</span><br><span class="line">  -mixed ................. 混合压缩模式：通过启发式选择每帧的有损或无损压缩来优化图像的压缩。此全局选项禁用本地选项和 -lossy、lossless。</span><br><span class="line">  -q &lt;<span class="built_in">float</span>&gt; ............. quality factor (0:small..100:big)</span><br><span class="line">  -m &lt;int&gt; ............... compression method (0=fast, 6=slowest)</span><br><span class="line">  -min_size .............. 对图像进行编码以实现最小尺寸。这将禁用关键帧插入并选取参数，从而获得每个帧的最小输出。默认情况下，它使用无损压缩，但可以与-q、-m、-lossy、-mixed选项组合使用。</span><br><span class="line">  -kmin &lt;int&gt; ............ </span><br><span class="line">  -kmax &lt;int&gt; ............ 指定输出动画中连续关键帧（可独立解码帧）之间的最小和最大距离。该工具将根据需要将一些关键帧插入到输出动画中，以便满足此条件。</span><br><span class="line">  -f &lt;int&gt; ............... filter strength (0=off..100)</span><br><span class="line">  -metadata &lt;string&gt; ..... comma separated list of metadata to copy from the input to the output <span class="keyword">if</span> present Valid values: all, none, icc, xmp (default)</span><br><span class="line">  -loop_compatibility .... 指定动画应循环的次数，使用0意味着“无限期循环”</span><br><span class="line">  -mt .................... use multi-threading <span class="keyword">if</span> available</span><br><span class="line">  -version ............... <span class="built_in">print</span> version number and <span class="built_in">exit</span></span><br><span class="line">  -v ..................... verbose</span><br><span class="line">  -quiet ................. don<span class="string">'t print anything</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>简单实例:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># gif2webp - converts a GIF image to a WebP image</span></span><br><span class="line">gif2webp picture.gif -o picture.webp</span><br><span class="line">gif2webp -q 70 picture.gif -o picture.webp</span><br><span class="line">gif2webp -lossy -m 3 picture.gif -o picture_lossy.webp</span><br><span class="line">gif2webp -lossy -f 50 picture.gif -o picture.webp</span><br><span class="line">gif2webp -min_size -q 30 -o picture.webp -- ---picture.gif</span><br><span class="line">cat picture.gif | gif2webp -o - -- - &gt; output.webp</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="img2webp-命令-从一系列输入图像创建动画WebP文件。"><a href="#img2webp-命令-从一系列输入图像创建动画WebP文件。" class="headerlink" title="img2webp 命令 - 从一系列输入图像创建动画WebP文件。"></a>img2webp 命令 - 从一系列输入图像创建动画WebP文件。</h3><p><strong>语法参数</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Usage:</span></span><br><span class="line">  img2webp [file_options] [[frame_options] frame_file]...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 压缩选项</span></span><br><span class="line">-o string ：指定输出 WebP 文件的名称。</span><br><span class="line">-min_size ： 对图像进行编码以实现最小尺寸</span><br><span class="line">-kmin int</span><br><span class="line">-kmax int ：指定输出动画中连续关键帧（可独立解码帧）之间的最小和最大距离。</span><br><span class="line">-mixed：混合压缩模式：通过启发式选择每帧的有损或无损压缩来优化图像的压缩。</span><br><span class="line">-loop int ：指定动画应循环的次数，使用0意味着“无限期循环”。</span><br><span class="line"></span><br><span class="line"><span class="comment"># 帧选项</span></span><br><span class="line">-d int 以毫秒为单位指定图像持续时间。</span><br><span class="line">-lossless, -lossy 使用无损或有损压缩模式压缩下一个图像。默认模式为无损。</span><br><span class="line">-q <span class="built_in">float</span> 指定介于 0 和 100 之间的压缩因子。默认值为 75。</span><br><span class="line">-m int 指定要使用的压缩方法。此参数控制编码速度与压缩文件大小和质量之间的权衡。可能的值范围为 0 到 6。默认值为 4。</span><br></pre></td></tr></table></figure></p>
+<p>TIPS: 其支持的输入格式为 <code>WebP, JPEG, PNG, PNM (PGM, PPM, PAM), TIFF</code>.</p>
+<p><br/></p>
+<p><strong>简单实例:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.将 in0.png 、in1.jpg、in2.tiff组合为 webp 格式的动态图片。</span></span><br><span class="line">img2webp -loop 2 in0.png -lossy in1.jpg -d 80 in2.tiff -o out.webp</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="webpmux-命令-从非动画WebP图像中创建动画WebP文件"><a href="#webpmux-命令-从非动画WebP图像中创建动画WebP文件" class="headerlink" title="webpmux 命令 - 从非动画WebP图像中创建动画WebP文件"></a>webpmux 命令 - 从非动画WebP图像中创建动画WebP文件</h3><p>描述: 从非动画WebP图像中创建动画WebP文件，从动画WebP图片中提取帧，以及管理XMP/EXIF元数据和ICC配置文件。</p>
+<p><strong>语法参数:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Usage:</span></span><br><span class="line">webpmux -get GET_OPTIONS INPUT -o OUTPUT</span><br><span class="line">webpmux -<span class="built_in">set</span> SET_OPTIONS INPUT -o OUTPUT</span><br><span class="line">webpmux -strip STRIP_OPTIONS INPUT -o OUTPUT</span><br><span class="line">webpmux -frame FRAME_OPTIONS [ -frame ... ] [ -loop LOOP_COUNT ] [ -bgcolor BACKGROUND_COLOR ] -o OUTPUT</span><br><span class="line">webpmux -duration DURATION OPTIONS [ -duration ... ] INPUT -o OUTPUT</span><br><span class="line">webpmux -info INPUT</span><br><span class="line"></span><br><span class="line"><span class="comment"># GET_OPTIONS (-get):</span></span><br><span class="line">  icc    Get ICC profile.</span><br><span class="line">  exif   Get EXIF metadata.</span><br><span class="line">  xmp    Get XMP metadata.</span><br><span class="line">  frame n  Get nth frame from an animated image. (n = 0 has a special meaning: last frame).</span><br><span class="line"></span><br><span class="line"><span class="comment"># SET_OPTIONS (-set):</span></span><br><span class="line">  loop loop_count : Set loop count on an animated file.</span><br><span class="line">    <span class="comment"># Where: 'loop_count' must be in range [0, 65535].</span></span><br><span class="line">  bgcolor A,R,G,B : Set the background color of the canvas on an animated file.</span><br><span class="line">    <span class="comment"># where:  'A',  'R', 'G' and 'B' are integers in the range 0 to 255 specifying the Alpha, Red, Green and Blue component values respectively.</span></span><br><span class="line">  icc file.icc : Set ICC profile.</span><br><span class="line">    <span class="comment"># Where: 'file.icc' contains the ICC profile to be set.</span></span><br><span class="line">  exif file.exif : Set EXIF metadata.</span><br><span class="line">    <span class="comment"># Where: 'file.exif' contains the EXIF metadata to be set.</span></span><br><span class="line">  xmp file.xmp : Set XMP metadata.</span><br><span class="line">    <span class="comment"># Where: 'file.xmp' contains the XMP metadata to be set.</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>示例演示:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">webpmux -get exif test.webp -o test.webp.txt</span><br><span class="line">webpmux -get frame 0 test.webp -o test.webp.txt</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="webpinfo-命令-打印出WebP文件的块级结构以及基本的完整性检查。"><a href="#webpinfo-命令-打印出WebP文件的块级结构以及基本的完整性检查。" class="headerlink" title="webpinfo 命令 - 打印出WebP文件的块级结构以及基本的完整性检查。"></a>webpinfo 命令 - 打印出WebP文件的块级结构以及基本的完整性检查。</h3><p><strong>语法参数:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Usage: webpinfo [options] in_files</span><br><span class="line">Options:</span><br><span class="line">  -version ........... Print version number and <span class="built_in">exit</span>.</span><br><span class="line">  -quiet ............. Do not show chunk parsing information.</span><br><span class="line">  -diag .............. Show parsing error diagnosis.(显示分析错误诊断)</span><br><span class="line">  -summary ........... Show chunk stats summary.(显示块统计信息摘要)</span><br><span class="line">  -bitstream_info .... Parse bitstream header.(解析位流头)</span><br></pre></td></tr></table></figure></p>
+<p><strong>使用案例:</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.显示指定webp摘要信息</span></span><br><span class="line">$ webpinfo -diag -summary wechat-search.webp</span><br><span class="line">  File: wechat-search.webp</span><br><span class="line">  RIFF HEADER:</span><br><span class="line">    File size:  11298</span><br><span class="line">  Chunk VP8  at offset     12, length  11286</span><br><span class="line">    Width: 438</span><br><span class="line">    Height: 200</span><br><span class="line">    Alpha: 0</span><br><span class="line">    Animation: 0</span><br><span class="line">    Format: Lossy (1)</span><br><span class="line">  Summary:</span><br><span class="line">  Number of frames: 1</span><br><span class="line">  Chunk <span class="built_in">type</span>  :  VP8 VP8L VP8X ALPH ANIM ANMF(VP8 /VP8L/ALPH) ICCP EXIF  XMP</span><br><span class="line">  Chunk counts:    1    0    0    0    0    0    0    0    0     0    0    0</span><br><span class="line">  No error detected.</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.解析指定webp文件的比特流头</span></span><br><span class="line">$ webpinfo -bitstream_info input_file_1.webp input_file_2.webp</span><br><span class="line">File: input_file_1.webp</span><br><span class="line">RIFF HEADER:</span><br><span class="line">  File size:  11076</span><br><span class="line">Chunk VP8  at offset     12, length  11064</span><br><span class="line">  Width: 493</span><br><span class="line">  Height: 424</span><br><span class="line">  Alpha: 0</span><br><span class="line">  Animation: 0</span><br><span class="line">  Format: Lossy (1)</span><br><span class="line">  Parsing lossy bitstream...</span><br><span class="line">  Key frame:        Yes</span><br><span class="line">  Profile:          0</span><br><span class="line">  Display:          Yes</span><br><span class="line">  Part. 0 length:   1619</span><br><span class="line">  Width:            493</span><br><span class="line">  X scale:          0</span><br><span class="line">  Height:           424</span><br><span class="line">  Y scale:          0</span><br><span class="line">  Color space:      0</span><br><span class="line">  Clamp <span class="built_in">type</span>:       0</span><br><span class="line">  Use segment:      1</span><br><span class="line">  Update map:       1</span><br><span class="line">  Update data:      1</span><br><span class="line">  Absolute delta:   1</span><br><span class="line">  Quantizer:        27 27 23 17</span><br><span class="line">  Filter strength:  8 6 5 2</span><br><span class="line">  Prob segment:     35 55 40</span><br><span class="line">  Simple filter:    0</span><br><span class="line">  Level:            8</span><br><span class="line">  Sharpness:        0</span><br><span class="line">  Use lf delta:     0</span><br><span class="line">  Total partitions: 1</span><br><span class="line">  Base Q:           27</span><br><span class="line">  DQ Y1 DC:         0</span><br><span class="line">  DQ Y2 DC:         0</span><br><span class="line">  DQ Y2 AC:         0</span><br><span class="line">  DQ UV DC:         -2</span><br><span class="line">  DQ UV AC:         -3</span><br><span class="line">File: input_file_2.webp</span><br><span class="line">.....</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h3 id="vwebp-命令-解压缩WebP文件并将其显示在窗口中"><a href="#vwebp-命令-解压缩WebP文件并将其显示在窗口中" class="headerlink" title="vwebp 命令 - 解压缩WebP文件并将其显示在窗口中"></a>vwebp 命令 - 解压缩WebP文件并将其显示在窗口中</h3><p><strong>语法参数:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">vwebp [options] input_file.webp</span><br><span class="line"><span class="comment"># Options are:</span></span><br><span class="line">  -version ..... <span class="built_in">print</span> version number and <span class="built_in">exit</span></span><br><span class="line">  -noicc ....... don<span class="string">'t use the icc profile if present</span></span><br><span class="line"><span class="string">  -nofancy ..... don'</span>t use the fancy YUV420 upscaler</span><br><span class="line">  -nofilter .... <span class="built_in">disable</span> <span class="keyword">in</span>-loop filtering</span><br><span class="line">  -dither &lt;int&gt;  dithering strength (0..100), default=50</span><br><span class="line">  -noalphadither <span class="built_in">disable</span> alpha plane dithering</span><br><span class="line">  -usebgcolor .. display background color</span><br><span class="line">  -mt .......... use multi-threading</span><br><span class="line">  -info ........ <span class="built_in">print</span> info</span><br><span class="line">  -h ........... this <span class="built_in">help</span> message</span><br><span class="line"></span><br><span class="line"><span class="comment"># Keyboard shortcuts:</span></span><br><span class="line">  <span class="string">'c'</span> ................ toggle use of color profile</span><br><span class="line">  <span class="string">'b'</span> ................ toggle background color display</span><br><span class="line">  <span class="string">'i'</span> ................ overlay file information</span><br><span class="line">  <span class="string">'d'</span> ................ <span class="built_in">disable</span> blending &amp; disposal (debug)</span><br><span class="line">  <span class="string">'q'</span> / <span class="string">'Q'</span> / ESC .... quit</span><br></pre></td></tr></table></figure></p>
+<p><strong>使用示例:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vwebp picture.webp</span><br><span class="line">vwebp picture.webp -mt -dither 0</span><br><span class="line">vwebp -- ---picture.webp</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h2 id="0x03-企业实践"><a href="#0x03-企业实践" class="headerlink" title="0x03 企业实践"></a>0x03 企业实践</h2><h3 id="1-请求访问Nginx服务器中承载的不同分辨率WebP格式图片。"><a href="#1-请求访问Nginx服务器中承载的不同分辨率WebP格式图片。" class="headerlink" title="1.请求访问Nginx服务器中承载的不同分辨率WebP格式图片。"></a>1.请求访问Nginx服务器中承载的不同分辨率WebP格式图片。</h3><p>描述: 在请求中指定图片分辨率大小，如何让Nginx识别指定的分辨率值并返回指定分辨率大小的webp图形资源。</p>
+<blockquote>
+<p>答案当然可以从下述文章实践中找到答案，此前我们需要确定源代码编译nginx参数中是否启用了<code>--with-http_image_filter_module</code>该模块，如果没有启动则需要重新构建Nginx，具体操作如下所示。<br><code>nginx -V</code> 验证该其<code>configure arguments:</code>中是否存在<code>http_image_filter</code>模块。</p>
+</blockquote>
+<p>温馨提示: 进行 Nginx 的源代码编译安装步骤流程可以参考我前面此篇文章【 <a href="https://blog.weiyigeek.top/2022/7-2-676.html">https://blog.weiyigeek.top/2022/7-2-676.html</a> 】 或者【 <a href="https://mp.weixin.qq.com/s/u-zb-BxG6VyaLY4EQLKlOQ" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/u-zb-BxG6VyaLY4EQLKlOQ</a> 】直达。</p>
+<p>此处演示在已安装Nginx环境下使用<code>--with-http_image_filter_module</code>参数生成模块动态链接库，当然你也可直接编译进nginx，不过笔者还是推荐前者。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure --<span class="built_in">help</span> | grep <span class="string">"image_filter_module"</span></span><br><span class="line">--with-http_image_filter_module         <span class="comment"># enable ngx_http_image_filter_module</span></span><br><span class="line">--with-http_image_filter_module=dynamic <span class="comment"># enable dynamic ngx_http_image_filter_module</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p><strong>实践流程:</strong></p>
+<ul>
+<li>Step 1.实践项目web准备，此处采用我的主页作为展示，首先从gitee中拉取weiyigeek主页项目到本地<code>/app/html/</code>目录中.</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir /app/html/ &amp;&amp; <span class="built_in">cd</span> /app/html/</span><br><span class="line">git <span class="built_in">clone</span> --depth=1 https://gitee.com/WeiyiGeek/weiyigeek.git</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>Step 2.获取当前Nginx配置编译参数，并添加<code>http_image_filter</code>模块为动态链接。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取当前编译参数</span></span><br><span class="line">nginx -V </span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用 http_image_filter 模块并重新配置参数，进行编译构建</span></span><br><span class="line"><span class="comment"># ./configure [上述获取的编译参数] --with-http_image_filter_module=dynamic</span></span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/nginx-1.22.0</span><br><span class="line">./configure --prefix=/usr/<span class="built_in">local</span>/nginx --user=nginx --group=nginx --with-pcre=../pcre-8.45 --with-zlib=../zlib-1.2.12 --with-openssl=../openssl-1.1.1q --sbin-path=/usr/sbin/nginx --conf-path=/usr/<span class="built_in">local</span>/nginx/nginx.conf --pid-path=/usr/<span class="built_in">local</span>/nginx/nginx.pid --error-log-path=/var/<span class="built_in">log</span>/nginx/error.log --http-log-path=/var/<span class="built_in">log</span>/nginx/access.log --lock-path=/var/run/nginx.lock --modules-path=/usr/<span class="built_in">local</span>/nginx/modules --http-client-body-temp-path=/var/cache/nginx/client_temp --http-proxy-temp-path=/var/cache/nginx/proxy_temp --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp --http-scgi-temp-path=/var/cache/nginx/scgi_temp --with-threads --with-http_sub_module --with-http_v2_module --with-http_auth_request_module --with-http_realip_module --with-http_secure_link_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_ssl_module --with-http_slice_module --with-http_stub_status_module --with-http_dav_module --with-http_flv_module --with-http_mp4_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-stream_geoip_module --with-mail --with-mail_ssl_module --with-http_addition_module --with-http_random_index_module --with-compat --with-file-aio --with-cc-opt=<span class="string">'-Os -fomit-frame-pointer -g'</span> --with-ld-opt=-Wl,-rpath,/usr/<span class="built_in">local</span>/luajit/lib,--as-needed,-O1,--sort-common --add-module=/usr/<span class="built_in">local</span>/src/ngx_devel_kit-0.3.1 --add-module=/usr/<span class="built_in">local</span>/src/lua-nginx-module-0.10.21 --add-dynamic-module=/usr/<span class="built_in">local</span>/src/<span class="built_in">echo</span>-nginx-module-0.62 --add-dynamic-module=/usr/<span class="built_in">local</span>/src/ngx_http_geoip2_module-3.4 --with-http_image_filter_module=dynamic</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>温馨提示: 当编译 Nginx 时报<code>checking for LuaJIT 2.x ... not found, ./configure: error: unsupported LuaJIT version; ngx_http_lua_module requires LuaJIT 2.x.</code> 错误时的解决办法。</p>
+<p>问题描述: tell nginx’s build system where to find LuaJIT 2.1<br>解决办法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 临时生效</span></span><br><span class="line"><span class="built_in">export</span> LUAJIT_LIB=/usr/<span class="built_in">local</span>/luajit/lib</span><br><span class="line"><span class="built_in">export</span> LUAJIT_INC=/usr/<span class="built_in">local</span>/luajit/include/luajit-2.1</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>温馨提示: 如出现GD库没有部署即<code>./configure: error: the HTTP image filter module requires the GD library. You can either do not enable the module or install the libraries.</code>提示可以按照如下方式进行解决。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get install -y libgd-dev</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<ul>
+<li>Step 3.当执行make命令后你会发现在objs目录中生成了<code>ngx_http_image_filter_module.so</code>，此处我们需要将生成nginx二进制文件复制到/usr/sbin目录,并将动态链接库放入的modules目录中。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@weiyigeek:/usr/<span class="built_in">local</span>/src/nginx-1.22.0<span class="comment"># ls objs/</span></span><br><span class="line">root@weiyigeek:/usr/<span class="built_in">local</span>/src/nginx-1.22.0<span class="comment"># cp objs/nginx /usr/sbin/nginx</span></span><br><span class="line">root@weiyigeek:/usr/<span class="built_in">local</span>/src/nginx-1.22.0<span class="comment"># cp objs/ngx_http_image_filter_module.so /usr/local/nginx/modules/</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>Step 4.加载<code>ngx_http_image_filter_module</code>模块到nginx，并在demo.conf配置一个简单示例。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">$ vim /usr/<span class="built_in">local</span>/nginx/nginx.conf</span><br><span class="line">...</span><br><span class="line"><span class="comment"># 加载动态模块</span></span><br><span class="line">load_module modules/ngx_http_image_filter_module.so;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">$ tee /usr/<span class="built_in">local</span>/nginx/conf.d/demo.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">server &#123;</span><br><span class="line">  listen       80;</span><br><span class="line">  server_name  demo.weiyigeek.top;</span><br><span class="line">  charset utf-8;</span><br><span class="line">  access_log /var/<span class="built_in">log</span>/nginx/demo-access.log main buffer=128k flush=1m;</span><br><span class="line"></span><br><span class="line">  location / &#123;</span><br><span class="line">    root /app/html/weiyigeek;</span><br><span class="line">    index  index.html index.htm;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">location ~* /img/(.+)_(\d+)x(\d+)\.(jpg|jpeg|gif|png|webp)$ &#123;</span><br><span class="line">    <span class="comment"># 如果图形不存在则显示根目录下的404.png图像。 </span></span><br><span class="line">    try_files /<span class="variable">$1</span>.<span class="variable">$4</span>  /404.png;</span><br><span class="line">    <span class="built_in">set</span> <span class="variable">$width</span> <span class="variable">$2</span>;</span><br><span class="line">    <span class="built_in">set</span> <span class="variable">$height</span> <span class="variable">$3</span>;</span><br><span class="line">    image_filter resize <span class="variable">$width</span> <span class="variable">$height</span>;</span><br><span class="line">    image_filter_buffer 5M;</span><br><span class="line">    image_filter_interlace on;</span><br><span class="line">    image_filter_jpeg_quality 80;</span><br><span class="line">    expires 1d;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Origin'</span> <span class="string">'*'</span>;</span><br><span class="line">    add_header <span class="string">'Access-Control-Allow-Credentials'</span> <span class="string">'true'</span>;</span><br><span class="line">    add_header <span class="string">'Image-Filter'</span> <span class="string">"Name <span class="variable">$1</span>.<span class="variable">$4</span>,<span class="variable">$width</span> x <span class="variable">$height</span>"</span>;</span><br><span class="line">    <span class="built_in">alias</span> /app/html/weiyigeek/img;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">[^libwebp]: WebpAPI帮助文档 https://developers.google.com/speed/webp/docs/api </span><br><span class="line">[^cwebp]: cwebp帮助文档 https://developers.google.com/speed/webp/docs/cwebp</span><br><span class="line">[^dwebp]: dwebp帮助文档 https://developers.google.com/speed/webp/docs/dwebp</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>温馨提示: <code>root 指令</code>与<code>alias 指令</code>的区别，root 可以让访问 /images/ 路径时，访问到 /User/WeiyiGeek/Desktop/images，若是将 root 替换为 alias，则访问的是 /User/WeiyiGeek/Desktop/；其中 /User/WeiyiGeek/Desktop/ 是本机中的绝对路径。</p>
+<p>温馨提示: 上述<code>image_filter</code>配置简单解析位于location上下文中，该模块 （0.7.54+） 是一个过滤器，用于转换 JPEG、GIF、PNG 和 WebP 格式的图像，其模块  <a href="https://nginx.org/en/docs/http/ngx_http_image_filter_module.html" target="_blank" rel="noopener">Module ngx_http_image_filter_module 文档参考(nginx.org)</a>.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启用图形过滤器</span></span><br><span class="line">image_filter off;</span><br><span class="line"><span class="comment"># 确保响应是 JPEG、GIF、PNG 或 WebP 格式的图像。否则将返回 415（不支持的媒体类型）错误。</span></span><br><span class="line">image_filter <span class="built_in">test</span>;</span><br><span class="line"><span class="comment"># 以 JSON 格式输出有关图像的信息，如果错误则输出为 &#123;&#125;</span></span><br><span class="line">image_filter size;</span><br><span class="line"><span class="comment"># 将图像逆时针旋转指定的度数; 可为变量</span></span><br><span class="line">image_filter rotate 90 | 180 | 270;</span><br><span class="line"><span class="comment"># 按比例将图像减小到指定大小</span></span><br><span class="line">image_filter resize width height;</span><br><span class="line"><span class="comment"># 按比例将图像缩小到较大的侧尺寸，并在另一侧裁剪无关的边缘。</span></span><br><span class="line">image_filter crop width height;</span><br><span class="line"><span class="comment"># 设置图片缓冲区的最大大小，大小超过设定值，服务器将返回错误415。</span></span><br><span class="line">image_filter_buffer size;</span><br><span class="line"><span class="comment"># 如果启用最终图像将隔行扫描对于JPEG，最终图像将采用“渐进式JPEG”格式。</span></span><br><span class="line">image_filter_interlace on | off;</span><br><span class="line"><span class="comment"># jpeg 、webp 格式图形质量设置（1~100），较小的值通常意味着较低的图像质量和较少的数据传输。最大建议值为95。参数值可以包含变量</span></span><br><span class="line">image_filter_jpeg_quality quality;</span><br><span class="line">image_filter_webp_quality quality;</span><br><span class="line"><span class="comment"># 提高最终图像的清晰度，锐度百分比可以超过100。零值禁用锐化</span></span><br><span class="line">image_filter_sharpen percent;</span><br><span class="line"><span class="comment"># 定义在转换 GIF 图像或具有调色板指定颜色的 PNG 图像时是否应保留透明度。透明度的损失会导致图像质量更好。PNG 中的 Alpha 通道透明度始终保留。</span></span><br><span class="line">image_filter_transparency on|off;</span><br></pre></td></tr></table></figure>
+<p>温馨提示： 此模块需要依赖与<a href="http://libgd.org" target="_blank" rel="noopener">libgd</a> 库，建议使用最新的可用版本的库。</p>
+<p><br/></p>
+<ul>
+<li>Step 5.配置检查与重载Nginx服务进程 <code>nginx -t &amp;&amp; nginx -s reload</code>, 然后通过浏览器分别访问验证 <code>http://demo.weiyigeek.top/img/i-banner.png</code> 与 <code>http://demo.weiyigeek.top/img/i-banner_1080x520.png</code> ，查看其图片尺寸是否有变化，结果如下图所示。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ ls /app/html/weiyigeek/img/</span><br><span class="line">alipay.jpg  bg.jpg  bg.png  i-banner.png  wechat-gzh.jpg  wechat-scan.png  wechat-search.png  wechat-search-white.png  weiyigeek.jpg  weiyigeek.png</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220808230050.png" target="_blank" title="WeiyiGeek.image_filter resize png" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220808230050.png" alt="WeiyiGeek.image_filter resize png" title="" class=""></a>
+                <p>WeiyiGeek.image_filter resize png</p>
+            </figure>
+<p><br/></p>
+<ul>
+<li>Step 6.在步骤五的实践中你会发现虽然在进行图片过滤器时设置了图像质量，从原图的1.3MB到现在的639KB，但是是否还是感觉此图片体积稍大，此时我们便可请出本章主人公webp转换工具cwebp，将png图片图片转换为webp格式图片。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">$ cwebp -q 80 i-banner.png -o i-banner.webp</span><br><span class="line">Saving file <span class="string">'i-banner.webp'</span></span><br><span class="line">File:      i-banner.png</span><br><span class="line">Dimension: 1772 x 903</span><br><span class="line">Output:    61096 bytes Y-U-V-All-PSNR 45.57 49.64 49.89   46.57 dB</span><br><span class="line">           (0.31 bpp)</span><br><span class="line">block count:  intra4:       2308  (36.48%)</span><br><span class="line">              intra16:      4019  (63.52%)</span><br><span class="line">              skipped:      1469  (23.22%)</span><br><span class="line">bytes used:  header:            499  (0.8%)</span><br><span class="line">             mode-partition:  10154  (16.6%)</span><br><span class="line"> Residuals bytes  |segment 1|segment 2|segment 3|segment 4|  total</span><br><span class="line">    macroblocks:  |       1%|       4%|      10%|      85%|    6327</span><br><span class="line">      quantizer:  |      27 |      27 |      23 |      18 |</span><br><span class="line">   filter level:  |       8 |       5 |      25 |      21 |</span><br><span class="line"></span><br><span class="line">$ ls  -lah i-banner.*</span><br><span class="line">-rw-r--r-- 1 root root 1.3M Aug  8 15:00 i-banner.png</span><br><span class="line">-rw-r--r-- 1 root root  60K Aug  8 23:07 i-banner.webp</span><br></pre></td></tr></table></figure>
+<p>在设置质量为80后，转换后你会发现体积从1.3M一下就降到了60kb，可以看到其体积极大优化了在互联网上传播速度。</p>
+<p><br/></p>
+<ul>
+<li>Step 7.同样图片过滤器也可以处理webp格式的图形文件，这一点模块官网已经说明，我们直接使用上述转换后的i-banner.webp图形进行验证，同样分别访问 <code>http://demo.weiyigeek.top/img/i-banner.webp</code> 与 <code>http://demo.weiyigeek.top/img/i-banner_1080x520.webp</code>, 查看其图片尺寸是否有变化，结果如下图所示。</li>
+</ul>
+<figure class="image-box">
+                <a rel=8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220808231417.png" target="_blank" title="WeiyiGeek.image_filter resize web" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220808231417.png" alt="WeiyiGeek.image_filter resize web" title="" class=""></a>
+                <p>WeiyiGeek.image_filter resize web</p>
+            </figure>
+<p>从上图中可以看出原始的webp的图形大小的尺寸为 1772x903 大小为 61kb，而经过图片过滤器后按照其纵横比设置为了 1021x520 其大小也降为 24.9 kb。</p>
+<p><br/></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-08-10T08:04:43.606Z" itemprop="dateUpdated">2022-08-10 16:04:43</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/系统运维/Application/Web/WebApp/Nginx/8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践.md" target="_blank" rel="noopener noreferrer">_posts/系统运维/Application/Web/WebApp/Nginx/8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2022/7-3-677.html" target="_blank" rel="external">https://blog.weiyigeek.top/2022/7-3-677.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/webp/" rel="tag">webp</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/7-3-677.html&title=《8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/7-3-677.html&title=《8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践》 — WeiyiGeek Blog&source=本章目录
+[TOC]
+0x00 前言简述描述: 最近公司业务中有这么一个需求就是在保证图像的清晰度的情况下, 减少其体积大小使得减轻外部请求流量带宽对网关..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/7-3-677.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/7-3-677.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/7-3-677.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2022/7-3-678.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">9.Nginx实践之使用MaxMind的GeoIP2实现处理不同国家或城市的访问最佳实践指南</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2022/7-2-676.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#WebP-介绍"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">WebP 介绍</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0X01-部署安装"><span class="post-toc-number">2.</span> <span class="post-toc-text">0X01 部署安装</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#实践环境说明"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">实践环境说明</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#WebP-工具库安装"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">WebP 工具库安装</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#二进制包方式安装"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">二进制包方式安装</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#源代码编译方式安装"><span class="post-toc-number">2.2.2.</span> <span class="post-toc-text">源代码编译方式安装</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-工具命令浅析"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 工具命令浅析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#cwebp-命令-转换-webp-图片格式"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">cwebp 命令 - 转换 webp 图片格式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#dwebp-命令-将webp格式转换为png格式-解码"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">dwebp 命令 - 将webp格式转换为png格式(解码)</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#gif2webp-命令-将gif格式图片转换为webp格式"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">gif2webp 命令 - 将gif格式图片转换为webp格式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#img2webp-命令-从一系列输入图像创建动画WebP文件。"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">img2webp 命令 - 从一系列输入图像创建动画WebP文件。</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#webpmux-命令-从非动画WebP图像中创建动画WebP文件"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">webpmux 命令 - 从非动画WebP图像中创建动画WebP文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#webpinfo-命令-打印出WebP文件的块级结构以及基本的完整性检查。"><span class="post-toc-number">3.6.</span> <span class="post-toc-text">webpinfo 命令 - 打印出WebP文件的块级结构以及基本的完整性检查。</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#vwebp-命令-解压缩WebP文件并将其显示在窗口中"><span class="post-toc-number">3.7.</span> <span class="post-toc-text">vwebp 命令 - 解压缩WebP文件并将其显示在窗口中</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-企业实践"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 企业实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-请求访问Nginx服务器中承载的不同分辨率WebP格式图片。"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">1.请求访问Nginx服务器中承载的不同分辨率WebP格式图片。</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/7-3-677.html&title=《8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/7-3-677.html&title=《8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践》 — WeiyiGeek Blog&source=本章目录
+[TOC]
+0x00 前言简述描述: 最近公司业务中有这么一个需求就是在保证图像的清晰度的情况下, 减少其体积大小使得减轻外部请求流量带宽对网关..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/7-3-677.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/7-3-677.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/7-3-677.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKUlEQVR42u3aUW7jMAwE0N7/0tkTpJ4R3QVMP38FRaLoqcCEEvXzEz+f4Pn2/t/HbD81ejAwMB7LSCb37S/JyMkIv79OFg4DA+MNjGQSk8nln00WCwMDA6NlJOPkZR8GBgbGnJFPNNmmtpGNgYHxZkayiZ1E5CTEb96LY2BgPJCRn7r//9d/0t/AwMB4FONTPmdH/23Ls54VBgbGakbbjJy3NtulScbBwMDYzUi2rEmAJu9Mis7Dv2BgYKxmTA7i54f+kyi/+N3AwMBYxJhsQfMrX/eGb3QWiIGBsZRxViyeBW67fBcVIAYGxmpGvmXNg7U454vfEx3nYWBgrGa0A7X3H5KpnH3vxX8GAwNjNaMNyhxwlpBJQYmBgbGVkWxZ2+m2BWUbpl87GxgYGKsZ7eQmyPZ4LlpWDAyM1YyzsDtrUtZ3QMqGKwYGxlZGe4Uiv9swLy7rYMXAwFjKaFM5idRJm/OGFgUGBsZrGEmYtkGcRHO+fEVnAwMDYwXjrouneeE4KRAvLrBiYGCsZrQb1LNW5eRSxcU4GBgYr2HkB21t+CZF4dm2FgMDYzfjUz5tpLZNgiRkL2pbDAyMdYxJszMZLr8clsf6zT1bDAyMhzDakG0jso3g/JJZ3cHAwMB4OKM4gh8c+s9/Ab5+IwYGBkbZPGjLxHYJbghcDAyMlzEmk55f4MDAwHgPI9nEJpvPSfHX4jEwMN7DyLeOZ63HdhJnYY2BgbGU8Q+RggPxEm7AIQAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

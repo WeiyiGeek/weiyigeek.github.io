@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 纵深防御原理与架构|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="企业安全">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>纵深防御原理与架构</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">纵深防御原理与架构</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-02-09T02:34:30.000Z" itemprop="datePublished" class="page-time">
+  2020-02-09
+</time>
+
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安防御/安全建设/基础原理架构/纵深防御原理与架构"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">纵深防御原理与架构</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-02-09 10:34:30" datetime="2020-02-09T02:34:30.000Z"  itemprop="datePublished">2020-02-09</time>
+
+            
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="1-基础知识"><a href="#1-基础知识" class="headerlink" title="1.基础知识"></a>1.基础知识</h4><p>描述:深度防御含义我们可以从以下的几个方面进行了解:<br>1.军事学上概念:空间与时间纵深防御;<br>2.网络安全概念:多层屏障、安全技术整合;</p>
+<p>深度防御手段的<code>必要性和优点</code>:<br>1.单一防御手段的局限性信息安全的马奇诺防线;<br>2.单一防御的困境是一处疏漏则导致功亏一篑;<br>3.最大限度发挥现有防御技术的优势,全方位抵御已知及未知攻击,阻挡进攻到纵深防御以及运动歼敌;<br>4.而纵深防御的优势正是攻击者困境一环失败则功亏一篑;</p>
+<p>深度防御架构设计：</p>
+<ul>
+<li>1.常规为五层<code>从外围到核心、从下层到上层</code>;</li>
+<li>2.物理环境防御:讲解主要在机房建设那章;<ul>
+<li>机房大楼周围的防非法进入;</li>
+<li>机房动环系统以及进出人员身份审计门禁系统,防止非法进入机房以及保证机房服务器正常运转(UPS不间断电源,并机空调,气体灭火器,状态告警以及远程监控);</li>
+</ul>
+</li>
+<li>3.网络环境防御:<ul>
+<li>网络边界:防火墙Firewall、VPN、无线有线接入控制、抗DDos;</li>
+<li>网络隔离:区域划分(核心区|办公区|DMZ区)、访问控制(VLAN)</li>
+<li>网络检测:IPS / IDS 网络审计系统;</li>
+</ul>
+</li>
+<li>4.主机环境防御:<ul>
+<li>身份鉴别:生物特征验证、二次身份验证;</li>
+<li>权限控制:最小权限,统一化域管理、堡垒机访问; </li>
+<li>操作系统安全:正版系统、补丁及时升级、安装病毒防护软件;</li>
+<li>系统加固:配置安全基线(控制参数的安全设置);</li>
+<li>系统安全性评估:漏洞扫描、系统加固验证;</li>
+</ul>
+</li>
+<li>5.应用系统防御:<ul>
+<li>安全开发:安全设计规范阶段启动并且与开发同步(简单的说在开发同时带入安全漏洞的防御)，遵循安全编码规则;</li>
+<li>安全认证:合适得身份认证方式;</li>
+<li>访问控制:特殊权限访问特定的功能,敏感信息的保护;</li>
+<li>安全日志:完整的操作日志(要素齐全以及不可篡改);</li>
+<li>环境分离:开发测试与运行环境分离,关键性口令参数配置一定要不同;</li>
+<li>测评合规:在应用正式上线前需要进行测评或者合规性确认;</li>
+</ul>
+</li>
+<li>6.数据安全防御:是纵深防御的重中之重，需要引入安全 三要素;<ul>
+<li>保密性:加密、隐藏、隔离;</li>
+<li>完整性:效验、数字签名;</li>
+<li>可用性:备份、接管、冗余、分布式;</li>
+</ul>
+</li>
+</ul>
+<p><strong>深度防御的实施指南</strong></p>
+<ul>
+<li>整体规划（根据系统、应用、网络环境等威胁）、进行分步实施;</li>
+<li>业务决定安全需求而非技术引领，简单的说就是并非什么技术新采用什么而是其前提是安全的;</li>
+<li>进行风险评估先行，从最大的风险入手;</li>
+<li>投资回报原则:收益&gt;投资;</li>
+<li>采用PDDR模型:防护时间&gt;检测时间+响应时间;</li>
+</ul>
+<p><br></p>
+<h4 id="2-网络安全防御"><a href="#2-网络安全防御" class="headerlink" title="2.网络安全防御"></a>2.网络安全防御</h4><p><strong>边界防护</strong><br>描述:在构建公司网络时候需要对接入进行控制,对接入网络的终端进行合规性检查，当满足要求的时候才可以访问网络，这在大规模的网络结构中是非常重要的;</p>
+<ul>
+<li><p>(1) 防火墙:基本的安全设备、检查过滤进出网络的数据,主要有包过滤和应用代理(网关转发-软路由透明代理)两种类型;<br>常规的下一代防火墙可以实现六元组的控制即`源地址|端口、目的地址|端口、协议(protocol)、拒绝或者允许，作用于ISO模型中的下四层传输层、网络层、数据链路层、物理层;</p>
+<ul>
+<li>选型参考:基础功能、扩展功能、吞吐量、接口数量、冗余异常直通情况;</li>
+</ul>
+</li>
+<li><p>(2) VPN(虚拟专用网络):使用隧道加密技术，在公共互联网上架设虚拟专用的网络设备。主要类型有IPsec和SSLVPN两种类型;</p>
+<ul>
+<li>IPsec一般适用于网络之间互联,大型的公司一般在全国有多个部门的;</li>
+<li>SSLVPN后者适用于终端远程接入;</li>
+<li>选型参考:基础功能、吞吐量、稳定性、移动端适配、移动接入口;</li>
+</ul>
+</li>
+<li><p>(3) 网闸:使用带有多种控制功能的固态开关读写介质，连接两个独立主机系统的信息安全设备, 目前流行的网络隔离技术的产品和方案：<code>独立网络方案</code> 和 <code>终端级解决方案</code>;;</p>
+<ul>
+<li>百度:由于两个独立的主机系统通过网闸进行隔离，使系统间不存在通信的物理连接、逻辑连接及信息传输协议，不存在依据协议进行的信息交换，而只有以数据文件形式进行的无协议摆渡。因此，网闸从逻辑上隔离、阻断了对内网具有潜在攻击可能的一切网络连接，使外部攻击者无法直接入侵、攻击或破坏内网，保障了内部主机的安全</li>
+<li>简单描述:就是当环境中存在公用网络和专用网络时候,网闸保证了机器只能在同一时间访问一个网络,另外一个网络将会被隔离;</li>
+<li>终端级解决方案:用户使用一台客户端设备排他性选择连接内部网络和外部网络，主要类型可分为以下几种<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">（1）双主板，双硬盘型：通过设置两套独立计算机的设备实现，使用时，通过客户端开关分别选择两套计算机系统。</span><br><span class="line">（2）单主板，双硬盘型：客户端通过增加一块隔离卡、一块硬盘，将硬盘接口通过添加的隔离卡转接到主板，网卡也通过该卡引出两个网络接口。通过该卡控制客户端存储设备，同时选择相应的网络接口，达到网络隔离的效果。</span><br><span class="line">（3）单主板，单硬盘型：客户端需要增加一块隔离卡，存储器通过隔离卡连接到主板，网卡也通过隔离卡引出两个网络接口。对硬盘上划分安全区、非安全区，通过隔离卡控制客户端存储设备分时使用安全区和非安全区，同时对相应的网络接口进行选择，以实施网络隔离。</span><br></pre></td></tr></table></figure></li>
+<li>网闸实现了内外网的逻辑隔离，在技术特征上，主要表现在网络模型各层的断开如物理层断开、链路层断开、TCP/IP协议隔离、应用协议隔离;</li>
+<li>应用场景:涉密网和非涉密网之间、局域网和互联网之间、办公网与业务网、业务网与互联网之间、电子政务的内网与专用网之间</li>
+<li>选型参考:应用场景、基础功能、吞吐量、端口数量;</li>
+</ul>
+</li>
+<li><p>(4) 流量清洗设备:主要是为了抵抗DDos所产生,并且对访问的流量进行清洗以来抵抗分布式拒绝攻击，主要针对提供公共服务的信息系统;</p>
+<ul>
+<li>选型参考:有运营商机和企业级(常见使用CDN加速防止DDos)不同的方案；</li>
+</ul>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>网络隔离</strong></p>
+<ul>
+<li>(1) 区域划分:按照一定的规则进行网络区域划分,同一区域之间采用同一安全策略;<ul>
+<li>例如按照重要程度、保密程度划分；以及按院系、部门、地理位置划分;</li>
+</ul>
+</li>
+<li>(2) 访问控制:根据访问控制规则、对不同区域进行网段级、IP级、端口级、应用级等不同的粒度的访问控制;<ul>
+<li>安全性要求较高的网络可采用物理隔离的方式,使用网闸或者人工方式进行信息交换;</li>
+</ul>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>网络入侵检测和防御</strong></p>
+<ul>
+<li>(1) NIDS(网络入侵检测系统):基于网络的入侵检测系统，采用特征匹配或者异常行为识别检测入侵(注意:可以参考网络安全设备详细);<ul>
+<li>特点:通常差异旁路部署在网络之中，配合交换机的流量镜像功能接收流量并进行分析;</li>
+</ul>
+</li>
+<li>(2) NIPS(网络入侵防御系统):它与NIDS不同之处在于它部署在主路之中,当触发相应的规则时候则阻断网络访问请求,注意只能过滤大部分的攻击,并不能完全替代WAF网络应用防火墙安全软件;</li>
+<li>(3) 网络审计系统:基于网络的审计系统，根据定义的审计对象和访问行为，审计所有符合的记录;</li>
+</ul>
+<p><br></p>
+<h4 id="3-主机安全防御"><a href="#3-主机安全防御" class="headerlink" title="3.主机安全防御"></a>3.主机安全防御</h4><p>描述:主机的防御主要是通过对操作系统进行安全配置以抵御大部分的恶意攻击；</p>
+<ul>
+<li>(1) 正版系统:盗版的GHOST软件不仅会带来广告并且会带来病毒或者后门，导致信息泄露的可能;</li>
+<li>(2) 统一域管理:建议将计算机加入到域环境中方便对身份的统一管理、策略统一下发设置、对于多个部门组使用的计算机进行组织级的管理;<ul>
+<li>域的建立基础是DNS环境和目录数据库，域的狐妖的协议是LDAP和Kerberos，可以使用dcpromo创建域；</li>
+<li>域的五大主要角色:架构主控、域命名主控、PDC仿真器、RID主控、结构主控;</li>
+</ul>
+</li>
+<li>(3) 最小权限:仅仅赋予用户完成任务所需的最小权限;</li>
+<li>(4) 补丁升级:使用微软的WSUS配合域策略进行统一升级;</li>
+<li>(5) 身份鉴别:口令、硬件USBkey、短信验证码、可信手机二维码扫描、生物特征，使用以上两种模式称为双因素认证，在安全性要求比较高的系统一般使用多因素认证;</li>
+<li>(6) 病毒防护:安装企业级的网络版杀毒软件，比如360企业安全软件、以及趋势杀毒软件,注意不建议在大规模网络中使用个人版本的杀软软件;</li>
+<li>(7) 主机入侵检测系统:HIDS基于主机可以对入侵行为进行较为彻底的检测和分析，例如安全狗软件；</li>
+<li>(8) 配置安全基线:一组安全配置策略的完整集合,包括密码策略、服务策略、审核策略;</li>
+<li>(9) 主机加固:由于OS默认情况下并非最安全配置，需要根据应用场景和恶意攻击进行修改予以安全强化,并且将此并入配置安全基线之中;</li>
+<li>(10) 漏洞扫描:主机漏洞扫描(360安全卫士、火绒等)和网络漏洞扫描两大类(Nessus);</li>
+<li>(11) 主机配置核查:实际是对于8~9步骤进行过程检查，检查配置过程是否按照基线进行了设置,过程记录文件是否完整;</li>
+</ul>
+<p><br></p>
+<h4 id="4-应用安全防御"><a href="#4-应用安全防御" class="headerlink" title="4.应用安全防御"></a>4.应用安全防御</h4><p>描述:应用安全的也是在防御中不可忽视的，比如由OWASP TOP 10 发布的Web应用的漏洞都是来源于应用开发时候未采用安全开发规范，导致系统被攻击入侵；</p>
+<p><strong>(1) 安全开发</strong><br>描述:应用开发设计时应该遵循安全编码规则:</p>
+<ul>
+<li>使用安全的函数对用户的输入以及输出做过滤合规性检查，检查参数与缓冲区长度防止内存溢出;</li>
+<li>采用微软建立的软件开发生命周期SDL标准进行开发设计;</li>
+</ul>
+<p><br></p>
+<p><strong>(2) 身份认证</strong><br>描述:常规应用采用的身份认证方式是匿名模式、用户口令模式、生物特征模式、多因素认证模式；</p>
+<ul>
+<li>注意需要对于密码、身份证、银行账户等铭感信息不能名称存储和传输，密码也需要进行加密处理(比如:加盐哈希采用日期或者随机数)来防止彩虹表攻击;</li>
+</ul>
+<p><br></p>
+<p><strong>(3) 访问控制模型</strong></p>
+<ul>
+<li>自主访问控制(DAC|Discretionary Access Control)</li>
+<li>强制访问控制(MAC|Mandatory Access Control)</li>
+<li>基于角色的访问控制(RBAC|Role-Based Access Control)</li>
+</ul>
+<p><br></p>
+<p><strong>(4) 操作访问日志</strong><br>描述:应用系统的安全日志、操作日志应该完整；</p>
+<ul>
+<li>日志要素:包括时间、用户、登录IP、访问对象、操作行为、操作结果等；</li>
+<li>注意:需要符合等保日志存储的相关规则，保证日志不可篡改以及存储6个月;</li>
+</ul>
+<p><br></p>
+<p><strong>(5) 应用环境</strong><br>描述:应用系统的开发测试环境和生产环境必须隔离；</p>
+<ul>
+<li>未经脱敏的生产数据不能用于开发测试环境</li>
+<li>应用系统的安全性设计在规划阶段同步启动，与业务功能同步设计、同步实施、同步验收、同步投入使用；</li>
+<li>应用系统上线前必须经过安全测评和合规性检查;</li>
+</ul>
+<p><br></p>
+<h4 id="5-数据安全防御"><a href="#5-数据安全防御" class="headerlink" title="5.数据安全防御"></a>5.数据安全防御</h4><p>描述:前面我们说明该项防御是纵深防御的重中之重，数据是防护的核心；在云计算的背景下，边界日益模糊并且访问控制不在自己手里，数据防护的重要性凸显;</p>
+<p><strong>(1) 数据保密性</strong><br>描述:不被非授权用户知晓的特性，要做好数据的保密性需要从以下几个方面进行入手;</p>
+<ul>
+<li>加密:使用加密算法加密数据，只有拥有密匙才可以解密，效果取决于加密强度，常见的加密方式有对称和非对称加密;<ul>
+<li>对称加密:加解密同一个密匙;</li>
+<li>非对称加密:加解密分别是两个密匙一个公匙(加密)和私匙(解密);</li>
+</ul>
+</li>
+<li>隐藏:通过隐藏技术奖数据变得”不可见”，比如用多媒体文件每一个字节的最后一个位存储数据; 隐藏是不可靠的，通过文件熵值来筛选进行发现(特征是熵值增大)，一般需要和加密结合使用;</li>
+<li>隔离:将数据存放在与外界物理隔绝的介质中</li>
+</ul>
+<p><br></p>
+<p><strong>(2) 数据完整性</strong><br>描述:不被非授权用户修改的特性，需要从以下几个方面进行入手;</p>
+<ul>
+<li>效验:只能通过计算校验值，监测数据在传输或者存储时候有误错误，并不能抵抗有意的篡改，因为攻击者可以将效验值一并进行修改，而接收方无从知晓，所以我们在下面加入数字签名来防止这样的事件发生;</li>
+<li>数字签名:数据签名除了提供数据效验外，还提供了抗抵赖、确认发送者身份，可追溯等特性;在区块链链中应用的淋漓尽致;</li>
+</ul>
+<p><br></p>
+<p><strong>(3) 数据可用性</strong><br>描述:确保授权用户可以拥有能获取数据的能力，要做好数据可用性，从以下几方面入手;</p>
+<ul>
+<li>备份Backup:为了防止数据丢失，而将全部或者部分数据集导出至其他的介质的过程，常见的备份方式有热备和冷备，其细分为全量备份和增量备份；</li>
+<li>接管高可用:在主系统宕机时候，备用系统接管数据处理的过程，保证业务连续性;</li>
+<li>冗余:数据有多份可自动同步的副本,如Hadoop;</li>
+<li>分布式:将数据分为多份副本(一般为只读，存放在离用户较近的地方，如内容分发网络CDN)</li>
+</ul>
+<p><br></p>
+<h4 id="6-重点及其难点"><a href="#6-重点及其难点" class="headerlink" title="6.重点及其难点"></a>6.重点及其难点</h4><p>描述:对于深度的纵深防御拥有以下重点和难点；</p>
+<p><strong>(1) 重点</strong></p>
+<ul>
+<li>进不来:采用边界防火墙和应用、主机防火墙等规则安全过滤配置，即使应用出现漏洞也进入不到系统内网中来;</li>
+<li>看不见:系统和系统之间做相互的隔离，无法与其他同一生产区的机器进行通信;</li>
+<li>拿不走:通过防数据泄露的安全设备进行检测用户行为，发现可以立即阻断并记录预警;</li>
+<li>看不懂:保证数据库中敏感数据进行了加密存储;</li>
+<li>走不掉:采用一系列的行为记录设备例如IPS/IDS/Firewall或者主机日志策略，记录攻击者IP、MAC、以及时间。</li>
+</ul>
+<p><br></p>
+<p><strong>(2) 难点</strong></p>
+<ul>
+<li>规则互通:即网络安全设备由于生产的厂家在特征方面，没有通过的格式规范，导致过滤规则不同完整的通用在两个安全产商的设备上应用;</li>
+<li>系统联动:一般来只有采用一个产商的网络安全设备，并建立中心联动机器并连接到安全产商的云安全库中，可以对微威胁进行分析然后触发一系列安全设备的联动防御;</li>
+<li>关联分析:无法从准确从攻击元组中将攻击行为、用户、时间、特征进行关联性分析，例如在两个系统中攻击者或者其中一个系统的用户凭据，然后登陆另外的一个系统之中；</li>
+<li>同一管理:即不能完全采用SSO统一身份认证进行管理，但是有一些产商的安全设备支持LDAP协议进行身份认证;</li>
+</ul>
+<p><br></p>
+<h4 id="7-发展方向"><a href="#7-发展方向" class="headerlink" title="7.发展方向"></a>7.发展方向</h4><ul>
+<li>可视化:利用大数据以及其他可视化技术构建出网络态势可视化;</li>
+<li>智能化:精准判断、减少误报和漏报，安全设备的自我学习;</li>
+<li>自动化:自动处理威胁、自动切换业务;</li>
+<li>集成化:统一策略、统一控制、统一信息交换、无缝集成;</li>
+<li>云计算和大数据分析:云化的安全和大数据分析可以提升当好手段的”智力”和”敏捷度”;</li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-10-10T02:37:50.501Z" itemprop="dateUpdated">2020-10-10 10:37:50</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/网安防御/安全建设/基础原理架构/纵深防御原理与架构.md" target="_blank" rel="noopener noreferrer">_posts/网安防御/安全建设/基础原理架构/纵深防御原理与架构.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/2-9-439.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/2-9-439.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E4%BC%81%E4%B8%9A%E5%AE%89%E5%85%A8/" rel="tag">企业安全</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/2-9-439.html&title=《纵深防御原理与架构》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/2-9-439.html&title=《纵深防御原理与架构》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/2-9-439.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《纵深防御原理与架构》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/2-9-439.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/2-9-439.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/2-9-514.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Java的Mavan项目实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/2-8-505.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">1.安卓逆向学习入门记录</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-基础知识"><span class="post-toc-number">1.</span> <span class="post-toc-text">1.基础知识</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-网络安全防御"><span class="post-toc-number">2.</span> <span class="post-toc-text">2.网络安全防御</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-主机安全防御"><span class="post-toc-number">3.</span> <span class="post-toc-text">3.主机安全防御</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-应用安全防御"><span class="post-toc-number">4.</span> <span class="post-toc-text">4.应用安全防御</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-数据安全防御"><span class="post-toc-number">5.</span> <span class="post-toc-text">5.数据安全防御</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#6-重点及其难点"><span class="post-toc-number">6.</span> <span class="post-toc-text">6.重点及其难点</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#7-发展方向"><span class="post-toc-number">7.</span> <span class="post-toc-text">7.发展方向</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/2-9-439.html&title=《纵深防御原理与架构》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/2-9-439.html&title=《纵深防御原理与架构》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/2-9-439.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《纵深防御原理与架构》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/2-9-439.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/2-9-439.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLElEQVR42u3aS27DMAwFwN7/0u42QGHhkUwKmBmtArdRPF7Q/OjnJ17Xy/p75fX63f/f7Vn91mhhYGA8lnEd15mR7JzscP58vjcMDIzvYSQ3ccbn30qCeH5vGBgYGL3PCTgP0xgYGBi9gJsXunkxjIGBgXFmJEXsJEROgviba3EMDIwHMvKu+/9//sh8AwMD41GMq7jyfarh8hosDAyM3YxegZq0+3v7TApmDAyMrYzqptU22eRwWOEKBgbGasa8BTZp+p+TwvI9YGBgLGVMysskNPeK4fPDit4bGBgYixhRjRsXsXnAza9U7wQDA2M3I/mB/LBX/oDyh9gMtRgYGIsY+Y8lKVpejlYfWfRXDAyMpYxeudhrsVUfX/4ywMDA2MdI2vE9QJLe9d4Jt5MNDAyM1Yy8QJ209Xsjz0L9jYGBsZQxCXbVIWV+jGw+4MTAwNjEqA4XP124Vpt9hUiPgYGxmpF/N9m5OnKI0kQMDIzVjLysPaeAvWNhvRDfzG0xMDAezui1vXoHKd6baN5OOTAwMJYy3nWcYl4Y90I5BgbGNzCqxyOSdK2aFPbKWgwMjN2Mq7jexct7+1ECioGBsZpRnRJW2/RJYJ2Uys1hJwYGxgMZ1SCbh7/q0bF85ImBgfGdjN5ximriOH8D3CIxMDAwWsPLPE1MRptR0w0DAwOjWIj2HkRvfwwMjG9gJEVsElInyd/kGAcGBsZuRl469kaP1ZvoBWsMDIyljF9wugPxclr17AAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 4.Go语言项目操作之NSQ分布式消息队列实践|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Go">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>4.Go语言项目操作之NSQ分布式消息队列实践</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">4.Go语言项目操作之NSQ分布式消息队列实践</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-05-01T03:16:58.000Z" itemprop="datePublished" class="page-time">
+  2020-05-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Development/">Development</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Development/Programming/">Programming</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-编程世界/Go/Extension/4.Go语言项目操作之NSQ分布式消息队列实践"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">4.Go语言项目操作之NSQ分布式消息队列实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-05-01 11:16:58" datetime="2020-05-01T03:16:58.000Z"  itemprop="datePublished">2020-05-01</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Development/">Development</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Development/Programming/">Programming</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-Go语言项目操作之NSQ分布式消息队列实践"><a href="#0x00-Go语言项目操作之NSQ分布式消息队列实践" class="headerlink" title="0x00 Go语言项目操作之NSQ分布式消息队列实践"></a>0x00 Go语言项目操作之NSQ分布式消息队列实践</h2><p>描述: 目前比较流行的一个分布式的消息队列是<code>RabbitMQ、ZeroMQ、Kafka(大项目中推荐)、NSQ</code>，本章将着重介绍 NSQ 基础概念、安装部署及Go语言如何操作NSQ分布式消息队列，因为NSQ是采用Go语言进行开发使用的。</p>
+<h3 id="NSQ-快速了解"><a href="#NSQ-快速了解" class="headerlink" title="NSQ 快速了解"></a>NSQ 快速了解</h3><p><strong>Q: 什么是NSQ?</strong><br>答: NSQ 是一个基于Go语言的分布式实时消息平台, 具有分布式，易于水平扩展，易于安装，易于集成（主流语言都有对应的客户端库）的特点。</p>
+<p><strong>其主要核心概念</strong></p>
+<ul>
+<li>Topic： 在生产者publish时会创建topic，一个topic就是程序发布消息的一个逻辑键。</li>
+<li>Channels： 通道组与消费者相关，是消费者之间的负载均衡，channel在某种意义上来说是一个“队列”。每当一个发布者发送一条消息到一个topic，消息会被复制到所有消费者连接的channel上，消费者通过这个特殊的channel读取消息，实际上，在消费者第一次订阅时就会创建channel。（Channel会将消息进行排列，如果没有消费者读取消息，消息首先会在内存中排队，当量太大时就会被保存到磁盘中）</li>
+<li>Messages: 消息构成了我们数据流的中坚力量，消费者可以选择结束消息，表明它们正在被正常处理，或者重新将他们排队待到后面再进行处理。每个消息包含传递尝试的次数，当消息传递超过一定的阀值次数时，我们应该放弃这些消息，或者作为额外消息进行处理。</li>
+</ul>
+<p><strong>NSQ 的优势</strong>：</p>
+<ul>
+<li>安装运行简单: 易于配置和部署，并且内置了管理界面。</li>
+<li>协议简单: NSQ 支持多种语言客户端接入，其有一个快速的二进制协议，通过短短的几天工作量就可以很简单地实现这些协议，我们还自己创建了我们的纯JS驱动（当时只存在coffeescript驱动）</li>
+<li>在线扩容：NSQ 支持横向扩展，没有任何集中式代理。</li>
+<li>分布式 : 提倡分布式和分散的拓扑，没有单点故障，支持容错和高可用性，并提供可靠的消息交付保证</li>
+</ul>
+<p><strong>NSQ 的特性</strong>：</p>
+<ul>
+<li>持久化模式方案: 采用的方式时内存+硬盘的模式，当内存到达一定程度时就会将数据持久化到硬盘, 如果设置了<code>--mem-queue-size=0</code>则所有的消息将会存储到磁盘。</li>
+<li>队列中的每条消息至少传递一次。</li>
+<li>队列中消息不保证有序的。</li>
+</ul>
+<p><br/></p>
+<p><strong>NSQ 四个重要组件构成</strong>：<br>(1) <code>nsqd</code>：一个负责接收、排队、转发消息到客户端的守护进程，它可以独立运行，不过通常它是由 nsqlookupd 实例所在集群配置的, 其默认监听端口<code>4150</code>和<code>4151</code>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># nsqd 简单启动示例</span></span><br><span class="line">./nsqd -broadcast-address=192.168.1.2:4160</span><br><span class="line">  <span class="comment"># -broadcast-address 配置广播地址</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果是在搭配nsqlookupd使用的模式下需要还指定nsqlookupd地址，如果是部署了多个nsqlookupd节点的集群，那还可以指定多个-lookupd-tcp-address。</span></span><br><span class="line">./nsqd -broadcast-address=192.168.1.2 -lookupd-tcp-address=192.168.1.2:4160</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p><code>nsqlookupd</code>：管理拓扑信息并提供最终一致性的发现服务的守护进程,值得注意其数据并不是持久化保存,也不需要与任何其他nsqlookupd实例协调以满足查询, 因此根据你系统的冗余要求尽可能多地部署nsqlookupd节点(通常三个), 其默认监听端口<code>4160</code>和<code>4161</code>。</p>
+</li>
+<li><p><code>nsqadmin</code>：它是一套实时监控集群状态、执行各种管理任务的Web管理平台, 默认监听端口<code>4171</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动 nsqadmin 示例</span></span><br><span class="line">./nsqadmin -lookupd-http-address=192.168.1.2:4161</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>utilities</code>：常见基础功能、数据流处理工具，如 <code>nsq_stat、nsq_tail、nsq_to_file、nsq_to_http、nsq_to_nsq、to_nsq</code></p>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>NSQ 架构及其工作模式</strong><br>我们首先开看NSQ工作模式图，值得非常注意的一点就是在非集群模式下可以直接连接指定的nsqd, 而集群模式下则通过nsqlookup查询到nsqd地址再连接。</p>
+<figure class="image-box">
+                <a rel=4.Go语言项目操作之NSQ分布式消息队列实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228145438.png" target="_blank" title="WeiyiGeek.NSQ工作模式" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228145438.png" alt="WeiyiGeek.NSQ工作模式" title="" class=""></a>
+                <p>WeiyiGeek.NSQ工作模式</p>
+            </figure>
+<p>上图中每个nsqd实例旨在一次处理多个数据流, 该数据流称为”topics”,并且topic与channels是1对多的关系, 每个channel都会收到topic所有消息的副本，实际上下游的服务是通过对应的channel来消费topic消息。</p>
+<ul>
+<li>topic 在首次使用时创建，方法是将其发布到指定topic，或者订阅指定topic上的channel</li>
+<li>channel 是通过订阅指定的channel在第一次使用时创建的。</li>
+</ul>
+<p>topic 和 channel 都相互独立地缓冲数据，防止缓慢的消费者导致其他chennel的积压（同样适用于topic级别），但是channel可以并且通常会连接多个客户端。</p>
+<p>假设所有连接的客户端都处于准备接收消息的状态，则每条消息将被传递到随机客户端，如下图所示:</p>
+<figure class="image-box">
+                <a rel=4.Go语言项目操作之NSQ分布式消息队列实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228145803.gif" target="_blank" title="WeiyiGeek.NSQ工作模式" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228145803.gif" alt="WeiyiGeek.NSQ工作模式" title="" class=""></a>
+                <p>WeiyiGeek.NSQ工作模式</p>
+            </figure>
+<p>总而言之消息是<code>从topic -&gt; channel</code>（每个channel接收该topic的所有消息的副本）多播的，但是从<code>channel -&gt; consumers</code>均匀分布（每个消费者接收该channel的一部分消息）。</p>
+<p><br/></p>
+<p><strong>NSQ 消息队列的应用场景</strong><br>(1) 异步处理: 我们可以利用消息队列把业务流程中的非关键流程异步化，从而显著降低业务请求的响应时间。 </p>
+<p><a rel=4.Go语言项目操作之NSQ分布式消息队列实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228103638.png" target="_blank" title="WeiyiGeek.异步处理" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228103638.png" alt="WeiyiGeek.异步处理"></a></p>
+<p>(2) 应用解耦: 通过使用消息队列将不同的业务逻辑解耦，降低系统间的耦合，提高系统的健壮性，后续有其他业务要使用订单数据可直接订阅消息队列，提高系统的灵活性。</p>
+<figure class="image-box">
+                <a rel=4.Go语言项目操作之NSQ分布式消息队列实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228103751.png" target="_blank" title="WeiyiGeek.应用解耦" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228103751.png" alt="WeiyiGeek.应用解耦" title="" class=""></a>
+                <p>WeiyiGeek.应用解耦</p>
+            </figure>
+<p>(3) 流量削峰: 在类似秒杀（大秒）等场景下，某一时间可能会产生大量的请求，使用消息队列能够为后端处理请求提供一定的缓冲区，保证后端服务的稳定性，例如:<code>秒杀请求 --Write--&gt; 消息队列 --根据规则读取--&gt; 请求处理。</code></p>
+<p>(4) 消息通信: 消息队列一般都内置了高效的通信机制，因此也可以用在纯的消息通讯, 例如实现点对点消息队列，或者聊天室进行消息发布和接收等。<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// # 点对点</span></span><br><span class="line">客户端A --&gt;&gt; 消息队列 &lt;&lt;-- 客户端B</span><br><span class="line"></span><br><span class="line"><span class="comment">// # 聊天室订阅主题进行消息发布和接收</span></span><br><span class="line">客户端A &lt;&lt;--&gt;&gt; 消息队列 &lt;&lt;--&gt;&gt; 客户端B</span><br></pre></td></tr></table></figure></p>
+<p>例如: NSQ接收和发送消息流程如下图所示。</p>
+<figure class="image-box">
+                <a rel=4.Go语言项目操作之NSQ分布式消息队列实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228145801.png" target="_blank" title="WeiyiGeek.NSQ接收和发送消息流程" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228145801.png" alt="WeiyiGeek.NSQ接收和发送消息流程" title="" class=""></a>
+                <p>WeiyiGeek.NSQ接收和发送消息流程</p>
+            </figure>
+<p><br/></p>
+<p><strong>附录补充</strong></p>
+<p>NSQ 官网地址: <a href="https://nsq.io/" target="_blank" rel="noopener">https://nsq.io/</a></p>
+<p><br></p>
+<h3 id="NSQ-安装配置"><a href="#NSQ-安装配置" class="headerlink" title="NSQ 安装配置"></a>NSQ 安装配置</h3><p>从NSQ官方下载页面(<a href="https://nsq.io/deployment/installing.html)" target="_blank" rel="noopener">https://nsq.io/deployment/installing.html)</a>, 根据自己的平台下载并解压到指定目录, 然后设置环境变量即可。</p>
+<p><strong>此处使用Docker方式安装部署测试</strong><br>实践环境说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ docker --version</span><br><span class="line">Docker version 19.03.15, build 99e3ed8919</span><br><span class="line">$ docker-compose --version</span><br><span class="line">docker-compose version 1.25.0, build unknown</span><br><span class="line"></span><br><span class="line">nsq v1.2.1</span><br></pre></td></tr></table></figure></p>
+<p>步骤01.首先创建一个 docker-compose.yml 存放了容器运行配置清单。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 注意操作系统中是否安装 docker-compose, 如没有安装请执行yum或者apt安装即可。</span></span><br><span class="line">$ vim docker-compose.yml</span><br><span class="line">version: <span class="string">'2'</span></span><br><span class="line">services:</span><br><span class="line">  nsqlookupd:</span><br><span class="line">    container_name: nsqlookupd</span><br><span class="line">    image: nsqio/nsq</span><br><span class="line">    <span class="built_in">command</span>: /nsqlookupd</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">"4160:4160"</span></span><br><span class="line">      - <span class="string">"4161:4161"</span></span><br><span class="line">  nsqd:</span><br><span class="line">    image: nsqio/nsq</span><br><span class="line">    container_name: nsqd</span><br><span class="line">    <span class="built_in">command</span>: /nsqd --lookupd-tcp-address=nsqlookupd:4160</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">"4150:4150"</span></span><br><span class="line">      - <span class="string">"4151:4151"</span></span><br><span class="line">  nsqadmin:</span><br><span class="line">    image: nsqio/nsq</span><br><span class="line">    container_name: nsqadmin</span><br><span class="line">    <span class="built_in">command</span>: /nsqadmin --lookupd-http-address=nsqlookupd:4161</span><br><span class="line">    ports:</span><br><span class="line">      - <span class="string">"4171:4171"</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips:从 上面的docker-compose.yml文件可以看到 <code>nsqd服务</code> 需要注册到 nsqlookupd 的 4160 端口, 而 <code>nsqadmin服务</code> 需要注册到 nsqlookupd 的 4161 端口</p>
+<p>步骤02.在该yml文件同级目录下执行如下命令进行创建并后台运行容器。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ docker-compose up -d</span><br><span class="line">  <span class="comment"># Creating network "docker_default" with the default driver</span></span><br><span class="line">  <span class="comment"># Creating nsqd       ... done</span></span><br><span class="line">  <span class="comment"># Creating nsqadmin   ... done</span></span><br><span class="line">  <span class="comment"># Creating nsqlookupd ... done</span></span><br><span class="line">$ docker ps</span><br><span class="line">  <span class="comment"># CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                            NAMES</span></span><br><span class="line">  <span class="comment"># 6ff1c7b396fe        nsqio/nsq           "/nsqadmin --lookupd…"   8 seconds ago       Up 6 seconds        4150-4151/tcp, 4160-4161/tcp, 4170/tcp, 0.0.0.0:4171-&gt;4171/tcp   nsqadmin</span></span><br><span class="line">  <span class="comment"># 33eeda6384e5        nsqio/nsq           "/nsqlookupd"            8 seconds ago       Up 6 seconds        4150-4151/tcp, 4170-4171/tcp, 0.0.0.0:4160-4161-&gt;4160-4161/tcp   nsqlookupd</span></span><br><span class="line">  <span class="comment"># ae4830fd10e1        nsqio/nsq           "/nsqd --lookupd-tcp…"   8 seconds ago       Up 6 seconds        4160-4161/tcp, 0.0.0.0:4150-4151-&gt;4150-4151/tcp, 4170-4171/tcp   nsqd</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>步骤03.访问nsqadmin提供的消息队列监控的Web管理平台 <a href="http://10.10.107.225:4171/lookup。" target="_blank" rel="noopener">http://10.10.107.225:4171/lookup。</a></p>
+<figure class="image-box">
+                <a rel=4.Go语言项目操作之NSQ分布式消息队列实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228115249.png" target="_blank" title="WeiyiGeek.nsqadmin-Web管理平台" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228115249.png" alt="WeiyiGeek.nsqadmin-Web管理平台" title="" class=""></a>
+                <p>WeiyiGeek.nsqadmin-Web管理平台</p>
+            </figure>
+<p>至此安装完毕，通过docker来部署NSQ是非常简单的。</p>
+<p><br/></p>
+<h3 id="NSQ-实践操作"><a href="#NSQ-实践操作" class="headerlink" title="NSQ 实践操作"></a>NSQ 实践操作</h3><h4 id="1-go-nsq-安装"><a href="#1-go-nsq-安装" class="headerlink" title="1.go-nsq 安装"></a>1.go-nsq 安装</h4><p>描述: NSQ官方为了开发者提供了Go语言版的客户端<code>go-nsq</code>(<a href="https://github.com/nsqio/go-nsq)，更多客户端支持请查看CLIENT" target="_blank" rel="noopener">https://github.com/nsqio/go-nsq)，更多客户端支持请查看CLIENT</a> LIBRARIES(<a href="https://nsq.io/clients/client_libraries.html)。" target="_blank" rel="noopener">https://nsq.io/clients/client_libraries.html)。</a></p>
+<p><strong>go-nsq库安装命令如下所示:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  src <span class="built_in">cd</span> weiyigeek.top                           </span><br><span class="line">➜  weiyigeek.top go get -u github.com/nsqio/go-nsq</span><br><span class="line">  <span class="comment"># go: downloading github.com/nsqio/go-nsq v1.1.0</span></span><br><span class="line">  <span class="comment"># go: downloading github.com/golang/snappy v0.0.1</span></span><br><span class="line">  <span class="comment"># go: downloading github.com/golang/snappy v0.0.4</span></span><br><span class="line">  <span class="comment"># go get: added github.com/golang/snappy v0.0.4</span></span><br><span class="line">  <span class="comment"># go get: added github.com/nsqio/go-nsq v1.1.0</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h4 id="2-go-nsq-简单使用"><a href="#2-go-nsq-简单使用" class="headerlink" title="2.go-nsq 简单使用"></a>2.go-nsq 简单使用</h4><p><strong>生产者Producer</strong><br>简单的生产者示例代码如下：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// studygo/Day09/NSQ/demo1/producer.go</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">"bufio"</span></span><br><span class="line">  <span class="string">"fmt"</span></span><br><span class="line">  <span class="string">"log"</span></span><br><span class="line">  <span class="string">"os"</span></span><br><span class="line">  <span class="string">"strings"</span></span><br><span class="line"></span><br><span class="line">  <span class="string">"github.com/nsqio/go-nsq"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// NSQ Producer(生产者)示例演示</span></span><br><span class="line"><span class="keyword">var</span> Producer *nsq.Producer</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> NsqProducer <span class="keyword">struct</span> &#123;</span><br><span class="line">  nsqd_host <span class="keyword">string</span></span><br><span class="line">  nsqd_port <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化NSQ生产者</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(NP NsqProducer)</span> <span class="title">InitProducer</span><span class="params">()</span> <span class="params">(*nsq.Producer, error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// NewConfig返回一个新的默认nsq配置。</span></span><br><span class="line">  config := nsq.NewConfig()</span><br><span class="line">  <span class="comment">// 组合nsqd服务连接地址。</span></span><br><span class="line">  nsqdAddr := fmt.Sprintf(<span class="string">"%s:%d"</span>, NP.nsqd_host, NP.nsqd_port)</span><br><span class="line">  Producer, err := nsq.NewProducer(nsqdAddr, config)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">"create producer failed, err:%v\n"</span>, err)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> Producer, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 1.实例化以及初始化</span></span><br><span class="line">  nsqd := &amp;NsqProducer&#123;</span><br><span class="line">    nsqd_host: <span class="string">"10.10.107.225"</span>,</span><br><span class="line">    nsqd_port: <span class="number">4150</span>,</span><br><span class="line">  &#125;</span><br><span class="line">  Producer, err := nsqd.InitProducer()</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">"Init producer failed, err:%v\n"</span>, err)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    log.Printf(<span class="string">"Init Producer success!"</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2.从标准输入读取</span></span><br><span class="line">  fmt.Println(<span class="string">"请输入你要向Topic_Demo消息队列传递的消息:"</span>)</span><br><span class="line">  reader := bufio.NewReader(os.Stdin)</span><br><span class="line">  <span class="keyword">for</span> &#123;</span><br><span class="line">    data, err := reader.ReadString(<span class="string">'\n'</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      fmt.Printf(<span class="string">"read string from stdin failed, err:%v\n"</span>, err)</span><br><span class="line">      <span class="keyword">continue</span></span><br><span class="line">    &#125;</span><br><span class="line">    data = strings.TrimSpace(data)</span><br><span class="line">    <span class="comment">// 3.当前输入Q或者q时退出程序</span></span><br><span class="line">    <span class="keyword">if</span> strings.ToUpper(data) == <span class="string">"Q"</span> &#123;</span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 4.向 'Topic_Demo' publish 数据</span></span><br><span class="line">    err = Producer.Publish(<span class="string">"Topic_Demo"</span>, []<span class="keyword">byte</span>(data))</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      fmt.Printf(<span class="string">"publish msg to nsq failed, err:%v\n"</span>, err)</span><br><span class="line">      <span class="keyword">continue</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><br/></p>
+<p><strong>消费者-Consumer</strong><br>简单的消费者示例代码如下：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">"fmt"</span></span><br><span class="line">  <span class="string">"os"</span></span><br><span class="line">  <span class="string">"os/signal"</span></span><br><span class="line">  <span class="string">"syscall"</span></span><br><span class="line">  <span class="string">"time"</span></span><br><span class="line">  nsq <span class="string">"github.com/nsqio/go-nsq"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// NSQ Consumer(消费者) 示例演示</span></span><br><span class="line"><span class="comment">// NsqConsumer 是一个消费者类型结构体</span></span><br><span class="line"><span class="keyword">type</span> NsqConsumer <span class="keyword">struct</span> &#123;</span><br><span class="line">  Title <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// HandleMessage 是需要实现的处理消息的方法</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *NsqConsumer)</span> <span class="title">HandleMessage</span><span class="params">(msg *nsq.Message)</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">  fmt.Printf(<span class="string">"%s : recv from %v, msg:%v\n"</span>, m.Title, msg.NSQDAddress, <span class="keyword">string</span>(msg.Body))</span><br><span class="line">  <span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化Consumer消费者</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(NC *NsqConsumer)</span> <span class="title">InitConsumer</span><span class="params">(topic <span class="keyword">string</span>, channel <span class="keyword">string</span>, address <span class="keyword">string</span>)</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 1.NewConfig返回一个新的默认nsq配置</span></span><br><span class="line">  config := nsq.NewConfig()</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2.查找轮询间隔此处设置15s</span></span><br><span class="line">  config.LookupdPollInterval = <span class="number">15</span> * time.Second</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 3.NewConsumer为指定的主题/频道创建新的Consumer实例</span></span><br><span class="line">  c, err := nsq.NewConsumer(topic, channel, config)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">"create consumer failed, err:%v\n"</span>, err)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 4.AddHandler为此使用者接收的消息设置处理程序，可以多次调用该函数以添加其他处理程序，注意其必须放在连接NSQD和NSQLOOKUP前。</span></span><br><span class="line">  c.AddHandler(NC)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 5.两种方式连接到NSQD</span></span><br><span class="line">  <span class="comment">// if err := c.ConnectToNSQD(address); err != nil &#123;   // 直接连NSQD，tcp长连接</span></span><br><span class="line">  <span class="keyword">if</span> err := c.ConnectToNSQLookupd(address); err != <span class="literal">nil</span> &#123; <span class="comment">// 通过lookupd查询连NSQD，更易于分布式容错和高可用</span></span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 实例化消费者</span></span><br><span class="line">  consumer := &amp;NsqConsumer&#123;</span><br><span class="line">    Title: <span class="string">"NSQ_USE"</span>,</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 初始化连接NSQD进行获取消息队列中的值</span></span><br><span class="line">  err := consumer.InitConsumer(<span class="string">"Topic_Demo"</span>, <span class="string">"channel_first"</span>, <span class="string">"10.10.107.225:4161"</span>)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">"init consumer failed, err:%v\n"</span>, err)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 定义一个信号的通道</span></span><br><span class="line">  c := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</span><br><span class="line">  <span class="comment">// 转发键盘中断信号到c</span></span><br><span class="line">  signal.Notify(c, syscall.SIGINT)</span><br><span class="line">  <span class="comment">// 通道输出消息队列中的值阻塞</span></span><br><span class="line">  &lt;-c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>执行结果: 从结果可以看到当开启多个消费者时会一个发送一次消息队列中的信息。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生产者</span></span><br><span class="line">➜  demo1 go run .</span><br><span class="line">2021/12/28 21:09:40 Init Producer success!</span><br><span class="line">请输入你要向Topic_Demo消息队列传递的消息:</span><br><span class="line">Whoami</span><br><span class="line">2021/12/28 21:21:04 INF    1 (10.10.107.225:4150) connecting to nsqd</span><br><span class="line">WeiyiGeek</span><br><span class="line">...</span><br><span class="line">topic测试</span><br><span class="line">2021/12/28 21:21:56 INF    1 (10.10.107.225:4150) connecting to nsqd</span><br><span class="line">channel</span><br><span class="line"><span class="built_in">test</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 消费者01</span></span><br><span class="line">➜  demo2 go run .</span><br><span class="line">2021/12/28 21:21:37 INF    1 [Topic_Demo/channel_first] (ae4830fd10e1:4150) connecting to nsqd</span><br><span class="line">NSQ_USE : recv from ae4830fd10e1:4150, msg:Whoami</span><br><span class="line">NSQ_USE : recv from ae4830fd10e1:4150, msg:WeiyiGeek</span><br><span class="line">NSQ_USE : recv from ae4830fd10e1:4150, msg:topic测试</span><br><span class="line">NSQ_USE : recv from ae4830fd10e1:4150, msg:channel</span><br><span class="line"></span><br><span class="line"><span class="comment"># 消费者02</span></span><br><span class="line">➜  demo2 go run .</span><br><span class="line">2021/12/28 21:22:19 INF    1 [Topic_Demo/channel_first] querying nsqlookupd http://10.10.107.225:4161/lookup?topic=Topic_Demo</span><br><span class="line">2021/12/28 21:22:19 INF    1 [Topic_Demo/channel_first] (ae4830fd10e1:4150) connecting to nsqd</span><br><span class="line">NSQ_USE : recv from ae4830fd10e1:4150, msg:<span class="built_in">test</span></span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=4.Go语言项目操作之NSQ分布式消息队列实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228212934.png" target="_blank" title="WeiyiGeek.Producer与Consumer实践" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228212934.png" alt="WeiyiGeek.Producer与Consumer实践" title="" class=""></a>
+                <p>WeiyiGeek.Producer与Consumer实践</p>
+            </figure></p>
+<p>Tips: 在客户端执行是如果采用ConnectToNSQLookupd方法即通过lookupd查询连NSQD，需要在hosts绑定对应的容器hostname和宿主机地址（粗暴解决）。例如此处<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ cat /etc/hosts            </span><br><span class="line">127.0.0.1       localhost</span><br><span class="line">127.0.1.1       Ubuntu-PC</span><br><span class="line">10.10.107.225 ae4830fd10e1</span><br></pre></td></tr></table></figure></p>
+<p>Tips: 此处我们可以通过<code>nsqdadmin</code>提供的Web页面查看到我们Publish的topic，以及我们生产者向队列传递的值，和消费者从通道中接收到的值，点击页面上的Topic_Demo就能进入一个展示更多详细信息的页面, 而在<code>/counter</code>页面显示处理的消息数量。</p>
+<figure class="image-box">
+                <a rel=4.Go语言项目操作之NSQ分布式消息队列实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228220403.png" target="_blank" title="WeiyiGeek.Topic&Channel查看" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211228220403.png" alt="WeiyiGeek.Topic&Channel查看" title="" class=""></a>
+                <p>WeiyiGeek.Topic&Channel查看</p>
+            </figure>
+<p>Tips: 在<code>/lookup</code>界面支持创建topic和channel, 这是提供了一种在将服务部署到生产环境之前设置流层次结构的方法, 如果频道名称为空，则只创建主题。</p>
+<p><br></p>
+<h4 id="3-go-nsq-直连方式"><a href="#3-go-nsq-直连方式" class="headerlink" title="3.go-nsq 直连方式"></a>3.go-nsq 直连方式</h4><p>描述: 上面实践了通过nsqlookupd的http接口查询后长连接到nsqd, 本节将简单演示直连nsqd（tcp长连接）写法。<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">"flag"</span></span><br><span class="line">  <span class="string">"log"</span></span><br><span class="line">  <span class="string">"time"</span></span><br><span class="line">  <span class="string">"github.com/nsqio/go-nsq"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">go</span> startConsumer()</span><br><span class="line">  startProducer()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> url <span class="keyword">string</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">//nsqd 服务具体ip,端口根据实际情况传入或者修改默认配置, 写入和获取都是采用同一个。</span></span><br><span class="line">  flag.StringVar(&amp;url, <span class="string">"url"</span>, <span class="string">"10.10.107.225:4150"</span>, <span class="string">"nsqd"</span>)</span><br><span class="line">  flag.Parse()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 生产者</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">startProducer</span><span class="params">()</span></span> &#123;</span><br><span class="line">    cfg := nsq.NewConfig()</span><br><span class="line">    producer, err := nsq.NewProducer(url, cfg)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 发布指定的消息</span></span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> err := producer.Publish(<span class="string">"DirectConnection"</span>, []<span class="keyword">byte</span>(<span class="string">"test message"</span>)); err != <span class="literal">nil</span> &#123;</span><br><span class="line">          log.Fatal(<span class="string">"publish error: "</span> + err.Error())</span><br><span class="line">      &#125;</span><br><span class="line">      time.Sleep(<span class="number">1</span> * time.Second)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 消费者</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">startConsumer</span><span class="params">()</span></span> &#123;</span><br><span class="line">    cfg := nsq.NewConfig()</span><br><span class="line">    consumer, err := nsq.NewConsumer(<span class="string">"DirectConnection"</span>, <span class="string">"first"</span>, cfg)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 设置消息处理函数</span></span><br><span class="line">    consumer.AddHandler(nsq.HandlerFunc(<span class="function"><span class="keyword">func</span><span class="params">(message *nsq.Message)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">        log.Println(<span class="keyword">string</span>(message.Body))</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;))</span><br><span class="line">    <span class="comment">// 连接到单例nsqd</span></span><br><span class="line">    <span class="keyword">if</span> err := consumer.ConnectToNSQD(url); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    &lt;-consumer.StopChan</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>至此完毕！</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:06.304Z" itemprop="dateUpdated">2022-03-29 13:39:06</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/编程世界/Go/Extension/4.Go语言项目操作之NSQ分布式消息队列实践.md" target="_blank" rel="noopener noreferrer">_posts/编程世界/Go/Extension/4.Go语言项目操作之NSQ分布式消息队列实践.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/5-1-609.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/5-1-609.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Go/" rel="tag">Go</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5-1-609.html&title=《4.Go语言项目操作之NSQ分布式消息队列实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5-1-609.html&title=《4.Go语言项目操作之NSQ分布式消息队列实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/5-1-609.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《4.Go语言项目操作之NSQ分布式消息队列实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/5-1-609.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/5-1-609.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/5-1-213.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Linux基础命令行使用技巧</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/5-1-610.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">5.Go语言项目操作之Kafka日志收集项目实践</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-Go语言项目操作之NSQ分布式消息队列实践"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Go语言项目操作之NSQ分布式消息队列实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#NSQ-快速了解"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">NSQ 快速了解</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#NSQ-安装配置"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">NSQ 安装配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#NSQ-实践操作"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">NSQ 实践操作</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-go-nsq-安装"><span class="post-toc-number">1.3.1.</span> <span class="post-toc-text">1.go-nsq 安装</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-go-nsq-简单使用"><span class="post-toc-number">1.3.2.</span> <span class="post-toc-text">2.go-nsq 简单使用</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-go-nsq-直连方式"><span class="post-toc-number">1.3.3.</span> <span class="post-toc-text">3.go-nsq 直连方式</span></a></li></ol></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5-1-609.html&title=《4.Go语言项目操作之NSQ分布式消息队列实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5-1-609.html&title=《4.Go语言项目操作之NSQ分布式消息队列实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/5-1-609.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《4.Go语言项目操作之NSQ分布式消息队列实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/5-1-609.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/5-1-609.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACK0lEQVR42u3aS3KDQAwFQN//0s46C/CThFNBNCuXC8bTLGR95vWKr3dwHd1/vmb1qdGFgYFxW0ayuaNvkpWTFc4/Jy8OAwPjCYxkE+dLnz+Vw5KXhYGBgXFZEDy4vxqmMTAwMKqMSbisPoWBgYFRLWLPg2lS3P6LWhwDA+OGjLzr/vefvzLfwMDAuBXjXbx6rf/qyLO8KwwMjNWM6jDyfBN5api/mmQdDAyM5zAm44Gk+EySzsk3GBgYWxl56OwFweqooHp07FeGi4GBsZSRp315ITpp6H/Y6HmwxsDAWMroHdWaB9xqk+7DXwIGBsZqRlIo9g57RQ2y+J5CkoqBgfEYxvzURl6OVlt+Ue8QAwNjNaP3A9UWWzUcJ7+CgYGxlZGkYvNU8oKOYO+YBQYGxiJGHtrmh1l7/waj+hsDA2MFI08He4PJvKxtDjgxMDAewLgqTfzGMbJCbw8DA2M1oxo68xQzKW4n40wMDIwnMOZBeVKmVovY0ZAVAwPj5ozJMdOrBga9BPHDlAMDA2MdI9/EfDxQPSwbrYOBgfEARvV4RAKrJoW9shYDA2M341288s31BpxJkP2Q22JgYKxjzKeE89I3CdO9wxkYGBibGNUgm7TYegVwPvLEwMB4JiNJ1+al7/wf4BCJgYGB0Rpe5gcmqq/psOmGgYGBUQyp+Qp5gL4sNcTAwLgho9pKqzbxe0PKr7TbMDAwbsjIS8fe6LG6iV6wxsDAWMr4AXmZvCo0rBB9AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

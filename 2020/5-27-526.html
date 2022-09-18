@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 5-Kubernetes入门基础之控制器Controller介绍|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="k8s">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>5-Kubernetes入门基础之控制器Controller介绍</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">5-Kubernetes入门基础之控制器Controller介绍</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-05-27T10:37:47.000Z" itemprop="datePublished" class="page-time">
+  2020-05-27
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Kubernetes/5-Kubernetes入门基础之控制器Controller介绍"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">5-Kubernetes入门基础之控制器Controller介绍</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-05-27 18:37:47" datetime="2020-05-27T10:37:47.000Z"  itemprop="datePublished">2020-05-27</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[toc]</p>
+<h2 id="0x00-Controller-介绍"><a href="#0x00-Controller-介绍" class="headerlink" title="0x00 Controller 介绍"></a>0x00 Controller 介绍</h2><p><strong>Q: 什么是资源控制器(资源控制器介绍)?</strong><br>答：Kubernetes中内建了很多controller（控制器），这些相当于一个状态机，用来控制Pod的具体状态和行为。</p>
+<p><br></p>
+<p><strong>Q: 为什么要使用控制器？</strong><br>答: 前面说过Pod是k8s最小的部署单元，而如果需要<code>创建批量的Pod副本并进行扩容缩以及POD回退</code>就必须使用Controller进行实现；</p>
+<p><br></p>
+<p><strong>Q: 有那些类型的控制器?</strong></p>
+<ul>
+<li>(1) Replication Controller 和 ReplicaSet </li>
+<li>(2) Deployment </li>
+<li>(3) DaemonSet </li>
+<li>(4) Job/CronJob </li>
+<li>(5) StatefulSet</li>
+<li>(6) Horizontal Pod Autoscaling</li>
+</ul>
+<hr>
+<h2 id="0x01-Controller-详述"><a href="#0x01-Controller-详述" class="headerlink" title="0x01 Controller 详述"></a>0x01 Controller 详述</h2><h3 id="1-Replication-Controller"><a href="#1-Replication-Controller" class="headerlink" title="1.Replication Controller"></a>1.Replication Controller</h3><p><strong>Q: 什么是Replication Controller(RC)?</strong></p>
+<blockquote>
+<p>答: ReplicationController是一个基本的控制器类型, 它即我们所说的RC(<code>副本控制器</code>), 用于确保任意时间都有指定数量的Pod”副本”在运行;</p>
+</blockquote>
+<p><strong>Q: RC它有何作用?</strong></p>
+<blockquote>
+<p>答: 确保容器应用的副本数始终保持在用户定义的副本数，即如果有容器<code>异常退出，会自动创建新的Pod</code>来替代而如果<code>异常多出来的容器也会自动回收</code>；</p>
+</blockquote>
+<p><strong>Q: RC工作原理</strong></p>
+<blockquote>
+<p>答: 创建RC之后K8S Master节点上的Controller Manager(控制器管理器)组件接到创建RC的通知进行创建满足副本数相应的Pod, 然后它会定期巡视系统当中的存活的目标Pod, 然后进行标签匹配来监视对应的Pod，并确保目标Pod实例刚好等于RC中定义的副本数期望值，而目标Pod超过副本期望值将会被销毁;</p>
+</blockquote>
+<p><strong>Q: RC组成部分</strong></p>
+<ul>
+<li>1) Pod 期待的副本数 Replicas</li>
+<li>2) 用于筛选目标Pod的Lable Selector，对应Pod模板(Template)</li>
+<li>3) Pod 数量小于副本期望值时根据Pod模板创建相应的Pod</li>
+</ul>
+<p><strong>Q: RC使用实例</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># rc-demo.yaml</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ReplicationCaontroller</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">rc-demo</span>  <span class="comment"># Rc 名称</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span>  <span class="comment"># Pod副本期望值</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">nginx</span> <span class="comment"># pod 名称 </span></span><br><span class="line"><span class="attr">      lables:</span>     <span class="comment"># Pod 模板标签</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx</span> <span class="comment"># KV 值</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx</span>   <span class="comment"># 容器名称</span></span><br><span class="line"><span class="attr">        image:</span> <span class="attr">nginx:latest</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - contianerPort:</span> <span class="number">80</span></span><br></pre></td></tr></table></figure>
+<p><strong>操作实践:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建</span></span><br><span class="line">kubectl create -f rc-demo.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取RC &amp; 详细信息</span></span><br><span class="line">kubectl get rc/rc-demo</span><br><span class="line">kubectl describe rc/rc-demo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取Pod的信息</span></span><br><span class="line">kubectl get pod -l app=nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除RC创建的Pod (他会重新创建满足其副本数)</span></span><br><span class="line">kubectl delete pod nginx-*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除RC (慎用 -f 它是强制的)</span></span><br><span class="line">kubectl delete -f rc-demo.yaml</span><br></pre></td></tr></table></figure></p>
+<p>Tips: 我们可以在删除RC时不删除其构建的Pod进行更新修改RC,可以采用delete命令子参数<code>cascade=false</code>(级联),原RC被删除后可以创建一个新的RC来替换它，前提是旧的和新.spec.selector相匹配,那么新的将会采用旧的Pod;<br>Tips: 官方在新版本的Kubernetes中建议舍弃ReplicationController，切换使用功能能更强的ReplicaSet(RS) 这也是下一节的主要内容;</p>
+<p><br></p>
+<h3 id="2-ReplicaSet"><a href="#2-ReplicaSet" class="headerlink" title="2.ReplicaSet"></a>2.ReplicaSet</h3><p><strong>Q: 什么是ReplicaSet?</strong></p>
+<blockquote>
+<p>答: ReplicaSet即是我们说的(RS)副本集, 它是在k8s v1.2引入可以将它看做是RC的升级版本; 而ReplicaSet跟ReplicationController 没有本质的不同只是名字不一样，然后支持集合式(Set-Based selecor)的 selector【标签】，这使得RS在资源选择上更为灵活；</p>
+</blockquote>
+<p><strong>Q: ReplicaSet有何作用?</strong></p>
+<blockquote>
+<p>答: RS 和 RC 一样都能确保运行满足副本数期望值的Pod;<br>虽然RS可以独立使用而它主要用于协调Deployment对Pod创建、删除、更新等，当使用Deployment时候不用担心RS因为可以直接通过Deployment对其进行管理；</p>
+</blockquote>
+<p>Tips : 快速查看控制器的apiVsersion<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl api-versions | grep $(kubectl api-resources | grep <span class="string">"ReplicaSet"</span> | awk -F <span class="string">" "</span> <span class="string">'&#123;print $3&#125;'</span>)</span><br><span class="line">apps/v1</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>Pod 资源文件示例：<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; pod-demo.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">pod-demo</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">pod-demo</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  containers:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">nginx-pod-demo</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">harbor.weiyigeek.top/test/nginx:v1.0</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="attr">    - containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
+<p>ReplicaSet 资源文件示例:<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; replicaset-demo.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ReplicaSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">replicaset-demo</span>   <span class="comment"># ReplicaSet 名称</span></span><br><span class="line"><span class="attr">  labels:</span>                 <span class="comment"># ReplicaSet 标签</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">replicaset-demo</span>   </span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span> <span class="comment"># 有3个副本</span></span><br><span class="line"><span class="attr">  selector:</span>   <span class="comment"># 标签选择器</span></span><br><span class="line"><span class="attr">    matchLabels:</span>               <span class="comment"># matchLabels是&#123;key,value&#125;对的映射</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">replicaset-demo</span>     <span class="comment"># 注意: 匹配的标签需要原数据中的replicaset-demo一致</span></span><br><span class="line"><span class="attr">    matchExpressions:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">&#123;key:</span> <span class="string">tier,</span> <span class="attr">operator:</span> <span class="string">In,</span> <span class="attr">values:</span> <span class="string">&#123;frontend&#125;&#125;</span>  </span><br><span class="line"><span class="attr">  template:</span>   <span class="comment"># 模板</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">replicaset-demo</span> </span><br><span class="line"><span class="attr">    spec:</span>     <span class="comment"># 模板细则</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx-replicaset-demo</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">harbor.weiyigeek.top/test/nginx:v1.0</span></span><br><span class="line"><span class="attr">        command:</span> <span class="string">["sh","-c","java</span> <span class="bullet">-jar</span> <span class="string">nginx-app-$&#123;RELASE_VER&#125;.jar"]</span></span><br><span class="line"><span class="attr">        env:</span> <span class="comment"># 环境变量 (此时对实际环境中项目的部署值得学习)</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">GET_HOSTS_FROM</span> </span><br><span class="line"><span class="attr">          value:</span> <span class="string">dns</span> </span><br><span class="line"><span class="attr">        - name:</span> <span class="string">RELASE_VER</span></span><br><span class="line"><span class="attr">          value:</span> <span class="number">1.3</span><span class="number">.5</span></span><br><span class="line"><span class="attr">        ports:</span> <span class="comment"># 暴露端口</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
+<p>操作流程:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 使用K8s部署自助式Pod以及ReplicaSet控制器部署Pod</span></span><br><span class="line">~/K8s/Day5/demo1$ kubectl create -f pod-demo.yaml</span><br><span class="line">  <span class="comment"># pod/pod-demo created</span></span><br><span class="line">~/K8s/Day5/demo1$ kubectl create -f replicaset-demo.yaml</span><br><span class="line">  <span class="comment"># replicaset.apps/replicaset-demo created</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 查看 Pod 的信息</span></span><br><span class="line">~/K8s/Day5/demo1$  kubectl get pod --show-labels -o wide</span><br><span class="line">  <span class="comment"># NAME                    READY   STATUS    RESTARTS   AGE   IP            NODE          LABELS</span></span><br><span class="line">  <span class="comment"># pod-demo                1/1     Running   0          28m   10.244.1.16   k8s-node-4    app=pod-demo</span></span><br><span class="line">  <span class="comment"># replicaset-demo-9j457   1/1     Running   0          17m   10.244.1.19   k8s-node-4    tier=replicaset-demo</span></span><br><span class="line">  <span class="comment"># replicaset-demo-9sm9d   1/1     Running   0          17m   10.244.1.18   k8s-node-4    tier=replicaset-demo</span></span><br><span class="line">  <span class="comment"># replicaset-demo-zkl7t   1/1     Running   0          17m   10.244.1.17   k8s-node-4    tier=replicaset-demo</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># PS : 对于 ReplicaSet 控制器创建的 Pod 可以采用下列命令查看</span></span><br><span class="line">$ kubectl get rs -o wide   <span class="comment"># Pod 名称在名称空间中必须是惟一的</span></span><br><span class="line">  <span class="comment"># NAME              DESIRED   CURRENT   READY   AGE     CONTAINERS(容器名称)     IMAGES(镜像)                                 SELECTOR (标签)</span></span><br><span class="line">  <span class="comment"># replicaset-demo   3         3         3       7m39s   nginx-replicaset-demo   harbor.weiyigeek.top/test/nginx:v1.0   tier=replicaset-demo</span></span><br><span class="line"><span class="comment"># PS : pod 中执行命令 kubectl exec replicaset-demo-9j457 -it -- /bin/sh</span></span><br><span class="line">$ kubectl <span class="built_in">exec</span> replicaset-demo-9j457 -it -- env</span><br><span class="line">  <span class="comment"># PATH=/usr/local/nginx/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin</span></span><br><span class="line">  <span class="comment"># HOSTNAME=replicaset-demo-9j457</span></span><br><span class="line">  <span class="comment"># TERM=xterm</span></span><br><span class="line">  <span class="comment"># GET_HOSTS_FROM=dns  # 定义的 GET_HOSTS_FROM 环境变量</span></span><br><span class="line">  <span class="comment"># KUBERNETES_SERVICE_PORT=443</span></span><br><span class="line">  <span class="comment"># KUBERNETES_SERVICE_PORT_HTTPS=443</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT=tcp://10.96.0.1:443</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT_443_TCP_PROTO=tcp</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT_443_TCP_PORT=443</span></span><br><span class="line">  <span class="comment"># KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1</span></span><br><span class="line">  <span class="comment"># KUBERNETES_SERVICE_HOST=10.96.0.1</span></span><br><span class="line">  <span class="comment"># NGINX_VERSION=1.19.4</span></span><br><span class="line">  <span class="comment"># NJS_VERSION=0.4.4</span></span><br><span class="line">  <span class="comment"># PKG_RELEASE=1~buster</span></span><br><span class="line">  <span class="comment"># IMAGE_VERSION=1.0</span></span><br><span class="line">  <span class="comment"># HOME=/root</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 访问Pod中的容器</span></span><br><span class="line">~/K8s/Day5/demo1$ curl http://10.244.1.&#123;16..19&#125;/host.html</span><br><span class="line">  <span class="comment"># Hostname: pod-demo  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 1.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Hostname: replicaset-demo-zkl7t  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 1.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Hostname: replicaset-demo-9sm9d  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 1.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Hostname: replicaset-demo-9j457  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 1.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 【重点】验证自助式Pod与控制器式Pod（Labels-标签）的差异</span></span><br><span class="line">~/K8s/Day5/demo1 $ kubectl delete pod --all  <span class="comment"># 删除default名称空间下的所有Pod</span></span><br><span class="line">  <span class="comment"># pod "pod-demo" deleted</span></span><br><span class="line">  <span class="comment"># pod "replicaset-demo-9j457" deleted</span></span><br><span class="line">  <span class="comment"># pod "replicaset-demo-9sm9d" deleted</span></span><br><span class="line">  <span class="comment"># pod "replicaset-demo-zkl7t" deleted</span></span><br><span class="line">~/K8s/Day5/demo1 $ kubectl get pod --show-labels -o wide  <span class="comment"># 再次查看 Pod 相关信息发现容器名称以及IP地址发生改变</span></span><br><span class="line">  <span class="comment"># NAME                    READY   STATUS    RESTARTS   AGE   IP            NODE          LABELS</span></span><br><span class="line">  <span class="comment"># replicaset-demo-frfsw   1/1     Running   0          43s   10.244.1.22   k8s-node-4    tier=replicaset-demo</span></span><br><span class="line">  <span class="comment"># replicaset-demo-hh7fd   1/1     Running   0          43s   10.244.1.20   k8s-node-4    tier=replicaset-demo</span></span><br><span class="line">  <span class="comment"># replicaset-demo-lqjq8   1/1     Running   0          43s   10.244.1.21   k8s-node-4    tier=replicaset-demo</span></span><br><span class="line"><span class="comment"># PS : 结论控制器创建的Pod在delete会重新创建以达到资源清单中的replicas期望值</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) 结束Replicaset创建的Pod（管理者被清除了其下面管理的资源也将被释放）</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl delete rs replicaset-demo</span><br><span class="line">  <span class="comment"># replicaset.apps "replicaset-demo" deleted</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips : 除非需要自定义更新编排或者根本不需要更新，否则建议使用Deployment来创建Pod而不是直接使用ReplicaSets创建Pod;</p>
+<p><br></p>
+<h3 id="3-Deployment"><a href="#3-Deployment" class="headerlink" title="3.Deployment"></a>3.Deployment</h3><p><strong>Q: 什么是Deployment?</strong></p>
+<blockquote>
+<p>答: Deployment 也是在k8s v1.2版本引入，其内部使用了RS进行实现副本期望值数量Pod的创建，<code>即通过RS去创建和管理对应的pod及不同的RS交替去完成滚动更新</code>。　</p>
+</blockquote>
+<p><strong>Q: 为何要使用Deployment?</strong></p>
+<blockquote>
+<p>答: 使用其的主要原因是其支持更新、回滚(Rollback)可以极大节约部署时间以及简化部署流程, 全部在其控制器内部完成对用户是不可见的(Pod 创建过程可以参考上一章的声明周期);</p>
+</blockquote>
+<p><strong>Q: Deployment组成部分</strong></p>
+<ul>
+<li>1) 其对象生成RS并完成满足Pod副本数的Pod创建</li>
+<li>2) 通过其对象方便升级或者回滚Pod应用 【Deployment自身具备的特点】</li>
+<li>3) 通过其对象方便暂停或回复发布 【Deployment自身具备的特点】</li>
+<li>4) 通过其对象方便扩容和缩容【RS就已经实现，Deployment通过RS管理Pod因此也支持】</li>
+</ul>
+<p><strong>Pod、RelicationController 、ReplicaSet、Deployment关系说明</strong></p>
+<ul>
+<li>RelicationController  -&gt; Pod (一直满足Pod副本数除非RC被删除)</li>
+<li>ReplicaSet -&gt; Pod (一直满足Pod副本数除非RS被删除,较RC其主要特点是支持标签得集合得选择)</li>
+<li>Deployment -&gt; ReplicaSet -&gt; Pod (在RS基础之上可用快速完成更新、回滚、扩容、收缩等)</li>
+</ul>
+<figure class="image-box">
+                <a rel=5-Kubernetes入门基础之控制器Controller介绍 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201110204759.png" target="_blank" title="WeiyiGeek.deployment-scale-replicas" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/2/20201110204759.png" alt="WeiyiGeek.deployment-scale-replicas" title="" class=""></a>
+                <p>WeiyiGeek.deployment-scale-replicas</p>
+            </figure>
+<p><br/></p>
+<p>Deployment 资源文件示例:<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; nginx-deployment-demo.yaml&lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span>       <span class="comment"># 资源类型</span></span><br><span class="line"><span class="attr">metadata:</span>              <span class="comment"># 源数据</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nginx-deployment-demo</span>  <span class="comment"># Deployment 名称 </span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span>           <span class="comment"># 副本数量</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span>               <span class="comment"># matchLabels是&#123;key,value&#125;对的映射等同于key=value</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">nginx-deployment</span>    <span class="comment"># 键值对</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx-deployment</span>  <span class="comment"># Pod 名称</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span>    <span class="comment"># 镜像定义</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx-deployment</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">harbor.weiyigeek.top/test/nginx:v1.0</span></span><br><span class="line"><span class="attr">        ports:</span>  <span class="comment"># 容器端口暴露</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>演示流程:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) docker build dockerfile后上传镜像到Harbor之中</span></span><br><span class="line">~/K8s/Day5/demo2$ docker push harbor.weiyigeek.top/<span class="built_in">test</span>/nginx:v1.0</span><br><span class="line">~/K8s/Day5/demo2$ docker push harbor.weiyigeek.top/<span class="built_in">test</span>/nginx:v2.0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 部署</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl create -f nginx-deployment-demo.yaml --record </span><br><span class="line"><span class="comment">## --record参数可以记录命令，我们可以很方便的查看每次 revision 的变化 更新的时候可以记录状态，每一步是使用什么命令进行更新的   </span></span><br><span class="line">  <span class="comment"># deployment.apps/nginx-deployment-demo created</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 查看</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl get deploy -o wide  <span class="comment"># 你可以在Deploy中查看到也可以通过RS查看到创建的Pod</span></span><br><span class="line">  <span class="comment"># NAME      READY(Pod状态)   UP-TO-DATE(用于滚动升级过程中表示多少副本已经成功升级)   AVAILABLE(可用)   AGE(好久前创建或者运行)   CONTAINERS(容器名称)    IMAGES(镜像)      SELECTOR(标签选择器)</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo   3/3     3            3                2m33s   nginx-deployment   harbor.weiyigeek.top/test/nginx:v1.0   app=nginx-deployment</span></span><br><span class="line"></span><br><span class="line">~/K8s/Day5/demo2$ kubectl get rs  <span class="comment"># 【重点】 此处印证了Deployment不是直接管理并创建POD，而是通过ReplicasSet管理并创建的POD;</span></span><br><span class="line">  <span class="comment"># NAME(注意点)                      DESIRED(期待得副本数)   CURRENT(当前创建完成得副本数)   READY   AGE</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-65f7d977f8   3         3         3       55s</span></span><br><span class="line"></span><br><span class="line">~/K8s/Day5/demo2$ kubectl get pod -o wide --show-labels</span><br><span class="line">  <span class="comment"># NAME(注意点)                          READY   STATUS    RESTARTS   AGE   IP            NODE          LABELS</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-65f7d977f8-285dc   1/1     Running   0          46s   10.244.1.25   k8s-node-4    app=nginx-deployment,pod-template-hash=65f7d977f8</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-65f7d977f8-4xxf7   1/1     Running   0          46s   10.244.1.23   k8s-node-4    app=nginx-deployment,pod-template-hash=65f7d977f8</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-65f7d977f8-dpj4p   1/1     Running   0          46s   10.244.1.24   k8s-node-4    app=nginx-deployment,pod-template-hash=65f7d977f8</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) nginx 访问</span></span><br><span class="line">~/K8s/Day5/demo2$ curl http://10.244.1.&#123;23..25&#125;/host.html</span><br><span class="line">  <span class="comment"># Hostname: nginx-deployment-demo-65f7d977f8-4xxf7  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 1.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line">  <span class="comment"># Hostname: nginx-deployment-demo-65f7d977f8-dpj4p  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 1.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line">  <span class="comment"># Hostname: nginx-deployment-demo-65f7d977f8-285dc  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 1.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) 扩容</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl scale deployment nginx-deployment-demo --replicas 5</span><br><span class="line">  <span class="comment"># deployment.apps/nginx-deployment-demo scaled</span></span><br><span class="line"><span class="comment">#如果集群支持horizontal pod autoscaling的话，还可以为Deployment设置自动扩展 </span></span><br><span class="line">kubectl autoscale deployment nginx-deployment-demo  --min=10 --max=15 --cpu-percent=80 </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (6) 更新容器中的镜像(注意镜像名称是在资源清单中设置的)</span></span><br><span class="line">kubectl <span class="built_in">set</span> image deployment/nginx-deployment-demo nginx-deployment=harbor.weiyigeek.top/<span class="built_in">test</span>/nginx:v2.0</span><br><span class="line">  <span class="comment"># deployment.apps/nginx-deployment-demo image updated</span></span><br><span class="line">kubectl get rs -o wide  <span class="comment"># 查看 rs 替换历史从下面可以看见已经成功替换成为了新的镜像</span></span><br><span class="line">  <span class="comment"># NAME                               DESIRED   CURRENT   READY   AGE   CONTAINERS         IMAGES                                 SELECTOR</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-59f9c8458c   5         5         5       88s   nginx-deployment   harbor.weiyigeek.top/test/nginx:v2.0   app=nginx-deployment,pod-template-hash=59f9c8458c</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-65f7d977f8   0         0         0       29m   nginx-deployment   harbor.weiyigeek.top/test/nginx:v1.0   app=nginx-deployment,pod-template-hash=65f7d977f8</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (7) 查看扩容更新的结果</span></span><br><span class="line">~$ curl http://10.244.1.&#123;38..42&#125;/host.html</span><br><span class="line">  <span class="comment"># Hostname: nginx-deployment-demo-59f9c8458c-x8hsz  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 2.0 &lt;/u&gt;  # 注意到版本的变化</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line">  <span class="comment"># Hostname: nginx-deployment-demo-59f9c8458c-kjrjl  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 2.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line">  <span class="comment"># Hostname: nginx-deployment-demo-59f9c8458c-rb5nv  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 2.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line">  <span class="comment"># Hostname: nginx-deployment-demo-59f9c8458c-qw6h7  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 2.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line">  <span class="comment"># Hostname: nginx-deployment-demo-59f9c8458c-5zgdk  &lt;br&gt;</span></span><br><span class="line">  <span class="comment"># Image Version: &lt;u&gt; 2.0 &lt;/u&gt;</span></span><br><span class="line">  <span class="comment"># Nginx Version: 1.19.4</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (8) 回滚 &amp; 历史版本</span></span><br><span class="line">$ kubectl rollout undo deployment/nginx-deployment-demo</span><br><span class="line">  <span class="comment"># deployment.apps/nginx-deployment-demo rolled back</span></span><br><span class="line"><span class="comment"># 查看rollout的状态</span></span><br><span class="line">$ kubectl rollout status deployment/nginx-deployment-demo  <span class="comment"># 成功后的状态</span></span><br><span class="line">  <span class="comment"># deployment "nginx-deployment-demo" successfully rolled out</span></span><br><span class="line"></span><br><span class="line">$ kubectl rollout <span class="built_in">history</span> deployment/nginx-deployment-demo</span><br><span class="line">  <span class="comment"># deployment.apps/nginx-deployment-demo</span></span><br><span class="line">  <span class="comment"># REVISION  CHANGE-CAUSE</span></span><br><span class="line">  <span class="comment"># 3         kubectl create --filename=nginx-deployment-demo.yaml --record=true</span></span><br><span class="line">  <span class="comment"># 4         kubectl create --filename=nginx-deployment-demo.yaml --record=true</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (9) 使用edit命令编辑Deployment</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl edit deployment/nginx-deployment-demo</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (10) 收缩</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl scale deployment nginx-deployment-demo --replicas 0</span><br><span class="line">  <span class="comment"># deployment.apps/nginx-deployment-demo scaled</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl get pod</span><br><span class="line">  <span class="comment"># NAME                                     READY   STATUS        RESTARTS   AGE</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-59f9c8458c-5zgdk   1/1     Terminating   0          15m</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-59f9c8458c-kjrjl   1/1     Terminating   0          15m</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-59f9c8458c-qw6h7   1/1     Terminating   0          15m</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-59f9c8458c-rb5nv   1/1     Terminating   0          15m</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-59f9c8458c-x8hsz   1/1     Terminating   0          15m</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl get pod</span><br><span class="line">  <span class="comment"># No resources found in default namespace.</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (11) 删除Deployment创建的Pod</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl delete deploy nginx-deployment-demo</span><br><span class="line">  <span class="comment"># deployment.apps "nginx-deployment-demo" deleted</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl get pod   <span class="comment"># 在没有执行收缩为0的情况下进行停止并删除Deployment控制器创建的Pod</span></span><br><span class="line">  <span class="comment"># NAME                                     READY   STATUS(正在终结中)        RESTARTS   AGE</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-65f7d977f8-285dc   1/1     Terminating               0          8m43s</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-65f7d977f8-4xxf7   1/1     Terminating               0          8m43s</span></span><br><span class="line">  <span class="comment"># nginx-deployment-demo-65f7d977f8-dpj4p   1/1     Terminating               0          8m43s</span></span><br><span class="line">~/K8s/Day5/demo2$ kubectl get pod    <span class="comment"># 再次查看发现所用的Pod资源已被清理</span></span><br><span class="line">  <span class="comment"># No resources found in default namespace.</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>Tips : Deployment、ReplicaSet和Pod间得命名关系<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Deployment Name: [Name]</span><br><span class="line">ReplicaSet Name: [deployment-name]-[随机字符串]</span><br><span class="line">Pod Name: [replicaset-name]-[随机字符串]</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>Tips: Deployment 更新策略【如果我们需要更新时将会创建出两个RS，<code>其中旧的RS一次减少25%的pod而新的RS一次创建25%的pod</code> 】</p>
+<ul>
+<li>Deployment 可以保证在升级时只有一定数量的Pod是down的。默认的，它会确保至少有比期望的Pod数量少一个是up状态（最多一个不可用）</li>
+<li>Deployment同时也可以确保只创建出超过期望数量的一定数量的Pod。默认的，它会确保最多比期望的Pod数量多一个的Pod是up的（最多1个surge）</li>
+<li>未来的Kuberentes 版本中，将从1-1变成25%-25%<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># deployments 详细查看 （更新事件查看）</span></span><br><span class="line">~$ kubectl describe deployments</span><br><span class="line">  <span class="comment"># Name:                   nginx-deployment-demo</span></span><br><span class="line">  <span class="comment"># Namespace:              default</span></span><br><span class="line">  <span class="comment"># CreationTimestamp:      Tue, 10 Nov 2020 21:20:57 +0800</span></span><br><span class="line">  <span class="comment"># Labels:                 &lt;none&gt;</span></span><br><span class="line">  <span class="comment"># Annotations:            deployment.kubernetes.io/revision: 4</span></span><br><span class="line">  <span class="comment">#                         kubernetes.io/change-cause: kubectl create --filename=nginx-deployment-demo.yaml --record=true</span></span><br><span class="line">  <span class="comment"># Selector:               app=nginx-deployment</span></span><br><span class="line">  <span class="comment"># Replicas:               0 desired | 0 updated | 0 total | 0 available | 0 unavailable # 副本数量变化状态</span></span><br><span class="line">  <span class="comment"># StrategyType:           RollingUpdate   # 策略类型 【关键点】</span></span><br><span class="line">  <span class="comment"># MinReadySeconds:        0</span></span><br><span class="line">  <span class="comment"># RollingUpdateStrategy:  25% max unavailable, 25% max surge # 滚动更新策略【关键点】</span></span><br><span class="line">  <span class="comment"># Pod Template:</span></span><br><span class="line">  <span class="comment">#   Labels:  app=nginx-deployment</span></span><br><span class="line">  <span class="comment">#   Containers:</span></span><br><span class="line">  <span class="comment">#    nginx-deployment:</span></span><br><span class="line">  <span class="comment">#     Image:        harbor.weiyigeek.top/test/nginx:v2.0</span></span><br><span class="line">  <span class="comment">#     Port:         80/TCP</span></span><br><span class="line">  <span class="comment">#     Host Port:    0/TCP</span></span><br><span class="line">  <span class="comment">#     Environment:  &lt;none&gt;</span></span><br><span class="line">  <span class="comment">#     Mounts:       &lt;none&gt;</span></span><br><span class="line">  <span class="comment">#   Volumes:        &lt;none&gt;</span></span><br><span class="line">  <span class="comment"># Conditions:</span></span><br><span class="line">  <span class="comment">#   Type           Status  Reason</span></span><br><span class="line">  <span class="comment">#   ----           ------  ------</span></span><br><span class="line">  <span class="comment">#   Available      True    MinimumReplicasAvailable</span></span><br><span class="line">  <span class="comment">#   Progressing    True    NewReplicaSetAvailable</span></span><br><span class="line">  <span class="comment"># OldReplicaSets:  &lt;none&gt;</span></span><br><span class="line">  <span class="comment"># NewReplicaSet:   nginx-deployment-demo-59f9c8458c (0/0 replicas created)</span></span><br><span class="line">  <span class="comment"># Events: (事件) 可查看采用Deployment进行扩缩容得Pod容器副本变化记录</span></span><br><span class="line">  <span class="comment">#   Type    Reason             Age                From                   Message</span></span><br><span class="line">  <span class="comment">#   ----    ------             ----               ----                   -------</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  50m                deployment-controller  Scaled up replica set nginx-deployment-demo-65f7d977f8 to 3</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  27m                deployment-controller  Scaled up replica set nginx-deployment-demo-849b98d6f7 to 2</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  24m (x2 over 27m)  deployment-controller  Scaled up replica set nginx-deployment-demo-849b98d6f7 to 3</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  23m (x2 over 29m)  deployment-controller  Scaled up replica set nginx-deployment-demo-65f7d977f8 to 5</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  23m                deployment-controller  Scaled down replica set nginx-deployment-demo-849b98d6f7 to 0</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  22m (x2 over 27m)  deployment-controller  Scaled down replica set nginx-deployment-demo-65f7d977f8 to 4</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  22m                deployment-controller  Scaled up replica set nginx-deployment-demo-59f9c8458c to 2</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  22m                deployment-controller  Scaled up replica set nginx-deployment-demo-59f9c8458c to 3</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  22m                deployment-controller  Scaled down replica set nginx-deployment-demo-65f7d977f8 to 3</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  22m                deployment-controller  Scaled up replica set nginx-deployment-demo-59f9c8458c to 4</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  22m (x4 over 22m)  deployment-controller  (combined from similar events): Scaled down replica set nginx-deployment-demo-65f7d977f8 to 0</span></span><br><span class="line">  <span class="comment">#   Normal  ScalingReplicaSet  7m14s              deployment-controller  Scaled down replica set nginx-deployment-demo-59f9c8458c to 0</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips : Deployment 回滚策略<code>Rollover【多个rollout并行】</code></p>
+<ul>
+<li>只要Deployment的rollout被触发，就会创建一个revision。也就是说当且仅当Deployment的Pod template(如<code>.spec.template</code>)被更改，例如更新template中的label和容器镜像时，就会创建出一个新的revision。其他的更新，</li>
+<li>比如扩容Deployment不会创建revision, 因此我们可以很方便的手动或者自动扩容。这意味着当您回退到历史revision时，只有Deployment中的<code>Pod template</code>部分才会回退<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#设置镜像</span></span><br><span class="line">kubectl <span class="built_in">set</span> image deployment/Pod名称 容器名称=镜像仓库/名称:版本</span><br><span class="line"><span class="comment">#查看当前更新状态</span></span><br><span class="line">kubectl rollout status deployments nginx-deployment </span><br><span class="line">kubectl get pods </span><br><span class="line"><span class="comment">#查看可回滚的历史版本</span></span><br><span class="line">kubectl rollout <span class="built_in">history</span> deployment/nginx-deployment </span><br><span class="line">kubectl rollout undo deployment/nginx-deployment</span><br><span class="line"><span class="comment">##可以使用--revision参数指定回退到某个历史版本 </span></span><br><span class="line">kubectl rollout undo deployment/nginx-deployment --to-revision=2  </span><br><span class="line"><span class="comment">##暂停 deployment的更新</span></span><br><span class="line">kubectl rollout pause deployment/nginx-deployment</span><br></pre></td></tr></table></figure></li>
+<li>您可以用 <code>kubectl rollout status</code>命令查看Deployment是否完成。如果 rollout成功完成，<code>kubect1rollout status</code> 将返回一个0值的 <code>Exit Code</code> 【非常值得注意在进行自动化运维脚本编程时非常使用】<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ kubect1 rollout status deploy/nginx</span><br><span class="line">$ <span class="built_in">echo</span> $? <span class="comment"># 在实际脚本开发中可以判断是否回滚成功</span></span><br><span class="line">0</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips : Deployment 历史版本策略</p>
+<ul>
+<li>您可以通过设置 .spec.revisonHistoryLimit 项来指定 deployment 最多保留多少revision历史记录(缺省<code>revisionHistoryLimit: 10</code>), 如果将该项设置为 0 Deployment 就不允许回退了</li>
+</ul>
+<p>Tips: 命令式 &amp; 申明式编程</p>
+<ul>
+<li>命令式编程（<code>rs</code>） create（优） apply<ul>
+<li>它侧重于如何实现程序，就像我们刚接触编程的时候那样，我们需要把程序的实现过程按照逻辑结果一步步写下来；</li>
+</ul>
+</li>
+<li>申明式编程（<code>Deployment</code>）apply（优）    create<ul>
+<li>它侧重于定义想要什么然后告诉计算机/引擎让他帮你去实现, 类似于SQL语句；</li>
+</ul>
+</li>
+</ul>
+<p><br/></p>
+<h3 id="4-DaemonSet"><a href="#4-DaemonSet" class="headerlink" title="4.DaemonSet"></a>4.DaemonSet</h3><p>描述: 如果我们需要在每一台Node节点上运行一个容器应用, 我们可以采用k8s提供的DaemonSet控制器满足我们的需求; 即 DaemonSet 类似与守护进程的应用程序可用，它能够让所有或指定的Node上运行同一个Pod;</p>
+<p><strong>DaemonSet 功能说明:</strong></p>
+<ul>
+<li>(1) 当一个新节点加入到k8s集群中时DaemonSet创建的Pod将会被自动调度到该节点之中;</li>
+<li>(2) 当一个节点从k8s集群中被移除时DeamonSet创建的Pod也将会从该节点移除;</li>
+<li>(3) 如果删除某个创建的DaemonSet所有跟这个DaemonSet相关的Pods在各个节点都将会被删除;</li>
+</ul>
+<p><br/></p>
+<p><strong>Q:DaemonSet 的应用场景:</strong></p>
+<ul>
+<li>在每个Node 上运行集群存储 daemon，例如运行glusterd、ceph</li>
+<li>在每个Node 上运行日志收集 daemon，例如fluentd、1ogstash</li>
+<li>在每个Node 上运行监控daemon，例如Prometheus Node Exporter[<a href="https://github.com/prometheus/node_exporter]、collectd、Datadog代理、New" target="_blank" rel="noopener">https://github.com/prometheus/node_exporter]、collectd、Datadog代理、New</a> Relic 代理，或Ganglia gmond</li>
+</ul>
+<p>示例: 例如 kube-proxy 、kube-system  在每个节点上都有一个Pod;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~$ kubectl get daemonsets.apps --all-namespaces</span><br><span class="line">  <span class="comment"># NAMESPACE     NAME          DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE</span></span><br><span class="line">  <span class="comment"># kube-system   calico-node   7         7         7       7            7           kubernetes.io/os=linux   22d</span></span><br><span class="line">  <span class="comment"># kube-system   kube-proxy    7         7         7       7            7           kubernetes.io/os=linux   24d</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>DaemonSet的创建和查看</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># DaemonSet 控制器资源清单</span></span><br><span class="line"><span class="string">cat</span> <span class="string">&gt; daemonset-example.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">apps/v1</span> </span><br><span class="line"><span class="attr">kind:</span> <span class="string">DaemonSet</span> </span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">daemonset-example</span>       <span class="comment"># DaemonSet 控制创建资源对象的名称</span></span><br><span class="line"><span class="attr">  labels:</span> </span><br><span class="line"><span class="attr">    app:</span> <span class="string">daemonset</span> </span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span>                     <span class="comment"># 选择器进行匹配模板标签</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">daemonset-example</span>   <span class="comment"># 注意点: 匹配的标签必须和pod源数据name键值一致;</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span> </span><br><span class="line"><span class="attr">        name:</span> <span class="string">daemonset-example</span></span><br><span class="line"><span class="attr">    spec:</span> </span><br><span class="line">      <span class="comment"># tolerations:   # 容忍说明</span></span><br><span class="line">      <span class="comment">#   - key: node-role.kubernetes.io/master</span></span><br><span class="line">      <span class="comment">#     effect: NoShedule</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">daemonset-example</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">harbor.weiyigeek.top/test/nginx:v2.0</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span>   <span class="comment"># 如果本地存在则不拉取</span></span><br><span class="line"><span class="attr">        resources:</span>                      <span class="comment"># 资源限制</span></span><br><span class="line"><span class="attr">          limits:</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="number">200</span><span class="string">m</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">200</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">          requests:</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="number">100</span><span class="string">m</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">100</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">      terminationGracePeriodSeconds:</span> <span class="number">30</span>  <span class="comment"># 销毁宽限实际(s)</span></span><br><span class="line"></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+<p>操作流程:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 查看 DaemonSet 的 api 资源名称</span></span><br><span class="line">$ kubectl api-resources | grep <span class="string">"DaemonSet"</span></span><br><span class="line">  <span class="comment"># daemonsets   ds   apps   true    DaemonSet</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 部署 </span></span><br><span class="line">$ kubectl create -f daemonset-example.yaml</span><br><span class="line">  <span class="comment"># daemonset.apps/daemonset-example created</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 查看(由于这里只有一个node节点)</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get ds -o wide                 <span class="comment"># daemonset 控制器创建信息</span></span><br><span class="line">  <span class="comment"># NAME                DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE     CONTAINERS          IMAGES                                 SELECTOR</span></span><br><span class="line">  <span class="comment"># daemonset-example   1         1         1       1            1           &lt;none&gt;          2m26s   daemonset-example   harbor.weiyigeek.top/test/nginx:v2.0   name=daemonset-example</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get pod -o wide --show-labels  <span class="comment"># 创建的pod信息</span></span><br><span class="line">  <span class="comment"># NAME                      READY   STATUS    RESTARTS   AGE   IP            NODE         LABELS</span></span><br><span class="line">  <span class="comment"># daemonset-example-858ks   1/1     Running   0          49s   10.244.1.43   k8s-node-4   controller-revision-hash=5bcf6b6794,name=daemonset-example,pod-template-generation=1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 验证 daemonset 是否有上述作用我们将master节点污点去除, 然后查看与上面的区别;</span></span><br><span class="line">$ kubectl describe node k8s-master-1 | grep <span class="string">"Taints"</span></span><br><span class="line">  Taints:             node-role.kubernetes.io/master:NoSchedule</span><br><span class="line">$ kubectl taint nodes k8s-master-1 node-role.kubernetes.io/master=:NoSchedule-  </span><br><span class="line">  <span class="comment"># node/k8s-master-1 untainted  # 无污点的</span></span><br><span class="line">~/K8s/Day5/demo3$  kubectl describe node k8s-master-1 | grep <span class="string">"Taints"</span></span><br><span class="line">  Taints:             &lt;none&gt;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) 结果</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get ds -o wide  <span class="comment"># 可以看见当前daemonset控制器已经生成两个可用的pod</span></span><br><span class="line">  <span class="comment"># NAME                DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE   CONTAINERS          IMAGES                                 SELECTOR</span></span><br><span class="line">  <span class="comment"># daemonset-example   2         2         2       2            2           &lt;none&gt;          20m   daemonset-example   harbor.weiyigeek.top/test/nginx:v2.0   name=daemonset-example</span></span><br><span class="line"></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get pod -o wide --show-labels  <span class="comment"># 查看到节点分别在Master节点以及工作节点上存在</span></span><br><span class="line">  <span class="comment"># NAME                      READY   STATUS    RESTARTS   AGE    IP            NODE          LABELS</span></span><br><span class="line">  <span class="comment"># daemonset-example-4rvkf   1/1     Running   0          173m   10.244.0.6    k8s-master-1   controller-revision-hash=5bcf6b6794,name=daemonset-example,pod-template-generation=1</span></span><br><span class="line">  <span class="comment"># daemonset-example-858ks   1/1     Running   0          3h9m   10.244.1.43   k8s-node-4    controller-revision-hash=5bcf6b6794,name=daemonset-example,pod-template-generation=1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (6) Pod访问</span></span><br><span class="line">~/K8s/Day5/demo3$ curl http://10.244.0.6/host.html</span><br><span class="line">  <span class="comment"># Hostname: daemonset-example-4rvkf  &lt;br&gt; Image Version: &lt;u&gt; 2.0 &lt;/u&gt; Nginx Version: 1.19.4</span></span><br><span class="line">~/K8s/Day5/demo3$ curl http://10.244.1.43/host.html</span><br><span class="line">  <span class="comment"># Hostname: daemonset-example-858ks  &lt;br&gt; Image Version: &lt;u&gt; 2.0 &lt;/u&gt; Nginx Version: 1.19.4</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (7) 再次设置master节点的污点</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl taint node k8s-master-1 node-role.kubernetes.io/master=:NoSchedule</span><br><span class="line">  <span class="comment"># node/k8s-master-1 tainted</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get ds  <span class="comment"># 关键点 此时daemonset管理的Pod已经只有一个了;</span></span><br><span class="line">  <span class="comment"># NAME                DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE</span></span><br><span class="line">  <span class="comment"># daemonset-example   1         1         1       1            1           &lt;none&gt;          3h19m</span></span><br><span class="line">~$ kubectl get pod -o wide --show-labels  <span class="comment"># 此时运行在 Master 节点上的Pod(daemonset-example-4rvkf)变成了自助式Pod</span></span><br><span class="line">  <span class="comment"># NAME                      READY   STATUS    RESTARTS   AGE     IP            NODE          LABELS</span></span><br><span class="line">  <span class="comment"># daemonset-example-4rvkf   1/1     Running   0          3h5m    10.244.0.6    k8s-master-1  controller-revision-hash=5bcf6b6794,name=daemonset-example,pod-template-generation=1</span></span><br><span class="line">  <span class="comment"># daemonset-example-858ks   1/1     Running   0          3h22m   10.244.1.43   k8s-node-4    controller-revision-hash=5bcf6b6794,name=daemonset-example,pod-template-generation=1</span></span><br><span class="line">~$ kubectl delete pod daemonset-example-4rvkf <span class="comment"># (重点)删除后由于不受控制器管理则不会重新运行满足副本数的Pod</span></span><br><span class="line">  <span class="comment"># pod "daemonset-example-4rvkf" deleted</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (8) 删除 daemonset 控制器创建的Pod(如添加 -cascade=false 参数则删除DeamonSet控制器创建的资源时不会将创建的Pod删除，相反 -cascade=true 则将一起删除)</span></span><br><span class="line">$ kubectl -cascade=<span class="literal">false</span> delete ds daemonset-example</span><br><span class="line">$ kubectl -cascade=<span class="literal">true</span> delete ds daemonset-example  <span class="comment"># 缺省</span></span><br><span class="line">  <span class="comment"># daemonset.apps "daemonset-example" deleted</span></span><br></pre></td></tr></table></figure></p>
+<p>PS : 由于污点的原因所有的Pod不会运行在Master节点中，但是我们可以手动或者在资源清单中申明取消污点，或者在yaml资源清单文件中的 <code>·spec</code>对象中添加如下;<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">  <span class="comment"># tolerations:   # 容忍说明</span></span><br><span class="line">      <span class="comment">#   - key: node-role.kubernetes.io/master</span></span><br><span class="line">      <span class="comment">#     effect: NoShedule</span></span><br><span class="line"><span class="string">```</span> </span><br><span class="line"></span><br><span class="line"><span class="string">**Q:</span> <span class="string">静态</span> <span class="string">Pod</span> <span class="string">与</span> <span class="string">DaemonSet</span> <span class="string">的不同点。**</span></span><br><span class="line"><span class="string">&gt; A: 前面我们说过 Static Pod 不受kubectl和其他k8s API 客户端管理，并且不依赖于Api Server，这使得它们在集群启动的情况下非常有用，实际环境中除非有特殊应用请不要使用此种方式;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Tips ：可以通过 `.spec.template.spec.nodeSelector` 或者 `Affinity` 等高级调度策略部署DaemonSet到指定节点或者拓扑;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&lt;br/&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">### 5.Job </span></span><br><span class="line"><span class="string">描述: Job 控制器资源对象有自身的纠错能力, 如果Job运行的脚本(script)没有以0状态码退出的话(或者脚本执行)，Job将会重新执行Job负责批处理任务，仅执行一次的任务，它保证批处理任务的一个或多个Pod成功结束</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">即当返回结果为非0的情况下将会重新执行, 并且保证批处理成功执行;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&lt;br/&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">**Q: 什么是Job?**</span></span><br><span class="line"><span class="string">&gt; A: Job负责批处理任务，即仅执行一次的任务，它保证批处理任务的一个或多个Pod成功结束</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">资源对象特殊说明:</span></span><br><span class="line"><span class="string">```bash</span></span><br><span class="line"><span class="string">·spec.template 格式同Pod</span></span><br><span class="line"><span class="string">·RestartPolicy 仅支持 `Never 或 OnFailure` 单个Pod时，默认Pod成功运行后Job即结束</span></span><br><span class="line"><span class="string">.spec.completions 标志Job结束需要成功运行的Pod个数，默认为1·</span></span><br><span class="line"><span class="string">.spec.parallelism 标志并行运行的Pod的个数，默认为1</span></span><br><span class="line"><span class="string">·spec.activeDeadlineseconds 标志失败Pod的重试最大时间，超过这个时间不会继续重试</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>Job &amp; CronJob 控制器资源类型及版本:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl api-resources | grep <span class="string">"Job"</span></span><br><span class="line">  <span class="comment"># jobs             batch         true         Job</span></span><br><span class="line">  <span class="comment"># cronjobs    cj   batch         true         CronJob</span></span><br><span class="line"></span><br><span class="line">$ kubectl api-versions | grep $(kubectl api-resources | grep <span class="string">" Job"</span> | awk -F <span class="string">" "</span> <span class="string">'&#123;print $2&#125;'</span>)</span><br><span class="line">  <span class="comment"># batch/v1           # jobs </span></span><br><span class="line">  <span class="comment"># batch/v1beta1      # cronjobs</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>Job资源文件示例:</strong><br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; job-demo.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">batch/v1</span> </span><br><span class="line"><span class="attr">kind:</span> <span class="string">Job</span> </span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">job-demo-pi</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">job-demo-pi</span> </span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">busybox-pi</span> </span><br><span class="line"><span class="attr">        image:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">        command:</span> <span class="string">["/bin/sh","-c","date;echo</span> <span class="string">Job</span> <span class="string">Controller</span> <span class="string">Demo!"]</span>  <span class="comment">#利用Perl求取圆周率 小数点后的2000位</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span>   <span class="comment"># 如果本地存在则不拉取</span></span><br><span class="line"><span class="attr">      restartPolicy:</span> <span class="string">Never</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
+<p>操作实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) Job 控制器 创建 Pod</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl create -f job-demo.yaml</span><br><span class="line">  <span class="comment"># job.batch/job-demo-pi created</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 查看</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get <span class="built_in">jobs</span> -o wide --show-labels</span><br><span class="line">  <span class="comment"># NAME          COMPLETIONS   DURATION   AGE   CONTAINERS   IMAGES    SELECTOR                                              LABELS</span></span><br><span class="line">  <span class="comment"># job-demo-pi   1/1           1s         41s   busybox-pi   busybox   controller-uid=3988087c-fa65-4ca0-90e4-c23bbf01884c   controller-uid=3988087c-fa65-4ca0-90e4-c23bbf01884c,job-name=job-demo-pi</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get pod -o wide --show-labels</span><br><span class="line">  <span class="comment"># NAME                READY   STATUS      RESTARTS   AGE   IP            NODE         LABELS</span></span><br><span class="line">  <span class="comment"># job-demo-pi-p7j59   0/1     Completed   0          60s   10.244.1.57   k8s-node-4   controller-uid=3988087c-fa65-4ca0-90e4-c23bbf01884c,job-name=job-demo-pi</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 结果验证</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl logs job-demo-pi-p7j59</span><br><span class="line">  <span class="comment"># Wed Nov 11 07:49:00 UTC 2020</span></span><br><span class="line">  <span class="comment"># Job Controller Demo!</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl describe pod job-demo-pi-p7j59</span><br><span class="line">  <span class="comment"># Events:</span></span><br><span class="line">  <span class="comment"># Type    Reason     Age    From               Message</span></span><br><span class="line">  <span class="comment"># ----    ------     ----   ----               -------</span></span><br><span class="line">  <span class="comment"># Normal  Scheduled  3m54s  default-scheduler  Successfully assigned default/job-demo-pi-p7j59 to k8s-node-4</span></span><br><span class="line">  <span class="comment"># Normal  Pulled     3m53s  kubelet            Container image "busybox" already present on machine</span></span><br><span class="line">  <span class="comment"># Normal  Created    3m53s  kubelet            Created container busybox-pi</span></span><br><span class="line">  <span class="comment"># Normal  Started    3m53s  kubelet            Started container busybox-pi</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 删除 Jobs 控制器创建的资源</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl delete -f job-demo.yaml <span class="comment"># 指定</span></span><br><span class="line"><span class="comment"># job.batch "job-demo-pi" deleted</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl delete <span class="built_in">jobs</span> --all       <span class="comment"># 删除所有</span></span><br><span class="line"><span class="comment"># job.batch "job-demo-pi" deleted</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get <span class="built_in">jobs</span></span><br><span class="line">  <span class="comment"># No resources found in default namespace.</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get pod</span><br><span class="line">  <span class="comment"># No resources found in default namespace.  # 可以看见已经所有Pod资源已经被删除</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="6-CronJob"><a href="#6-CronJob" class="headerlink" title="6.CronJob"></a>6.CronJob</h3><p>5.CronJob【本质上是在特定的时间循环创建Job去实现的】批处理脚本程序可用<br>CronJob 管理基于时间的Job，即：<br>·在给定时间点只运行一次 <code>分 时 日 月 周</code><br>·周期性地在给定时间点运行<br>　使用前提条件：<strong>当前使用的Kubernetes集群，版本&gt;=1.8（对Cronjob）。对于先前版本的集群，版本&lt;1.8，启动API Server时，通过传递选项–runtime-config=batch/v2alpha1=true 可以开启batch/v2alpha1API</strong><br>　典型的用法如下所示：<br>·在给定的时间点调度Job运行<br>创建周期性运行的Job，例如：数据库备份、发送邮件</p>
+<p>CronJob Spec<br>　　·spec.template格式同Pod<br>　　·RestartPolicy仅支持Never或OnFailure ·单个Pod时，默认Pod成功运行后Job即结束·<br>　　.spec.completions标志Job结束需要成功运行的Pod个数，默认为1·<br>　　.spec.parallelism 标志并行运行的Pod的个数，默认为1<br>　　·spec.activeDeadlineSeconds 标志失败Pod的重试最大时间，超过这个时间不会继续重试</p>
+<p>　　.spec.schedule：调度，必需字段，指定任务运行周期，格式同 Cron·<br>　　.spec.jobTemplate:Job模板，必需字段，指定需要运行的任务，格式同Job<br>　　.spec.startingDeadlineSeconds:启动Job的期限（秒级别），该字段是可选的。如果因为任何原因而错过了被调度的时间，那么错过执行时间的Job将被认为是失败的。如果没有指定，则没有期限.spec.concurrencyPolicy:并发策略，该字段也是可选的。<br>它指定了如何处理被 Cron Job创建的Job的并发执行。只允许指定下面策略中的一种：<br>　　　　Allow（默认）：允许并发运行Job<br>　　　　Forbid：禁止并发运行，如果前一个还没有完成，则直接跳过下一个<br>　　　　Replace：取消当前正在运行的Job，用一个新的来替换<br>　　注意，当前策略只能应用于同一个CronJob创建的Job。如果存在多个Cron Job，它们创建的Job之间总是允许并发运行。<br>　　.spec.suspend：挂起，该字段也是可选的。如果设置为true，后续所有执行都会被挂起。它对已经开始执行的Job不起作用。默认值为false。<br>　　.spec.successfulJobsHistoryLimit和.spec.failed]obsHistoryLimit:历史限制，是可选的字段。它们指定了可以保留多少完成和失败的Job。默认情况下，它们分别设置为3和1。设置限制的值为0，相关类型的Job完成后将不会被保留。</p>
+<p>CronJob资源文件示例<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; cronjob-demo.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">batch/v1beta1</span> </span><br><span class="line"><span class="attr">kind:</span> <span class="string">CronJob</span> </span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">cronjob-demo</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  schedule:</span> <span class="string">"*/1 * * * *"</span>   <span class="comment"># 表示每一分钟运行一次</span></span><br><span class="line"><span class="attr">  jobTemplate:</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      template:</span></span><br><span class="line"><span class="attr">        spec:</span>               <span class="comment"># 模板配置说明书</span></span><br><span class="line"><span class="attr">          containers:</span>    </span><br><span class="line"><span class="attr">          - name:</span> <span class="string">cronjob-demo</span></span><br><span class="line"><span class="attr">            image:</span> <span class="string">busybox</span> </span><br><span class="line"><span class="attr">            args:</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">/bin/sh</span> </span><br><span class="line"><span class="bullet">            -</span> <span class="bullet">-c</span> </span><br><span class="line"><span class="bullet">            -</span> <span class="string">date;echo</span> <span class="string">Hello</span> <span class="string">from</span> <span class="string">the</span> <span class="string">Kubernetes</span> <span class="string">cluster,</span> <span class="string">This</span> <span class="string">is</span> <span class="string">cronjob-demo;</span></span><br><span class="line"><span class="attr">            imagePullPolicy:</span> <span class="string">IfNotPresent</span>   <span class="comment"># 如果本地存在则不拉取</span></span><br><span class="line"><span class="attr">          restartPolicy:</span> <span class="string">OnFailure</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
+<p>操作流程:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 忘记如果编写CronJob的资源清单的时候可以按照下面格式查找帮助; </span></span><br><span class="line">~$ kubectl explain CronJob.spec.jobTemplate.spec.template.spec.containers</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 创建</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl create -f cronjob-demo.yaml</span><br><span class="line">cronjob.batch/cronjob-demo created</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 查看</span></span><br><span class="line">$ kubectl get cj -o wide --show-labels   <span class="comment"># cronjob 控制创建</span></span><br><span class="line">  <span class="comment"># NAME           SCHEDULE      SUSPEND(是否延迟)   ACTIVE   LAST SCHEDULE(下一次执行)   AGE    CONTAINERS     IMAGES    SELECTOR   LABELS</span></span><br><span class="line">  <span class="comment"># cronjob-demo   */1 * * * *   False                 0      41s             3m3s   cronjob-demo   busybox   &lt;none&gt;     &lt;none&gt;</span></span><br><span class="line">$ kubectl get <span class="built_in">jobs</span> -o wide   <span class="comment"># 实际上 cronjob 调用 Job 创建pod,可以看见已经完成有三个job(缺省保留3次成功或者失败的Job)</span></span><br><span class="line">  <span class="comment"># NAME                      COMPLETIONS   DURATION   AGE     CONTAINERS     IMAGES    SELECTOR                                              </span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082620   1/1           2s         2m46s   cronjob-demo   busybox   controller-uid=0e44795c-d799-4a5a-8f83-4025fd966f18</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082680   1/1           2s         106s    cronjob-demo   busybox   controller-uid=e9ccc654-ed2b-4b49-8456-e4dd2fd21950 </span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082740   1/1           2s         46s     cronjob-demo   busybox   controller-uid=7398827f-14f2-4fc9-b410-3089f9982bbe</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get pod -o wide --show-labels</span><br><span class="line">  <span class="comment"># NAME                            READY(这里由于完成后便立即退出了)   STATUS      RESTARTS   AGE     IP            NODE         LABELS</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082740-pfw87   0/1     Completed   0          2m32s   10.244.1.62   k8s-node-4   controller-uid=7398827f-14f2-4fc9-b410-3089f9982bbe,job-name=cronjob-demo-1605082740</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082800-6jslj   0/1     Completed   0          92s     10.244.1.63   k8s-node-4   controller-uid=42835ca2-c28e-4c3d-b7ea-107a0acf59f3,job-name=cronjob-demo-1605082800</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082860-2747h   0/1     Completed   0          32s     10.244.1.65   k8s-node-4   controller-uid=d4b1e587-b881-4721-8330-7a3ef78ddc69,job-name=cronjob-demo-1605082860</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 执行反馈结果</span></span><br><span class="line">~$ kubectl get pod | grep <span class="string">"cronjob"</span> | cut -d <span class="string">" "</span> -f1</span><br><span class="line">  <span class="comment"># cronjob-demo-1605083580-twsb8</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605083640-dtscf</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605083700-64g88</span></span><br><span class="line"></span><br><span class="line">~$ kubectl logs cronjob-demo-1605083580-twsb8</span><br><span class="line">  <span class="comment"># Wed Nov 11 08:33:03 UTC 2020</span></span><br><span class="line">  <span class="comment"># Hello from the Kubernetes cluster, This is cronjob-demo</span></span><br><span class="line">~$ kubectl logs cronjob-demo-1605083640-dtscf</span><br><span class="line">  <span class="comment"># Wed Nov 11 08:34:03 UTC 2020</span></span><br><span class="line">  <span class="comment"># Hello from the Kubernetes cluster, This is cronjob-demo</span></span><br><span class="line">~$ kubectl logs cronjob-demo-1605083700-64g88</span><br><span class="line">  <span class="comment"># Wed Nov 11 08:35:03 UTC 2020</span></span><br><span class="line">  <span class="comment"># Hello from the Kubernetes cluster, This is cronjob-demo</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) 两种方式删除CronJob控制器创建的Job以及附属的Pod资源</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl delete cronjob --all</span><br><span class="line">~/K8s/Day5/demo3$ kubectl delete -f cronjob-demo.yaml</span><br><span class="line">  cronjob.batch <span class="string">"cronjob-demo"</span> deleted</span><br></pre></td></tr></table></figure></p>
+<p>PS : Cronjob 本身的一些限制创建Job操作应该是幂等的, CronJob并不太好去判断任务是否成功，CronJob通过创建Job去完成任务，Job成功与否可以判断，但CronJob无法链接到Job去获取成功与否，Cron只会定期的去创建Job仅此而已。</p>
+<p><br/></p>
+<h3 id="7-StatefulSet"><a href="#7-StatefulSet" class="headerlink" title="7.StatefulSet"></a>7.StatefulSet</h3><p>描述: 前面我们学习了RC、RS、Deployment、DaemonSet 与 Job 等它们都是面向无状态服务的，而本节学习的StatefulSet的控制器是有状态服务的即主要用于部署（有状态服务的应用程序）。</p>
+<p>在 K8s 中使用 StatefulSet 控制器来部署有状态服务, StatefulSet 是一个给Pod提供唯一标准的控制器，它可以保证部署 和 扩展收缩的顺序;</p>
+<p><br/></p>
+<p><strong>Q: 什么是有状态服务? 什么又是无状态服务?</strong></p>
+<blockquote>
+<p>A: 服务所维护的与客户交互活动的信息称为状态信息<br>Stateless Service（无状态服务）：在应用程序运行过程之中不保存任何数据和状态信息的服务；例如 Mysql 它需要存储产生的新数据;<br>Stataful Service (有状态服务) : 在应用程序运行过程之中保存的数据或状态的服务；例如 Nginx;</p>
+</blockquote>
+<p><br/></p>
+<p><strong>StatefulSet 特征</strong></p>
+<ul>
+<li>(1) 稳定(固定)的网络标识符，即Pod重新调度后其 PodName 和 HostName 不变基于<code>Headless Service（即没有Cluster IP的Service)</code>来实现，例如一个Pod叫做mysql-0，第二个叫做mysql-1，然后依次顺序满足其期望值即n的一个叫做mysql-(n-1)。</li>
+<li>(2) 有序部署和有序扩展：基于 init containers 来实现，在第n个Pod启动之间，前一个Pod必须是处于Ready且Running状态;</li>
+<li>(3) 稳定的持久化存储：即Pod重新调度后还是能访问到相同的持久化数据，基于PV/PVC、以及StorageClass来实现。</li>
+<li>(4) 有序删除和停止: 即从N-1 到 0 Terminal依次销毁;</li>
+</ul>
+<p><br></p>
+<p><strong>Statefulset 启停顺序详述:</strong></p>
+<ul>
+<li>1.有序部署: 部罢Statefulset时，如果有多个Pod副本，它们会被顺序地创建（从0到N-1)并且，在<code>下一个Pod运行之前所有之前的Pod必须都是Running和Ready状态</code>。</li>
+<li>2.有序删除: 当Pod被删除时，它们被终止的顺序是从N-1到0。</li>
+<li>3.有序扩展: 当对Pod执行扩展操作时，与部署一样，它前面的Pod必须都处于Running和Ready状态</li>
+</ul>
+<p><br></p>
+<p>Tips : StatefulSet 除了需要采用PV/PVC持久化Pod状态数据之外还需使用到Headless Service, 该Service为StatefulSet控制的每个Pod创建一个DNS域名,其格式<code>PodName.HeadlessServiceName</code><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 例如 Headless Service Name = database , 而 StatefulSet名称为 mysql-app 则其DNS名称为</span></span><br><span class="line">mysql-app-1.database</span><br><span class="line">mysql-app-2.database</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p>此次是针对于StatefulSet控制器做一个简单的了解后续在进行PVC持久化卷数据时演示;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># statefulset 资源控制器</span></span><br><span class="line">~$ kubectl api-resources | grep <span class="string">"stateful"</span>   <span class="comment"># 资源</span></span><br><span class="line">  <span class="comment"># statefulsets                      sts          apps                           true         StatefulSet</span></span><br><span class="line">~$ kubectl api-versions | grep <span class="string">"apps"</span>        <span class="comment"># api-groups及其版本</span></span><br><span class="line">  <span class="comment"># apps/v1</span></span><br><span class="line"></span><br><span class="line">~$ kubectl get storageclass</span><br><span class="line">  <span class="comment"># NAME                            PROVISIONER      RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE</span></span><br><span class="line">  <span class="comment"># managed-nfs-storage (default)   fuseim.pri/ifs   Delete          Immediate           false                  57d</span></span><br></pre></td></tr></table></figure></p>
+<p>资源清单示例:<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; statefulset-demo.yaml &lt;&lt;'END'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span>   </span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nginx-statefulset-service</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  clusterIP:</span> <span class="string">None</span></span><br><span class="line"><span class="attr">  selector:</span> </span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx-sfs</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">80</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span> </span><br><span class="line"><span class="attr">kind:</span> <span class="string">StatefulSet</span>    <span class="comment"># 资源控制器</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">web</span> </span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">nginx-sfs</span>           <span class="comment"># 匹配 .spec.template.metadata.labels 中的标签</span></span><br><span class="line"><span class="attr">  serviceName:</span> <span class="string">"nginx-statefulset-service"</span> <span class="comment"># 绑定的SVC 与上面的 Service 名称对应</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">3</span> </span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx-sfs</span>    <span class="comment"># Pod 模板的标签 (有了它StatefulSet知道创建的Pod是否在自己期望数量中以及便于SVC)</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx</span> </span><br><span class="line"><span class="attr">        image:</span> <span class="attr">nginx:1.19.6</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span> </span><br><span class="line"><span class="attr">          name:</span> <span class="string">web</span> </span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">www</span> </span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/usr/share/nginx/html</span> </span><br><span class="line"><span class="attr">  volumeClaimTemplates:</span>   <span class="comment"># volume 模板 </span></span><br><span class="line"><span class="attr">  - metadata:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">www</span> </span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      accessModes:</span> <span class="string">[</span> <span class="string">"ReadWriteOnce"</span> <span class="string">]</span>         <span class="comment"># 允许模式 </span></span><br><span class="line"><span class="attr">      storageClassName:</span> <span class="string">"managed-nfs-storage"</span>  <span class="comment"># 采用storageClass进行动态创建的PVC (后续将会讲述)</span></span><br><span class="line"><span class="attr">      resources:</span></span><br><span class="line"><span class="attr">        requests:</span></span><br><span class="line"><span class="attr">          storage:</span> <span class="number">200</span><span class="string">Mi</span></span><br><span class="line"><span class="string">END</span></span><br></pre></td></tr></table></figure></p>
+<p>构建部署：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 创建Pod</span></span><br><span class="line">~/K8s/Day5/demo4$ kubectl apply -f statefulset-demo.yaml</span><br><span class="line">  <span class="comment"># service/nginx-statefulset-service created</span></span><br><span class="line">  <span class="comment"># statefulset.apps/web created</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 查看StatefulSet控制器、SVC、PVC </span></span><br><span class="line">~/K8s/Day5/demo4$ kubectl get sts,pvc -o wide | egrep <span class="string">"web"</span></span><br><span class="line">  <span class="comment"># statefulset.apps/web                 3/3     6m29s   nginx        nginx:1.19.6</span></span><br><span class="line">  <span class="comment"># persistentvolumeclaim/www-web-0                                     Bound    pvc-c1352011-6bc8-450f-941c-d6369ca55ca6   200Mi      RWO            managed-nfs-storage   6m29s   Filesystem</span></span><br><span class="line">  <span class="comment"># persistentvolumeclaim/www-web-1                                     Bound    pvc-07127f78-f282-4fac-970d-e6c991242b03   200Mi      RWO            managed-nfs-storage   6m19s   Filesystem</span></span><br><span class="line">  <span class="comment"># persistentvolumeclaim/www-web-2                                     Bound    pvc-205e0dfc-6a9c-450a-be20-b3440d94a453   200Mi      RWO            managed-nfs-storage   6m      Filesystem</span></span><br><span class="line"></span><br><span class="line">~/K8s/Day5/demo4$ kubectl get svc  | grep <span class="string">"nginx-statefulset-service"</span></span><br><span class="line">  <span class="comment"># nginx-statefulset-service   ClusterIP   None            &lt;none&gt;        80/TCP           7m4s</span></span><br><span class="line">~/K8s/Day5/demo4$ kubectl get ep -o wide | grep <span class="string">"nginx-statefulset-service"</span>   <span class="comment">#  查看 SVC 绑定的 Endport</span></span><br><span class="line">  <span class="comment"># nginx-statefulset-service   10.244.0.247:80,10.244.1.230:80,10.244.2.133:80         8m23s</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 访问搭建的Nginx</span></span><br><span class="line">~/K8s/Day5/demo4$ <span class="built_in">echo</span> <span class="string">"Web-0"</span> &gt; /nfs/data/default-www-web-0-pvc-c1352011-6bc8-450f-941c-d6369ca55ca6/index.html</span><br><span class="line">~/K8s/Day5/demo4$ curl http://10.244.0.247</span><br><span class="line">Web-0</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="8-Horizontal-Pod-Autoscaling-水平扩展"><a href="#8-Horizontal-Pod-Autoscaling-水平扩展" class="headerlink" title="8.Horizontal Pod Autoscaling - 水平扩展"></a>8.Horizontal Pod Autoscaling - 水平扩展</h3><p>描述: 前面我们知道 Kubernetes 集群可以通过 <code>Replication Controller</code> 的 scale 机制完成服务的扩容或缩容，实现具有伸缩性的服务, 但是其需要我们进行人工干预。</p>
+<p><br/></p>
+<p><strong>Q: 那么是否有自动完成扩容和收缩的机制?</strong><br>答: 那就本文主要讲解的 HPA (<code>Horizontal Pod Autoscaling</code>) 进行服务的 autoscale 自动伸缩;</p>
+<p>描述: Horizontal Pod Autoscaling (<code>简称HPA</code>) 自动扩展, 它可以根据当前pod资源的使用率（如CPU、磁盘、内存等），进行副本数的动态的扩容与缩容，以便减轻各个pod的压力。当pod负载达到一定的阈值后，会根据扩缩容的策略生成更多新的pod来分担压力，当pod的使用比较空闲时，在稳定空闲一段时间后，还会自动减少pod的副本数量。</p>
+<p>HPA 起始作用是 Pod 按照一定的策略进行自动扩容缩，例如根据CPU利用率自动伸缩一个 <code>Replication Controller、 Deployment 或者 ReplicaSet</code>中管理的的Pod副本数量; 您可以简单理解为<code>它并不是一个控制器而是一个控制器的附属品</code>, 可以使用它去控制其他的控制器，从而使其他的控制器具有自动扩展的功能;</p>
+<p>Tips: 若要实现自动扩缩容的功能，还需要部署<code>heapster</code>服务，用来收集及统计资源的利用率，<code>支持kubectl top命令</code>，heapster服务集成在prometheus（普罗米修斯） MertricServer服务中，所以说，为了方便，我这里基于prometheus服务的环境上进行部署HPA（动态扩缩容）的服务。</p>
+<p><br/></p>
+<p><em>集群资源伸缩方式说明:</em></p>
+<ul>
+<li>sacle 手动伸缩: kubernetes资源对象的升级、回滚、扩容、缩容;</li>
+<li>autoscale 自动伸缩：也就是(本篇博文所介绍的HPA);</li>
+</ul>
+<p><br/></p>
+<p>Kubernetes AutoScale (自动扩展) 主要分为两种方式：</p>
+<ul>
+<li>水平扩展：针对实例数目的增减；</li>
+<li>垂直扩展：即单个实例就可以使用的资源的增减，比如增加CPU、内存；</li>
+</ul>
+<p><strong>简单实例:</strong></p>
+<ul>
+<li><p>1) 构建测试专业的镜像 (#运行构建Deployment的hpa资源，名称为php-apache，并设置请求CPU的资源为200m并暴露一个80端口)</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">~/K8s/Day11$</span> <span class="string">cat</span> <span class="string">&gt; hpa-demo.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">kind:</span> <span class="string">Deployment</span>    <span class="comment">#该配置的类型，我们使用的是 Deployment</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span> <span class="comment">#与k8s集群版本有关，使用 kubectl api-versions 即可查看当前集群支持的版本</span></span><br><span class="line"><span class="attr">metadata:</span>           <span class="comment">#译名为元数据，即 Deployment 的一些基本属性和信息</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">php-apache-deployment</span> <span class="comment"># Deployment 控制器的名称</span></span><br><span class="line"><span class="attr">  labels:</span>        <span class="comment">#标签，可以灵活定位一个或多个资源，其中key和value均可自定义，可以定义多组，目前不需要理解</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">php-apache-deploy</span>    <span class="comment"># 为该Deployment设置key为app，value为nginx的标签</span></span><br><span class="line"><span class="attr">spec:</span>            <span class="comment">#这是关于该Deployment的描述，可以理解为你期待该Deployment在k8s中如何使用</span></span><br><span class="line">  <span class="comment"># replicas: 1    #使用该Deployment创建一个应用程序实例</span></span><br><span class="line"><span class="attr">  selector:</span>      <span class="comment">#标签选择器，与上面的标签共同作用，目前不需要理解</span></span><br><span class="line"><span class="attr">    matchLabels:</span> <span class="comment">#选择包含标签app:nginx的资源</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">php-apache</span></span><br><span class="line"><span class="attr">    matchExpressions:</span></span><br><span class="line"><span class="attr">    - key:</span> <span class="string">app</span></span><br><span class="line"><span class="attr">      operator:</span> <span class="string">In</span></span><br><span class="line"><span class="attr">      values:</span> <span class="string">[php-apache]</span> </span><br><span class="line"><span class="attr">  template:</span>     <span class="comment">#这是选择或创建的Pod的模板</span></span><br><span class="line"><span class="attr">    metadata:</span>   <span class="comment">#Pod的元数据</span></span><br><span class="line"><span class="attr">      labels:</span>   <span class="comment">#Pod的标签，上面的selector即选择包含标签app:nginx的Pod</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">php-apache</span></span><br><span class="line"><span class="attr">    spec:</span>              <span class="comment">#期望Pod实现的功能(即在pod中部署)</span></span><br><span class="line"><span class="attr">      containers:</span>      <span class="comment">#生成container，与docker中的container是同一种</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx</span>    <span class="comment">#container的名称</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">mirrorgooglecontainers/hpa-example</span>  <span class="comment">#使用镜像nginx最新版本创建container，该container默认80端口可访问</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">        resources:</span>     <span class="comment"># 资源的限制</span></span><br><span class="line"><span class="attr">          requests:</span>    <span class="comment"># 资源申请值</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="number">128</span><span class="string">m</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">128</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">          limits:</span>      <span class="comment"># 资源限制值</span></span><br><span class="line"><span class="attr">            cpu:</span> <span class="number">200</span><span class="string">m</span></span><br><span class="line"><span class="attr">            memory:</span> <span class="number">200</span><span class="string">Mi</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">php-apache</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">ClusterIP</span>         <span class="comment"># Service 类型</span></span><br><span class="line"><span class="attr">  selector:</span>               <span class="comment"># backend 绑定</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">php-apache</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">  - protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">    port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">    targetPort:</span> <span class="number">80</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>2) 按照上面的资源清单构建 Deloyment 资源控制器并查看对应的资源;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">~/K8s/Day11$ kubectl create -f hpa-demo.yaml</span><br><span class="line">  <span class="comment"># deployment.apps/php-apache-deployment created</span></span><br><span class="line">  <span class="comment"># service/php-apache created</span></span><br><span class="line">~/K8s/Day11$ kubectl get deployments -o wide</span><br><span class="line">  <span class="comment"># NAME                    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                               SELECTOR</span></span><br><span class="line">  <span class="comment"># php-apache-deployment   1/1     1            1           2m    nginx        mirrorgooglecontainers/hpa-example   app=php-apache</span></span><br><span class="line">~/K8s/Day11$ kubectl get svc</span><br><span class="line">  <span class="comment"># NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE</span></span><br><span class="line">  <span class="comment"># kubernetes       ClusterIP   10.96.0.1      &lt;none&gt;        443/TCP   33d</span></span><br><span class="line">  <span class="comment"># php-apache       ClusterIP   10.96.176.18   &lt;none&gt;        80/TCP    5m8s</span></span><br><span class="line">~/K8s/Day11$ kubectl get replicasets.apps -o wide</span><br><span class="line">  <span class="comment"># NAME                               DESIRED   CURRENT   READY   AGE     CONTAINERS   IMAGES                               SELECTOR</span></span><br><span class="line">  <span class="comment"># php-apache-deployment-75695fbcd8   1         1         1       6m59s   nginx        mirrorgooglecontainers/hpa-example   app=php-apache,pod-template-hash=75695fbcd8</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>(3) 创建HPA控制器(<code>#当hpa资源的deployment资源对象的CPU使用率达到50%时，就进行扩容最多可以扩容到10个</code>)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1.autoscale 命令</span></span><br><span class="line">~/K8s/Day11$ kubectl autoscale deployment php-apache-deployment --cpu-percent=50 --min=1 --max=10</span><br><span class="line">  <span class="comment"># horizontalpodautoscaler.autoscaling/php-apache-deployment autoscaled</span></span><br><span class="line">  </span><br><span class="line"><span class="comment"># 方式2.资源清单</span></span><br><span class="line">~/K8s/Day11$ tee HorizontalPodAutoscaler.yaml &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">apiVersion: autoscaling/v1</span><br><span class="line">kind: HorizontalPodAutoscaler</span><br><span class="line">metadata:</span><br><span class="line">  name: php-apache-deployment</span><br><span class="line">  namespace: default</span><br><span class="line">spec:</span><br><span class="line">  minReplicas: 1</span><br><span class="line">  maxReplicas: 10</span><br><span class="line">  scaleTargetRef:</span><br><span class="line">    kind: Deployment</span><br><span class="line">    name: php-apache-deployment</span><br><span class="line">    apiVersion: apps/v1</span><br><span class="line">  targetCPUUtilizationPercentage: 50</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">~/K8s/Day11$ kubectl get hpa</span><br><span class="line">  <span class="comment"># NAME                    REFERENCE                          TARGETS         MINPODS   MAXPODS   REPLICAS   AGE</span></span><br><span class="line">  <span class="comment"># php-apache-deployment   Deployment/php-apache-deployment   &lt;unknown&gt;/50%   1         10        1          19s</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>(4) 模拟消耗php-apache的资源，并验证pod是否会自动扩容与缩容</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新开启多个终端（也可使用node节点），对php-apache的pod进行死循环请求，如下（如果你的系统资源比较充足，可以选择开启多个终端，对pod进行死循环请求，我这里开启了两个node的终端，同时请求php-apache的pod）：</span></span><br><span class="line">$ kubectl run -i --tty load-generator --image=busybox /bin/sh </span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式1.模拟多用户对php-apache的pod造成的并发请求</span></span><br><span class="line">$ <span class="keyword">while</span> <span class="literal">true</span>; <span class="keyword">do</span> wget -q -O- http://php-apache.default.svc.cluster.local; <span class="keyword">done</span></span><br><span class="line"><span class="comment"># OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK!OK</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2.使用ab进行压力测试</span></span><br><span class="line">$ ab -c 5000 -n 2000000 http://tomcat-svc:8080/</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>(5) 监控查看hpa资源对cpu的占用情况以及Pod扩容结果;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">~/K8s/Day11$ watch -n 2 <span class="string">"kubectl get deployments | grep "</span>php-apache-deployment<span class="string">" &amp;&amp; kubectl get hpa &amp;&amp; kubectl top pod -l app=php-apache"</span></span><br><span class="line">  php-apache-deployment   4/4     4            4           6m46s        <span class="comment"># 可以看见创建了四个副本</span></span><br><span class="line">  NAME                    REFERENCE                          TARGETS   MINPODS   MAXPODS   REPLICAS   AGE</span><br><span class="line">  php-apache-deployment   Deployment/php-apache-deployment   93%/50%   1         10        4          4m46s   <span class="comment"># CPU 使用值已超过我们设定的额定百分百50%</span></span><br><span class="line">  NAME                                     CPU(cores)   MEMORY(bytes)   <span class="comment"># 创建的Pod</span></span><br><span class="line">  php-apache-deployment-5c6b89b758-55m2m   122m         12Mi </span><br><span class="line">  php-apache-deployment-5c6b89b758-gm8rz   0m           2Mi</span><br><span class="line">  php-apache-deployment-5c6b89b758-s8ldx   118m         12Mi</span><br><span class="line">  php-apache-deployment-5c6b89b758-wdt9p   0m           0Mi</span><br><span class="line"></span><br><span class="line"><span class="comment"># PS : 当然最大也就只可以产生10个pod，因为我们之前规定最多产生10个pod</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>(6) 当停止死循环请求后，也并不会立即减少pod数量，会等一段时间（大约5分分钟）后减少pod数量（5~10分钟），防止流量再次激增。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 当停止死循环请求后，也并不会立即减少pod数量，会等一段时间后减少pod数量（5~10分钟），防止流量再次激增。</span></span><br><span class="line">~/K8s/Day11$ watch -c -t -n 2 <span class="string">"kubectl get deployments | grep "</span>php-apache-deployment<span class="string">" &amp;&amp; kubectl get hpa &amp;&amp; kubectl get pod -l app=php-apache"</span></span><br><span class="line">  <span class="comment"># php-apache-deployment   1/1     1            1           17m</span></span><br><span class="line">  <span class="comment"># NAME                    REFERENCE                          TARGETS   MINPODS   MAXPODS   REPLICAS   AGE</span></span><br><span class="line">  <span class="comment"># php-apache-deployment   Deployment/php-apache-deployment   0%/50%    1         10        1          15m</span></span><br><span class="line">  <span class="comment"># NAME                                     READY   STATUS    RESTARTS   AGE</span></span><br><span class="line">  <span class="comment"># php-apache-deployment-5c6b89b758-s8ldx   1/1     Running   0          17m</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>(7) 至此HPA实现pod副本数量的自动扩容与缩容就实现了，下面可以测试删除策略扩容HPA</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~/K8s/Day11$ kubectl delete horizontalpodautoscalers.autoscaling php-apache-deployment</span><br><span class="line">  <span class="comment"># horizontalpodautoscaler.autoscaling "php-apache-deployment" deleted</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>Tips: K8s 1.19.x 的 HAP 控制器只能针对于<code>Deployment, ReplicaSet, StatefulSet, or ReplicationController</code>等资源控制器创建的Pod资源进行扩容缩;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 注意许多CSDN 或者 博客园中会写出以下的方式验证(它并不适用于当前版本)</span></span><br><span class="line">kubectl create php-apache-test --image=mirrorgooglecontainers/hpa-example --requests=cpu=200m --expose --port=80</span><br><span class="line">  <span class="comment"># service/php-apache created</span></span><br><span class="line">  <span class="comment"># pod/php-apache created   # 可以看见它创建的是Pod</span></span><br><span class="line">kubectl get pod</span><br><span class="line">  <span class="comment"># NAME         READY   STATUS    RESTARTS   AGE</span></span><br><span class="line">  <span class="comment"># php-apache   1/1     Running   0          48s</span></span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-05-17T07:42:08.580Z" itemprop="dateUpdated">2022-05-17 15:42:08</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Kubernetes/5-Kubernetes入门基础之控制器Controller介绍.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Kubernetes/5-Kubernetes入门基础之控制器Controller介绍.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/5-27-526.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/5-27-526.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/k8s/" rel="tag">k8s</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5-27-526.html&title=《5-Kubernetes入门基础之控制器Controller介绍》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5-27-526.html&title=《5-Kubernetes入门基础之控制器Controller介绍》 — WeiyiGeek Blog&source=WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/5-27-526.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《5-Kubernetes入门基础之控制器Controller介绍》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/5-27-526.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/5-27-526.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/5-27-528.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">6-Kubernetes入门基础之服务发现Service介绍</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/5-27-529.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Ingress-Nginx 服务暴露基础学习与实践</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-Controller-介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Controller 介绍</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-Controller-详述"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 Controller 详述</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-Replication-Controller"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.Replication Controller</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-ReplicaSet"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.ReplicaSet</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-Deployment"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">3.Deployment</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-DaemonSet"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">4.DaemonSet</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-CronJob"><span class="post-toc-number">2.5.</span> <span class="post-toc-text">6.CronJob</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#7-StatefulSet"><span class="post-toc-number">2.6.</span> <span class="post-toc-text">7.StatefulSet</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#8-Horizontal-Pod-Autoscaling-水平扩展"><span class="post-toc-number">2.7.</span> <span class="post-toc-text">8.Horizontal Pod Autoscaling - 水平扩展</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/5-27-526.html&title=《5-Kubernetes入门基础之控制器Controller介绍》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/5-27-526.html&title=《5-Kubernetes入门基础之控制器Controller介绍》 — WeiyiGeek Blog&source=WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/5-27-526.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《5-Kubernetes入门基础之控制器Controller介绍》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/5-27-526.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/5-27-526.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKklEQVR42u3a0W7DIBAEwPz/T7uvldIkexyuAoyfqsSxGSqdYI/HI76uX1fy7fV0vfpV/pYJFwYGxrKM6+31/p4c82roz58n7/3jORgYGAcw7nh0fk+HjYGBgZEwqgX3/UAxMDAwZjGqm88vLbgYGBhLMZJNbPKyPGirFvFpe3EMDIwFGXnq/v9/39LfwMDAWIpxFa/qc8YWjuVRYWBgbM3IC1yyHOxvaDvjwcDA2JWRtx6rL5sVwEWfYGBgHMPoHPzKt76dAxwvn4aBgbE1I29kVo9HdBqWY9OEgYFxAqO6jaxuSvOFZnUiMDAwTmD0GwP5bOWxXfk/gIGBsSmjczqj2qocC++iX2FgYBzAqB4nzSP7nFptUXxIDTEwMDZijIX+eesxWYDmExQ1RzEwMLZjVA9D5AU33wbn5XgwHcTAwFicMfmgQzuAG2uUYmBgnMAYq2D59jJ/ZXWCyrkgBgbGgoxOuJ/f0z/G+mGZiIGBsTUjX8xVl4+dxV/1iAYGBsYJjE5Mf0fqNThxGBgYBzDGArKx9mQeyRUmFwMD4wBGvzEwtlkdCwFvbGFiYGB8GaMf/XcGmoduH4ovBgbG1ox+O7O6sMvjuerTMDAw9maMhf7VxWK1SZk3SjEwMM5hjBW+ZJdcXSZWSz8GBgZGdeh5UyEvu4XQDQMDA6NdjvtLzMkFFwMDYylGtRmQR/md8npL3IaBgbEgo3VSY1JroRrSDY4KAwNjPcYPym1qmKXxIuIAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

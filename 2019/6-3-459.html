@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 5.Docker底层实现原理了解|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Docker">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>5.Docker底层实现原理了解</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">5.Docker底层实现原理了解</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-06-03T06:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-06-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Docker/5.Docker底层实现原理了解"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">5.Docker底层实现原理了解</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-06-03 14:36:30" datetime="2019-06-03T06:36:30.000Z"  itemprop="datePublished">2019-06-03</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-Docker架构与底层实现原理浅析"><a href="#0x00-Docker架构与底层实现原理浅析" class="headerlink" title="0x00 Docker架构与底层实现原理浅析"></a>0x00 Docker架构与底层实现原理浅析</h2><p>通过前面的学习，我们基本掌握了Docker的配置使用，现在我们以 Docker 基础架构来探究Docke底层的核心技术，简单的包括:</p>
+<ul>
+<li>Linux 上的命名空间（Namespaces）</li>
+<li>控制组（Control groups）</li>
+<li>Union 文件系统（Union file systems）</li>
+<li>容器格式（Container format）</li>
+<li>容器网络 (Container network) </li>
+<li>容器存储驱动  (Container Storage)</li>
+</ul>
+<p><br></p>
+<h3 id="1-基本架构"><a href="#1-基本架构" class="headerlink" title="1.基本架构"></a>1.基本架构</h3><ul>
+<li>C/S 架构，包括客户端和服务端,既可以运行在一个机器上，也可通过 socket 或者 RESTful API 来进行通信。</li>
+<li>Docker 守护进程 （Daemon）一般在宿主主机后台运行，作为服务端接受来自客户端的请求，并处理这些请求（创建、运行、分发容器）</li>
+<li>Docker 客户端则为用户提供一系列可执行命令如docker run / ，用户用这些命令实现跟 Docker 守护进程交互。</li>
+</ul>
+<p><a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190603221034.png" target="_blank" title="WeiyiGeek.Docker基础架构" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190603221034.png" alt="WeiyiGeek.Docker基础架构"></a></p>
+<p><em>传统虚拟机特点：</em><br>传统的虚拟机通过在宿主主机中运行 hypervisor 来模拟一整套完整的硬件环境提供给虚拟机的操作系统，虚拟机系统看到的环境是可限制的，也是彼此隔离的，实现了对资源最完整的封装但是意味着系统资源的浪费;</p>
+<p><em>操作系统与资源共享</em><br>操作系统中包括内核、文件系统、网络、PID、UID、IPC、内存、硬盘、CPU 等等，所有的资源都是应用进程直接共享的</p>
+<p>例如，以宿主机和虚拟机系统都为 Linux 系统为例，虚拟机中运行的应用其实可以利用宿主机系统中的运行环境（docker也是基于此）。</p>
+<p>实现虚拟化的要求：</p>
+<ul>
+<li>实现对内存memory(不可压缩)、CPU（可压缩）、网络IO、硬盘IO、存储空间等的限制外</li>
+<li>实现文件系统、网络、PID、UID、IPC等等的相互隔离</li>
+</ul>
+<p><strong>Memory</strong></p>
+<ul>
+<li>OOME 介绍:在linux主机中如果kernel监测到当前宿主机没有充足的内存用于实现系统某些重要的功能，就会抛出OOME异常(Out<br>Of Memory Exception)同时kill掉一些进程;<ul>
+<li>一旦发生OOME任何进程都有可能被杀死,包括docker daemon在内,为此Docker特定调整dockerdaemon的优先级以免被误杀,但是容器的优先级未被调整;</li>
+<li>根据各种复杂的算法来算出进程的oom-score数越多就会被kill掉,有些您不想kill掉的容器需要采用oom_odj键来初始化指定即(–oom-kill-disable / –oom-score-adj int)</li>
+<li>设置限制容器中内存大小的参数：–memory 与 –memory-swap N ,其中内存又被分为RAM、SWAP;必须先设置前则才能使用–memory-swap<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190606131046.png" target="_blank" title="WeiyiGeek.memory-swap" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190606131046.png" alt="WeiyiGeek.memory-swap" title="" class=""></a>
+                <p>WeiyiGeek.memory-swap</p>
+            </figure>
+</li>
+</ul>
+</li>
+</ul>
+<p><br></p>
+<p><strong>CPU</strong></p>
+<ul>
+<li>CFS scheduler : 完全公平调度系统在docker1.3以前使用,在1.3及以后使用的是realtime实时性的;<ul>
+<li>普通进程优先级调度是非实时的/内核级进程一般都是实时的;</li>
+<li>优先级：CPU密集型、IO密集型</li>
+<li>限制CPU的参数：–cpus 核数 / –cpu-shares (需要则按照比例进行分配)</li>
+</ul>
+</li>
+</ul>
+<p>使用docker的stress镜像压测实现资源限制：<br>我的机器是1核的：所以CPU百分比超过100%，Range of CPUs is from 0.01 to 1.00, as there are only 1 CPUs available.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$docker</span> pull lorel/docker-stress-ng</span><br><span class="line">lorel/docker-stress-ng   latest              1ae56ccafe55        3 years ago         8.1MB</span><br><span class="line"></span><br><span class="line"><span class="variable">$docker</span> run --name stress -it --rm lorel/docker-stress-ng:latest stress -<span class="built_in">help</span> <span class="comment">#查看镜像压力测试帮助</span></span><br><span class="line">Example: stress-ng --cpu 8 --io 4 --vm 2 --vm-bytes 128M --fork 4 --timeout 10s</span><br><span class="line"></span><br><span class="line"><span class="comment">#演示1.限制虚拟内最大不能藏256MB</span></span><br><span class="line">[root@izwz9biz2m4sd3bb3k38pgz ~]<span class="comment"># docker run --name stress -it -m 256m --rm lorel/docker-stress-ng:latest stress --vm 2</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$docker</span> stats  </span><br><span class="line">CONTAINER ID        NAME                CPU %               MEM USAGE / LIMIT  MEM %               NET I/O             BLOCK I/O           PIDS</span><br><span class="line">36a41704053f        stress              98.57%              140MiB / 256MiB (关键点)    54.69%              0B / 0B             0B / 0B             5</span><br><span class="line"></span><br><span class="line"><span class="comment">#测试cpu的性能：</span></span><br><span class="line"><span class="variable">$docker</span> run --name stress -it -m 256m --rm lorel/docker-stress-ng:latest stress --cpu 8 --io 4             <span class="comment">#使用全部CPU占100%</span></span><br><span class="line"><span class="variable">$docker</span> run --name stress --cpus 0.5 -it -m 256m --rm lorel/docker-stress-ng:latest stress --cpu 8 --io 4  <span class="comment">#使用半个CPU 不超过50% 上下误差+/-5</span></span><br><span class="line"><span class="variable">$docker</span> run --name stress --cpuset-cpus 0 -it --rm lorel/docker-stress-ng:latest stress --cpu 8   <span class="comment">#使用第</span></span><br><span class="line">CONTAINER ID        NAME                CPU %               MEM USAGE / LIMIT   MEM %               NET I/O             BLOCK I/O           PIDS</span><br><span class="line">6d6cc81d6e26        stress              50.99%              15.93MiB / 256MiB   6.22%               0B / 0B             0B / 143kB          13</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="2-I-O设备简述"><a href="#2-I-O设备简述" class="headerlink" title="2.I/O设备简述"></a>2.I/O设备简述</h3><p>描述:Linux中I/O设备分为以下两类,两种设备本身没有严格限制，但是基于不同的功能进行分类;</p>
+<ul>
+<li>字符设备: 提供连续的数据流<code>支持按字节、字符来读写数据</code>，应用程序需要按顺序进行读取，所以通常不支持随机存取; 比如:<code>调制解调器就是典型的字符设备</code>;</li>
+<li>块设备: 应用程序可以随机访问设备数据，并且程序自己确定读取数据的位置；比如磁盘就是典型的块设备;</li>
+</ul>
+<p>Q: 字符设备与块设备的区别?<br>答：<code>前者顺序读取写入，后者通过寻址磁盘上的任何位置进行读取写入</code>，注意<code>块设备数据的读写只能以块(通常是512B)的倍数</code>进行，与字符设备另外一个区别就是<code>块设备并不支持基于字符的寻址</code>;</p>
+<p>Linux 的设备管理和文件系统是紧密相关的（一切皆文件），以文件的格式存放于/dev/目录之下称为设备文件。<br>应用程序可以打开、关闭、读写这些设备文件，完成对设备的操作就像操作普通数据文件一样，并且为了便于管理设备系统为各个设备进行编号，每个设备号分为主设备号和次设备号；</p>
+<p>对于常用设备Linux有约定俗称的编号，如磁盘的主设备号是3；并且一个字符设备或者块设备都有一个主设备号和次设备号（<code>统称为设备号</code>）；</p>
+<p>Q: 什么是主设备号和次设备号？<br>答: 主设备号表示一个特定的驱动程序，用来区分不同种类的设备；<br>次设备号表示使用该驱动程序的各设备，用来区分同一种类(类型)的多个设备；</p>
+<hr>
+<h3 id="3-底层原理浅析"><a href="#3-底层原理浅析" class="headerlink" title="3.底层原理浅析"></a>3.底层原理浅析</h3><h5 id="1-命名空间"><a href="#1-命名空间" class="headerlink" title="1.命名空间"></a>1.命名空间</h5><p>描述:容器（Container）利用Linux中内核(&gt;=2.4.19)命名空间来做<code>权限的隔离控制</code>即将某个特定的全局系统资源通过抽象的方法使得namespace中的进程看起来拥有他们自己的隔离的全局系统资源，并且联合利用 <code>cgroups 来做资源分配限制</code>。</p>
+<p>Docker 容器和 LXC 容器很相似,命名空间提供了最基础也是最直接的隔离，在容器中运行的进程不会被运行在主机上的进程和其它容器发现和作用。随着 Linux 系统对于命名空间功能的完善实现，程序员已经可以实现上面的所有需求，让某些进程在彼此隔离的命名空间中运行。大家虽然都共用一个内核和某些运行时环境（例如一些系统命令和系统库），但是彼此却看不到都以为系统中只有自己的存在</p>
+<p>当使用docker run启动一个容器时候,后台Docker会为容器创建一个独立的命名空间和控制组集合;每个容器都有资源独有网络,意味着他们不能访问其他容器的sockets或接口。但能通过–links来连接 2 个容器时或者–net来自定义Docker容器网络（网桥接口相互通信）,容器就可以相互通信了（可以根据配置来限制通信的策略）;</p>
+<p>命名空间（namespace）在<code>Docker容器具体实现</code>说明如下:</p>
+<ul>
+<li><p>(1)先来看一个示例1，当前Linux宿主机终端进程对应的namespace信息:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$ls</span> -l /proc/$$/ns</span><br><span class="line">总用量 0</span><br><span class="line">lrwxrwxrwx. 1 root root 0 7月   4 23:27 ipc -&gt; ipc:[4026531839]</span><br><span class="line">lrwxrwxrwx. 1 root root 0 7月   4 23:27 mnt -&gt; mnt:[4026531840]</span><br><span class="line">lrwxrwxrwx. 1 root root 0 7月   4 23:27 net -&gt; net:[4026531956]</span><br><span class="line">lrwxrwxrwx. 1 root root 0 7月   4 23:27 pid -&gt; pid:[4026531836]</span><br><span class="line">lrwxrwxrwx. 1 root root 0 7月   4 23:27 user -&gt; user:[4026531837]</span><br><span class="line">lrwxrwxrwx. 1 root root 0 7月   4 23:27 uts -&gt; uts:[4026531838]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>（2）Docker容器中Namespace</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Namespace</th>
+<th style="text-align:left">隔离的全局系统资源</th>
+<th style="text-align:left">容器隔离效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">UTS (UNIX Time-sharing System )</td>
+<td style="text-align:left">主机名与域名</td>
+<td style="text-align:left">每个容器拥有独立的 hostname 和 domain name, 使其在网络上可以被视作一个独立的节点而非主机上的一个进程。</td>
+</tr>
+<tr>
+<td style="text-align:center">User</td>
+<td style="text-align:left">用户和用户组</td>
+<td style="text-align:left">每个容器可以有不同的用户uid和组gid, 可以在容器内用容器内部的用户执行程序而非宿主主机上的用户。</td>
+</tr>
+<tr>
+<td style="text-align:center">IPC (Inter-Process Communication)</td>
+<td style="text-align:left">信号量、消息队列(POSIX message queues)以及共享内存</td>
+<td style="text-align:left">每个容器有其自己的System V IPC 和 POSIX 消息队列系统，从而只有在同一个IPC namespace的进程之间才能互相通信; <br> 注意:容器的进程间交互实际上还是 host 上具有相同 pid 命名空间中的进程间交互。因此需要在 IPC 资源(<code>有唯一的32位id</code>)申请时加入命名空间信息。</td>
+</tr>
+<tr>
+<td style="text-align:center">PID</td>
+<td style="text-align:left">进程编号</td>
+<td style="text-align:left">每个名称空间中pid中的进程可以有其独立的PID，即不同用户的进程通过 pid 命名空间隔离开的，且不同命名空间中可以有相同 pid号; 每个容器可以有其PID为1的root进程，也使得容器可以在不同的host之间进行迁移(因为namespace中的进程ID和host不是强绑定，使得容器中的每个进程有两个PID即容器中PID和host上的PID);</td>
+</tr>
+<tr>
+<td style="text-align:center">Network</td>
+<td style="text-align:left">网络设备、网络栈、端口等</td>
+<td style="text-align:left">每个 net 命名空间有独立的网络设备、IP地址、路由表、/proc/net目录、端口号等等，这也使得一个host上多个容器内的同一个应用都绑定到各自的80端口上,Docker 默认采用 veth 的方式，将容器中的虚拟网卡同 host 上的一 个Docker 网桥 docker0 连接在一起。</td>
+</tr>
+<tr>
+<td style="text-align:center">Mount (mnt)</td>
+<td style="text-align:left">文件系统挂载点</td>
+<td style="text-align:left">类似 chroot将一个进程放到一个特定的目录执行,与 chroot 不同是每个命名空间中的容器在 /proc/mounts 的信息只包含所在命名空间的 mount point,允许不同命名空间的进程看到的文件结构不同,使得进程间文件目录隔离开来。</td>
+</tr>
+</tbody>
+</table>
+<p>基础示例1-mnt:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.创建一个文件夹，使用tmpfs这种基于内存的文件系统来模拟挂载</span></span><br><span class="line">mkdir /tmp/mnt_isolation</span><br><span class="line"><span class="comment"># 2.使用unshare(内置命令做作用是不启动一个新进程就可以起到隔离效果，相当于跳出原先的namespace)隔离mnt namespace</span></span><br><span class="line">unshare --mount /bin/bash</span><br><span class="line"><span class="comment"># 3.挂载我们的tmpfs</span></span><br><span class="line">mount -t tmpfs tmpfs /tmp/mnt_isolation</span><br><span class="line"><span class="comment"># 4.然后进入/tmp/mnt_isolation创建文件</span></span><br><span class="line"><span class="built_in">cd</span> /tmp/mnt_isolation &amp;&amp; touch linux-mnt-&#123;1..10&#125;</span><br><span class="line"><span class="comment"># 5.新建立一个shell终端发现并没有创建文件；</span></span><br><span class="line">[root@localhost mnt_isolation]$ ls <span class="comment">#终端1</span></span><br><span class="line">linux-mnt-1   linux-mnt-2  linux-mnt-4  linux-mnt-6  linux-mnt-8</span><br><span class="line">linux-mnt-10  linux-mnt-3  linux-mnt-5  linux-mnt-7  linux-mnt-9</span><br><span class="line"></span><br><span class="line">[root@localhost mnt_isolation]$ ls /tmp/mnt_isolation/ <span class="comment">#终端2</span></span><br><span class="line"><span class="comment">#输出为空</span></span><br></pre></td></tr></table></figure></p>
+<p>基础示例2-ipc:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.创建一个消息队列</span></span><br><span class="line">$ ipcmk --queue</span><br><span class="line">消息队列 id：0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.查看创建的消息队列</span></span><br><span class="line">$ ipcs</span><br><span class="line"><span class="comment"># --------- 消息队列 -----------</span></span><br><span class="line"><span class="comment"># 键        msqid      拥有者  权限     已用字节数 消息</span></span><br><span class="line"><span class="comment"># 0x651dbb47 0          root       644        0            0</span></span><br><span class="line"><span class="comment"># ------------ 共享内存段 --------------</span></span><br><span class="line"><span class="comment"># 键        shmid      拥有者  权限     字节     nattch     状态</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># --------- 信号量数组 -----------</span></span><br><span class="line"><span class="comment"># 键        semid      拥有者  权限     nsems</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.使用unshare命令进行隔离IPC namespace</span></span><br><span class="line"><span class="variable">$echo</span> $$</span><br><span class="line">78285</span><br><span class="line"><span class="variable">$unshare</span> --ipc /bin/bash  </span><br><span class="line"><span class="variable">$echo</span> $$  <span class="comment">#此时已经切换到新的进程</span></span><br><span class="line">78468</span><br><span class="line"><span class="variable">$ps</span> aux | grep -E <span class="string">"78468|78285"</span></span><br><span class="line">root      78285  0.0  0.1 117460  3980 pts/1    Ss   00:01   0:00 -bash</span><br><span class="line">root      78468  0.0  0.1 117408  3956 pts/1    S    00:04   0:00 /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.再次查看消息队列发现为空，所以证实了在隔离的Namespace中创建的内容外部无法看到</span></span><br><span class="line">ipcs</span><br><span class="line"><span class="comment"># --------- 消息队列 -----------</span></span><br><span class="line"><span class="comment"># 键        msqid      拥有者  权限     已用字节数 消息</span></span><br><span class="line"><span class="comment"># ------------ 共享内存段 --------------</span></span><br><span class="line"><span class="comment"># 键        shmid      拥有者  权限     字节     nattch     状态</span></span><br><span class="line"><span class="comment"># --------- 信号量数组 -----------</span></span><br><span class="line"><span class="comment"># 键        semid      拥有者  权限     nsems</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="2-控制组"><a href="#2-控制组" class="headerlink" title="2.控制组"></a>2.控制组</h5><p>描述:控制组（Control Group）是  Linux 内核(2.6.24)的一个特性也是容器机制的另外一个关键组件，主要用来对共享资源(<code>内存、CPU、磁盘 IO 等资源</code>)进行隔离、限制、审计等（用于<code>资源控制</code>）。<br>简单的说Cgroup是Linux内核的一个功能，它将任意进程进行分组化管理具体资源管理就是通过它来实现的，具体的资源管理功能称为<code>Cgroup子系统或控制器</code>，它可以控制内存的Memory控制器、控制进程调度的CPU控制器并且运行中的内核可以使用Cgroup子系统<code>利用/proc/cgroup来管理</code>;</p>
+<p>实现原理:将一组进程放在一个控制组里，通过给这个控制组分配指定的可用资源，达到控制这一组进程可用资源的目的。所以<code>只有能控制分配到容器的资源，才能避免当多个容器同时运行时的对系统资源的竞争</code>。<br>实现角度: Cgroup实现了一个通用的进程分组的架构，而不同资源的具体管理则是由各个Cgroup子系统实现的。<br>实现方式: cgroupfs <code>Cgroup Driver: cgroupfs</code> 或者 systemd <code>Cgroup Driver: systemd</code>;</p>
+<p>发展历史:</p>
+<ul>
+<li>在Cgroup出现之前，只能针对一个进程做一些资源的控制，例如通过shed_setaffinity系统调用限定一个进程的CPU亲和性，或者用ulimit<code>限制一个进程的文件上限、限大小</code>等;</li>
+<li>在Cgroup出现之后，可以对进程进行人员的分组这是用户自定义的，例如安卓的应用分为前台与后台应用；</li>
+</ul>
+<p>注意:不同内核版本Cgroup中实现的子系统有些许不同，当用docker run启动一个容器的时候创建一个独立的名称空间和控制组集合；<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 3.10.0-1062.18.1.el7.x86_64</span></span><br><span class="line">grep cgroup /proc/mounts | awk -F <span class="string">" "</span> <span class="string">'&#123;print $2 " = " $4&#125;'</span></span><br><span class="line">/sys/fs/cgroup = ro,seclabel,nosuid,nodev,noexec,mode=755</span><br><span class="line">/sys/fs/cgroup/systemd = rw,seclabel,nosuid,nodev,noexec,relatime,xattr,release_agent=/usr/lib/systemd/systemd-cgroups-agent,name=systemd</span><br><span class="line">/sys/fs/cgroup/freezer = rw,seclabel,nosuid,nodev,noexec,relatime,freezer</span><br><span class="line">/sys/fs/cgroup/net_cls,net_prio = rw,seclabel,nosuid,nodev,noexec,relatime,net_prio,net_cls</span><br><span class="line">/sys/fs/cgroup/cpu,cpuacct = rw,seclabel,nosuid,nodev,noexec,relatime,cpuacct,cpu</span><br><span class="line">/sys/fs/cgroup/cpuset = rw,seclabel,nosuid,nodev,noexec,relatime,cpuset</span><br><span class="line">/sys/fs/cgroup/perf_event = rw,seclabel,nosuid,nodev,noexec,relatime,perf_event</span><br><span class="line">/sys/fs/cgroup/hugetlb = rw,seclabel,nosuid,nodev,noexec,relatime,hugetlb</span><br><span class="line">/sys/fs/cgroup/pids = rw,seclabel,nosuid,nodev,noexec,relatime,pids</span><br><span class="line">/sys/fs/cgroup/memory = rw,seclabel,nosuid,nodev,noexec,relatime,memory</span><br><span class="line">/sys/fs/cgroup/blkio = rw,seclabel,nosuid,nodev,noexec,relatime,blkio</span><br><span class="line">/sys/fs/cgroup/devices = rw,seclabel,nosuid,nodev,noexec,relatime,devices</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.7.0-1.el7.elrepo.x86_64</span></span><br><span class="line">grep cgroup /proc/mounts | awk -F <span class="string">" "</span> <span class="string">'&#123;print $2 " = " $4&#125;'</span></span><br><span class="line">/sys/fs/cgroup = ro,nosuid,nodev,noexec,mode=755</span><br><span class="line">/sys/fs/cgroup/systemd = rw,nosuid,nodev,noexec,relatime,xattr,release_agent=/usr/lib/systemd/systemd-cgroups-agent,name=systemd</span><br><span class="line">/sys/fs/cgroup/cpu,cpuacct = rw,nosuid,nodev,noexec,relatime,cpu,cpuacct</span><br><span class="line">/sys/fs/cgroup/memory = rw,nosuid,nodev,noexec,relatime,memory</span><br><span class="line">/sys/fs/cgroup/devices = rw,nosuid,nodev,noexec,relatime,devices  <span class="comment">#主机设备读写节点创建控制</span></span><br><span class="line">/sys/fs/cgroup/blkio = rw,nosuid,nodev,noexec,relatime,blkio</span><br><span class="line">/sys/fs/cgroup/net_cls,net_prio = rw,nosuid,nodev,noexec,relatime,net_cls,net_prio</span><br><span class="line">/sys/fs/cgroup/freezer = rw,nosuid,nodev,noexec,relatime,freezer</span><br><span class="line">/sys/fs/cgroup/rdma = rw,nosuid,nodev,noexec,relatime,rdma  <span class="comment"># 内核新增</span></span><br><span class="line">/sys/fs/cgroup/hugetlb = rw,nosuid,nodev,noexec,relatime,hugetlb</span><br><span class="line">/sys/fs/cgroup/perf_event = rw,nosuid,nodev,noexec,relatime,perf_event</span><br><span class="line">/sys/fs/cgroup/cpuset = rw,nosuid,nodev,noexec,relatime,cpuset</span><br><span class="line">/sys/fs/cgroup/pids = rw,nosuid,nodev,noexec,relatime,pids</span><br></pre></td></tr></table></figure></p>
+<p>由上面可知cgroups分为多个子系统，每个系统代表一种设施或者说是资源控制器，用来调度某一类的资源使用（cpu,内存,块设备），在实现上cgroups并没有增加新的系统调用，而是表现为一个cgroup文件系统，可以把一个或者多个子系统挂载到某一个目录之中;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 挂载cpu子系统到 /sys/fs/cgroup/cpu</span></span><br><span class="line">mount -t cgroup -o cpu cpu /sys/fs/cgroup/cpu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看</span></span><br><span class="line">cgroup on /sys/fs/cgroup/cpuset <span class="built_in">type</span> cgroup (rw,nosuid,nodev,noexec,relatime,seclabel,cpuset)</span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#示例1.分配和限制内存和CPU使用</span></span><br><span class="line">docker run -itd --cpus=<span class="string">"1.5"</span> --cpuset-cpus=<span class="string">"0-1"</span> --cpuset-mems=<span class="string">"0"</span> busybox sleep 6000  <span class="comment">#常规分配指定cpu节点</span></span><br><span class="line">docker run -itd --memory 512m --memory-swap 1g busybox sleep 6000     <span class="comment">#分配指定内存 -m.--memory 512m</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#示例2.为容器添加一个主机设备</span></span><br><span class="line">docker run -itd --name=demo --device=/dev/sda3 busybox sleep 6000</span><br><span class="line">docker <span class="built_in">exec</span> -it demo ls /dev/sda3</span><br><span class="line"></span><br><span class="line"><span class="comment">#实例3.CPU调度与资源限制</span></span><br><span class="line">docker run -itd calico/cni -c 512 --cpuset-cpus=<span class="string">"0"</span>   <span class="comment"># -c cpu权重 </span></span><br><span class="line">docker run -itd busybox -c 1024 --cpuset-cpus=<span class="string">"1,2"</span>   <span class="comment"># 让一个cgroup使用cpu的1/3,同时另外一个cgroup使用该cpu的2/3(根据cgroup组来划分)</span></span><br><span class="line">docker run -itd calico/cni --memory 512m --memory-swap 1g --cpu-period=1000000 --cpu-quota=950000 <span class="comment"># docker 1.12 及其之前版本</span></span><br><span class="line">docker run -itd calico/cni --memory 512m --memory-swap 1g --cpu-rt-runtime 950000               <span class="comment"># 完全公平调度 CFS scheduler</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h6 id="子系统之Devices"><a href="#子系统之Devices" class="headerlink" title="子系统之Devices"></a>子系统之Devices</h6><p>描述:其作用于控制Cgroup的进程对那些设备具有访问的权限;<br>接口如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 全局</span></span><br><span class="line">cat /sys/fs/cgroup/devices/devices.list</span><br><span class="line"><span class="comment"># a *:* rwm</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># docker 应用全局</span></span><br><span class="line">cat /sys/fs/cgroup/devices/docker/devices.list</span><br><span class="line"><span class="comment"># a *:* rwm</span></span><br><span class="line">ls -l /sys/fs/cgroup/devices/devices.allow</span><br><span class="line">--w-------. 1 root root 0 6月  15 09:46 /sys/fs/cgroup/devices/devices.allow</span><br><span class="line">ls -l /sys/fs/cgroup/devices/devices.deny</span><br><span class="line">--w-------. 1 root root 0 6月  15 09:46 /sys/fs/cgroup/devices/devices.deny</span><br><span class="line"></span><br><span class="line"><span class="comment"># docker 容器设置</span></span><br><span class="line"><span class="variable">$docker</span> ps</span><br><span class="line">25d2d645bfc9        test1               <span class="string">"top -b -d 2"</span>       2 weeks ago   </span><br><span class="line">cat /sys/fs/cgroup/devices/docker/25d2d645bfc9e6530039d6aac890f69dd9af33f8f966adc2d7287b74964678e3/devices.list</span><br><span class="line">c 1:5 rwm</span><br><span class="line">c 1:3 rwm</span><br><span class="line">c 1:9 rwm</span><br><span class="line">c 1:8 rwm <span class="comment">#brw-rw----. 1 root disk 8, 0 6月  15 09:46 /dev/sda</span></span><br><span class="line">c 5:0 rwm</span><br><span class="line">c 5:1 rwm</span><br><span class="line">c *:* m</span><br><span class="line">b *:* m</span><br><span class="line">c 1:7 rwm <span class="comment">#lrwxrwxrwx. 1 root root 7 6月  15 09:46 /dev/mapper/centos-app -&gt; ../dm-2</span></span><br><span class="line">c 136:* rwm</span><br><span class="line">c 5:2 rwm</span><br><span class="line">c 10:200 rwm</span><br><span class="line"></span><br><span class="line"><span class="comment"># 手动创建Devices</span></span><br><span class="line">mkdir /sys/fs/cgroup/devices/testgroup <span class="comment">#创建一个控制组</span></span><br><span class="line">ls /sys/fs/cgroup/devices/testgroup  <span class="comment">#默认情况下创建的控制组可以访问全部设备</span></span><br><span class="line"><span class="comment"># cgroup.clone_children  cgroup.procs   devices.deny  notify_on_release</span></span><br><span class="line"><span class="comment"># cgroup.event_control   devices.allow  devices.list  tasks</span></span><br><span class="line">cat devices.list</span><br><span class="line"><span class="comment"># a *:* rwm</span></span><br><span class="line"><span class="built_in">echo</span>  <span class="string">'c 1:3 rwm'</span> &gt; /sys/fs/cgroup/devices/testgroup/devices.deny <span class="comment">#对testgroup组禁止字符设备/dev/null 读写以及创建节点</span></span><br><span class="line"><span class="built_in">echo</span> $$ &gt; /sys/fs/cgroup/devices/testgroup/tasks <span class="comment">#将当前进程号加入任务中</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"hello world"</span> &gt; /dev/null  <span class="comment">#由于组设置了对字符设备/dev/null进行写限制，所以下面写请求失败</span></span><br><span class="line"><span class="comment"># -bash: /dev/null: 不允许的操作</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># $$ 表示当前bash进程的PID等价于$BASHPID</span></span><br><span class="line">cat /sys/fs/cgroup/devices/testgroup/tasks</span><br><span class="line"><span class="comment"># 123453</span></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$BASHPID</span></span><br><span class="line"><span class="comment"># 123453</span></span><br></pre></td></tr></table></figure><br>接口说明:</p>
+<ul>
+<li>(1) devices.list: 只读文件下载当前允许被访问的设备列表（每个条母有三个域）<ul>
+<li>类型: a(所有设备)，b（块设备），c（字符设备）</li>
+<li>设备号: 格式为major:minor设备号</li>
+<li>权限: r w m(创建设备节点mknod)<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#示例演示</span></span><br><span class="line">a *:* rwm <span class="comment">#表示所有设备都可以访问</span></span><br><span class="line">c 1:3 r   <span class="comment">#表示字符设备只有一个读权限</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li>(2) devices.allow：只写文件不能读取，允许指定的设备访问权限;</li>
+<li>(3) devices.deny: 与上周作用相反，禁止指定设备的访问权限;</li>
+</ul>
+<p><br></p>
+<h6 id="子系统之cpuset"><a href="#子系统之cpuset" class="headerlink" title="子系统之cpuset"></a>子系统之cpuset</h6><p>描述:其作用于分配指定的CPU和内存节点以此来限定进程可以使用的cpu核心和内存节点，现广泛用于KVM场景之中；</p>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#(1) 创建一个控制组</span></span><br><span class="line">mkdir /sys/fs/cgroup/cpuset/testgroup</span><br><span class="line"><span class="comment">#(2) 限制控制组只能使用内存节点0和cpu0与cpu1(与您cpu核心数有关 `grep "processor" /proc/cpuinfo`)</span></span><br><span class="line"><span class="built_in">echo</span> 0 &gt; /sys/fs/cgroup/cpuset/testgroup/cpuset.mems</span><br><span class="line"><span class="built_in">echo</span> 0,1 &gt; /sys/fs/cgroup/cpuset/testgroup/cpuset.cpus</span><br><span class="line"><span class="comment">#(3) 同样将当前进程加入控制组中</span></span><br><span class="line"><span class="built_in">echo</span> $$ &gt; /sys/fs/cgroup/cpuset/testgroup/tasks</span><br><span class="line"><span class="comment">#(4) 验证配置结果</span></span><br><span class="line">cat /proc/$$/status | grep <span class="string">"_allowed_list"</span></span><br><span class="line">Cpus_allowed_list:      0-1</span><br><span class="line">Mems_allowed_list:      0</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h6 id="子系统之cpu"><a href="#子系统之cpu" class="headerlink" title="子系统之cpu"></a>子系统之cpu</h6><p>描述:其作用是限制每个进程能够占用CPU多长时间进行设置；比如在机器上运行多个可能会消耗大量的系统资源的进程时候，我们不希望出现某个程序占据所有的系统资源而导致其它程序进程无法执行，从而导致程序假死的状态,此时使用<code>cgroup对CPU的获取量</code>便可以有效的进行控制;<br>我们在学操作系统原理的时候我们知道操作系统中有多种调度策略，各种调度策略适用于不同的应用场景;</p>
+<p>常用的调度程序:</p>
+<ul>
+<li>(1) 完全公平调度 Completely Fair Scheduler (CFS): 按照比例分配调度程序，可以根据任务优先级/权重或者cgroup获得份额，在任务群组(cgroup)间按比例分配CPU时间(cpu带宽)</li>
+<li>(2) 实时调度 Real-Time Scheduler (RT)：任务调度程序，可以对实时任务使用CPU的时间进行限定</li>
+</ul>
+<p>cpu子系统接口一览:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">- cpu.shares: 资源组的CPU使用权重它不限制进程使用绝对的CPU而是控制各组之间的配额,默认情况下Docker容器中cpu shares权重都为1024;</span><br><span class="line"><span class="built_in">echo</span> 512 &gt; /sys/fs/cgroup/cpu/testgroup/cpu.shares</span><br><span class="line"><span class="built_in">echo</span> 1024 &gt; /sys/fs/cgroup/cpu/testgroup1/cpu.shares</span><br><span class="line"></span><br><span class="line">- cpu.cfs_period_us: 完全公平调度策略，用于统计CPU使用的时间周期（时间片份数）它可以设定重新分配cgroup的可用CPU资源的时间间隔，单位为微秒us(值范围:1000us~1s);</span><br><span class="line">- cpu.cfs_quota_us: 完全公平调度策略，用于某周期内占用CPU的时间(指单核的时间，多核着需要设置时累加)，此参数设定基于时间片份数某个cgroup中所有任务可运行的时间总量,单位为微秒us(默认值为-1);</span><br><span class="line"><span class="comment">#比如:cpu.cfs_period_us设置为1000000而cpu.cfs_quota_us设置为200000表示cgroup控制的任务中在每1秒钟的0.2秒可单独对CPU进行存取;</span></span><br><span class="line"><span class="comment">#比如:cpu.cfs_quota_us设置成为-1则表示cgroup不需要遵循任何CPU时间限制，这也是每个cgroup的默认值；</span></span><br><span class="line">简单来说:在CFS调度下period设置为1s并且quota设置为0.5s，那么在cgroup进程中最多可以运行0.5s然后被强制休眠只能等待下一秒才能继续运行;</span><br><span class="line"><span class="comment">#示例:假设CPU&gt;=4核心表示这个组在一个使用周期(1s)内可以跑满4核资源；</span></span><br><span class="line"><span class="built_in">echo</span> 1000000 &gt; /sys/fs/cgroup/cpu/testgroup/cpu.cfs_period_us</span><br><span class="line"><span class="built_in">echo</span> 1000000 &gt; /sys/fs/cgroup/cpu/testgroup/cpu.cfs_quota_us</span><br><span class="line"></span><br><span class="line">- cpu.rt_period_us: 实时调度策略，设置某个时间段中每隔多久cgroup对CPU资源的存储就要重新分配，单位为微秒（注意:只可以用于实时调度的程序）</span><br><span class="line">- cpu.rt_runtime_us: 实时调度策略，设置某个时间段内cgroup中任务对CPU资源的最长连续访问时间，单位为微秒（注意:只可以用于实时调度的程序）</span><br><span class="line"><span class="comment">#比如:我们宿主机中的内核参数设置如下，表示实时进程在运行时候并不是完全占用CPU的，这样设置的好处是即不会对实时任务响应时间导致大的影响，同时也解决了实时任务卡住时导致整个系统无响应;</span></span><br><span class="line">sysctl -a | grep <span class="string">"sched_rt"</span></span><br><span class="line">kernel.sched_rt_period_us = 1000000</span><br><span class="line">kernel.sched_rt_runtime_us = 950000</span><br></pre></td></tr></table></figure></p>
+<p><strong>FAQ补充:</strong><br>Q:#RT调度与CFS调度区别？<br>答:两则强制上限类似，但RT只是限制实时任务（对响应时间高要求的进程）对cpu的存取，这类进程需要在限定的时间内处理并完成用户的请求，因此在限定的时间内所占用的CPU资源不能被其它进程打断或者占用; 如果此时实时进程中出现类似死循环之类的情况下就会导致整个系统无响应，因为实时进程中CPU权限最高并且在未完成任务前不会释放CPU资源;</p>
+<p><br></p>
+<h6 id="子系统之cpuacct"><a href="#子系统之cpuacct" class="headerlink" title="子系统之cpuacct"></a>子系统之cpuacct</h6><p>描述:CPU统计(CPU accounting)子系统会自动生成报告来显示cgroup任务所使用的cpu资源，其中包括子群组任务：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ls /sys/fs/cgroup/cpu,cpuacct | grep <span class="string">"cpuacct"</span></span><br><span class="line">cpuacct.stat    <span class="comment"># 报告此cgroup中所有任务（包括层级中的低端任务-下同）中用户(用户模式)和系统（kelnel模式）使用的CPU时间</span></span><br><span class="line"><span class="comment"># user 350140</span></span><br><span class="line"><span class="comment"># system 344690</span></span><br><span class="line"></span><br><span class="line">cpuacct.usage   <span class="comment"># 报告此cgroup中所有任务使用CPU的总时间</span></span><br><span class="line"><span class="comment"># 13713389123644</span></span><br><span class="line"></span><br><span class="line">cpuacct.usage_percpu <span class="comment">#报告cgroup中所有任务每个CPU使用时间（单位纳秒）</span></span><br><span class="line"><span class="comment"># 6911595096356 6801848202718</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h6 id="子系统之memory"><a href="#子系统之memory" class="headerlink" title="子系统之memory"></a>子系统之memory</h6><p>描述:其作用是用来限制Cgroup组所能使用的内存，主要接口:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">ls /sys/fs/cgroup/memory | grep <span class="string">"memory."</span></span><br><span class="line"></span><br><span class="line">memory.kmem.limit_in_bytes  <span class="comment">#设置内存使用上线，单位可以使用k/K,m/M,g/GD等;</span></span><br><span class="line">memory.memsw.limit_in_bytes <span class="comment">#设置内存加上交换分区的使用总量，防止进程把交换分区耗光;</span></span><br><span class="line">memory.stat         <span class="comment">#汇报内存使用信息包括当前资源总量，使用量，换页次数，活动页数量等等;</span></span><br><span class="line">memory.oom_control  <span class="comment">#用来决定一个进程在申请内存超限时候，是否会被系统kill掉，采用0或1来开启或者关闭cgroup的OOM killer默认开启（oom_kill_disable 0）;</span></span><br><span class="line"><span class="comment"># - 0 如果开启任务进程尝试申请内存超过允许，就会被系统OOM Killer终止;</span></span><br><span class="line"><span class="comment"># - 1 如果关闭任务进程尝试申请内存超过允许，那么它就会被暂停，直到额外的内存被释放;</span></span><br><span class="line">memory.swappiness  <span class="comment">#设置内存交换条件，对于使用swap空间有很大的重要性;</span></span><br><span class="line">memory.failcnt</span><br><span class="line">memory.force_empty</span><br><span class="line">memory.kmem.failcnt</span><br><span class="line">memory.kmem.max_usage_in_bytes</span><br><span class="line">memory.kmem.slabinfo</span><br><span class="line">memory.kmem.tcp.failcnt</span><br><span class="line">memory.kmem.tcp.limit_in_bytes</span><br><span class="line">memory.kmem.tcp.max_usage_in_bytes</span><br><span class="line">memory.kmem.tcp.usage_in_bytes</span><br><span class="line">memory.kmem.usage_in_bytes</span><br><span class="line">memory.limit_in_bytes</span><br><span class="line">memory.max_usage_in_bytes</span><br><span class="line">memory.memsw.failcnt</span><br><span class="line">memory.memsw.max_usage_in_bytes</span><br><span class="line">memory.memsw.usage_in_bytes</span><br><span class="line">memory.move_charge_at_immigrate</span><br><span class="line">memory.numa_stat</span><br><span class="line">memory.pressure_level</span><br><span class="line">memory.soft_limit_in_bytes</span><br><span class="line">memory.usage_in_bytes</span><br><span class="line">memory.use_hierarchy</span><br></pre></td></tr></table></figure></p>
+<p>基础示例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.创建控制组</span></span><br><span class="line">mkdir  /sys/fs/cgroup/memory/testcagroup</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.设置控制组使用的内存上限位100M，且内存与swap的总量为200M</span></span><br><span class="line"><span class="built_in">echo</span> 100M &gt; /sys/fs/cgroup/memory/testcagroup/memory.limit_in_bytes</span><br><span class="line"><span class="built_in">echo</span> 200M &gt; /sys/fs/cgroup/memory/testcagroup/memory.memsw.limit_in_bytes</span><br><span class="line"></span><br><span class="line"><span class="comment">#3.设置控制组中如果有进程尝试申请内存超过允许，就会被系统OOM killer掉</span></span><br><span class="line">cat /sys/fs/cgroup/memory/testcagroup/memory.oom_control</span><br><span class="line">oom_kill_disable 1</span><br><span class="line">under_oom 0</span><br><span class="line"></span><br><span class="line"><span class="comment">#4.查看memory.stat因为控制组内没有添加进程，所以stat的信息为空将当前进程加入cgroup组内</span></span><br><span class="line"><span class="variable">$echo</span> $$ &gt; /sys/fs/cgroup/memory/testcagroup/tasks</span><br><span class="line"><span class="variable">$cat</span> memory.stat</span><br><span class="line">cache 0</span><br><span class="line">rss 225280</span><br><span class="line">rss_huge 0</span><br><span class="line">mapped_file 0</span><br><span class="line">swap 0</span><br><span class="line">pgpgin 108</span><br><span class="line">pgpgout 53</span><br><span class="line">pgfault 584</span><br><span class="line">pgmajfault 0</span><br><span class="line">inactive_anon 0</span><br><span class="line">active_anon 200704</span><br><span class="line">inactive_file 0</span><br><span class="line">active_file 0</span><br><span class="line">unevictable 0</span><br><span class="line">hierarchical_memory_limit 104857600</span><br><span class="line">hierarchical_memsw_limit 209715200</span><br><span class="line">total_cache 0</span><br><span class="line">total_rss 225280</span><br><span class="line">total_rss_huge 0</span><br><span class="line">total_mapped_file 0</span><br><span class="line">total_swap 0</span><br><span class="line">total_pgpgin 108</span><br><span class="line">total_pgpgout 53</span><br><span class="line">total_pgfault 584</span><br><span class="line">total_pgmajfault 0</span><br><span class="line">total_inactive_anon 0</span><br><span class="line">total_active_anon 200704</span><br><span class="line">total_inactive_file 0</span><br><span class="line">total_active_file 0</span><br><span class="line">total_unevictable 0</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h6 id="子系统之blkio-块-I-O"><a href="#子系统之blkio-块-I-O" class="headerlink" title="子系统之blkio(块 I/O)"></a>子系统之blkio(块 I/O)</h6><p>描述:其子系统可以控制并监控cgroup中任务对块设备I/O存取，对一些伪文件写入值可以限制存取次数或者带宽，从伪文件中读取值可以获得关于I/O操作系统信息。</p>
+<p>块 I/O blkio子系统给出两种方式来控制对I/O的存取:</p>
+<ul>
+<li>权重分配: 用于完全公平列队I/O调度程序(Completely Fair Queuing I/O Sheduler), 用此方法可以给指定的cgroup设置权重；意味着每个cgroup都有一个预留的I/O操作设定比例(即权重)</li>
+<li>I/O 节流上限: 当一个指定设备执行I/O操作时，用此方法可为其操作次数设定上限；意味着一个设备的读或者写的操作次数是可以限定的;</li>
+</ul>
+<p>基本示例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 默认权重为1000</span></span><br><span class="line">cat /sys/fs/cgroup/blkio/blkio.weight</span><br><span class="line">1000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建2个控制组并设置权重</span></span><br><span class="line">mkdir/sys/fs/cgroup/blkio/mygroup&#123;1,2&#125;</span><br><span class="line"><span class="built_in">echo</span> 500 &gt; /sys/fs/cgroup/blkio/mygroup1/blkio.weight</span><br><span class="line"><span class="built_in">echo</span> 100 &gt; /sys/fs/cgroup/blkio/mygroup2/blkio.weight</span><br><span class="line"></span><br><span class="line"><span class="comment"># 此时离cgexec命令在清空缓存后采用dd读写（可以以此区别两个控制组的读写比例在5:1左右）</span></span><br><span class="line">cgexec -g <span class="string">"blkio:mygroup1"</span> dd bs=1M count=4096 <span class="keyword">if</span>=file1 of=/dev/null</span><br><span class="line">cgexec -g <span class="string">"blkio:mygroup2"</span> dd bs=1M count=4096 <span class="keyword">if</span>=file1 of=/dev/null</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="3-Union-文件系统"><a href="#3-Union-文件系统" class="headerlink" title="3.Union 文件系统"></a>3.Union 文件系统</h5><p>联合文件系统（UnionFS）是一种分层、轻量级并且高性能的文件系统也是 Docker 镜像的基础，它支持对文件系统的修改作为一次提交来一层层的叠加，同时可以将不同目录挂载到同一个虚拟文件系统下(unite several directories into a single virtual filesystem)。</p>
+<p>Docker 目前支持的联合文件系统包括 OverlayFS, AUFS, Btrfs, VFS, ZFS 和 Device Mapper,在可能的情况下，推荐使用 <code>overlay2 存储驱动</code>它是目前 Docker 默认的存储驱动;</p>
+<p><em>使用的好处：</em><br>镜像可以通过分层来进行继承（对于修改采用分层存储），基于基础镜像（没有父镜像），可以制作各种具体的应用镜像。另外不同 Docker 容器就可以共享一些基础的文件系统层，同时再加上自己独有的改动层，大大提高了存储的效率。</p>
+<p>Docker 中使用的 AUFS（AnotherUnionFS）就是一种联合文件系统。 </p>
+<ul>
+<li>AUFS 支持为每一个成员目录（类似 Git 的分支）设定只读（readonly）、读写（readwrite）和写出（whiteout-able）权限, </li>
+<li>同时 AUFS 里有一个类似分层的概念, 对只读权限的分支可以逻辑上进行增量地修改(不影响只读部分的)。</li>
+</ul>
+<p><br></p>
+<h5 id="4-容器格式"><a href="#4-容器格式" class="headerlink" title="4.容器格式"></a>4.容器格式</h5><p>最初，Docker 采用了 LXC 中的容器格式。<br>从 0.7 版本以后开始去除 LXC，转而使用自行开发的 libcontainer，从 1.11 开始，则进一步演进为使用 runC 和 containerd。</p>
+<p><em>Docker 与 LXC（Linux Container）有何不同？</em><br>*答：LXC 利用 Linux 上相关技术实现了容器，Docker 则在如下的几个方面进行了改进：</p>
+<ul>
+<li>移植性：通过抽象容器配置，容器可以实现从一个平台移植到另一个平台；</li>
+<li>镜像系统：基于 AUFS 的镜像系统为容器的分发带来了很多的便利，同时共同的镜像层只需要存储一份，实现高效率的存储；</li>
+<li>版本管理：类似于Git的版本管理理念，用户可以更方便的创建、管理镜像文件；</li>
+<li>仓库系统：仓库系统大大降低了镜像的分发和管理的成本；</li>
+<li>周边工具：各种现有工具（配置管理、云平台）对 Docker 的支持，以及基于 Docker的 PaaS、CI 等系统，让 Docker 的应用更加方便和多样化。</li>
+</ul>
+<p><br></p>
+<p><em>Docker 与 Vagrant 有何不同？</em><br>答：两者的定位完全不同。</p>
+<ul>
+<li>Vagrant 类似 Boot2Docker（一款运行 Docker 的最小内核），是一套虚拟机的管理环境。Vagrant 可以在多种系统上和虚拟机软件中运行，可以在 Windows，Mac 等非 Linux 平台上为 Docker 提供支持，自身具有较好的包装性和移植性。</li>
+<li>原生的 Docker 自身只能运行在 Linux 平台上，但启动和运行的性能都比虚拟机要快，往往更适合快速开发和部署应用的场景。</li>
+</ul>
+<p><em>简单说：</em></p>
+<ul>
+<li>Docker 不是虚拟机，而是进程隔离，对于资源的消耗很少，但是目前需要 Linux 环境支持。</li>
+<li>Vagrant 是虚拟机上做的封装，虚拟机本身会消耗资源。</li>
+<li>一句话：Vagrant 适合用来管理虚拟机，而 Docker 适合用来管理应用环境。</li>
+</ul>
+<p><br></p>
+<h5 id="5-网络实现"><a href="#5-网络实现" class="headerlink" title="5.网络实现"></a>5.网络实现</h5><p>描述:Docker 的网络实现其实就是利用了 Linux 上的网络命名空间和虚拟网络设备veth(Vritual Enternet Device)，veth主要的目的是为了跨NetWork Namespace之间提供一种类似于Linux进程间通信技术，所以veth总数成对出现进行通信其<code>工作在L2数据链路层</code>，比如veth0与veth1他们<code>分别在不同的Network Namespace</code>，其中一端Veth设备任意一端上RX到的数据都会在另外一端上以Tx的方式发送出去；</p>
+<p>前面我们说过Linux下的Docker容器网络通过Network Namespace机制(<code>/proc/net, IP地址, 网卡, 路由</code>)实现隔离网络资源，不同的Network Namespace有各自的网络设备,协议栈,路由器以及防火墙，同一个Namepsace下的进程共享同一个网络视图；所以veth-pair设备接口它在本地主机和容器内分别创建一个虚拟接口(<code>即:在不同的网络命名空间中创建通道</code>)，并让它们彼此连通实现网络通信，该设备在转发数据包过程中并不篡改数据包内容;</p>
+<p><strong>基本原理：</strong><br>为了实现Docker网络中各个容器通信，需要veth-pair设备在本地主机和容器内分别创建虚拟接口(<code>Docker 中的网络接口默认都是虚拟的接口</code>), 然后Linux 通过在内核中进行数据复制来实现虚拟接口之间的数据转发，<code>发送接口的发送缓存中的数据包被直接复制到接收接口的接收缓存中</code>，并且对于本地系统和容器内系统看来就像是一个正常的以太网卡，只是它不需要真正同外部网络设备通信，所以速度要快很多则转发效率较高；此外如果不同子网之间要进行通信，还需要路由机制。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.网桥工具安装brctl</span></span><br><span class="line">yum install -y bridge-utils</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.查看网桥连接信息</span></span><br><span class="line"><span class="variable">$brctl</span> show</span><br><span class="line"><span class="comment"># bridge name     bridge id               STP enabled     interfaces</span></span><br><span class="line"><span class="comment"># br-fa08aa7db7a6 8000.0242fb5007f1       no              veth842b243</span></span><br><span class="line"><span class="comment"># docker0         8000.024245b206ce       no              veth985cbf0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#3.机器网卡信息</span></span><br><span class="line"><span class="variable">$ip</span> addr | grep <span class="string">"BROADCAST"</span></span><br><span class="line"><span class="comment"># 2: ens192: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP group default qlen 1000</span></span><br><span class="line"><span class="comment"># 3: docker0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default</span></span><br><span class="line"><span class="comment"># 5: br-fa08aa7db7a6: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default</span></span><br><span class="line"><span class="comment"># 57: veth985cbf0@if56: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue master docker0 state UP group default</span></span><br><span class="line"><span class="comment"># 71: veth842b243@if70: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue master br-fa08aa7db7a6 state UP group default</span></span><br></pre></td></tr></table></figure>
+<p>当通过docker run创建一个容器的时候便<code>有了单独的网络命名空间</code>，容器网络初始化流程：</p>
+<ul>
+<li>1.创建一对虚拟接口，分别放到本地主机和新容器中；</li>
+<li>2.本地主机一端桥接到默认的 docker0 或指定网桥上，并具有一个唯一的名字，如 veth985cbf0@if56；</li>
+<li>3.容器一端放到新容器中，并修改名字作为 eth0，这个接口只在容器的命名空间可见；</li>
+<li>4.从网桥可用地址段中获取一个空闲地址分配给容器的 eth0@if57 <code>网卡名称@虚拟接口序号</code>，并配置默认路由到桥接网卡 veth985cbf0@if56(57)<br>完成这些之后，容器就可以使用 eth0 虚拟网卡来连接其他容器和其他网络。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 简单描述</span></span><br><span class="line">ens192|eth0 &lt;-&gt; docker0 &lt;-&gt; veth985cbf0@56(虚拟网卡) &lt;-&gt; eth0@if57(容器内部)网卡</span><br><span class="line"></span><br><span class="line"><span class="comment"># 容器内部网卡信息</span></span><br><span class="line">docker <span class="built_in">exec</span> -it test1 sh -c ip addr</span><br><span class="line"><span class="comment"># 1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN qlen 1000</span></span><br><span class="line"><span class="comment">#     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span></span><br><span class="line"><span class="comment">#     inet 127.0.0.1/8 scope host lo</span></span><br><span class="line"><span class="comment">#        valid_lft forever preferred_lft forever</span></span><br><span class="line"><span class="comment"># 56: eth0@if57: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue state UP</span></span><br><span class="line"><span class="comment">#     link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff</span></span><br><span class="line"><span class="comment">#     inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span></span><br><span class="line"><span class="comment">#        valid_lft forever preferred_lft forever</span></span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190604143208.png" target="_blank" title="WeiyiGeek.虚拟接口原理图" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190604143208.png" alt="WeiyiGeek.虚拟接口原理图" title="" class=""></a>
+                <p>WeiyiGeek.虚拟接口原理图</p>
+            </figure>
+</li>
+</ul>
+<p>Docker 中网络提供了五种模式：</p>
+<ul>
+<li>Bridge 模式</li>
+<li>Host 模式</li>
+<li>Container 模式(即:指定容器之间通信的网络)</li>
+<li>None 模式</li>
+<li>Overtlay</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) Docker network 查看</span></span><br><span class="line">docker network ls</span><br><span class="line"><span class="comment"># NETWORK ID          NAME                DRIVER(驱动模式)              SCOPE</span></span><br><span class="line"><span class="comment"># 3448511628ee        bridge              bridge              local</span></span><br><span class="line"><span class="comment"># 5baa8b9f47c3        host                host                local</span></span><br><span class="line"><span class="comment"># afd58da3d80f        none                null                local</span></span><br><span class="line"><span class="comment"># fa08aa7db7a6        opt_default         bridge              local</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 网络名称信息详细</span></span><br><span class="line">docker network inspect $(docker network ls -q)</span><br><span class="line"><span class="comment"># [</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#         "Name": "bridge",</span></span><br><span class="line"><span class="comment">#         "Id": "3448511628ee3de59985bfa8251a8731148265417530fba645d1f5cca6464ccf",</span></span><br><span class="line"><span class="comment">#         "Created": "2020-07-02T11:21:02.785207578+08:00",</span></span><br><span class="line"><span class="comment">#         "Scope": "local",</span></span><br><span class="line"><span class="comment">#         "Driver": "bridge",</span></span><br><span class="line"><span class="comment">#         "EnableIPv6": false,</span></span><br><span class="line"><span class="comment">#         "IPAM": &#123;</span></span><br><span class="line"><span class="comment">#             "Driver": "default",</span></span><br><span class="line"><span class="comment">#             "Options": null,</span></span><br><span class="line"><span class="comment">#             "Config": [</span></span><br><span class="line"><span class="comment">#                 &#123;</span></span><br><span class="line"><span class="comment">#                     "Subnet": "172.17.0.0/16",</span></span><br><span class="line"><span class="comment">#                     "Gateway": "172.17.0.1"</span></span><br><span class="line"><span class="comment">#                 &#125;</span></span><br><span class="line"><span class="comment">#             ]</span></span><br><span class="line"><span class="comment">#         &#125;,</span></span><br><span class="line"><span class="comment">#         "Internal": false,</span></span><br><span class="line"><span class="comment">#         "Attachable": false,</span></span><br><span class="line"><span class="comment">#         "Ingress": false,</span></span><br><span class="line"><span class="comment">#         "ConfigFrom": &#123;</span></span><br><span class="line"><span class="comment">#             "Network": ""</span></span><br><span class="line"><span class="comment">#         &#125;,</span></span><br><span class="line"><span class="comment">#         "ConfigOnly": false,</span></span><br><span class="line"><span class="comment">#         "Containers": &#123;</span></span><br><span class="line"><span class="comment">#             "25d2d645bfc9e6530039d6aac890f69dd9af33f8f966adc2d7287b74964678e3": &#123;</span></span><br><span class="line"><span class="comment">#                 "Name": "test1",</span></span><br><span class="line"><span class="comment">#                 "EndpointID": "6c825cb11f084e85afddbc993937e6061b2e36ea7dfaa30792b2ea6d0eb414a1",</span></span><br><span class="line"><span class="comment">#                 "MacAddress": "02:42:ac:11:00:02",</span></span><br><span class="line"><span class="comment">#                 "IPv4Address": "172.17.0.2/16",</span></span><br><span class="line"><span class="comment">#                 "IPv6Address": ""</span></span><br><span class="line"><span class="comment">#             &#125;</span></span><br><span class="line"><span class="comment">#         &#125;,</span></span><br><span class="line"><span class="comment">#         "Options": &#123;</span></span><br><span class="line"><span class="comment">#             "com.docker.network.bridge.default_bridge": "true",</span></span><br><span class="line"><span class="comment">#             "com.docker.network.bridge.enable_icc": "true",</span></span><br><span class="line"><span class="comment">#             "com.docker.network.bridge.enable_ip_masquerade": "true",</span></span><br><span class="line"><span class="comment">#             "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",</span></span><br><span class="line"><span class="comment">#             "com.docker.network.bridge.name": "docker0",</span></span><br><span class="line"><span class="comment">#             "com.docker.network.driver.mtu": "1500"</span></span><br><span class="line"><span class="comment">#         &#125;,</span></span><br><span class="line"><span class="comment">#         "Labels": &#123;&#125;</span></span><br><span class="line"><span class="comment">#     &#125;</span></span><br><span class="line"><span class="comment"># ]</span></span><br></pre></td></tr></table></figure>
+<p><strong>Tips:</strong></p>
+<ul>
+<li>(1)通过 –net 参数来指定容器的网络配置，有4个可选值：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">--net=bridge 这个是默认值，连接到默认的网桥。</span><br><span class="line">--net=host 告诉Docker不要将容器网络放到隔离的命名空间中，即不要容器化容器内的网络</span><br><span class="line">  - 此时容器使用本地主机的网络，它拥有完全的本地主机接口访问权（不安全）,</span><br><span class="line">  - 如果进一步的使用 --privileged=<span class="literal">true</span>，容器会被允许直接配置主机的网络堆栈。</span><br><span class="line">--net=container:NAME_or_ID  让Docker将新建容器的进程放到一个已存在容器的网络栈中，新容器进程有自己的文件系统、进程列表和资源限制，但会和已存在的容器共享 IP 地址和端口等网络资源，两者进程可以直接通过 lo 环回接口通信。</span><br><span class="line">--net=none 让 Docker 将新容器放到隔离的网络栈中，但是不进行网络配置。之后用户可以自己进行配置。</span><br><span class="line">  - 用户可以使用 ip netns <span class="built_in">exec</span> 命令来在指定网络命名空间中进行配置，从而配置容器内的网络。</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<h6 id="Bridge-模式"><a href="#Bridge-模式" class="headerlink" title="Bridge 模式"></a>Bridge 模式</h6><p>描述: 该模式是Docker默认的一种网络通讯模式;</p>
+<p>Bridge 网络模式原理:</p>
+<blockquote>
+<p>答:Docker Daemon 首次启动时候，会在其所在的宿主机上创建一个名为Docker0的虚拟网桥，然后利用<code>veth pair技术创建一对虚拟网络接口</code>分别接入到Docker0网桥中和相关容器的Network Namespace之中,即<code>Docker0 &lt;-&gt; veth pair &lt;-&gt; Container[Namespace]</code>;<br>容器在建立之初Docker0网桥会为其设置一个IP地址及其网关(即Docker0接口地址), 在通过iptables控制容器与网络通信以及容器间通信的, 实际上Docker0通过iptables中配置与宿主机上的物理网卡链接，并且符合条件的请求将会通过iptables转发到网桥docker0中，之后再分发给对应的机器；</p>
+</blockquote>
+<p>网络图示:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">----------           ----------   </span><br><span class="line">|Container|          |Container|</span><br><span class="line">|eth0@if57|          |eth0@if70|     <span class="comment">#veth pair@ 对应宿主机上虚拟网卡号 $ip addr 可查看</span></span><br><span class="line">----------           ----------</span><br><span class="line">    |                   |</span><br><span class="line">------------------------------------</span><br><span class="line">veth985cbf0@if56   veth842b243@if69  <span class="comment">#veth pair:@ 后对应着容器内部网络号  $ip addr 可查看</span></span><br><span class="line">|      docker0 （bridge）          |</span><br><span class="line">------------------------------------</span><br><span class="line">              | ipv4_ip_forward (iptales)</span><br><span class="line">         (eth0|ens192)</span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 容器 test1 的网络信息</span></span><br><span class="line"><span class="variable">$docker</span> <span class="built_in">exec</span> -it test1 ip addr</span><br><span class="line">56: eth0@if57: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue state UP</span><br><span class="line">    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 查看iptables中关于test1容器的NAT转发规则</span></span><br><span class="line"><span class="variable">$iptables</span> -t nat -L   <span class="comment"># 默认四条链+创建的Docker链</span></span><br><span class="line">Chain PREROUTING (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line">DOCKER     all  --  anywhere             anywhere             ADDRTYPE match dst-type LOCAL  <span class="comment">#网桥</span></span><br><span class="line"></span><br><span class="line">Chain INPUT (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line"></span><br><span class="line">Chain OUTPUT (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line">DOCKER     all  --  anywhere            !loopback/8           ADDRTYPE match dst-type LOCAL   <span class="comment">#网桥</span></span><br><span class="line"></span><br><span class="line">Chain POSTROUTING (policy ACCEPT)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line">MASQUERADE  all  --  172.18.0.0/16       anywhere</span><br><span class="line">MASQUERADE  tcp  --  172.18.0.2          172.18.0.2           tcp dpt(destination port):http                    <span class="comment">#运行通过的目标IP协议与应用</span></span><br><span class="line"></span><br><span class="line">Chain DOCKER (2 references)</span><br><span class="line">target     prot opt <span class="built_in">source</span>               destination</span><br><span class="line">RETURN     all  --  anywhere             anywhere</span><br><span class="line">RETURN     all  --  anywhere             anywhere</span><br><span class="line">DNAT       tcp  --  anywhere             anywhere             tcp dpt:tproxy to:172.18.0.2:80  <span class="comment">#将指定容器的IP和端口进行转发</span></span><br><span class="line"><span class="comment"># 上述规则简要说明:</span></span><br><span class="line"><span class="comment"># 从任意源发送当前机器的80端口的TCP转发到容器地址为 172.18.0.2:80 的内部应用上;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 具体流程</span></span><br><span class="line"><span class="comment"># 访问宿主机的80端口，然后经过iptables的NAT PREROUTING将IP重定向到172.18.0.2, 之后重定向的数据包通过iptables中的FILTER配置，最终在NAT POSTROUTING阶段将IP地址伪装成为127.0.0.1，此时访问宿主机上映射到容器中端口，所有的请求便会转发到容器中;</span></span><br><span class="line">127.0.0.1:80 -&gt;  NAT PREROUTING -&gt; 172.18.0.2:80 -&gt; FILTER FORWARD -&gt; ACCEPT -&gt; NAT POSTROUTING</span><br></pre></td></tr></table></figure></p>
+<p>Bridge网络中容器与宿主机通信示意图:<br><figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200708232154.png" target="_blank" title="WeiyiGeek.容器宿主机" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200708232154.png" alt="WeiyiGeek.容器宿主机" title="" class=""></a>
+                <p>WeiyiGeek.容器宿主机</p>
+            </figure></p>
+<p><strong>总结说明:</strong></p>
+<ul>
+<li>1) Veth-Pair技术在<code>宿主机Docker0网桥上与容器的所属的网络命名空间(Network Namespace)上分别创建一个虚拟网络接口</code>即<code>veth985cbf0@if56 &lt;---&gt; eth0@if57</code>，它保证了无论哪一个接口接收到网络报文，都会无条件的转发到另外一方之上;</li>
+<li>2) 默认情况下容器可以访问外部网络(<code>一般都会添加本地系统转发支持</code>)采用是NATP(网络地址端口转换)的方式其包含两种转换方式<code>SNAT(源地址) 和 DNAT(目的地址)</code>，容器连接外网是通过源NAT地址转换实现的，但是外部网络却无法访问到容器它也需要通过目的NAT转换(<code>数据包的目的地址</code>)才能与容器进行通信;<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 内核转发参数查看</span></span><br><span class="line"><span class="variable">$sysctl</span> -a | grep <span class="string">"ip_forward"</span></span><br><span class="line">net.ipv4.ip_forward = 1</span><br><span class="line"><span class="comment"># PS:手动开启转发（临时生效）</span></span><br><span class="line">sysctl -w net.ipv4.ip_forward = 1</span><br><span class="line"><span class="comment"># 启动docker deamon指定以下参数也可以实现本地转发</span></span><br><span class="line">dockerd  -h | grep <span class="string">"ip_forward"</span></span><br><span class="line">--ip-forward  Enable net.ipv4.ip_forward (default <span class="literal">true</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 宿主机以外的世界需要访问容器时候，利用DNAT修改数据包的目的地址，数据包的流向如下</span></span><br><span class="line"><span class="comment"># 宿主机上的dokcer0网桥采用iptable识别到有请求访问容器IP和端口时，将数据包发送附加到docker0网桥上的veth985cbf0@if56接口中，该接口由于veth-pair特性会将接收到的数据包无条件的发送给容器内部的 eth0@if57 ，容器接收到数据包并做出响应;</span></span><br><span class="line">              |------------------------------------------------|</span><br><span class="line">数据包(外界) -&gt; Eth0 &lt;-&lt;- DNAT -&gt;-&gt; Docker0 —&gt; veth985cbf0@if56 -&gt; eth0@if57(容器内部)</span><br><span class="line">              |                 宿主机                         |</span><br><span class="line">              |------------------------------------------------|</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 当容器内部需要访问宿主机以外的世界时候，利用SNAT修改数据包的源地址（此时容器对与外部网络是透明的），数据包流向为下所示</span></span><br><span class="line"><span class="comment"># 流程与上面相似方向相反，只是转发采用SNAT方式;</span></span><br><span class="line">数据包[eth0@if57](容器) -&gt; veth985cbf0@if56 -&gt; Docker0 &lt;-&lt;- SNAT -&gt;-&gt; Eth0 -&gt; 外界网络</span><br><span class="line">                        |--------------------宿主机------------------------|</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<h6 id="Host-模式"><a href="#Host-模式" class="headerlink" title="Host 模式"></a>Host 模式</h6><p>描述:该网络模式与Bridge桥接的网络模式存在一定的差异，最大差异是没有为容器创建一个<code>隔离的网络环境</code>, 并且因为该host网络模式下的Docker容器与宿主机<code>共享一个网络命名空间(namepace)</code>，拥有相同的网络设施并且容器的IP即为宿主机IP能直接与外界进行通信;<br>由于Doker容器的host网络模式在实现过程之中，由于不需要额外的网桥以及虚拟网卡、故而不涉及docker0网桥以及veth-pair虚拟网卡对；</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[Docker Container](host 模式) -&gt; 宿主机 (eth0) -&gt; 外界网络</span><br></pre></td></tr></table></figure>
+<p><strong>Host网络模式优缺点:</strong></p>
+<ul>
+<li>1)优点: 效率高(直接采用宿主机IP与外界通信不经过NATP转换)、端口公用(容器可直接使用宿主机端口)</li>
+<li>2)缺点: 安全性差(容器不在拥有隔离的和独立的网络栈)、端口限制(宿主机占用或者Bridge网络模式主机占用的端口不能被使用，即不在拥有容器中全部端口)</li>
+</ul>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 创建Host网络模式的同期，可以通过ip addr 命令查看网卡信息，因为直接利用宿主机的网络栈，所有打印出的直接是宿主机的网卡接口信息;</span></span><br><span class="line">docker run -it --net=host busybox ip addr</span><br><span class="line"><span class="comment"># 1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span></span><br><span class="line"><span class="comment"># 2: ens192: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq qlen 1000</span></span><br><span class="line"><span class="comment"># 3: docker0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue</span></span><br><span class="line"><span class="comment"># 5: br-fa08aa7db7a6: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue</span></span><br><span class="line"><span class="comment"># 57: veth985cbf0@if56: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue master docker0</span></span><br><span class="line"><span class="comment"># 71: veth842b243@if70: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue master br-fa08aa7db7a6</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h6 id="Container-模式"><a href="#Container-模式" class="headerlink" title="Container 模式"></a>Container 模式</h6><p>描述: 该模式通常用于自定义网络栈时候使用，它会重用另外一个容器的网络命名空间(例如Bridge)；比如Kubernetes也是使用该模式进行内部分布式应用通信;<br>实际上，采用Container模式的两个容器共享相同的1个Network Namespace;</p>
+<p>Container 网络模式示意图:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Docker Container  &lt;-&gt;  Docker Container</span><br><span class="line">                       |   eth0@if57   | </span><br><span class="line">                       -----------------</span><br><span class="line">                              |</span><br><span class="line">  Docker0 (Bridge) &lt;-&gt; [veth985cbf0@if56]                                </span><br><span class="line">    | (ipv4.ip_forward)</span><br><span class="line">  eth0</span><br></pre></td></tr></table></figure></p>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.创建一个bridge网络模式的容器</span></span><br><span class="line">docker run -d -P --net=bridge --name nginx nginx:latest</span><br><span class="line"><span class="comment"># 2.查看其容器的ip 信息</span></span><br><span class="line">docker inspect nginx | grep <span class="string">"IPAddress"</span></span><br><span class="line">docker inspect nginx | grep <span class="string">"IPAddress"</span></span><br><span class="line"><span class="string">"SecondaryIPAddresses"</span>: null,</span><br><span class="line"><span class="string">"IPAddress"</span>: <span class="string">"172.17.0.3"</span>,</span><br><span class="line"><span class="comment"># 3.构建一个采用Container网络模式的容器</span></span><br><span class="line"><span class="comment"># 创建容器连接到已键容器的网络之中，比如采用container:容器名称进行制定网络;</span></span><br><span class="line">docker run -d --name busybox --net=container:nginx busybox:latest top</span><br><span class="line"><span class="comment"># 13d274350a2855c1295e3c93fd4e6a166b6e34cfc71a91e1396ca8b4a75f67e2</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.此时您会发现其IP地址与链接到容器中的网络IP地址一样均为172.17.0.3</span></span><br><span class="line"><span class="variable">$docker</span> ps</span><br><span class="line">CONTAINER ID        IMAGE                    COMMAND                  CREATED             STATUS                PORTS                   NAMES</span><br><span class="line">13d274350a28        busybox:latest           <span class="string">"top"</span>                    3 seconds ago       Up 2 seconds                                  busybox</span><br><span class="line">04074e2e85b4        nginx:latest             <span class="string">"/docker-entrypoint.…"</span>   4 minutes ago       Up 3 minutes          0.0.0.0:32768-&gt;80/tcp   nginx</span><br><span class="line"><span class="variable">$docker</span> <span class="built_in">exec</span> -it busybox ip addr</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">72: eth0@if73: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue</span><br><span class="line">    link/ether 02:42:ac:11:00:03 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.3/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h6 id="none-模式"><a href="#none-模式" class="headerlink" title="none 模式"></a>none 模式</h6><p>描述: 该模式不为Docker容器提供任何的网络环境可以说该模式只是对容器做了极少的设定，一旦设置none网络模式容器内部就只能使用loopback设备，不会再有其它的网络资源环境;</p>
+<p>该模式下方便docker开发者基于此做出其他可能的网络定制开发, 实际上该模式关闭了容器的网络功能，应用场景如下；</p>
+<ul>
+<li>容器并不需要网络(例如只需要写磁盘卷的批处理任务)</li>
+<li>希望自定义网络</li>
+</ul>
+<p>基础实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.创建一个网络模式为none的容器</span></span><br><span class="line">docker run -itd --net=none --name=busybox-none busybox top</span><br><span class="line"><span class="comment"># 2.查看创建的容器的ip地址，只能看见一个回环地址</span></span><br><span class="line">docker <span class="built_in">exec</span> -it busybox-none ip addr</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h6 id="Overlay-模式"><a href="#Overlay-模式" class="headerlink" title="Overlay 模式"></a>Overlay 模式</h6><p>描述:Overlay模式是Docker原生的跨主机网络方案(其他一些方案:Flannel/Weave和<code>Calico K8s已默认使用</code>)，而Docker 又通过Libnetwork以及CNM将上述各种方案与docker集成在一起;</p>
+<p>Q: 什么是Libnetwork库?</p>
+<blockquote>
+<p>答: 他是Docker容器的网络库，其核心内容是其定义的<code>Container Network Model (CNM)容器网络模型</code> 他对容器网络进行了抽象;</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">                     | -&gt; Native Drivers(None, Bridge, Overlay, Macvlan) <span class="comment">#原生</span></span><br><span class="line">Docker -&gt; Libnetwork | -&gt;</span><br><span class="line">                     | -&gt; Remote Drivers(Flannel, Weave, Calico)  <span class="comment">#第三方网络插件</span></span><br></pre></td></tr></table></figure>
+<p>CNM 由以下三类组件组成:</p>
+<ul>
+<li>Sandbox: <code>Linux Network Namespace</code> 是基于 Sandbox的标准实现，它是容器的网络栈其囊括<code>Interface, 路由器 和 DNS 设置</code>,也就是说Sandbox将一个容器与另外容器通过Namespace进行隔离，一个容器包含一个Sandbox，它可以包含来自不同的Network的Endpoint，即<code>每个Sandbox可以有多个Endpoint</code>隶属于不同的网络;</li>
+<li>Endpoint: 将Sandbox接入到Network之中，一个Endpoint只能属于一个网络与一个Sandbox，例如 Veth-pair 的实现;</li>
+<li>Network: 包含一组Endpoint，同一个Network的Endpoint可以直接通信，其实现可以是Linux bridge vlan等</li>
+</ul>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200711231356.png" target="_blank" title="WeiyiGeek.CNM" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200711231356.png" alt="WeiyiGeek.CNM" title="" class=""></a>
+                <p>WeiyiGeek.CNM</p>
+            </figure>
+<p>总结: </p>
+<ul>
+<li>(1) Sandbox 与 Endpoint 是一对多的关系，Endpoint将Sandbox绑定到Network之中，并且同一个Network间的Endpoint可以直接通信;</li>
+</ul>
+<p><strong>Overlay网络原理</strong><br>描述:Docker overlay网络需要一个K-V数据库用于保存状态相关信息(包括CNM网络组件Network，Endpoint以及IP)，可选方案有Consul/Etc/Zokeeper等，此处以Consul一种K-V数据库为例进行演示，此处我们并不需要写任何代码只需要按照Consul即可；</p>
+<p>基础实践:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.在Docker Deamon其中一个节点中拉取并运行Consul镜像</span></span><br><span class="line">docker run -d -p 8500:8500 -h consul --name consul-net-overlay progrium/consul -server -bootstrap**docker run -d -p 8500:8500 -h consul --name consul-net-overlay progrium/consul -server -bootstrap</span><br><span class="line"><span class="comment"># Status: Downloaded newer image for progrium/consul:latest</span></span><br><span class="line"><span class="comment"># 86d9d93384034b19acad56dfdebed754da060125b534b240fd87f79e18a2bfcd</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.然后再各个Docker节点的Deamon上进行配置Consul发现: /etc/systemd/system/docker.service 再其后加上如下参数</span></span><br><span class="line">--cluster-store=consul://10.10.107.245:8500 --cluster-advertise=ens192:2376</span><br><span class="line">$ systemctl cat docker</span><br><span class="line"><span class="comment"># /usr/lib/systemd/system/docker.service</span></span><br><span class="line"><span class="comment"># ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --exec-opt native.cgroupdriver=systemd --cluster-store=consul://10.10.107.245:8500 (consul运行节点) --cluster-advertise=ens192:2376(当前节点网卡或者IP即Docker Deamon服务)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.systemd守护进程重启与重启docker</span></span><br><span class="line">[root@worker-03 ~]$ systemctl daemon-reload</span><br><span class="line">[root@worker-03 ~]$ systemctl restart docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.创建overlay 网络与创建bridge网络基本一致，只是在-d参数时候有些许不同</span></span><br><span class="line">docker network create -d overlay overlay-net </span><br><span class="line">docker network create -d overlay overlay-net-sub --subnet 172.25.0.0/24 --gateway 172.25.0.1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.创建运行容器时候指定-network参数，及时在不同的docker主机下创建的容器只要--network为oveylay-net它们之间都能相互访问；</span></span><br><span class="line"><span class="comment"># 以简单使用 –net=host 方式使用主机网络模式</span></span><br><span class="line">docker run --network overlay-net busybox sleep 6000</span><br><span class="line">docker run --network overlay-net busybox sleep 6000</span><br><span class="line"><span class="variable">$docker</span> ps</span><br><span class="line"><span class="comment"># CONTAINER ID        IMAGE                   COMMAND                  CREATED             STATUS              PORTS               NAMES</span></span><br><span class="line"><span class="comment"># 430ec4450df4        busybox                 "sleep 6000"             6 minutes ago       Up 6 minutes                            cranky_curie</span></span><br><span class="line"><span class="comment"># 0902833f9a63        busybox                 "sleep 6000"             12 minutes ago      Up 11 minutes                           intelligent_chaplygin</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.Docker 网络查看</span></span><br><span class="line"><span class="variable">$docker</span> network ls</span><br><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">5de5f196afda        bridge              bridge              <span class="built_in">local</span></span><br><span class="line">23d95a1bd969        docker_gwbridge     bridge              <span class="built_in">local</span></span><br><span class="line">3a700c6af892        host                host                <span class="built_in">local</span></span><br><span class="line">93a5b381ef0d        none                null                <span class="built_in">local</span></span><br><span class="line">e437f4650c96        overlay-net         overlay             global</span><br><span class="line"><span class="variable">$docker</span> network inspect docker_gwbridge -f <span class="string">"&#123;&#123;.IPAM.Config&#125;&#125;"</span></span><br><span class="line"><span class="comment"># [&#123;172.18.0.0/16  172.18.0.1 map[]&#125;]</span></span><br><span class="line"><span class="variable">$docker</span> network inspect overlay-net -f <span class="string">"&#123;&#123;.IPAM.Config&#125;&#125;"</span></span><br><span class="line"><span class="comment"># [&#123;10.0.0.0/24  10.0.0.1 map[]&#125;]</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 7.创建容器的IP地址查看</span></span><br><span class="line">[root@worker-03 ~]<span class="variable">$docker</span> <span class="built_in">exec</span> -it 090 ip addr</span><br><span class="line">22: eth0@if23: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1450 qdisc noqueue</span><br><span class="line">    link/ether 02:42:0a:00:00:02 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.0.2/24 brd 10.0.0.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">25: eth1@if26: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue</span><br><span class="line">    link/ether 02:42:ac:12:00:02 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.18.0.2/16 brd 172.18.255.255 scope global eth1</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">[root@worker-03 ~]<span class="variable">$docker</span> <span class="built_in">exec</span> -it 430 ip addr</span><br><span class="line">27: eth0@if28: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1450 qdisc noqueue</span><br><span class="line">    link/ether 02:42:0a:00:00:03 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.0.3/24 brd 10.0.0.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">29: eth1@if30: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue</span><br><span class="line">    link/ether 02:42:ac:12:00:03 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.18.0.3/16 brd 172.18.255.255 scope global eth1</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"></span><br><span class="line">[root@worker-03 ~]<span class="variable">$docker</span> <span class="built_in">exec</span> -it 090 sh</span><br><span class="line">/ <span class="comment"># ip addr</span></span><br><span class="line">/ <span class="comment"># ping 10.0.0.1</span></span><br><span class="line">PING 10.0.0.1 (10.0.0.1): 56 data bytes</span><br><span class="line">64 bytes from 10.0.0.1: seq=0 ttl=64 time=0.540 ms</span><br><span class="line">/ <span class="comment"># ping 10.0.0.2</span></span><br><span class="line">PING 10.0.0.2 (10.0.0.2): 56 data bytes</span><br><span class="line">64 bytes from 10.0.0.2: seq=0 ttl=64 time=0.055 ms</span><br><span class="line">/ <span class="comment"># ping 10.0.0.3 #可以看到是正常通信的</span></span><br><span class="line">PING 10.0.0.3 (10.0.0.3): 56 data bytes</span><br><span class="line">64 bytes from 10.0.0.3: seq=0 ttl=64 time=0.110 ms</span><br></pre></td></tr></table></figure><br>访问Consul查看究竟存在什么东西:<code>http://10.10.107.245:8500/ui/#/dc1/kv/docker/network/v1.0/</code></p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200712000034.png" target="_blank" title="WeiyiGeek.Consul-docker-kv-network" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200712000034.png" alt="WeiyiGeek.Consul-docker-kv-network" title="" class=""></a>
+                <p>WeiyiGeek.Consul-docker-kv-network</p>
+            </figure>
+<p><br/></p>
+<p><strong>总结:</strong><br>从上面的实际操作中我们可以看见当创建完overlay网络后，查看docker网络会发现网络中多了个 overlay-net (类型为Overlay，Scope为Global)与 docker_gwbridge (类型为Bridge，Scope为local)，为什么会多出来一个 docker_gwbridge网络呢?<br>答:实际上这就是Overlay工作原理之所在；<br>可以通过<code>yum install -y bridge-utils &amp;&amp; brctl show</code> 进行查看得出结果, 当每创建一个网络类型为Overlay的容器，docker_gwbridge 下便会挂载一个veth***，这说明oveylay容器是通过此网桥来进行对外连接的;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bridge name           bridge id               STP enabled     interfaces</span><br><span class="line">docker0               8000.024274c0c574       no</span><br><span class="line">docker_gwbridge       8000.02422e73bb62       no              vethae1f217</span><br><span class="line">                                                              vethec87cb3</span><br></pre></td></tr></table></figure></p>
+<p>简单的说overlay网络数据还是从Bridge网络docker_gwbridge网桥出去的，由于Consul的作用记录leoverlay网络的<code>CNM三大组件的信息</code>，使得其它主机docker知道此网络类型为oveylay，并且可以在该网络下不同主机之间进行相互的通信访问,但是实际上出口还是Docker_gwbridge;</p>
+<p><br></p>
+<h5 id="6-存储驱动"><a href="#6-存储驱动" class="headerlink" title="6.存储驱动"></a>6.存储驱动</h5><p>描述:Docker最开始采用AUFS作为文件系统，也得益于AUFS分层的概念，实现了多个Container可以共享同一个image；Docker支持的存储驱动类型有<code>overlay2、AUFS、Btrfs、Device mapper、OverlayFS、ZFS</code>五种存储驱动，所有驱动都用到写时复制（CoW）的技术。</p>
+<p>[2020年6月19日] - 目前最新版本的 docker 默认优先采用 overlay2 的存储驱动，对于已支持该驱动的 Linux 发行版，不需要任何进行任何额外的配置。devicemapper 存储驱动已经在 docker 18.09 版本中被废弃，docker 官方推荐使用 overlay2 替代devicemapper。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker info</span><br><span class="line"> Server Version: 19.03.3</span><br><span class="line"> Storage Driver: overlay2</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<ul>
+<li>写时复制(CoW)<br><em>什么是写时复制?</em><br>答:写时复制(CoW)就是copy-on-write，表示只在需要写时才去复制，这个是针对已有文件的修改场景。CoW技术可以让所有的容器共享image的文件系统，所有数据都从image中读取，只有当要对文件进行写操作时，才从image里把要写的文件复制到自己的文件系统进行修改。</li>
+</ul>
+<p>所以无论有多少个容器共享同一个image，所做的写操作都是对从image中复制到自己的文件系统中的复本上进行，并不会修改image的源文件，且多个容器操作同一个文件，会在每个容器的文件系统里生成一个复本，每个容器修改的都是自己的复本，相互隔离，相互不影响。使用CoW可以有效的提高磁盘的利用率。</p>
+<ul>
+<li>用时分配（allocate-on-demand）<br>只有在要新写入一个文件时才分配空间，这样可以提高存储资源的利用率。比如启动一个容器，并不会为这个容器预分配一些磁盘空间，而是当有新文件写入时，才按需分配新空间。</li>
+</ul>
+<h6 id="AUFS"><a href="#AUFS" class="headerlink" title="AUFS"></a>AUFS</h6><p><em>什么是AUFS？</em><br>答:AUFS（AnotherUnionFS）是一种Union FS，是文件级的存储驱动。<br>AUFS能透明覆盖一或多个现有文件系统的层状文件系统，把多层合并成文件系统的单层表示。文件系统可以一层一层地叠加修改文件,但是无论底下有多少层都是read only,只有最上层的文件系统是可写的;<br>当需要修改一个文件时，AUFS创建该文件的一个副本，使用CoW将文件从只读层复制到可写层进行修改，结果也保存在可写层;<br>在Docker中底下的只读层就是image，可写层就是Container;</p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119230432.png" target="_blank" title="WeiyiGeek.AUFS" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119230432.png" alt="WeiyiGeek.AUFS" title="" class=""></a>
+                <p>WeiyiGeek.AUFS</p>
+            </figure>
+<p><br></p>
+<h6 id="Overlay-当前docker默认的存储驱动"><a href="#Overlay-当前docker默认的存储驱动" class="headerlink" title="Overlay - 当前docker默认的存储驱动"></a>Overlay - 当前docker默认的存储驱动</h6><p>描述:Overlay是Linux内核3.18后支持的,它也是一种UnionFS与AUFS不同的是Overlay只有两层：一个upper文件系统和一个lower文件系统，分别代表Docker的镜像层和容器层。<br>当需要修改一个文件时，使用CoW将文件从只读的lower复制到可写的upper进行修改，结果也保存在upper层。</p>
+<p>同样在Docker中底下的只读层就是image，可写层就是Container；<br><figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119230740.png" target="_blank" title="WeiyiGeek.Overlay" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119230740.png" alt="WeiyiGeek.Overlay" title="" class=""></a>
+                <p>WeiyiGeek.Overlay</p>
+            </figure></p>
+<p>下图展示了overlayFS的两个特征：<code>上下合并、同名遮盖</code><br><figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200810161727.png" target="_blank" title="WeiyiGeek.overlay-Upper-Lower" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200810161727.png" alt="WeiyiGeek.overlay-Upper-Lower" title="" class=""></a>
+                <p>WeiyiGeek.overlay-Upper-Lower</p>
+            </figure></p>
+<p>采用一个挂载OverlayFS小例子深入理解其存储驱动:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) common.txt分别存放不同的内容</span></span><br><span class="line">比如lower1下面common.txt内容是lower1，lower2下面common.txt内容是lower2，lower3下面common.txt内容是lower3，upper目录有个和lower2/ower2.sh同名的目录</span><br><span class="line"><span class="variable">$tree</span> -L 2</span><br><span class="line">├── lower1</span><br><span class="line">│   ├── common.txt</span><br><span class="line">│   └── ower1.sh</span><br><span class="line">├── lower2</span><br><span class="line">│   ├── common.txt</span><br><span class="line">│   └── ower2.sh</span><br><span class="line">├── lower3</span><br><span class="line">│   ├── common.txt</span><br><span class="line">│   └── ower3.sh</span><br><span class="line">├── merged</span><br><span class="line">├── upper</span><br><span class="line">│   ├── ower2.sh</span><br><span class="line">│   └── up.txt</span><br><span class="line">└── work</span><br><span class="line">    └── work</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 我们通过下面的命令进行挂载</span></span><br><span class="line">* lowerdir: 代表lower层，可以有多个，优先级依次降低，也就是说`lower1 &gt; lower2 &gt; lower3`</span><br><span class="line">* upperdir: 代表upper层,会覆盖lower层</span><br><span class="line">* workdir: 工作目录,用于存放临时文件</span><br><span class="line">* merged: 挂载点,我们看看操作之后的目录</span><br><span class="line"></span><br><span class="line"><span class="variable">$mount</span> -t overlay overlay -o lowerdir=lower1:lower2:lower3,upperdir=upper,workdir=work merged</span><br><span class="line"><span class="comment"># (3) 挂载后的操作目录`merged挂载点`.</span></span><br><span class="line">├── lower1</span><br><span class="line">│   ├── common.txt</span><br><span class="line">│   └── ower1.sh</span><br><span class="line">├── lower2</span><br><span class="line">│   ├── common.txt</span><br><span class="line">│   └── ower2.sh</span><br><span class="line">├── lower3</span><br><span class="line">│   ├── common.txt</span><br><span class="line">│   └── ower3.sh</span><br><span class="line">├── merged        <span class="comment">#是不是看出了什么奥秘，很清晰的说明了overlayFS的上面两个特征</span></span><br><span class="line">│   ├── common.txt</span><br><span class="line">│   ├── ower1.sh</span><br><span class="line">│   ├── ower2.sh</span><br><span class="line">│   ├── ower3.sh</span><br><span class="line">│   └── up.txt</span><br><span class="line">├── upper</span><br><span class="line">│   ├── ower2.sh</span><br><span class="line">│   └── up.txt</span><br><span class="line">└── work</span><br><span class="line">    └── work</span><br></pre></td></tr></table></figure></p>
+<p>正如前面介绍的COW(写时复制)在overlayFS中也是只对于只读的lower层的操作，当用到它时候会把它复制到upper层然后再对upper的进行操作，我们演示几个对挂载后的目录的操作，就能很明白这个过程了：</p>
+<ul>
+<li>1.删除的文件是upper的，并且这个文件在lower层不存在（up.txt） 直接删除就行了</li>
+<li>2.删除的文件来自于lower层而upper层没有对应的文件（ower3.sh）, overlayFS通过一种叫whiteout的机制它可以用于屏蔽底层的同名文件，在upper层创建一个<code>主次设备号（mknod c 0 0）都是0的设备</code>，当在merge层去找的时候，overlayFS会自动过滤掉和whiteout文件自身以及和他同名的lower层的文件，从而达到隐藏的目的;</li>
+<li>3.删除的是upper覆盖lower的文件（ower2.sh） 依然创建一个whiteout文件;</li>
+<li>4.创建一个upper和lower都没有的目录 直接在upper中新增一个;</li>
+<li>5.创建一个在lower层已经存在且在upper层有whiteout文件的同名文件并删了whiteout文件，重新创建一个;</li>
+<li>6.创建一个lower层存在并且upper层已经有对应whiteout文件的目录,如果这个时候单纯的删除whiteout文件，那么lower层对应目录里面的文件就会显示出来。</li>
+</ul>
+<p>overlayFS引入了一种Opaque(<code>不透明的</code>)的属性，通过设置upper层上对应的目录上设置<code>&quot;trusted.overlay.opaque&quot;</code>为y来实现（前提是upper所在的文件系统支持xattr属性），overlayFS在读取上下层存在同名目录的时候，如果upper层的目录被设置了Opaque的属性，他会忽这个目录下层的所有同名目录项来保证新建的是个空目录。<br><figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200810174847.png" target="_blank" title="WeiyiGeek.Opaque属性" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200810174847.png" alt="WeiyiGeek.Opaque属性" title="" class=""></a>
+                <p>WeiyiGeek.Opaque属性</p>
+            </figure></p>
+<p><br></p>
+<h6 id="映射器-Device-mapper-已经在-docker-18-09-版本中被废弃"><a href="#映射器-Device-mapper-已经在-docker-18-09-版本中被废弃" class="headerlink" title="映射器 (Device mapper) - 已经在 docker 18.09 版本中被废弃."></a>映射器 (Device mapper) - 已经在 docker 18.09 版本中被废弃.</h6><p>描述:Device mapper是Linux内核2.6.9后支持的，提供的一种从逻辑设备到物理设备的映射框架机制，在该机制下，用户可以很方便的根据自己的需要制定实现存储资源的管理策略;<br>注意点:AUFS和OverlayFS都是文件级存储，而Device mapper是块级存储，所有的操作都是直接对块进行操作，而不是文件。</p>
+<p>Device mapper驱动会先在块设备上创建一个资源池，然后在资源池上创建一个带有文件系统的基本设备，所有镜像都是这个基本设备的快照，而<code>容器则是镜像的快照</code>。所以在容器里看到文件系统是资源池上基本设备的文件系统的快照，并不有为容器分配空间。当要写入一个新文件时，在容器的镜像内为其分配新的块并写入数据(写时分配)</p>
+<p>Device mapper存储驱动默认会创建一个100G的文件包含镜像和容器(其实就是资源存储池)。每一个容器被限制在10G大小的卷内，可以自己配置调整。它会默认会在<code>/var/lib/docker/devicemapper/devicemapper</code>目录下生成data和metadata两个稀疏文件，并将两个文件挂为loop设备作为块设备来使用(默认模式)，它使用空闲文件来构建存储池，性能非常低。</p>
+<p>注意事项:</p>
+<ul>
+<li><p>1.当要修改已有文件时，再使用CoW为容器快照分配块空间，将要修改的数据复制到在容器快照中新的块里再进行修改,注意挂载后的磁盘UUID变化后则需要手动修改deviceset-metadata来指定BaseDeviceUUID;</p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119231700.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119231700.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+<li><p>2.在18.09版本之前在Docker初始化时候可以指定<code>--storage-opt dm.loopdatasize=500G --storage-opt dm.loopmetadatasize=4G</code>,将回收环境设备大小设置为500G(数据存储)，元数据文件大小为4G(稀疏文件),然后分别附加到回环设备/dev/loop0和/dev/loop1，其次再基于回环块设备创建Thin Pool;</p>
+</li>
+</ul>
+<h6 id="Btrfs"><a href="#Btrfs" class="headerlink" title="Btrfs"></a>Btrfs</h6><p>描述:Btrfs被称为下一代写时复制文件系统，并入Linux内核也是文件级级存储，但可以像Device mapper一直接操作底层设备。</p>
+<p>Btrfs把文件系统的一部分配置为一个完整的子文件系统，称之为subvolume 。那么采用 subvolume，一个大的文件系统可以被划分为多个子文件系统，这些子文件系统共享底层的设备空间，在需要磁盘空间时便从底层设备中分配，类似应用程序调用 malloc()分配内存一样。为了灵活利用设备空间，Btrfs 将磁盘空间划分为多个chunk 。每个chunk可以使用不同的磁盘空间分配策略。比如某些chunk只存放metadata，某些chunk只存放数据</p>
+<p>模型优点:Btrfs支持动态添加设备,用户在系统中增加新的磁盘之后，可以使用Btrfs的命令将该设备添加到文件系统中。</p>
+<p>Btrfs把一个大的文件系统当成一个资源池，配置成多个完整的子文件系统，还可以往资源池里加新的子文件系统，而基础镜像则是子文件系统的快照，每个子镜像和容器都有自己的快照，这些快照则都是<code>subvolume</code>的快照。</p>
+<ul>
+<li>当写入一个新文件时，为在容器的快照里为其分配一个新的数据块，文件写在这个空间里，这个叫用时分配</li>
+<li>当要修改已有文件时，使用CoW复制分配一个新的原始数据和快照，在这个新分配的空间变更数据，变结束再更新相关的数据结构指向新子文件系统和快照，原来的原始数据和快照没有指针指向，被覆盖。</li>
+</ul>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119232215.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119232215.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<h6 id="ZFS"><a href="#ZFS" class="headerlink" title="ZFS"></a>ZFS</h6><p>描述:ZFS 文件系统是一个革命性的全新的文件系统，它从根本上改变了文件系统的管理方式，ZFS 完全抛弃了”卷管理”，不再创建虚拟的卷，而是把所有设备集中到一个存储池中来进行管理，用”存储池”的概念来管理物理存储空间。以前文件系统都是构建在物理设备之上的。为了管理这些物理设备，并为数据提供冗余，”卷管理”的概念提供了一个单设备的映像。而ZFS创建在虚拟的，被称为”zpools”的存储池之上。每个存储池由若干虚拟设备（virtual devices，vdevs）组成。这些虚拟设备可以是原始磁盘，也可能是一个RAID1镜像设备，或是非标准RAID等级的多磁盘组。于是zpool上的文件系统可以使用这些虚拟设备的总存储容量。</p>
+<ul>
+<li>当要写一个新文件时使用按需分配，一个新的数据快从zpool里生成，新的数据写入这个块，而这个新空间存于容器（ZFS的克隆）里。</li>
+<li>当要修改一个已存在的文件时使用写时复制WoC，分配一个新空间并把原始数据复制到新空间完成修改。</li>
+</ul>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119232651.png" target="_blank" title="WeiyiGeek.ZFS" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119232651.png" alt="WeiyiGeek.ZFS" title="" class=""></a>
+                <p>WeiyiGeek.ZFS</p>
+            </figure>
+<p>首先从zpool里分配一个ZFS文件系统给镜像的基础层，而其他镜像层则是这个ZFS文件系统快照的克隆，快照是只读的，而克隆是可写的，当容器启动时则在镜像的最顶层生成一个可写层。如下图所示：</p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119232756.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119232756.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br></p>
+<p><strong>存储驱动的对比及适应场景</strong></p>
+<ul>
+<li><p>AUFS VS Overlay<br>AUFS和Overlay都是联合文件系统，但AUFS有多层，而Overlay只有两层，所以在做写时复制操作时，如果文件比较大且存在比较低的层，则AUSF可能会慢一些。而且Overlay并入了linux kernel mainline，AUFS没有，所以可能会比AUFS快。但Overlay还太年轻，要谨慎在生产使用。而AUFS做为docker的第一个存储驱动，已经有很长的历史，比较的稳定，且在大量的生产中实践过，有较强的社区支持。目前开源的DC/OS指定使用Overlay。</p>
+</li>
+<li><p>Overlay VS Device mapper<br>Overlay是文件级存储，Device mapper是块级存储，当文件特别大而修改的内容很小，Overlay不管修改的内容大小都会复制整个文件，对大文件进行修改显示要比小文件要消耗更多的时间，而块级无论是大文件还是小文件都只复制需要修改的块，并不是整个文件，在这种场景下显然device mapper要快一些。因为块级的是直接访问逻辑盘，适合IO密集的场景。而对于程序内部复杂，大并发但少IO的场景，Overlay的性能相对要强一些。</p>
+</li>
+</ul>
+<ul>
+<li>Device mapper VS Btrfs Driver VS ZFS<br>Device mapper和Btrfs都是直接对块操作，都不支持共享存储，表示当有多个容器读同一个文件时，需要生活多个复本，所以这种存储驱动不适合在高密度容器的PaaS平台上使用。而且在很多容器启停的情况下可能会导致磁盘溢出，造成主机不能工作。Device mapper不建议在生产使用。Btrfs在docker build可以很高效。<br>ZFS最初是为拥有大量内存的Salaris服务器设计的，所在在使用时对内存会有影响，适合内存大的环境。ZFS的COW使碎片化问题更加严重，对于顺序写生成的大文件，如果以后随机的对其中的一部分进行了更改，那么这个文件在硬盘上的物理地址就变得不再连续，未来的顺序读会变得性能比较差。ZFS支持多个容器共享一个缓存块，适合PaaS和高密度的用户场景。</li>
+</ul>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233210.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233210.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><strong>IO性能对比</strong><br>测试工具：IOzone（是一个文件系统的benchmark工具，可以测试不同的操作系统中文件系统的读写性能）<br>测试场景：从4K到1G文件的顺序和随机IO性能<br>测试方法：基于不同的存储驱动启动容器，在容器内安装IOzone，执行命令<code>./iozone -a -n 4k -g 1g -i 0 -i 1 -i 2 -f /root/test.rar -Rb ./iozone.xls</code></p>
+<p>测试项的定义和解释</p>
+<ul>
+<li>Write：测试向一个新文件写入的性能。</li>
+<li>Re-write：测试向一个已存在的文件写入的性能。</li>
+<li>Read：测试读一个已存在的文件的性能。</li>
+<li>Re-Read：测试读一个最近读过的文件的性能。</li>
+<li>Random Read：测试读一个文件中的随机偏移量的性能。</li>
+<li>Random Write：测试写一个文件中的随机偏移量的性能。</li>
+</ul>
+<p>测试数据对比结果:</p>
+<ul>
+<li><p>Write</p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233814.png" target="_blank" title="WeiyiGeek.Write" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233814.png" alt="WeiyiGeek.Write" title="" class=""></a>
+                <p>WeiyiGeek.Write</p>
+            </figure>
+</li>
+<li><p>Re-write</p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233842.png" target="_blank" title="WeiyiGeek.Re-write" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233842.png" alt="WeiyiGeek.Re-write" title="" class=""></a>
+                <p>WeiyiGeek.Re-write</p>
+            </figure>
+</li>
+<li><p>Read</p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233929.png" target="_blank" title="WeiyiGeek.Read" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233929.png" alt="WeiyiGeek.Read" title="" class=""></a>
+                <p>WeiyiGeek.Read</p>
+            </figure>
+</li>
+<li><p>Re-Read</p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233946.png" target="_blank" title="WeiyiGeek.Re-Read" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119233946.png" alt="WeiyiGeek.Re-Read" title="" class=""></a>
+                <p>WeiyiGeek.Re-Read</p>
+            </figure>
+</li>
+<li><p>Random Read</p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119234114.png" target="_blank" title="WeiyiGeek.Random Read" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119234114.png" alt="WeiyiGeek.Random Read" title="" class=""></a>
+                <p>WeiyiGeek.Random Read</p>
+            </figure>
+</li>
+<li><p>Random Write</p>
+<figure class="image-box">
+                <a rel=5.Docker底层实现原理了解 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119234143.png" target="_blank" title="WeiyiGeek.Random Write" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200119234143.png" alt="WeiyiGeek.Random Write" title="" class=""></a>
+                <p>WeiyiGeek.Random Write</p>
+            </figure>
+</li>
+</ul>
+<p>通过以上的性能数据可以看到：</p>
+<ul>
+<li>AUFS在读的方面性能相比Overlay要差一些，但在写的方面性能比Overlay要好。</li>
+<li>device mapper在512M以上文件的读写性能都非常的差，但在512M以下的文件读写性能都比较好。</li>
+<li>btrfs在512M以上的文件读写性能都非常好，但在512M以下的文件读写性能相比其他的存储驱动都比较差。</li>
+<li>ZFS整体的读写性能相比其他的存储驱动都要差一些</li>
+</ul>
+<p><em>注意事项:</em></p>
+<ul>
+<li>Centos系统上（默认不支持aufs需要查看AUFS是否加入Linux内核），推荐使用overlayfs存储驱动;</li>
+<li>devicemapper默认会在/var/lib/docker/devicemapper/devicemapper目录下生成data和metadata两个稀疏文件，并将两个文件挂为loop设备作为块设备来使用。</li>
+<li>Direct和LVM的最大不同是创建DM thin pool的不再是通过losetup挂载的两个稀疏文件，而是两个裸的真正的块设备。由于direct lvm的读写性能表现更加稳定，推荐生产环境上使用direct-lvm模式;</li>
+</ul>
+<p><br></p>
+<h5 id="7-数据共享与持久化"><a href="#7-数据共享与持久化" class="headerlink" title="7.数据共享与持久化"></a>7.数据共享与持久化</h5><p>描述:Docker 数据卷是被用于共享和持久化数据的，而且它的声明周期是独立于容器的，所以当容器宕掉或者删除并不会导致数据卷中的数据丢失;</p>
+<p>Q: 数据卷的实现原理?<br>答: 简单的说卷其实就是文件或者目录，通过挂载的方式，由Docker Daemon挂载到容器内部，不属于联合系统;</p>
+<p>Docker 提供的几种数据卷的实现方式:</p>
+<ul>
+<li>1.数据卷<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 宿主机随机目录,指定的目录如果没有不存在将会被创建</span></span><br><span class="line">docker run -itd -v /tmp/container/folder --name data-volume busybox top</span><br><span class="line">docker inspect data-volume -f <span class="string">'Source:&#123;&#123;(index .Mounts 0).Source&#125;&#125;&#123;&#123;println&#125;&#125;Destination:&#123;&#123;(index .Mounts 0).Destination&#125;&#125;'</span></span><br><span class="line"><span class="comment"># 即表示容器中的/tmp/container/folder目标被挂载到宿主机的随机目录;</span></span><br><span class="line"><span class="comment"># Source:/var/lib/docker/volumes/1a035d81e56447cd314faf560754b1808234645785f1b61a2c17199b16a7cf27/_data</span></span><br><span class="line"><span class="comment"># Destination:/tmp/container/folder</span></span><br><span class="line"><span class="variable">$docker</span> <span class="built_in">exec</span> -it data-volume sh</span><br><span class="line"><span class="variable">$ls</span> /tmp/container/folder/ls^C</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 宿主机指定目录</span></span><br><span class="line">docker run -itd -v /tmp/mnt_isolation:/tmp/tar/tmp/container/folder --name data-volume-1 busybox top</span><br><span class="line">docker inspect data-volume-1 -f <span class="string">'Source:&#123;&#123;(index .Mounts 0).Source&#125;&#125;&#123;&#123;println&#125;&#125;Destination:&#123;&#123;(index .Mounts 0).Destination&#125;&#125;'</span></span><br><span class="line"><span class="comment"># 指定了宿主机映射的目录（下面查看源、目的地址的目录）</span></span><br><span class="line"><span class="comment"># Source:/tmp/mnt_isolation</span></span><br><span class="line"><span class="comment"># Destination:/tmp/tar/tmp/container/folder</span></span><br></pre></td></tr></table></figure></li>
+<li><p>2.数据卷容器:支持多个容器通过某一个容器进行数据工程，PS:k8s是Pod采用的就是这种共享方式；</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (3) 连接已经存在的数据卷，通过--volumes-from将上面的数据卷data-volume进行挂载起来</span></span><br><span class="line">docker run -itd --volumes-from data-volume --name data-volume-2 busybox top </span><br><span class="line"><span class="comment"># 91bfdb9c9ca88571faebf6f2409105b1e55d24866fe30a4ea7c2f750031c8baf</span></span><br><span class="line">docker run -itd --volumes-from data-volume --name data-volume-3 busybox top </span><br><span class="line"><span class="comment"># f601713d75277e6255e9a52a30046f1e38c169d7674f3ef2dd287bdb444820d1</span></span><br><span class="line"><span class="comment"># 进入data-volume-3容器中在其数据卷目录中创建文件</span></span><br><span class="line"><span class="variable">$docker</span> <span class="built_in">exec</span> -it data-volume-3 touch /tmp/container/folder/$$.txt</span><br><span class="line"><span class="comment"># 分别查看几个容器共享的数据卷是否一致</span></span><br><span class="line"><span class="variable">$docker</span> <span class="built_in">exec</span> -it data-volume-3 ls -alh /tmp/container/folder/</span><br><span class="line">-rw-r--r--    1 root     root           0 Jul  6 13:50 3758.txt</span><br><span class="line"><span class="variable">$docker</span> <span class="built_in">exec</span> -it data-volume-2 ls -alh /tmp/container/folder/</span><br><span class="line">-rw-r--r--    1 root     root           0 Jul  6 13:50 3758.txt</span><br><span class="line"><span class="variable">$docker</span> <span class="built_in">exec</span> -it data-volume ls -alh /tmp/container/folder/</span><br><span class="line">-rw-r--r--    1 root     root           0 Jul  6 13:50 3758.txt</span><br><span class="line"><span class="comment"># 删除数据卷容器目录时需要加上-v则删除一个停止的容器并且其数据卷中的内容</span></span><br><span class="line"><span class="variable">$docker</span> stop data-volume data-volume-2 data-volume-3</span><br><span class="line"><span class="variable">$docker</span> rm -v data-volume data-volume-2 data-volume-3   <span class="comment">#需要删除全部的数据卷存储的数据才会全部消失</span></span><br><span class="line">data-volume</span><br><span class="line"><span class="comment">#补充:docker volume prune 清除已停止的数据卷</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>3.数据卷插件<br>描述:Docker有多种存储驱动比如aufs、devicemapper等，对于Docker的存储卷一般就是用完将会被丢弃，很难被本机或者其它机器的容器复用，在存储插件出现之前复用的存储卷的唯一方式是在docker run 命令中，通过映射宿主机目录的方式(<code>-v 源宿主机:目标容器</code>)，将卷中保存的数据保存在宿主机上，通过Volume Plugin机制能够很方便的整合第三方存储为Docker提供Volume;</p>
+</li>
+</ul>
+<p>Q: 什么是存储插件?<br>答: 通过使用Docker存储卷插件，为容器提供了持久化卷存储;</p>
+<p>Q: 存储插件有哪些？常用的有以下几种插件:</p>
+<ul>
+<li>Rancher Convoy 其后端支持devicemapper，NFS, EBS 等实现容器跨主机共享数据,并且支持卷的增量备份快照，备份恢复，而且用户也可以方便在不同的宿主机上共享卷，以及卷的迁移,实际实现原理还是将主机目录挂载到容器之中;</li>
+</ul>
+<p>Q: 采用哪些方式进行容器数据备份？</p>
+<ul>
+<li>1) 通过卷插件，在宿主机上采用手工的方式将分布式系统挂载到本地;</li>
+<li>2) 通过容器内部或者外部数据收集程序(<code>fluentd或filebeat</code>)将存储于宿主机上的数据进行实时收集从而减少容器销毁导致的数据丢失带来的损失;</li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:03.676Z" itemprop="dateUpdated">2022-03-29 13:39:03</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Docker/5.Docker底层实现原理了解.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Docker/5.Docker底层实现原理了解.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/6-3-459.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/6-3-459.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Docker/" rel="tag">Docker</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/6-3-459.html&title=《5.Docker底层实现原理了解》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/6-3-459.html&title=《5.Docker底层实现原理了解》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/6-3-459.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《5.Docker底层实现原理了解》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/6-3-459.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/6-3-459.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/6-3-463.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">n3.Docker之Win10和Server使用实例</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/6-3-76.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">VNC远程连接服务安装与配置</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-Docker架构与底层实现原理浅析"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Docker架构与底层实现原理浅析</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-基本架构"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">1.基本架构</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-I-O设备简述"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">2.I&#x2F;O设备简述</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-底层原理浅析"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">3.底层原理浅析</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/6-3-459.html&title=《5.Docker底层实现原理了解》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/6-3-459.html&title=《5.Docker底层实现原理了解》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/6-3-459.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《5.Docker底层实现原理了解》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/6-3-459.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/6-3-459.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACMElEQVR42u3aQXLEMAhE0bn/pZ2qbB3hbpCmYvhapTKOrDcLAoLPR17X71r9/r5Wf3V/Rv90w4IBA8ZrGVe4Vs/cD6qTVjx9zz+oMGDAGMCIg6wbUuOvSTm6fjYYMGDAiJ+JU7ocEgYMGDDqjIcUTS5Hc0kkDBgwJjNyJageavVAfLwWhwEDxgsZbmPgmz8f7G/AgAHjJYzLXPUg6LY5pVPBgAGjNcO99M+lkidCv5ThwoABowVDCZq5kYs4vLoXdg+XbjBgwBjD0IvYXIKYe5c0oAYDBowBDD28SuHPbD3Ggd4oX2HAgDGAoTQm3SZlPfkzilgYMGA0ZSjbVS7u9YTPLZiNxgAMGDDaMewwl2ow6C0EpaCFAQNGb4ZSUrqDEfpQhcuwr9tgwIDRgpGrAfUkcldjwAjWMGDAaMrIFaXuayqDGlI7AQYMGE0Z7jiXGyKVQ1fGL2DAgDGBoWznBsc4iLs7G81OGDBgNGXoG+VGLhTkhjEOGDBgtGa4ZaTeANBHvty3L8EwYMBoynAHwnIp44ZgGu8GAwaMYQy3VekG1vrQ2DLDhQEDRlPGrqs3vXDdVQzDgAFjDuMyl5vA6X/rPiOlhjBgwGjB0Jd+OD0EH+zKwoABox0j1wCotAEqQXmJhAEDxgBGpWR1v47KfwAYMGDA0NPBSgPS/RQGDBgwcoxkAldgPKShMGDAGMDIFbH1hE9PHw9et8GAAePfMyqlo95WzL0414SAAQNGI8YP14Id80wXz6EAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

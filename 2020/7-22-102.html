@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 CIFS与CIFS Homedir文件系统学习总结|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="CIFS">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>CIFS与CIFS Homedir文件系统学习总结</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">CIFS与CIFS Homedir文件系统学习总结</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-07-22T11:35:30.000Z" itemprop="datePublished" class="page-time">
+  2020-07-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%A3%81%E7%9B%98%E7%AE%A1%E7%90%86/">磁盘管理</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/DiskManagement/NetworkStorage/CIFS与CIFS-Homedir网络文件系统学习总结"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">CIFS与CIFS Homedir文件系统学习总结</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-07-22 19:35:30" datetime="2020-07-22T11:35:30.000Z"  itemprop="datePublished">2020-07-22</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%A3%81%E7%9B%98%E7%AE%A1%E7%90%86/">磁盘管理</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h4><p>本章主要介绍 CIFS 与 CIFS Homedir 概念及其配置，方便初学者快速入门;</p>
+<h5 id="1-CIFS"><a href="#1-CIFS" class="headerlink" title="1.CIFS"></a>1.CIFS</h5><p>描述:CIFS（Common Internet File System - 通用网络文件系统）是当前<code>主流异构平台共享文件系统之一</code>,它是一个网络文件共享协议，允许Internet和Intranet中的Windows主机访问网络中的文件或其他资源。<code>主要应用在Window操作系统环境下进行文件共享</code>，如果你是Linux系统还是建议您采用NFS文件系统;</p>
+<p>CIFS是<code>SMB（Server Message Block）</code>的一个公共版本;</p>
+<p>Q: 那什么是SMB协议?</p>
+<blockquote>
+<p>答: SMB协议是一个网络文件访问协议，使本机程序可以访问局域网内计算机上的文件并请求此计算机的服务。</p>
+</blockquote>
+<p>Q: 为什么要使用CIFS文件系统而不是直接使用SMB共享?</p>
+<blockquote>
+<p>答: 随着企业规模的扩大，企业内各部门之间进行文件共享和访问的用户数量越来越多;由于共享文件所在的服务器的硬件配置限制，当大量用户访问共享文件时，造成访问速度下降、系统响应慢的问题<br>如何能够提高大量用户访问共享文件的性能，是企业网络应用必须解决的问题。<br>存储系统支持CIFS共享特性，使得Windows客户端<code>能够识别并访问网络中存储系统提供的共享资源</code>，客户端用户能够像使用本机一样对保存在存储系统中的文件进行读、写、创建等操作。CIFS<code>解决了大量用户访问共享文件速度下降和系统响应慢的问题</code>。</p>
+</blockquote>
+<p>CIFS 优势:</p>
+<ul>
+<li>1.高并发性: 提供文件共享和文件锁机制，允许多个客户端访问或更新同一个文件而不产生冲突（<code>同一时刻只允许一个客户端更新文件</code>）</li>
+<li>2.高性能: 某个客户端对共享文件进行的操作并不会立即写入存储系统而是保存在本地缓存中。当该客户端再次对共享文件进行操作时，系统会直接从缓存中读取文件，提高文件访问性能。</li>
+<li>3.数据完整性: 采用抢占缓存、预读和回写的方式保证数据的完整性,上面我们说到客户端对共享文件的操作不会立即写入存储系统而是保存在本地缓存之中,当其它客户端需要访问同一文件时候便会将缓存数据写入到存储之中,从而保证了在同一时刻<code>只有一个拷贝文件处于激活状态防止数据冲突</code>;</li>
+<li>4.高安全性: FS支持匿名传输和共享的鉴权访问(<code>设置用户对文件系统的访问权限，保证文件的机密性和安全性</code>)</li>
+<li>5.应用广泛性: 任意支持CIFS协议的客户端，均可以访问CIFS共享空间。</li>
+<li>6.统一的字符编码标准: 支持各类字符集，保证CIFS可以在所有语言系统中使用。</li>
+</ul>
+<p>配置CIFS共享包括<code>无域环境中配置CIFS共享</code>和<code>AD域环境中配置CIFS共享</code>两种方式;</p>
+<ul>
+<li>(1) 无域环境中的CIFS共享: 存储系统使用CIFS共享的方式，把文件系统以目录的形式共享给某个用户，并且存储系统还可以为不同的用户设置共享文件，使存储系统共享的目录和用户名一致，该用户无法查看或访问其他用户的共享目录。<ul>
+<li>链接流程:通过CIFS协议，向客户端提供对文件系统的共享访问，客户端（通过鉴权后）将共享文件映射到本地后，用户可以像访问本地文件一样远程访问服务器中的文件系统。</li>
+<li>Tips:在存储系统中通过设置本地认证的用户名和密码，确定允许访问该文件系统的本地认证信息。</li>
+</ul>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=CIFS与CIFS Homedir文件系统学习总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200811200752.png" target="_blank" title="WeiyiGeek.无域环境中的CIFS共享" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200811200752.png" alt="WeiyiGeek.无域环境中的CIFS共享" title="" class=""></a>
+                <p>WeiyiGeek.无域环境中的CIFS共享</p>
+            </figure>
+<ul>
+<li>(2) AD域环境中的CIFS共享:随着局域网、广域网规模越来越大，很多企业使用AD域进行Windows网络管理，使得管理更便捷、更具有扩展性。<br>比如华为V5存储系统能够加入AD域，作为AD域的客户端，实现和AD域环境的无缝对接，利用其AD域控制器中保存了域环境中所有的用户信息、群组信息等；AD域客户端访问存储系统提供的CIFS共享时，认证均通过AD域控制器完成。所有域用户均可以访问存储系统提供的共享目录。同时AD域的管理员可以配置基于文件的权限管理，对不同域用户访问每个文件夹进行不同的权限控制。同时，存储系统支持AD域客户端只能访问与其名称相同的共享目录，无法查看并访问其他域客户端的共享目录的方式；</li>
+</ul>
+<figure class="image-box">
+                <a rel=CIFS与CIFS Homedir文件系统学习总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200811201120.png" target="_blank" title="WeiyiGeek.AD域环境中的CIFS共享" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200811201120.png" alt="WeiyiGeek.AD域环境中的CIFS共享" title="" class=""></a>
+                <p>WeiyiGeek.AD域环境中的CIFS共享</p>
+            </figure>
+<p><br></p>
+<h5 id="2-CIFS-Homedir"><a href="#2-CIFS-Homedir" class="headerlink" title="2.CIFS Homedir"></a>2.CIFS Homedir</h5><p>描述:Homedir（Home Directory）属于CIFS共享方式的一种，它是是用户私有目录，可用于存放用户私有数据，<code>该用户只能查看和访问与其名称一致的共享目录，无法查看或访问其他用户的私有目录</code>。</p>
+<p>Homedir特性优势:</p>
+<ul>
+<li>支持配置Homedir共享名，用户可通过Homedir共享名访问不同的Homedir共享。</li>
+<li>支持配置CA、oplock、notify等特性开关，可以实现对用户访问Homedir共享业务的特性控制。</li>
+<li>支持配置Homedir共享权限，实现对Homedir共享的用户权限管理。</li>
+<li>支持配置多个Homedir共享，每个Homedir共享可添加多个用户Homedir文件系统路径映射规则，满足管理员划分用户Homedir到不同文件系统路径的业务场景。</li>
+<li>映射规则支持AutoCreate选项，可以自动为用户创建Homedir目录，简化了管理员对用户Homedir目录的管理。</li>
+</ul>
+<p>同CIFS一样华为存储V5也包括两种共享方式即<code>无域环境中的 CIFS Homedir共享 、 AD域环境中的CIFS Homedir共享</code>图示参照CIFS共享;</p>
+<hr>
+<h4 id="0x01-共享规划"><a href="#0x01-共享规划" class="headerlink" title="0x01 共享规划"></a>0x01 共享规划</h4><p>描述:在配置CIFS/CIFS Homedir共享前请先做好规划工作，以便顺利开展后续的业务配置。<br>规划的内容包括<code>网络、域、认证方式、共享方式、用户、用户组、权限和配额</code>。</p>
+<table>
+<thead>
+<tr>
+<th>规划项</th>
+<th>规划子项</th>
+<th>规划要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>网络</td>
+<td>存储系统IP</td>
+<td>存储系统使用逻辑端口（LIFa）提供存储系统和应用服务器之间的通信提供IP。</td>
+</tr>
+<tr>
+<td></td>
+<td>访问终端IP地址</td>
+<td>访问终端与存储系统在同一个网络中，可以相互ping通。</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>维护终端IP地址</td>
+<td>维护终端与存储系统在同一个网络中，可以相互ping通。</td>
+<td></td>
+</tr>
+<tr>
+<td>（可选）AD域环境</td>
+<td>在AD域环境中，规划AD域服务器和NTP服务器的IP地址和主机名，并保证各服务器与存储系统在同一个网络中，可以相互ping通。</td>
+<td></td>
+</tr>
+<tr>
+<td>域环境</td>
+<td>AD域或无域</td>
+<td>根据用户的管理需求，设置为AD域或无域环境。<br> 两种环境的优点如下。 AD域：存储系统能够实现与AD域的无缝对接，无需建立本地用户，域用户可以访问共享空间。无域：无需搭建域环境。</td>
+</tr>
+<tr>
+<td>认证方式</td>
+<td>本地认证和域认证</td>
+<td>根据用户环境AD域或无域环境设置认证方式。 本地认证：使用本地帐户进行用户身份的认证。域认证：使用域服务器进行用户身份的认证。</td>
+</tr>
+<tr>
+<td>共享方式</td>
+<td>CIFS共享</td>
+<td>创建CIFS共享前，需要先检查是否已启用CIFS服务并对CIFS服务进行配置。</td>
+</tr>
+<tr>
+<td>用户</td>
+<td>包括本地认证的用户和域认证的用户</td>
+<td>本地认证用户名长度范围为6到32位字符。 本地认证用户名不允许包含空格、`“””、“/”、“\”、“[”、“]”、“&lt;”、“&gt;”、“+”、“:”、“;”、“,”、“?”、“*”、“\</td>
+<td>”、“=”和“@”`，且尾字符不允许为“.”。</td>
+</tr>
+<tr>
+<td>用户组</td>
+<td>包括本地认证的用户组和域认证的用户组</td>
+<td>本地认证用户组名长度范围为1到32位字符。 本地认证用户组名不允许包含空格、`“””、“/”、“\”、“[”、“]”、“&lt;”、“&gt;”、“+”、“:”、“;”、“,”、“?”、“*”、“\</td>
+<td>”、“=”和“@”`，且尾字符不允许为“.”。</td>
+</tr>
+<tr>
+<td>权限级别</td>
+<td>用户或用户组访问共享的权限</td>
+<td>设置用户访问CIFS共享的权限，包括： <br>完全控制：拥有CIFS共享的所用权限。 <br>只读：只拥有CIFS共享的读权限。 <br>读写：拥有CIFS共享的读写权限。  <br>禁止：禁止访问。</td>
+</tr>
+<tr>
+<td>配额</td>
+<td>-</td>
+<td>配额只能针对文件系统的quota tree(b)，根据用户需求定义文件系统的配额值。配额大小不受文件系统容量限制。配额包括以下两方面： <br> 空间配额：文件系统中quota tree的最大容量。 <br> 文件配额：文件系统中quota tree的最大文件数目。</td>
+</tr>
+</tbody>
+</table>
+<p>a：LIF是在物理端口、绑定端口及VLAN端口上创建的逻辑端口，每个LIF对应一个IP地址。<br>b：quota tree即配额树，是文件系统的特殊目录。在quota tree上可以设置目录配额，管理该目录内所有文件的使用空间。 </p>
+<hr>
+<h4 id="0x02-CIFS-配置说明"><a href="#0x02-CIFS-配置说明" class="headerlink" title="0x02 CIFS 配置说明"></a>0x02 CIFS 配置说明</h4><p>描述下面以OceanStor DeviceManager设备型号：5310F V5 为例进行配置使用;</p>
+<ul>
+<li>(1) CIFS共享的配置流程</li>
+</ul>
+<figure class="image-box">
+                <a rel=CIFS与CIFS Homedir文件系统学习总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200811204220.png" target="_blank" title="WeiyiGeek.CIFS" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200811204220.png" alt="WeiyiGeek.CIFS" title="" class=""></a>
+                <p>WeiyiGeek.CIFS</p>
+            </figure>
+<ul>
+<li>(2) CIFS Homedir共享的配置流程：</li>
+</ul>
+<figure class="image-box">
+                <a rel=CIFS与CIFS Homedir文件系统学习总结 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200811204045.png" target="_blank" title="WeiyiGeek.CIFS Homedir" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200811204045.png" alt="WeiyiGeek.CIFS Homedir" title="" class=""></a>
+                <p>WeiyiGeek.CIFS Homedir</p>
+            </figure>
+<hr>
+<h4 id="0x03-CIFS-挂载使用"><a href="#0x03-CIFS-挂载使用" class="headerlink" title="0x03 CIFS 挂载使用"></a>0x03 CIFS 挂载使用</h4><h5 id="Windows-平台下挂载CIFS存储"><a href="#Windows-平台下挂载CIFS存储" class="headerlink" title="Windows 平台下挂载CIFS存储"></a>Windows 平台下挂载CIFS存储</h5><p>描述: 此处以客户端操作系统为 Windows 7为例进行说明，在用户客户端映射网络驱动器流程如下:<br>Step 1.在Windows客户端右键单击“计算机”。选择“映射网络驱动器”。</p>
+<p>Step 2.系统弹出“映射网络驱动器”对话框。在“文件夹”中输入映射的文件夹路径。</p>
+<p>Step 3.映射的文件夹路径使用<code>\\logical ip address\sharename</code>的格式。</p>
+<p>Step 4.其中sharename是指CIFS共享的共享名称。单击“完成”。 </p>
+<p><br></p>
+<h5 id="Linux-平台下挂载CIFS存储-windows-共享目录"><a href="#Linux-平台下挂载CIFS存储-windows-共享目录" class="headerlink" title="Linux 平台下挂载CIFS存储(windows 共享目录)"></a>Linux 平台下挂载CIFS存储(windows 共享目录)</h5><p>描述: 实际上在Linux中挂载CIFS(Common Internet File System，即通用internet文件系统)存储的方式流程与NFS相似，其主要使用场景是嵌入式中实现从开发板与windows的共享。</p>
+<p><strong>如果在linux去挂载其他linux或者window的磁盘该怎么做呢?</strong><br>软件安装包:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CentOS - 环境</span></span><br><span class="line">yum install cifs-utils -y </span><br><span class="line"></span><br><span class="line"><span class="comment"># Ubuntu - 环境</span></span><br><span class="line">sudo apt-get install cifs-utils</span><br></pre></td></tr></table></figure></p>
+<p><strong>挂载使用</strong></p>
+<p>Step 1.查看CIFS共享存储上的挂载点，注意需要放行相关端口<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">showmount –e 192.168.1.250</span><br><span class="line">/DATA</span><br></pre></td></tr></table></figure></p>
+<p>Step 2.挂载CIFS共享存储命令, 此处非常注意需要将Windows中<code>\\</code>改成Linux识别的<code>//</code>以及后续路径中的<code>\</code>也需要改成<code>/</code>否则无法正常挂载。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mkdir -vp /app/share</span><br><span class="line"></span><br><span class="line"><span class="comment"># 空密码链接示例</span></span><br><span class="line">mount -t cifs -o sec=none,iocharset=utf8,vers=2.0  //192.168.1.250/DATA /app/share</span><br><span class="line"></span><br><span class="line"><span class="comment"># 域和域用户账号密码</span></span><br><span class="line">mount -t cifs -o domain=cloud,username=administrator,password=123456,sec=ntlmssp,iocharset=utf8,vers=2.0 //192.168.1.250/DATA /app/share</span><br><span class="line"></span><br><span class="line"><span class="comment"># 命令参数解析：</span></span><br><span class="line">-t 挂载类型为cifs</span><br><span class="line">-o 挂载参数 </span><br><span class="line">  Domain=域名</span><br><span class="line">  sername=用户名</span><br><span class="line">  password=密码</span><br><span class="line">  sec=安全认证方式</span><br><span class="line">  iocharset=字符集</span><br><span class="line">  vers=版本</span><br><span class="line"></span><br><span class="line"><span class="comment"># 选择安全模型：</span></span><br><span class="line">sec=&#123;none|krb5|krb5i|ntlm|ntlmi|ntlmv2|ntlmv2i&#125;</span><br><span class="line">  * none 尝试以空用户连接(不提供用户名)</span><br><span class="line">  * krb5 使用 Kerberos version 5 认证</span><br><span class="line">  * krb5i 使用 Kerberos version 5 和包签名(packet signing)认证</span><br><span class="line">  * ntlm 使用 NTLM 口令散列认证(默认值)</span><br><span class="line">  * ntlmi 使用 NTLM 签名口令散列认证(如果 /proc/fs/cifs/PacketSigningEnabled 被开启或者服务器端要求必须签名时，这个将成为默认值)</span><br><span class="line">  * ntlmv2 使用 NTLMv2 口令散列认证</span><br><span class="line">  * ntlmv2i 使用 NTLMv2 签名口令散列认证</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: 如果指定挂载后文件编码使用中文(如挂载Windows共享)<code>-ocodepage=936,iocharset=cp936</code></p>
+<p>Step 3.如果需要设置自动挂载,则需要在<code>/etc/fstab</code>文件中添加如下配置。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">tee -a /etc/fstab &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">....</span><br><span class="line">//192.168.1.250/DATA /app/share cifs  defaults,username=administrator,password=123456 0 0</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">$ mount -a</span><br></pre></td></tr></table></figure></p>
+<p>Step 4.查看挂载的CIFS磁盘.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ df -Th | grep <span class="string">"cifs"</span></span><br><span class="line">//10.41.40.92/myshare/   cifs   44T   28G   44T    1% /mnt/cifs</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>入坑出坑</strong><br>1.使用mount挂载cifs时 <code>mount error(95): Operation not supported</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ mount -t cifs -o username=weiyigeek,password=<span class="string">'password'</span> //192.168.6.19/share /share</span><br><span class="line">mount error(95): Operation not supported</span><br><span class="line">Refer to the mount.cifs(8) manual page (e.g. man mount.cifs)</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li>解决办法: 在命令行 <code>vers=2.0</code> 参数即可。</li>
+</ul>
+<p>2.使用mount挂载cifs时普通用户无法操作挂载目录的文件及其目录报没有权限问题，以weiyigeek与app组为例<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 空密码链接示例, weiyigeek用户以及app组</span></span><br><span class="line">mount -t cifs -o sec=none,iocharset=utf8,vers=2.0,uid=weiyigeek,gid=app  //192.168.1.250/DATA /app/share</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-07-10T02:05:16.955Z" itemprop="dateUpdated">2022-07-10 10:05:16</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/系统运维/Application/DiskManagement/NetworkStorage/CIFS与CIFS-Homedir网络文件系统学习总结.md" target="_blank" rel="noopener noreferrer">_posts/系统运维/Application/DiskManagement/NetworkStorage/CIFS与CIFS-Homedir网络文件系统学习总结.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/7-22-102.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/7-22-102.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CIFS/" rel="tag">CIFS</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/7-22-102.html&title=《CIFS与CIFS Homedir文件系统学习总结》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/7-22-102.html&title=《CIFS与CIFS Homedir文件系统学习总结》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/7-22-102.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《CIFS与CIFS Homedir文件系统学习总结》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/7-22-102.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/7-22-102.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/7-22-626.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">GitLab有趣的API接口实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/7-16-648.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Flask基础学习之入坑出坑体验记录</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-共享规划"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 共享规划</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-CIFS-配置说明"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 CIFS 配置说明</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-CIFS-挂载使用"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 CIFS 挂载使用</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/7-22-102.html&title=《CIFS与CIFS Homedir文件系统学习总结》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/7-22-102.html&title=《CIFS与CIFS Homedir文件系统学习总结》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/7-22-102.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《CIFS与CIFS Homedir文件系统学习总结》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/7-22-102.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/7-22-102.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACIUlEQVR42u3aQY7DMAgF0N7/0pntSFWqD6Qzsv28qlKl8cuCYuD1itf1ayXfXm/r7q78KQ8sDAyMZRnXx1Xd1t1dd1t/v/75ubd7wMDAOIBR/emElzx+zsbAwMDoBcRJCMbAwMB4ivH5Sn4M/ueAi4GBsRQjCZ29dHBSnvvKWRwDA2NBRl51//vPX+lvYGBgLMW4iivhzRPH8q4wMDC2ZuQBrpfMTUY3ysMfGBgYmzLmB9HeRvMCXHQFAwPjGEa1uZhjkqL/pOSHgYFxAuOpEYq8bZCnm1HpDQMDY2vGvEmQX5+X7R7uhGBgYCzLqCaLeRDPg3X1NzEwMPZm5FvMN5SPglWD9e1dGBgYBzDygYZeAE2o1VfQnBnBwMBYkNFL2vLW4yTp7IVgDAyMvRlJgSwv9Ocl/vkLwsDA2JuRP7JaaOsV4JrtTwwMjGMY1TCah+Y8mWsOWGBgYGzNeGqoosrrjaM1s10MDIxNGdVWQV7Wr7YZEjwGBsYJjCSo9YJvL3FstlQxMDAOYCTNy/wx1Rift05vXyIGBsYBjHn5rHdYfap6hoGBsSvjKq7ewbUXZAt/AxgYGFsz5oNi1TGLZCt5mjjq2WJgYCzFmB9E58W4/JVhYGCczOgFvhzTexGF0I+BgYERFNfmTYV8wCIatsDAwMAoJpG9dkIBj4GBcQCj2gzIQ2Tv3i+W2zAwMBZkTCY1JofPSZGu2cjEwMBYj/ED58+yUPJwqUQAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

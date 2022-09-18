@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 Supervisor进程管理工具快速入门与使用|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="supervisor">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>Supervisor进程管理工具快速入门与使用</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">Supervisor进程管理工具快速入门与使用</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-05-22T11:35:30.000Z" itemprop="datePublished" class="page-time">
+  2019-05-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/OperationTools/">OperationTools</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/monitor/Supervisor进程管理工具快速入门与使用"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">Supervisor进程管理工具快速入门与使用</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-05-22 19:35:30" datetime="2019-05-22T11:35:30.000Z"  itemprop="datePublished">2019-05-22</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/OperationTools/">OperationTools</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]<br><a id="more"></a></p>
+<h4 id="0x00-快速入门"><a href="#0x00-快速入门" class="headerlink" title="0x00 快速入门"></a>0x00 快速入门</h4><p>描述：Supervisor是一个进程管理工具,是一个客户端/服务器系统，允许其用户在类UNIX操作系统上控制许多进程(官方解释)。<br>Supervisor是用Python开发的一套通用的进程管理程序，能将一个普通的命令行进程变为后台daemon，并监控进程状态，异常退出时能自动重启还能通过网页端进行控制;</p>
+<p>官方网站：<a href="http://supervisord.org/" target="_blank" rel="noopener">http://supervisord.org/</a></p>
+<p>应用场景：</p>
+<ul>
+<li>脚本需要通过后台进程运行且保证异常中断后重启服务,</li>
+</ul>
+<p>原理：<br>它是通过fork/exec的方式把这些被管理的进程当作supervisor的子进程来启动，这样只要在supervisor的配置文件中，把要管理的进程的可执行文件的路径写进去即可。</p>
+<ul>
+<li>实现当子进程挂掉的时候，父进程可以准确获取子进程挂掉的信息的，可以选择是否自己启动和报警。</li>
+<li>可以为supervisord或者每个子进程，设置一个非root的user，这个user就可以管理它对应的进程。</li>
+</ul>
+<p>优点：</p>
+<ul>
+<li>简单：不用您手动的去编写shell脚本放在/etc/init.d/目录下</li>
+<li>精确：supervisor监控子进程，得到的子进程状态无疑是准确的</li>
+<li>进程组：可以对进程组统一管理,把这个组作为一个对象进行管理，如启动，停止，重启等等操作;</li>
+<li>集中式管理: supervisor管理的进程，进程组信息，全部都写在一个ini格式的文件,而且supervisor提供了一个web界面</li>
+<li>有效性：当supervisor的子进程挂掉的时候，操作系统会直接给supervisor发信号</li>
+<li>可扩展性：supervisor是一个开源的软件,我们可以通过event机制与xml_rpc去扩展</li>
+<li>权限：为supervisord或者每个子进程设置一个非root的user,该user管理对应的进程;</li>
+<li>兼容性：由于采用Python编写,通用性高</li>
+</ul>
+<p><strong>1.安装supervisor</strong><br>由于supervisor是依赖于python环境的,我们应该提前准备这样的环境;<br>安装环境：CentOS Linux release 7.6.1810 (Core)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装时需要使用到easy_install命令，所以我们先安装它</span></span><br><span class="line"><span class="variable">$yum</span> install -y python-setuptools</span><br><span class="line"></span><br><span class="line"><span class="comment">#正式安装supervisor或者pip安装都可以</span></span><br><span class="line"><span class="variable">$easy_install</span> supervisor</span><br><span class="line">Finished processing dependencies <span class="keyword">for</span> supervisor  <span class="comment">#显示则安装完成</span></span><br><span class="line"><span class="comment">#成功安装后可以登陆python控制台输入import supervisor 查看是否能成功加载。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#注意：Debian / Ubuntu可以直接通过apt安装：</span></span><br><span class="line">apt-get install supervisor</span><br><span class="line"></span><br><span class="line">supervisor默认的安装路径：</span><br><span class="line">&gt; /usr/lib/python2.7/site-packages/supervisor-4.0.3-py2.7.egg/supervisor</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>2.工具介绍</strong><br>Supervisor 四个组件介绍：</p>
+<ul>
+<li>supervisord :服务器端部分用来启动supervisor并制定配置文件,<ul>
+<li>启动supervisor管理的子进程，</li>
+<li>应来自clients的请求</li>
+<li>重启闪退或异常退出的子进程</li>
+<li>把子进程的stderr或stdout记录到日志文件中</li>
+<li>生成和处理Event</li>
+</ul>
+</li>
+<li>supervisorctl：命令行客户端(可以连接到远端supervisor上),<ul>
+<li>利用它来查看子进程状态，启动/停止/重启子进程，获取running子进程的列表;</li>
+</ul>
+</li>
+<li>Web Server：通过XML_RPC来实现的,可以向supervisor请求数据,也可以控制supervisor及子进程</li>
+<li>XML_RPC接口 ：留给第三方集成的接口，你的服务可以在远程调用这些XML-RPC接口来控制supervisord管理的子进程，上面的Web服务器其实也是通过这个XML-RPC接口实现的。</li>
+</ul>
+<p>命令详细<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#以下启动顺序由上到下优先级，依次递减</span></span><br><span class="line"><span class="variable">$CWD</span>/supervisord.conf</span><br><span class="line"><span class="variable">$CWD</span>/etc/supervisord.conf</span><br><span class="line">/etc/supervisord.conf</span><br><span class="line">/etc/supervisor/supervisord.conf (since Supervisor 3.3.0)</span><br><span class="line">../etc/supervisord.conf (Relative to the executable)</span><br><span class="line">../supervisord.conf (Relative to the executable)</span><br><span class="line"></span><br><span class="line">supervisord -c /etc/supervisor/supervisord.conf</span><br><span class="line"><span class="comment">#默认去找$CWD/supervisord.conf，也就是当前目录</span></span><br><span class="line"><span class="comment">#默认$CWD/etc/supervisord.conf，也就当前目录下的etc目录</span></span><br><span class="line"><span class="comment">#默认去找/etc/supervisord.conf的配置文件</span></span><br><span class="line"><span class="comment">#最后到指定路径下去找配置文件</span></span><br></pre></td></tr></table></figure><br><br></p>
+<p>客户端命令supervisorctl：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#基础命令</span></span><br><span class="line">supervisorctl [Options]</span><br><span class="line"><span class="comment"># -c, --configuration 配置文件路径(默认/etc/supervisor .conf)</span></span><br><span class="line"><span class="comment"># -i, --interactive 交互式shell</span></span><br><span class="line"><span class="comment"># -s, --serverurl URL  (default “http://localhost:9001”) #需要对端开启监听</span></span><br><span class="line"><span class="comment"># -u, --username 	远程的supervisor server账号</span></span><br><span class="line"><span class="comment"># -p, --password 	远程的supervisor server密码</span></span><br><span class="line"><span class="comment"># -r, --history-file  保持readline历史记录(如果readline可用</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#动作命令</span></span><br><span class="line">supervisorctl <span class="built_in">help</span> &lt;action&gt;</span><br><span class="line">supervisorctl add/remove &lt;name&gt;  <span class="comment">#激活或者移出 进程/组配置中的任何更新</span></span><br><span class="line">supervisorctl start/update/stop/status/clear/pid/restart  all</span><br><span class="line"><span class="comment">#上面的参数除了all：所有以外还有</span></span><br><span class="line"><span class="comment">#&lt;gname&gt; / &lt;name&gt;  :指定组、用户</span></span><br><span class="line"><span class="comment">#update:重新加载配置和添加/删除必要的，并将重新启动受影响的程序</span></span><br><span class="line"><span class="comment">#pid : 得到主控制器的PID。</span></span><br><span class="line"></span><br><span class="line">supervisorctl <span class="built_in">fg</span> &lt;process&gt; <span class="comment">#译文：连接到前台模式下的进程，按Ctrl+C退出前台</span></span><br><span class="line">supervisorctl reload/reread/signal/shutdown <span class="comment">#重新加载配置文件</span></span><br><span class="line"><span class="comment">#reread:重新加载守护进程的配置文件，无需添加/删除(无需重新启动)</span></span><br><span class="line"></span><br><span class="line">supervisorctl tail [-f] &lt;name&gt; [stdout|stderr] (default stdout) <span class="comment">#输出进程日志的最后一部分Ex</span></span><br></pre></td></tr></table></figure></p>
+<p>Signals 配置：<br>监控器程序可能会被发送信号，使其在运行时执行某些操作,您可以将这些信号中的任何一个发送到单个主进程id,但是需要在supervisor的配置文件进行更改;<br>配置文件：[supervisord]参数部分,将supervisord.pid参数前面的;去掉</p>
+<ul>
+<li>SIGTERM : 监控器及其所有子进程将关闭。这可能需要几秒钟。</li>
+<li>SIGINT :</li>
+<li>SIGQUIT : 同上</li>
+<li>SIGHUP ： 监控器将停止所有进程，从它找到的第一个配置文件重新加载配置，并启动所有进程(重启)。</li>
+<li>SIGUSR2 ：监控器将关闭并重新打开主活动日志和所有子日志文件。</li>
+</ul>
+<p><br></p>
+<h4 id="0x01-配置文件"><a href="#0x01-配置文件" class="headerlink" title="0x01 配置文件"></a>0x01 配置文件</h4><p>Supervisor安装后不会自动生成配置文件，需要使用命令 echo_supervisord_conf 来生成配置文件：<br>常规路径：</p>
+<ul>
+<li>supervisor的配置文件：/etc/supervisor/supervisord.conf </li>
+<li>管理的子进程配置文件：/etc/supervisor/conf.d/*.ini <ul>
+<li>开始给自己需要的脚本程序编写一个子进程配置文件，让supervisor来管理它</li>
+</ul>
+</li>
+</ul>
+<p><em>主配置文件</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br></pre></td><td class="code"><pre><span class="line">[root@Szabbix ~]<span class="comment"># mkdir -vp  /etc/supervisor/conf.d/</span></span><br><span class="line">mkdir: 已创建目录 <span class="string">"/etc/supervisor/conf.d"</span></span><br><span class="line">[root@Szabbix ~]<span class="comment"># echo_supervisord_conf &gt; /etc/supervisor/supervisor.conf</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#主配置文件讲解 windows配置文件风格</span></span><br><span class="line">; Sample supervisor config file.</span><br><span class="line">; http://supervisord.org/configuration.html.</span><br><span class="line"></span><br><span class="line">[unix_http_server]</span><br><span class="line">file=/tmp/supervisor.sock   ; <span class="comment">#建议修改为 /var/run 目录,避免被系统删除包括 pid / </span></span><br><span class="line">;chmod=0700                 ; socket file mode (default 0700)</span><br><span class="line">;chown=nobody:nogroup       ; socket file uid:gid owner</span><br><span class="line">username=user              ; default is no username (open server)  <span class="comment">#设置sock账号密码</span></span><br><span class="line">password=123               ; default is no password (open server)</span><br><span class="line"></span><br><span class="line">[inet_http_server]         ; inet (TCP) server disabled by default</span><br><span class="line">port=192.168.56.102:9001        ; ip_address:port specifier, *:port <span class="keyword">for</span> all iface</span><br><span class="line">username=user              ; default is no username (open server)</span><br><span class="line">password=123               ; default is no password (open server)</span><br><span class="line"></span><br><span class="line">[supervisord]</span><br><span class="line">logfile=/tmp/supervisord.log ; main <span class="built_in">log</span> file; default <span class="variable">$CWD</span>/supervisord.log</span><br><span class="line">logfile_maxbytes=50MB        ; 最大主日志文件字节;默认50 mb</span><br><span class="line">logfile_backups=10           ; 主日志文件备份;0表示没有，默认为10</span><br><span class="line">loglevel=info                ; <span class="built_in">log</span> level; default info; others: debug,warn,trace</span><br><span class="line">pidfile=/tmp/supervisord.pid ; supervisord pidfile; default supervisord.pid</span><br><span class="line">nodaemon=<span class="literal">false</span>               ; start <span class="keyword">in</span> foreground <span class="keyword">if</span> <span class="literal">true</span>; default <span class="literal">false</span></span><br><span class="line">minfds=1024                  ; min. avail startup file descriptors; default 1024</span><br><span class="line">minprocs=200                 ; min. avail process descriptors;default 200</span><br><span class="line"><span class="built_in">umask</span>=022                   ; process file creation <span class="built_in">umask</span>; default 022</span><br><span class="line">;user=supervisord            ; setuid to this UNIX account at startup; recommended <span class="keyword">if</span> root</span><br><span class="line">;identifier=supervisor       ; supervisord identifier, default is <span class="string">'supervisor'</span></span><br><span class="line">;directory=/tmp              ; default is not to <span class="built_in">cd</span> during start</span><br><span class="line">;nocleanup=<span class="literal">true</span>              ; don<span class="string">'t clean up tempfiles at start; default false'</span></span><br><span class="line">;childlogdir=/tmp            ; <span class="string">'AUTO'</span> child <span class="built_in">log</span> dir, default <span class="variable">$TEMP</span></span><br><span class="line">;environment=KEY=<span class="string">"value"</span>     ; key value pairs to add to environment</span><br><span class="line">;strip_ansi=<span class="literal">false</span>            ; strip ansi escape codes <span class="keyword">in</span> logs; def. <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">; The rpcinterface:supervisor 部分必须保留在配置文件中</span><br><span class="line">；以便RPC (supervisorctl/web interface)工作。</span><br><span class="line">；可以通过在单独的[rpcinterface:x]小节中定义它们来添加其他接口。</span><br><span class="line"></span><br><span class="line">[rpcinterface:supervisor]</span><br><span class="line">supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface</span><br><span class="line"></span><br><span class="line">; The supervisorctl section ：设置supervisorctl连接交互到本机的参数</span><br><span class="line">; supervisord.  configure it match the settings <span class="keyword">in</span> either the unix_http_server inet_http_server section.</span><br><span class="line"></span><br><span class="line">[supervisorctl]</span><br><span class="line">serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  <span class="keyword">for</span> a unix socket</span><br><span class="line">;serverurl=http://127.0.0.1:9001 ; use an http:// url to specify an inet socket</span><br><span class="line">;username=chris              ; should be same as <span class="keyword">in</span> [*_http_server] <span class="keyword">if</span> <span class="built_in">set</span></span><br><span class="line">;password=123                ; should be same as <span class="keyword">in</span> [*_http_server] <span class="keyword">if</span> <span class="built_in">set</span></span><br><span class="line">;prompt=mysupervisor         ; cmd line prompt (default <span class="string">"supervisor"</span>)</span><br><span class="line">;history_file=~/.sc_history  ; use readline <span class="built_in">history</span> <span class="keyword">if</span> available</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#下面的示例程序小节显示了需要监控程序的设置项,注意设置的名称方便我们进行管理</span></span><br><span class="line">;[program:theprogramname]  <span class="comment">#项目名</span></span><br><span class="line">;<span class="built_in">command</span>=/bin/cat              ; <span class="comment">#脚本执行命令</span></span><br><span class="line">;process_name=%(program_name)s ; <span class="comment">#默认进程名称是我上面设置的项目名称</span></span><br><span class="line">;numprocs=1                    ; <span class="comment">#启动进程的数目。当不为1时，就是进程池的概念，注意process_name的设置默认为1  ； 非必须设置</span></span><br><span class="line">;directory=/tmp                ; <span class="comment">#脚本启动运行目录</span></span><br><span class="line">;<span class="built_in">umask</span>=022                     ; <span class="built_in">umask</span> <span class="keyword">for</span> process (default None)</span><br><span class="line">;priority=999                  ; <span class="comment">#子进程启动关闭优先级，优先级低的最先启动，关闭的时候最后关闭</span></span><br><span class="line">;autostart=<span class="literal">true</span>                ; <span class="comment">#supervisor启动的时候是否随着同时启动，默认True</span></span><br><span class="line">;startsecs=1                   ; <span class="comment">#这个选项是子进程启动多少秒之后，此时状态如果是running，则我们认为启动成功了。默认值为1</span></span><br><span class="line">;startretries=3                ; <span class="comment">#启动时串行启动失败尝试的最多次数(默认3次)，超过后supervisor将把此进程的状态置为FAIL</span></span><br><span class="line"></span><br><span class="line">;autorestart=unexpected        ;<span class="comment">#设置子进程挂掉后自动重启的情况，当程序exit的时候，这个program不会自动重启,默认unexpected</span></span><br><span class="line"><span class="comment">#有三个选项，false,unexpected和true。如果为false的时候，无论什么情况下，都不会被重新启动，如果为unexpected，只有当进程的退出码不在下面的exitcodes里面定义的</span></span><br><span class="line"><span class="comment"># ;如果为false的时候，无论什么情况下，都不会被重新启动，</span></span><br><span class="line"><span class="comment"># ;如果为unexpected，只有当进程的退出码不在下面的exitcodes里面定义的退出码的时候，才会被自动重启</span></span><br><span class="line"><span class="comment"># ;当为true的时候，只要子进程挂掉，将会被无条件的重启</span></span><br><span class="line">;exitcodes=0                   ; <span class="comment">#注意和上面的的autorestart=unexpected对应，exitcodes里面的定义的退出码是expected的。</span></span><br><span class="line"></span><br><span class="line">;stopsignal=QUIT               ; <span class="comment">#程停止信号可以为TERM, HUP, INT, QUIT, KILL, USR1, or USR2等信号,默认为TERM 。当用设定的信号去干掉进程，退出码会被认为是expected非必须设置</span></span><br><span class="line">;stopwaitsecs=10               ; <span class="comment">#当我们向子进程发送stopsignal信号后，到系统返回信息给supervisord，所等待的最大时间超过这个时间，supervisord会向该子进程发送一个强制kill的信号。</span></span><br><span class="line"></span><br><span class="line">;stopasgroup=<span class="literal">false</span>             ; <span class="comment">#管理的子进程，这个子进程本身还有子进程 </span></span><br><span class="line"><span class="comment">#如果仅仅干掉supervisord的子进程的话，子进程的子进程有可能会变成孤儿进程,所以咱们可以设置可个选项，把整个该子进程的整个进程组都干掉。 </span></span><br><span class="line"><span class="comment">#设置为true的话，一般killasgroup也会被设置为true。需要注意的是，该选项发送的是stop信号，默认为false。。非必须设置</span></span><br><span class="line">;killasgroup=<span class="literal">false</span>             ; SIGKILL the UNIX process group (def <span class="literal">false</span>),同不过上发送的是KILL信号</span><br><span class="line">;user=chrism                   ; <span class="comment">#脚本运行的用户身份 </span></span><br><span class="line">;redirect_stderr=<span class="literal">true</span>          ; <span class="comment">#如果为true，则stderr的日志会被写入stdout日志文件中，默认 false </span></span><br><span class="line"></span><br><span class="line"><span class="comment">#标准输出 日志</span></span><br><span class="line">;stdout_logfile=/a/path        ; stdout <span class="built_in">log</span> path, NONE <span class="keyword">for</span> none; default AUTO</span><br><span class="line">;stdout_logfile_maxbytes=1MB   ; max <span class="comment"># logfile bytes b4 rotation (default 50MB)</span></span><br><span class="line">;stdout_logfile_backups=10     ; <span class="comment"># of stdout logfile backups (0 means none, default 10)</span></span><br><span class="line">;stdout_capture_maxbytes=1MB   ; number of bytes <span class="keyword">in</span> <span class="string">'capturemode'</span> (default 0)</span><br><span class="line">;stdout_events_enabled=<span class="literal">false</span>   ; emit events on stdout writes (default <span class="literal">false</span>)</span><br><span class="line">;stdout_syslog=<span class="literal">false</span>           ; send stdout to syslog with process name (default <span class="literal">false</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#标准错误 日志</span></span><br><span class="line">;stderr_logfile=/a/path        ; stderr <span class="built_in">log</span> path, NONE <span class="keyword">for</span> none; default AUTO</span><br><span class="line">;stderr_logfile_maxbytes=1MB   ; max <span class="comment"># logfile bytes b4 rotation (default 50MB)</span></span><br><span class="line">;stderr_logfile_backups=10     ; <span class="comment"># of stderr logfile backups (0 means none, default 10)</span></span><br><span class="line">;stderr_capture_maxbytes=1MB   ; number of bytes <span class="keyword">in</span> <span class="string">'capturemode'</span> (default 0)</span><br><span class="line">;stderr_events_enabled=<span class="literal">false</span>   ; emit events on stderr writes (default <span class="literal">false</span>)</span><br><span class="line">;stderr_syslog=<span class="literal">false</span>           ; send stderr to syslog with process name (default <span class="literal">false</span>)</span><br><span class="line">;environment=A=<span class="string">"1"</span>,B=<span class="string">"2"</span>       ; process environment additions (def no adds) ，该子进程的环境变量，和别的子进程是不共享的</span><br><span class="line">;serverurl=AUTO                ; override serverurl computation (childutils)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">; The sample eventlistener section below shows all possible eventlistener</span><br><span class="line">; subsection values.  Create one or more <span class="string">'real'</span> eventlistener: sections to be</span><br><span class="line">; able to handle event notifications sent by supervisord.</span><br><span class="line"></span><br><span class="line">;[eventlistener:theeventlistenername]</span><br><span class="line">;<span class="built_in">command</span>=/bin/eventlistener    ; the program (relative uses PATH, can take args)</span><br><span class="line">;process_name=%(program_name)s ; process_name expr (default %(program_name)s)</span><br><span class="line">;numprocs=1                    ; number of processes copies to start (def 1)</span><br><span class="line">;events=EVENT                  ; event notif. types to subscribe to (req<span class="string">'d)'</span></span><br><span class="line">;buffer_size=10                ; event buffer queue size (default 10)</span><br><span class="line">;directory=/tmp                ; directory to cwd to before <span class="built_in">exec</span> (def no cwd)</span><br><span class="line">;<span class="built_in">umask</span>=022                     ; <span class="built_in">umask</span> <span class="keyword">for</span> process (default None)</span><br><span class="line">;priority=-1                   ; the relative start priority (default -1)</span><br><span class="line">;autostart=<span class="literal">true</span>                ; start at supervisord start (default: <span class="literal">true</span>)</span><br><span class="line">;startsecs=1                   ; <span class="comment"># of secs prog must stay up to be running (def. 1)</span></span><br><span class="line">;startretries=3                ; max <span class="comment"># of serial start failures when starting (default 3)</span></span><br><span class="line">;autorestart=unexpected        ; autorestart <span class="keyword">if</span> exited after running (def: unexpected)</span><br><span class="line">;exitcodes=0                   ; <span class="string">'expected'</span> <span class="built_in">exit</span> codes used with autorestart (default 0)</span><br><span class="line">;stopsignal=QUIT               ; signal used to <span class="built_in">kill</span> process (default TERM)</span><br><span class="line">;stopwaitsecs=10               ; max num secs to <span class="built_in">wait</span> b4 SIGKILL (default 10)</span><br><span class="line">;stopasgroup=<span class="literal">false</span>             ; send stop signal to the UNIX process group (default <span class="literal">false</span>)</span><br><span class="line">;killasgroup=<span class="literal">false</span>             ; SIGKILL the UNIX process group (def <span class="literal">false</span>)</span><br><span class="line">;user=chrism                   ; setuid to this UNIX account to run the program</span><br><span class="line">;redirect_stderr=<span class="literal">false</span>         ; redirect_stderr=<span class="literal">true</span> is not allowed <span class="keyword">for</span> eventlisteners</span><br><span class="line">;stdout_logfile=/a/path        ; stdout <span class="built_in">log</span> path, NONE <span class="keyword">for</span> none; default AUTO</span><br><span class="line">;stdout_logfile_maxbytes=1MB   ; max <span class="comment"># logfile bytes b4 rotation (default 50MB)</span></span><br><span class="line">;stdout_logfile_backups=10     ; <span class="comment"># of stdout logfile backups (0 means none, default 10)</span></span><br><span class="line">;stdout_events_enabled=<span class="literal">false</span>   ; emit events on stdout writes (default <span class="literal">false</span>)</span><br><span class="line">;stdout_syslog=<span class="literal">false</span>           ; send stdout to syslog with process name (default <span class="literal">false</span>)</span><br><span class="line">;stderr_logfile=/a/path        ; stderr <span class="built_in">log</span> path, NONE <span class="keyword">for</span> none; default AUTO</span><br><span class="line">;stderr_logfile_maxbytes=1MB   ; max <span class="comment"># logfile bytes b4 rotation (default 50MB)</span></span><br><span class="line">;stderr_logfile_backups=10     ; <span class="comment"># of stderr logfile backups (0 means none, default 10)</span></span><br><span class="line">;stderr_events_enabled=<span class="literal">false</span>   ; emit events on stderr writes (default <span class="literal">false</span>)</span><br><span class="line">;stderr_syslog=<span class="literal">false</span>           ; send stderr to syslog with process name (default <span class="literal">false</span>)</span><br><span class="line">;environment=A=<span class="string">"1"</span>,B=<span class="string">"2"</span>       ; process environment additions</span><br><span class="line">;serverurl=AUTO                ; override serverurl computation (childutils)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">;设置我们上面程序设置控制,并将它们放入特定得我组</span><br><span class="line"></span><br><span class="line">;[group:thegroupname]</span><br><span class="line">;programs=progname1,progname2  ; each refers to <span class="string">'x'</span> <span class="keyword">in</span> [program:x] definitions</span><br><span class="line">;priority=999                  ; 相对启动优先级(默认999)</span><br><span class="line"></span><br><span class="line">; The [include] section can just contain the <span class="string">"files"</span> setting.  This</span><br><span class="line">; setting can list multiple files (separated by whitespace or</span><br><span class="line">; newlines).  It can also contain wildcards.  The filenames are</span><br><span class="line">; interpreted as relative to this file.  Included files *cannot*</span><br><span class="line">; include files themselves.</span><br><span class="line"></span><br><span class="line">[include]</span><br><span class="line">files = conf.d/*.ini</span><br></pre></td></tr></table></figure></p>
+<p><br><br><em>子进程管理配置文件示例</em><br>如任意定义一个和脚本相关的项目名称的选项组（/etc/supervisor/conf.d/test.conf）：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[program:weiyigeek] <span class="comment">#说明同上</span></span><br><span class="line">directory=/opt/bin </span><br><span class="line"><span class="built_in">command</span>=/usr/bin/python /opt/bin/weiyigeek.py </span><br><span class="line">autostart=<span class="literal">true</span> </span><br><span class="line">autorestart=<span class="literal">false</span> </span><br><span class="line">stderr_logfile=/tmp/weiyigeek_stderr.log </span><br><span class="line">stdout_logfile=/tmp/weiyigeek_stdout.log </span><br><span class="line"><span class="comment">#user = weiyigeek</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="0x02-supervisor实战"><a href="#0x02-supervisor实战" class="headerlink" title="0x02 supervisor实战"></a>0x02 supervisor实战</h4><p>比如：我们写一个shell脚本来监控统计TCP连接的数量<br>nano tcpCount.sh<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="keyword">while</span> <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">  count=$(netstat -tlnp|wc -l)</span><br><span class="line">  count=$((count - 2))</span><br><span class="line">  <span class="built_in">echo</span> <span class="string">"当前TCP连接数量：<span class="variable">$&#123;count&#125;</span>"</span></span><br><span class="line">  sleep 3</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure></p>
+<p>Step 1.我们在进程管理配置文件进行配置子进程监控<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#我们需要在主配置文件中去掉 [include] 参数的 ;</span></span><br><span class="line">[include]</span><br><span class="line">files = conf.d/*.ini</span><br><span class="line"></span><br><span class="line"><span class="comment">#编辑我们监控配置文件</span></span><br><span class="line"><span class="variable">$nano</span> /etc/supervisor/conf.d/test.ini</span><br><span class="line">[program:weiyigeek]</span><br><span class="line">process_name=%(program_name)s</span><br><span class="line">directory=/tmp/</span><br><span class="line"><span class="built_in">command</span>=/bin/bash tcpCount.sh</span><br><span class="line">autostart=<span class="literal">true</span></span><br><span class="line">autorestart=<span class="literal">false</span></span><br><span class="line">redirect_stderr=<span class="literal">true</span></span><br><span class="line">stdout_logfile=/tmp/weiyigeek.stderr.log</span><br></pre></td></tr></table></figure></p>
+<p>Step 2.启动supervisor并查看状态<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#启动supervisor服务</span></span><br><span class="line">supervisord -c /etc/supervisor/supervisor.conf</span><br><span class="line"></span><br><span class="line"><span class="comment">#交互式连接sock进行查看</span></span><br><span class="line"><span class="comment">#[supervisorctl] 需要进行设置是否是需要其他主机连接查看</span></span><br><span class="line"><span class="variable">$supervisorctl</span> -s unix:///tmp/supervisor.sock status</span><br><span class="line">weiyigeek                        STOPPED   May 25 11:18 AM</span><br><span class="line"></span><br><span class="line"><span class="variable">$supervisorctl</span> -s unix:///tmp/supervisor.sock  -u user  -p 123 -i</span><br><span class="line">supervisor&gt; <span class="built_in">help</span></span><br><span class="line">default commands (<span class="built_in">type</span> <span class="built_in">help</span> &lt;topic&gt;):</span><br><span class="line">=====================================</span><br><span class="line">add    <span class="built_in">exit</span>      open  reload  restart   start   tail</span><br><span class="line">avail  <span class="built_in">fg</span>        pid   remove  shutdown  status  update</span><br><span class="line">clear  maintail  quit  reread  signal    stop    version</span><br><span class="line"></span><br><span class="line">supervisor&gt; version</span><br><span class="line">4.0.3</span><br><span class="line"></span><br><span class="line">supervisor&gt; status</span><br><span class="line">weiyigeek                        RUNNING   pid 4220, uptime 0:05:11</span><br><span class="line"></span><br><span class="line">supervisor&gt; tail -f weiyigeek  <span class="comment">#查看标准输出</span></span><br><span class="line">==&gt; Press Ctrl-C to <span class="built_in">exit</span> &lt;==</span><br><span class="line">当前TCP连接数量：4</span><br><span class="line">当前TCP连接数量：4</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#自身的pid与子进程的pid</span></span><br><span class="line">supervisor&gt; pid</span><br><span class="line">4219</span><br><span class="line">supervisor&gt; pid weiyigeek</span><br><span class="line">4220</span><br><span class="line"></span><br><span class="line"><span class="comment">#停止进程</span></span><br><span class="line">supervisor&gt; stop weiyigeek</span><br><span class="line">weiyigeek: stopped</span><br></pre></td></tr></table></figure></p>
+<p>Step3.通过supervisor网页端进行管理</p>
+<blockquote>
+<p><a href="http://192.168.56.102:9001/logtail/weiyigeek" target="_blank" rel="noopener">http://192.168.56.102:9001/logtail/weiyigeek</a> 可以看到打印的日志</p>
+</blockquote>
+<figure class="image-box">
+                <a rel=Supervisor进程管理工具快速入门与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525110422.png" target="_blank" title="WeiyiGeek.supervisor" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525110422.png" alt="WeiyiGeek.supervisor" title="" class=""></a>
+                <p>WeiyiGeek.supervisor</p>
+            </figure>
+<p><br/></p>
+<p><em>注意事项：</em></p>
+<ul>
+<li>supervisor 比较适合监控业务应用，且只能监控前台程序，如果你的程序是以daemon的方式启动，那么执行：supervisor status 会提示：BACKOFF  Exited too quickly (process log may have details)。</li>
+</ul>
+<hr>
+
+<h4 id="0x03-supervisor插件"><a href="#0x03-supervisor插件" class="headerlink" title="0x03 supervisor插件"></a>0x03 supervisor插件</h4><p>1）插件：<a href="https://github.com/ouqiang/supervisor-event-listener" target="_blank" rel="noopener">https://github.com/ouqiang/supervisor-event-listener</a><br>supervisor-event-listener，Supervisor事件通知, 支持邮件, Slack, WebHook</p>
+<p>2）可视化工具 - 实测试用其中CESI不错，推荐使用<br>程序来源：<a href="https://github.com/Gamegos/cesi" target="_blank" rel="noopener">https://github.com/Gamegos/cesi</a><br><a href="http://ae.koroglu.org/centralized-supervisor-interface-cesi/" target="_blank" rel="noopener">http://ae.koroglu.org/centralized-supervisor-interface-cesi/</a><br><figure class="image-box">
+                <a rel=Supervisor进程管理工具快速入门与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525231033.png" target="_blank" title="WeiyiGeek.CESI" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525231033.png" alt="WeiyiGeek.CESI" title="" class=""></a>
+                <p>WeiyiGeek.CESI</p>
+            </figure></p>
+<hr>
+
+<h4 id="0x04-扩展之xml-rpc"><a href="#0x04-扩展之xml-rpc" class="headerlink" title="0x04 扩展之xml_rpc"></a>0x04 扩展之xml_rpc</h4><p>supervisor提供的两种管理方式,supervisorctl和web其实都是通过xml_rpc来实现的,xml_rpc其实就是本地可以去调用远端的函数方法,然后函数方法经过一番处理后，把结果返回给我们。</p>
+<p>在设置扩展的时候需要在supervisor.conf配置文件中进行定义：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过在管理器配置文件中添加[rpcinterface:x]节，可以将附加RPC接口配置到管理器安装中。</span></span><br><span class="line">[rpcinterface:supervisor]</span><br><span class="line">supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface</span><br><span class="line"></span><br><span class="line">[rpcinterface:myrpc]</span><br><span class="line">supervisor.rpcinterface_factory = myrpc.rpc:my_rpc</span><br><span class="line">args = 1  <span class="comment">#表示传入my_rpc这个签名函数的参数</span></span><br></pre></td></tr></table></figure></p>
+<p>在python里面实现xml_rpc就更加的简单，用SimpleXMLRPCServer和xmlrpclib这两个模块就可以分别实现服务端和客户端了。<br>PYthon的模块使用与rpc连接：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Python 2’s xmlrpclib</span></span><br><span class="line">import xmlrpclib</span><br><span class="line">server = xmlrpclib.Server(<span class="string">'http://user:123@localhost:9001/RPC2'</span>) <span class="comment">#在设置了账号密码认证的时候</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#Python 3’s xmlrpc.client</span></span><br><span class="line">from xmlrpc.client import ServerProxy</span><br><span class="line">server = ServerProxy(<span class="string">'http://localhost:9001/RPC2'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>我们尝试连接和获取rpc提供的方法,supervisor本身提供的xml_rpc方法还是比较多的:包括查看进程状态，启动/停止/重启进程，查看日志，发送event等等<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> xmlrpclib</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>server = xmlrpclib.Server(<span class="string">'http://user:123@192.168.56.102:9001/RPC2'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> i <span class="keyword">in</span>  server.system.listMethods():  <span class="comment">#查看方法</span></span><br><span class="line"><span class="meta">... </span>    print(i)</span><br><span class="line">supervisor.addProcessGroup</span><br><span class="line">supervisor.clearAllProcessLogs</span><br><span class="line">supervisor.clearLog</span><br><span class="line">supervisor.clearProcessLog</span><br><span class="line">supervisor.clearProcessLogs</span><br><span class="line">supervisor.getAPIVersion   <span class="comment">#使用的RPC API的版本</span></span><br><span class="line">supervisor.getAllConfigInfo  <span class="comment">#获取所有的配置信息</span></span><br><span class="line">supervisor.getAllProcessInfo  <span class="comment">#获取所有的线程信息</span></span><br><span class="line">supervisor.getIdentification  <span class="comment"># #返回标识主键字符串</span></span><br><span class="line">supervisor.getPID         <span class="comment">#获取返回supervisor的PID</span></span><br><span class="line">supervisor.getProcessInfo</span><br><span class="line">supervisor.getState   <span class="comment">#以结构形式返回当前的监控状态</span></span><br><span class="line">supervisor.getSupervisorVersion   <span class="comment">#supervisor软件包的版本</span></span><br><span class="line">supervisor.getVersion</span><br><span class="line">supervisor.readLog(offset, length)  <span class="comment">#从偏移量开始从supervisor日志读取长度字节</span></span><br><span class="line">supervisor.readMainLog</span><br><span class="line">supervisor.readProcessLog</span><br><span class="line">supervisor.readProcessStderrLog</span><br><span class="line">supervisor.readProcessStdoutLog</span><br><span class="line">supervisor.reloadConfig</span><br><span class="line">supervisor.removeProcessGroup</span><br><span class="line">supervisor.restart    <span class="comment">#重启supervisor管理器进程</span></span><br><span class="line">supervisor.sendProcessStdin(name, chars)  <span class="comment">#将一串字符发送到进程名的stdin。如果发送的是非7位数据(unicode)，则在发送到进程' stdin之前将其编码为utf-8</span></span><br><span class="line">supervisor.sendRemoteCommEvent(type, data) <span class="comment">#发送一个事件，订阅RemoteCommunicationEvent的事件侦听器子进程将接收该事件。</span></span><br><span class="line">supervisor.shutdown  <span class="comment">#关闭supervisor管理器进程</span></span><br><span class="line">supervisor.signalAllProcesses</span><br><span class="line">supervisor.signalProcess</span><br><span class="line">supervisor.signalProcessGroup</span><br><span class="line">supervisor.startAllProcesses</span><br><span class="line">supervisor.startProcess</span><br><span class="line">supervisor.startProcessGroup</span><br><span class="line">supervisor.stopAllProcesses</span><br><span class="line">supervisor.stopProcess</span><br><span class="line">supervisor.stopProcessGroup</span><br><span class="line">supervisor.tailProcessLog</span><br><span class="line">supervisor.tailProcessStderrLog(name, offset, length)</span><br><span class="line">supervisor.tailProcessStdoutLog(name, offset, length)</span><br><span class="line">system.listMethods</span><br><span class="line">system.methodHelp</span><br><span class="line">system.methodSignature</span><br><span class="line">system.multicall(&#123;<span class="string">'methodName'</span>: string, <span class="string">'params'</span>: array&#125;)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>server.system.methodHelp(<span class="string">'supervisor.startProcess'</span>)  <span class="comment">#查看方法的帮助</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>server.supervisor.getAPIVersion()</span><br><span class="line"><span class="string">'3.0'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>server.supervisor.getSupervisorVersion()</span><br><span class="line"><span class="string">'4.0.3'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>server.supervisor.getProcessInfo(<span class="string">'weiyigeek'</span>)  <span class="comment">#获取监控项的信息</span></span><br><span class="line">&#123;<span class="string">'now'</span>: <span class="number">1558764355</span>, <span class="string">'group'</span>: <span class="string">'weiyigeek'</span>, <span class="string">'description'</span>: <span class="string">'May 25 01:09 PM'</span>, <span class="string">'pid'</span>: <span class="number">0</span>, <span class="string">'stderr_logfile'</span>: <span class="string">''</span>, <span class="string">'stop'</span>: <span class="number">1558760940</span>, <span class="string">'statename'</span>: <span class="string">'STOPPED'</span>, <span class="string">'start'</span>: <span class="number">1558759539</span>, <span class="string">'state'</span>: <span class="number">0</span>, <span class="string">'stdout_logfile'</span>: <span class="string">'/tmp/weiyigeek.stderr.log'</span>, <span class="string">'logfile'</span>: <span class="string">'/tmp/weiyigeek.stderr.log'</span>, <span class="string">'exitstatus'</span>: <span class="number">-1</span>, <span class="string">'spawnerr'</span>: <span class="string">''</span>, <span class="string">'name'</span>: <span class="string">'weiyigeek'</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> key <span class="keyword">in</span> server.supervisor.getAllConfigInfo():  <span class="comment">#所以的配置信息</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">for</span> keyname,value <span class="keyword">in</span> key.items():</span><br><span class="line"><span class="meta">... </span>            print(keyname,value)</span><br><span class="line">...</span><br><span class="line">(<span class="string">'stopsignal'</span>, <span class="number">15</span>)</span><br><span class="line">(<span class="string">'group_prio'</span>, <span class="number">999</span>)</span><br><span class="line">(<span class="string">'stderr_logfile_maxbytes'</span>, <span class="number">52428800</span>)</span><br><span class="line">(<span class="string">'group'</span>, <span class="string">'weiyigeek'</span>)</span><br><span class="line">(<span class="string">'stdout_capture_maxbytes'</span>, <span class="number">0</span>)</span><br><span class="line">(<span class="string">'startsecs'</span>, <span class="number">1</span>)</span><br><span class="line">(<span class="string">'autostart'</span>, <span class="literal">True</span>)</span><br><span class="line">(<span class="string">'stdout_events_enabled'</span>, <span class="literal">False</span>)</span><br><span class="line">(<span class="string">'stderr_capture_maxbytes'</span>, <span class="number">0</span>)</span><br><span class="line">(<span class="string">'stderr_logfile'</span>, <span class="string">'none'</span>)</span><br><span class="line">(<span class="string">'stdout_syslog'</span>, <span class="literal">False</span>)</span><br><span class="line">(<span class="string">'process_prio'</span>, <span class="number">999</span>)</span><br><span class="line">(<span class="string">'exitcodes'</span>, [<span class="number">0</span>])</span><br><span class="line">(<span class="string">'stderr_events_enabled'</span>, <span class="literal">False</span>)</span><br><span class="line">(<span class="string">'name'</span>, <span class="string">'weiyigeek'</span>)</span><br><span class="line">(<span class="string">'inuse'</span>, <span class="literal">True</span>)</span><br><span class="line">(<span class="string">'redirect_stderr'</span>, <span class="literal">True</span>)</span><br><span class="line">(<span class="string">'stopwaitsecs'</span>, <span class="number">10</span>)</span><br><span class="line">(<span class="string">'killasgroup'</span>, <span class="literal">False</span>)</span><br><span class="line">(<span class="string">'stdout_logfile_maxbytes'</span>, <span class="number">52428800</span>)</span><br><span class="line">(<span class="string">'stderr_syslog'</span>, <span class="literal">False</span>)</span><br><span class="line">(<span class="string">'stdout_logfile_backups'</span>, <span class="number">10</span>)</span><br><span class="line">(<span class="string">'command'</span>, <span class="string">'/bin/bash tcpCount.sh'</span>)</span><br><span class="line">(<span class="string">'startretries'</span>, <span class="number">3</span>)</span><br><span class="line">(<span class="string">'stderr_logfile_backups'</span>, <span class="number">10</span>)</span><br><span class="line">(<span class="string">'stdout_logfile'</span>, <span class="string">'/tmp/weiyigeek.stderr.log'</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>server.supervisor.getState()  <span class="comment">#操作状态</span></span><br><span class="line">&#123;<span class="string">'statename'</span>: <span class="string">'RUNNING'</span>, <span class="string">'statecode'</span>: <span class="number">1</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>server.supervisor.readLog(<span class="number">1</span>,<span class="number">1024</span>)</span><br><span class="line"><span class="string">"019-05-24 15:53:38,086 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.\n2019-05-24 15:53:38,190 INFO RPC interface 'su'</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&gt;&gt;&gt; server.supervisor.tailProcessLog('weiyigeek',1,1024)  #指定监控名称产生的线程日志</span></span><br><span class="line"><span class="string">[u' should be root.)\n\u5f53\u524dTCP\u8fde\u63a5\u6570\u91cf\uff1a4\n(No info could be read for "</span>-p<span class="string">": geteuid()=994 but you should be root.)\n\u5f53\u524dTCP\u8fde\u63a5\u6570\u91cf\uff1a4\n(No info could be read for "</span>-p<span class="string">": geteuid()=994 but you should be root.)\n\u5f53\u524dTCP\</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&gt;&gt;&gt; server.supervisor.startAllProcesses();  #启动所有线程</span></span><br><span class="line"><span class="string">[&#123;'status': 80, 'group': 'weiyigeek', 'name': 'weiyigeek', 'description': 'OK'&#125;]</span></span><br></pre></td></tr></table></figure></p>
+<p>自定义XMLRPC的接口：<br><a href="http://supervisord.org/configuration.html" target="_blank" rel="noopener">http://supervisord.org/configuration.html</a></p>
+<p>Here’s an example of a factory function, created in the <strong>init</strong>.py file of the Python package my.package.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[rpcinterface:another]</span><br><span class="line">supervisor.rpcinterface_factory &#x3D; my.package:make_another_rpcinterface</span><br><span class="line">retries &#x3D; 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class AnotherRPCInterface(object):</span><br><span class="line">    def __init__(self,supervisord,args):</span><br><span class="line">        self.supervisord &#x3D; supervisord</span><br><span class="line">        self.args &#x3D; args</span><br><span class="line"></span><br><span class="line">    def walk_args(self):</span><br><span class="line">        return self.walk</span><br><span class="line"></span><br><span class="line">def make_another_rpcinterface(supervisord, **config):</span><br><span class="line">    retries &#x3D; int(config.get(&#39;retries&#39;, 0))</span><br><span class="line">    another_rpc_interface &#x3D; AnotherRPCInterface(supervisord, retries)</span><br><span class="line">    return another_rpc_inte</span><br></pre></td></tr></table></figure></p>
+<hr>
+
+<h4 id="0x05-扩展之event"><a href="#0x05-扩展之event" class="headerlink" title="0x05 扩展之event"></a>0x05 扩展之event</h4><p>supervisor的event机制就是一个监控/通知的框架,抛开框架来说event其实就是一串数据，这串数据里面有head和body两部分。</p>
+<p>header数据结构:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#[header]</span></span><br><span class="line"><span class="comment">#表示event协议的版本，目前是3.0</span></span><br><span class="line">ver:3.0 </span><br><span class="line"><span class="comment">#表示supervisor的标识符，也就是咱们上一篇中[supervisord]块中的identifier选项中的东西</span></span><br><span class="line">server:supervisor </span><br><span class="line"></span><br><span class="line"><span class="comment">#这个东西是每个event的序列号，supervisord在运行过程中，发送的第一个event的序列号就是1，接下来的event依次类推</span></span><br><span class="line">serial:21 </span><br><span class="line"></span><br><span class="line"><span class="comment">#是你的listener的pool的名字，一般你的listener只启动一个进程的的话，其实也就没有 pool的概念了</span></span><br><span class="line">pool:listener </span><br><span class="line"></span><br><span class="line"><span class="comment">#上面的serial是supervisord给每个event的编号。 而poolserial则是，eventpool给发送到我这个pool过来的event编的号</span></span><br><span class="line">poolserial:10 </span><br><span class="line"></span><br><span class="line"><span class="comment">#是event的类型名称</span></span><br><span class="line">eventname:PROCESS_COMMUNICATION_STDOUT</span><br><span class="line"></span><br><span class="line"><span class="comment">#表示的是header后面的body部分的长度</span></span><br><span class="line">len:54</span><br></pre></td></tr></table></figure></p>
+<p><br/><br>body的数据结构:<br>其实是和event的具体类型相关的，不同的event的类型，header的结构都一样但是body的结构大多就不一样了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#PROCESS_STATE_EXITED其实就是，当supervisord管理的子进程退出的时候，supervisord就会产生PROCESS_STATE_EXITED这么个event。</span></span><br><span class="line">processname:cat   <span class="comment">#进程名字，这里名字不是我们实际进程的名字而是咱们[program:x]配置成的名字</span></span><br><span class="line">groupname:cat      <span class="comment">#组名</span></span><br><span class="line">from_state:RUNNING   <span class="comment">#进程退出前的状态是什么状态</span></span><br><span class="line">expected:0       <span class="comment">#默认情况下exitcodes是0和2，也就是说0和2是expected</span></span><br><span class="line">pid:2766   <span class="comment">#知道了event的产生，然后给我们的listener这么一种结构的数据</span></span><br></pre></td></tr></table></figure>
+<p>我们可以利用接收的数据，加工后进行报警等等操作,处理数据之前咱们还得要来了解一下,listener和supervisord之间的通信过程:<br>在这里我们首先要搞清楚，event的发起方和接收方。</p>
+<ul>
+<li>发起方是supervisord进程</li>
+<li>接收方是listener(需要配置)</li>
+</ul>
+<p>其实event还有另外一个过程，我们的program也就是我们要管理的进程，也可以发送event进而和supervisord主动通信。<br>协议其实很简单:</p>
+<ul>
+<li>当supervisord启动的时候，如果我们的listener配置为autostart=true的话，listener就会作为supervisor的子进程被启动。</li>
+<li>listener被启动之后，会向自己的stdout写一个”READY”的消息,此时父进程也就是supervisord读取到这条消息后，会认为listener处于就绪状态。</li>
+<li>listener处于就绪状态后，当supervisord产生的event在listener的配置的可接受的events中时，supervisord就会把该event发送给该listener。  </li>
+<li>listener接收到event后，我们就可以根据event的head，body里面的数据，做一些列的处理了。我们根据event的内容，判断，提取，报警等等操作。</li>
+<li>该干的活都干完之后，listener需要向自己的stdout写一个消息”RESULT\nOK”，supervisord接受到这条消息后。就知道listener处理event完毕了。</li>
+</ul>
+<p>案例：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="comment">#childutils这个模块是supervisor的一个模型，可以方便我们处理event消息。。。当然我们也可以自己按照协议，用任何语言来写listener，只不过用childutils更加简便罢了</span></span><br><span class="line"><span class="keyword">from</span> supervisor <span class="keyword">import</span> childutils</span><br><span class="line"><span class="keyword">from</span> optparse <span class="keyword">import</span> OptionParser</span><br><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> fcntl</span><br><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"> </span><br><span class="line">__doc__ = <span class="string">"\033[32m%s,捕获PROCESS_STATE_EXITED事件类型,当异常退出时触发报警\033[0m"</span> % sys.argv[<span class="number">0</span>]</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">write_stdout</span><span class="params">(s)</span>:</span></span><br><span class="line">    sys.stdout.write(s)</span><br><span class="line">    sys.stdout.flush()</span><br><span class="line"><span class="comment">#定义异常，没啥大用其实</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CallError</span><span class="params">(Exception)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,value)</span>:</span></span><br><span class="line">        self.value = value</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__str__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> repr(self.value)</span><br><span class="line"><span class="comment">#定义处理event的类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ProcessesMonitor</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.stdin = sys.stdin</span><br><span class="line">        self.stdout = sys.stdout</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">runforever</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment">#定义一个无限循环，可以循环处理event，当然也可以不用循环，把listener的autorestart#配置为true，处理完一次event就让该listener退出，</span></span><br><span class="line">        <span class="comment">#然后supervisord重启该listener，这样listener就可以处理新的event了</span></span><br><span class="line">        <span class="keyword">while</span> <span class="number">1</span>:</span><br><span class="line">            <span class="comment">#下面这个东西，是向stdout发送"READY"，然后就阻塞在这里，一直等到有event发过来</span></span><br><span class="line">            <span class="comment">#headers,payload分别是接收到的header和body的内容</span></span><br><span class="line">            headers, payload = childutils.listener.wait(self.stdin, self.stdout)</span><br><span class="line">            <span class="comment">#判断event是否是咱们需要的，不是的话，向stdout写入"RESULT\NOK"，并跳过当前</span></span><br><span class="line">            <span class="comment">#循环的剩余部分</span></span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> headers[<span class="string">'eventname'</span>] == <span class="string">'PROCESS_STATE_EXITED'</span>:</span><br><span class="line">                childutils.listener.ok(self.stdout)</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"> </span><br><span class="line">            pheaders,pdata = childutils.eventdata(payload+<span class="string">'\n'</span>)</span><br><span class="line">            <span class="comment">#判读event是否是expected是否是expected的，expected的话为1，否则为0</span></span><br><span class="line">            <span class="comment">#这里的判断是过滤掉expected的event</span></span><br><span class="line">            <span class="keyword">if</span> int(pheaders[<span class="string">'expected'</span>]):</span><br><span class="line">                childutils.listener.ok(self.stdout)</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line"> </span><br><span class="line">            ip = self.get_ip(<span class="string">'eth0'</span>)</span><br><span class="line">            <span class="comment">#构造报警信息结构</span></span><br><span class="line">            msg = <span class="string">"[Host:%s][Process:%s][pid:%s][exited unexpectedly fromstate:%s]"</span> % (ip,pheaders[<span class="string">'processname'</span>],pheaders[<span class="string">'pid'</span>],pheaders[<span class="string">'from_state'</span>])</span><br><span class="line">            <span class="comment">#调用报警接口，这个接口是我们公司自己开发的，大伙不能用的，要换成自己的接口</span></span><br><span class="line">            subprocess.call(<span class="string">"/usr/local/bin/alert.py -m '%s'"</span> % msg,shell=<span class="literal">True</span>)</span><br><span class="line">            <span class="comment">#stdout写入"RESULT\nOK"，并进入下一次循环</span></span><br><span class="line">            childutils.listener.ok(self.stdout)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">    <span class="string">'''def check_user(self):</span></span><br><span class="line"><span class="string">        userName = os.environ['USER']</span></span><br><span class="line"><span class="string">        if userName != 'root':</span></span><br><span class="line"><span class="string">            try:</span></span><br><span class="line"><span class="string">                raise MyError('must be run by root!')</span></span><br><span class="line"><span class="string">            except MyError as e:</span></span><br><span class="line"><span class="string">                write_stderr( "Error occurred,value:%s\n" % e.value)</span></span><br><span class="line"><span class="string">                sys.exit(255)</span></span><br><span class="line"><span class="string">    '''</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_ip</span><span class="params">(self,ifname)</span>:</span></span><br><span class="line">        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)</span><br><span class="line">        inet = fcntl.ioctl(s.fileno(), <span class="number">0x8915</span>, struct.pack(<span class="string">'256s'</span>, ifname[:<span class="number">15</span>]))</span><br><span class="line">        ret = socket.inet_ntoa(inet[<span class="number">20</span>:<span class="number">24</span>])</span><br><span class="line">        <span class="keyword">return</span> ret</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    parser = OptionParser()</span><br><span class="line">    <span class="keyword">if</span> len(sys.argv) == <span class="number">2</span>:</span><br><span class="line">        <span class="keyword">if</span> sys.argv[<span class="number">1</span>] == <span class="string">'-h'</span> <span class="keyword">or</span> sys.argv[<span class="number">1</span>] == <span class="string">'--help'</span>:</span><br><span class="line">            <span class="keyword">print</span> __doc__</span><br><span class="line">            sys.exit(<span class="number">0</span>)</span><br><span class="line">    <span class="comment">#(options, args) = parser.parse_args()</span></span><br><span class="line">    <span class="comment">#下面这个，表示只有supervisord才能调用该listener，否则退出</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> <span class="string">'SUPERVISOR_SERVER_URL'</span> <span class="keyword">in</span> os.environ:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">raise</span> CallError(<span class="string">"%s must be run as a supervisor event"</span> % sys.argv[<span class="number">0</span>])</span><br><span class="line">        <span class="keyword">except</span> CallError <span class="keyword">as</span> e:</span><br><span class="line">            write_stderr(<span class="string">"Error occurred,value: %s\n"</span> % e.value)</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"> </span><br><span class="line">    prog = ProcessesMonitor()</span><br><span class="line">    prog.runforever()</span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-07-15T11:23:44.373Z" itemprop="dateUpdated">2022-07-15 19:23:44</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/系统运维/Application/monitor/Supervisor进程管理工具快速入门与使用.md" target="_blank" rel="noopener noreferrer">_posts/系统运维/Application/monitor/Supervisor进程管理工具快速入门与使用.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/5-22-111.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/5-22-111.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/supervisor/" rel="tag">supervisor</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/5-22-111.html&title=《Supervisor进程管理工具快速入门与使用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/5-22-111.html&title=《Supervisor进程管理工具快速入门与使用》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/5-22-111.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Supervisor进程管理工具快速入门与使用》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/5-22-111.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/5-22-111.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/5-25-426.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Supervisor服务脆弱性</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/5-22-481.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">云原生与容器浅析基础知识</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-快速入门"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 快速入门</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-配置文件"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 配置文件</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-supervisor实战"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 supervisor实战</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-supervisor插件"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 supervisor插件</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-扩展之xml-rpc"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 扩展之xml_rpc</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x05-扩展之event"><span class="post-toc-number">6.</span> <span class="post-toc-text">0x05 扩展之event</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/5-22-111.html&title=《Supervisor进程管理工具快速入门与使用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/5-22-111.html&title=《Supervisor进程管理工具快速入门与使用》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/5-22-111.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Supervisor进程管理工具快速入门与使用》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/5-22-111.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/5-22-111.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACNElEQVR42u3aQW7jQAxEUd//0so6CFr6RUoxxP5aBROPzedFpZvk54OfY/H8/e3q9av3XH3K54lHhgwZr2Ucp895WRyzKn31Prw2GTJk7MOovfV5UJKP77NlyJAhg4RgGrjnhcqQIUPGXQz+kSSUvxa4MmTIeBWDXGJ5c4002tIQv+0uLkOGjBcyeNf9/39+ZL4hQ4aMVzGO8LmrPdev5Nd7ypAhYzSDB1ynuc8vtLV6ZMiQMZvRWXEgsH4DDv2LDBkyRjM6g0NeKGn691t+MmTImMqolcujtjOwDL4mGTJkbMDgDXoerxxGwvfiD4MMGTJGM87L5asPfKkr/eKCAacMGTK2YXQCN55IhGF98b9kyJAxlNEZSZKlUhLKvNyLdpsMGTJGM/ghjJTO1zVq4Y62RWTIkDGIUbvQ8hWKTqOtdSSVIUPGIEZnAFkbGPCvKTiwypAhYzQjza4bLpw47jutPRkyZExipCOBNC7TMWcauzJkyNiBwRcsOkPKtMWWrmjIkCFjB0btOJiGJnk9D/GLnREZMmRswCBNrrTd37+HXhwTZciQsQ2j1kTrh2ynIShDhozZjCN8arxayPLDqAwZMmYz0pgj7f70sto5Jha33mTIkPFCRu1gd+8SGBkkXBwTZciQsQGjU1A6SQxu2HhQKkOGDBmkiHSdgscuqkeGDBkyStfRNKD5YXF5iZUhQ8ZoRq2hxgefabw+2G6TIUPGCxmtTQ38ytpKWXr0lCFDxjjGDyCfslDqhF7kAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

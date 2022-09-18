@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 网站扫描与Fuzz测试之敏感信息收集|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Kail">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>网站扫描与Fuzz测试之敏感信息收集</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">网站扫描与Fuzz测试之敏感信息收集</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-09-20T09:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-09-20
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%B8%97%E9%80%8F%E5%B7%A5%E5%85%B7/">渗透工具</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安大类/渗透系统/Kail/网站扫描与Fuzz测试之敏感信息收集"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">网站扫描与Fuzz测试之敏感信息收集</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-09-20 17:34:30" datetime="2019-09-20T09:34:30.000Z"  itemprop="datePublished">2019-09-20</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%B8%97%E9%80%8F%E5%B7%A5%E5%85%B7/">渗透工具</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><b style="color:red">注意：本文分享给安全从业人员、网站开发人员以及运维人员在日常工作防范恶意攻击,请勿恶意使用下面介绍技术进行非法攻击操作。。</b></p>
+<p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x01-目录扫描"><a href="#0x01-目录扫描" class="headerlink" title="0x01 目录扫描"></a>0x01 目录扫描</h4><p>描述:主要针对于网站中一些常规目录和文件存放进行扫描</p>
+<h5 id="1-Dirfuzz"><a href="#1-Dirfuzz" class="headerlink" title="(1) Dirfuzz"></a>(1) Dirfuzz</h5><p>描述:多线程网站目录穷举扫描<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">python dirfuzz.py http://zhan.***.com/ php</span><br><span class="line">python dirfuzz.py www.wooyun.org asp</span><br><span class="line">python dirfuzz.py www.wooyun.org jsp</span><br><span class="line"></span><br><span class="line"><span class="comment">#扫描出的结果</span></span><br><span class="line">[200]:http://zha*.***.com/index.php?g=System&amp;m=Admin&amp;a=index</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920100848.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920100848.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<h5 id="2-DIRB"><a href="#2-DIRB" class="headerlink" title="(2) DIRB"></a>(2) DIRB</h5><p>描述:DIRB 是一个专门用于爆破目录的工具，在 Kali 中默认已经安装，类似工具还有国外的patator，dirsearch，DirBuster， 国内的御剑等等。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dirb http://IP:PORT /usr/share/dirb/wordlists/common.txt   <span class="comment">#url 文本地址</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="3-DirBuster"><a href="#3-DirBuster" class="headerlink" title="(3) DirBuster"></a>(3) DirBuster</h5><p>描述:DirBuster是一个多线程java应用程序，旨在强制在Web /应用程序服务器上强制目录和文件名。<br>作者:OWASP.org 许可:Apache 2.0<br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920125122.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920125122.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<hr>
+
+<h4 id="0x02-利用扫描"><a href="#0x02-利用扫描" class="headerlink" title="0x02 利用扫描"></a>0x02 利用扫描</h4><h5 id="1-nikto"><a href="#1-nikto" class="headerlink" title="(1)nikto"></a>(1)nikto</h5><p>描述:使用 nikto 扫描 Web 服务器扫描器，对于数据库注入、INFO DIscosrue、远程文件、命令执行等等<br>Kail中配置文件路径<code>配置文件：路径：/etc/nikto.conf</code></p>
+<p>nikto注意功能特点:</p>
+<ul>
+<li>-&gt; mutate(猜测子域名、文件、目录、用户名)</li>
+<li>-&gt; evasion(规避IDS检测,IPS检测告警)</li>
+<li>-&gt; Single(单组规则测试模式)</li>
+</ul>
+<p>帮助文档：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$nikto</span> -v  <span class="comment">#数据库Plugin版本</span></span><br><span class="line"><span class="variable">$nikto</span> -list-plugins <span class="comment">#查看插件；</span></span><br><span class="line"><span class="variable">$nikto</span> -update <span class="comment">#升级，更新插件；</span></span><br><span class="line"><span class="variable">$nikto</span> -h url -T  &lt;Scan tuning Number&gt; -t 每个测试类型的时间 -O 和 -F 指定文件名和输出格式</span><br><span class="line"><span class="comment"># -Tuning+           Scan tuning:</span></span><br><span class="line"><span class="comment"># 1     Interesting File / Seen in logs</span></span><br><span class="line"><span class="comment"># 2     Misconfiguration / Default File</span></span><br><span class="line"><span class="comment"># 3     Information Disclosure</span></span><br><span class="line"><span class="comment"># 4     Injection (XSS/Script/HTML)</span></span><br><span class="line"><span class="comment"># 5     Remote File Retrieval - Inside Web Root</span></span><br><span class="line"><span class="comment"># 6     Denial of Service</span></span><br><span class="line"><span class="comment"># 7     Remote File Retrieval - Server Wide</span></span><br><span class="line"><span class="comment"># 8     Command Execution / Remote Shell</span></span><br><span class="line"><span class="comment"># 9     SQL Injection</span></span><br><span class="line"><span class="comment"># 0     File Upload</span></span><br><span class="line"><span class="comment"># a     Authentication Bypass</span></span><br><span class="line"><span class="comment"># b     Software Identification</span></span><br><span class="line"><span class="comment"># c     Remote Source Inclusion</span></span><br><span class="line"><span class="comment"># d     WebService</span></span><br><span class="line"><span class="comment"># e     Administrative Console</span></span><br><span class="line"><span class="comment"># x     Reverse Tuning Options (i.e., include all except specified)</span></span><br><span class="line">-vhost <span class="comment">#当一个网站存在多个端口时可以使用-vhost遍历所有网站进行扫描或一个ip对应多个网站</span></span><br><span class="line">-evasion 逃避方式共8种：</span><br><span class="line"><span class="comment"># 1、随机url编码，</span></span><br><span class="line"><span class="comment"># 2、自选路径，</span></span><br><span class="line"><span class="comment"># 3、过早结束的URL，</span></span><br><span class="line"><span class="comment"># 4、优先考虑长随机字符串，</span></span><br><span class="line"><span class="comment"># 5、参数欺骗，</span></span><br><span class="line"><span class="comment"># 6、使用TAB作为命令的分隔符，</span></span><br><span class="line"><span class="comment"># 7、使用变化的URL，</span></span><br><span class="line"><span class="comment"># 8、使用Windows路径分隔符</span></span><br></pre></td></tr></table></figure></p>
+<p>基础使用方法<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#常规用法</span></span><br><span class="line">nikto -C all -h http://www.baidu.com</span><br><span class="line">nikto -h www.cqwu.net -T 3486 -t 3  -O web -f html</span><br><span class="line">nikto -host http://1.1.1.1 -output <span class="comment">#扫描并输出结果</span></span><br><span class="line">nikto -host 1.1.1.1 -port 80 <span class="comment">#扫描目标：ip地址加端口号</span></span><br><span class="line">nikto -host www.baidu.com -port 443 -ssl <span class="comment">#扫描https网站</span></span><br><span class="line">nikto -host 文件名.txt <span class="comment">#批量扫描目标</span></span><br><span class="line">nikto -host 192.168.0.1 -useproxy http://localhost:8070 <span class="comment">#利用代理进行扫描</span></span><br><span class="line">Nikto -host http://1.1.1.1 -evasion 1234</span><br><span class="line"></span><br><span class="line">nmap -p80 192.168.1.0/24 -oG - | nikto -host - <span class="comment">#利用nmap扫描开放80端口的IP段并且oG（nmap结果输出并整理）通过管道的方式“|”用nikto进行扫描</span></span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920101143.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920101143.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>测试结果发现Particularly this:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">+ OSVDB-3092: /<span class="built_in">test</span>/: This might be interesting...</span><br><span class="line"></span><br><span class="line"><span class="comment">#首先，我们需要确定有多少字节从一般请求的页面回来：</span></span><br><span class="line"><span class="variable">$curl</span> <span class="string">'http://rob-sec-1.com/test/?'</span> 1&gt;/dev/null</span><br><span class="line">  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current</span><br><span class="line">                                 Dload  Upload   Total   Spent    Left  Speed</span><br><span class="line">100    53  100    53    0     0     53      0  0:00:01 --:--:--  0:00:01   289</span><br><span class="line"></span><br><span class="line"><span class="comment">#这是53从这里我们可以配置wfuzz尝试不同的参数名称，然后寻找有超过53个字符以外的尺寸任何响应。</span></span><br><span class="line">$ wfuzz -w /usr/share/wordlists/dirb/common.txt --hh 53 <span class="string">'http://rob-sec-1.com/test/?FUZZ=&lt;script&gt;alert("xss")&lt;/script&gt;'</span></span><br><span class="line">==================================================================</span><br><span class="line">ID	Response   Lines      Word         Chars          Payload    </span><br><span class="line">==================================================================</span><br><span class="line">02127:  C=200      9 L	       8 W	     84 Ch	  <span class="string">"item"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#最终利用</span></span><br><span class="line">http://rob-sec-1.com/<span class="built_in">test</span>/?item=&lt;script&gt;alert(<span class="string">"xss"</span>)&lt;/script&gt;</span><br></pre></td></tr></table></figure><br><br></p>
+<h5 id="2-GoLismero"><a href="#2-GoLismero" class="headerlink" title="(2) GoLismero"></a>(2) GoLismero</h5><p>描述: web漏洞扫描（多纬度）安全性测试的是一个开源框架,这是目前针对网络安全,但它可以很容易地扩展到其他类型的扫描。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#下载Golismero</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/golismero/golismero.git</span><br><span class="line"></span><br><span class="line"><span class="comment">#所有的插件列表 http://golismero-project.com/doc/plugin_list/index.html</span></span><br><span class="line"><span class="comment">#显示可用的插件</span></span><br><span class="line">python golismero.py plugins</span><br><span class="line"><span class="comment">#查询指定插件的相关信息.</span></span><br><span class="line">python golismero.py info &lt;plugin&gt;</span><br><span class="line"><span class="comment">#显示所有可用配置文件的列表:</span></span><br><span class="line">python golismero profiles</span><br><span class="line"><span class="comment"># 显示所有信息和插件:</span></span><br><span class="line">golismero info brute_*</span><br></pre></td></tr></table></figure><br>基础示例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#可指定输出文件格式, 如果不指定, 扫描结束后就得用命令手工生成结果了.</span></span><br><span class="line">python golismero.py scan &lt;target&gt; -o &lt;output file name&gt;</span><br><span class="line">python golismero.py scan &lt;target&gt; --audit-name &lt;name&gt;</span><br><span class="line"><span class="comment">#扫描一个网站，并显示在屏幕上的结果:</span></span><br><span class="line">olismero scan http://www.0535code.com</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#可以使用 -i 选项, 导入别的工具扫描的结果.</span></span><br><span class="line">python golismero.py import -i nikto_output.csv -i nmap_output.xml -db database.db</span><br><span class="line"><span class="comment">#获取nmap结果，扫描发现所有主机写HTML报告:</span></span><br><span class="line">golismero scan -i nmap_output.xml -o report.html</span><br><span class="line"><span class="comment">#获取结果OpenVAS和它们显示在屏幕上，但不扫描任何东西:</span></span><br><span class="line">golismero import -i openvas_output.xml</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#使用 -nd 可以禁止程序将测试结果存储到数据库中.</span></span><br><span class="line">python golismero.py &lt;target&gt; -nd</span><br><span class="line"></span><br><span class="line"><span class="comment">#从以前的扫描中转储数据库:</span></span><br><span class="line">golismero dump -db example.db -o dump.sql</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920113556.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920113556.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>生成报告：下面的例子导入Nmap的扫描的结果, 并调用所有的dns插件进行测试, 同时将结果保存到数据库中, 并生成两种格式的报告.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">python golismero.py scan &lt;target&gt; -o - -o report.html</span><br><span class="line">python golismero.py -i nmap_output.xml -e dns* -db database.db -o report.rst -o report.html</span><br><span class="line"></span><br><span class="line"><span class="comment">#可以先扫描而不生成报告:</span></span><br><span class="line">python golismero.py scan &lt;target&gt; -db database.db -no</span><br><span class="line"></span><br><span class="line"><span class="comment">#扫描完成后再手工生成:</span></span><br><span class="line">python golismero.py report -db database.db -o report.html</span><br><span class="line"></span><br><span class="line"><span class="comment">#可以生成多种报告格式:</span></span><br><span class="line">python golismero.py report -db database.db -o report.html -o report.rst -o report.txt</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920115458.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920115458.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<h5 id="3-zaproxy-GUI"><a href="#3-zaproxy-GUI" class="headerlink" title="(3)zaproxy(GUI)"></a>(3)zaproxy(GUI)</h5><p>描述: 一个易于使用交互式的用于web应用程序漏洞挖掘的渗透测试工具。<br>OWASP Zed攻击代理(攻击)是一个易于使用的综合渗透测试工具在web应用程序中寻找漏洞，是设计用于与广泛的安全经验的人,因此是理想的开发和功能测试人员是渗透测试作为一个有用的补充有经验的笔测试人员工具箱。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zaproxy  #采用java</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920115622.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920115622.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<h5 id="4-Paros（GUI）"><a href="#4-Paros（GUI）" class="headerlink" title="(4)Paros（GUI）"></a>(4)Paros（GUI）</h5><p>描述:Paros Proxy（安全分析评估，以及方式分析网络地址）-支持SSL<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~$ paros</span><br><span class="line">file:/usr/share/paros/paros.jar</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920115719.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920115719.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<h5 id="5-Skipfish-扫描"><a href="#5-Skipfish-扫描" class="headerlink" title="(5)Skipfish 扫描"></a>(5)Skipfish 扫描</h5><p>描述：Skipfish 是一款 Web 应用安全侦查工具，Skipfish 会利用递归爬虫和基于字典的探针生成一幅交互式网站地图，最终生成的地图会在通过安全检查后输出。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">skipfish -m 5 -LY -S /usr/share/skipfish/dictionaries/complete.wl -o ./skipfish2 -u http://IP</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="6-WebScarab"><a href="#6-WebScarab" class="headerlink" title="(6)WebScarab"></a>(6)WebScarab</h5><p>描述:拦截代理Fuzezer,session ID ,analysic,spider,web services anlyzer,xss,CRLF,Identity等漏洞扫描器</p>
+<hr>
+
+<h4 id="0x03-CMS-Scan"><a href="#0x03-CMS-Scan" class="headerlink" title="0x03 CMS-Scan"></a>0x03 CMS-Scan</h4><h5 id="1-WPScan"><a href="#1-WPScan" class="headerlink" title="(1)WPScan"></a>(1)WPScan</h5><p>描述:WPScan是一个黑盒WordPress漏洞扫描器,可以用来扫描远程WordPress安装发现安全问题。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/wpscanteam/wpscan.git &amp;&amp; <span class="built_in">cd</span> wpscan</span><br><span class="line"></span><br><span class="line">./wpscan –url http://IP/ –enumerate p</span><br><span class="line"><span class="comment"># wpscan --url http://www.blogcn.com/ -e p</span></span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920120114.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920120114.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<h5 id="2-CMSmap-PentestBox"><a href="#2-CMSmap-PentestBox" class="headerlink" title="(2)CMSmap | PentestBox"></a>(2)CMSmap | PentestBox</h5><p>描述:Python开源CMS扫描,自动检测安全漏洞的过程中最受欢迎的CMS，CMSmap的主要目的是为不同类型的cms集成常见漏洞在一个单一的工具。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Examples:</span><br><span class="line">cmsmap.py -t &lt;URL&gt;</span><br><span class="line">cmsmap.py -t https://example.com</span><br><span class="line">cmsmap.py -t https://example.com -f W -F --noedb</span><br><span class="line">cmsmap.py -t https://example.com -i targets.txt -o output.txt</span><br><span class="line">cmsmap.py -t https://example.com -u admin -p passwords.txt</span><br><span class="line">cmsmap.py -k hashes.txt -w passwords.txt</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920124018.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920124018.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<h5 id="3-joomscan"><a href="#3-joomscan" class="headerlink" title="(3) joomscan"></a>(3) joomscan</h5><p>描述:OWASP Joomla Joomla漏洞扫描器<br>它可能是最广泛使用的CMS，由于其灵活性，用户友好性，可扩展性命名一些。因此，观察其漏洞，并添加像KB这样的漏洞到Joomla扫描器需要持续的活动。<br>它将帮助Web开发人员和Web 大师帮助识别他们部署的Joomla可能的安全弱点！ 网站。 没有Web安全扫描程序仅专用于一个CMS。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"> Example:  joomscan.pl -u victim.com -x localhost:8080</span><br><span class="line">           joomscan -u http://target.com/joomla</span><br><span class="line">            </span><br><span class="line"> Check:    joomscan.pl check  - Check <span class="keyword">if</span> the scanner update is available or not.</span><br><span class="line"> Update:   joomscan.pl update  - Check and update the <span class="built_in">local</span> database <span class="keyword">if</span> newer version is available.</span><br><span class="line"> Download: joomscan.pl download  - Download the scanner latest version as a single zip file - joomscan-latest.zip.</span><br><span class="line">    </span><br><span class="line"><span class="comment">#枚举已安装的组件：</span></span><br><span class="line">perl joomscan.pl --url www.example.com --enumerate-components</span><br><span class="line">perl joomscan.pl -u www.example.com –ec</span><br><span class="line"></span><br><span class="line"><span class="comment">#设置cookie：</span></span><br><span class="line">perl joomscan.pl --url www.example.com --cookie <span class="string">"test=demo;"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置user-agent：</span></span><br><span class="line">perl joomscan.pl --url www.example.com --user-agent <span class="string">"Googlebot/2.1(+http://www.googlebot.com/bot.html)"</span></span><br><span class="line">perl joomscan.pl -u www.example.com -a <span class="string">"Googlebot/2.1(+http://www.googlebot.com/bot.html)"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#设置随机user-agent</span></span><br><span class="line">perl joomscan.pl -u www.example.com --random-agent</span><br><span class="line">perl joomscan.pl --url www.example.com -r</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920124512.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920124512.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<h5 id="4-droopescan-pentestBox"><a href="#4-droopescan-pentestBox" class="headerlink" title="(4)droopescan | pentestBox"></a>(4)droopescan | pentestBox</h5><p>描述:识别基于插件的扫描仪，帮助安全研究人员识别问题Drupal SilverStripe Wordpress；<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Use：</span><br><span class="line">droopescan scan drupal -u URL_HERE</span><br><span class="line">droopescan scan silverstripe -u URL_HERE</span><br><span class="line">droopescan scan --<span class="built_in">help</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#实际案例</span></span><br><span class="line">droopescan scan wordpress -u http://www.blogcn.com/</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920124634.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920124634.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<h5 id="5-VBScan"><a href="#5-VBScan" class="headerlink" title="(5)VBScan"></a>(5)VBScan</h5><p>perl编程语言是一个开源项目的检测链入页面CMS漏洞和分析。<br>项目发起人 : Mohammad Reza Espargham<br>Github : <a href="https://github.com/rezasp/vbscan/" target="_blank" rel="noopener">https://github.com/rezasp/vbscan/</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">perl vbscan.pl &lt;target&gt;</span><br><span class="line">perl vbscan.pl http://target.com/vbulletin</span><br><span class="line">perl vbscan.pl --<span class="built_in">help</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="6-BlindElephant-py"><a href="#6-BlindElephant-py" class="headerlink" title="(6)BlindElephant.py"></a>(6)BlindElephant.py</h5><p>描述:Web应用指纹对比浏览程序，扫描固定位置的静态文件，进行对hash值，比对识别技术鉴定速度快，带宽消耗低，无危害，通用性高且高度自动化.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BlindElephant.py -l   <span class="comment">#可用插件</span></span><br><span class="line">BlindElephant.py http://www.cqkksy.com.cn drupal</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920125754.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920125754.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<hr>
+
+<h4 id="0x04-Fuzz-ByPass"><a href="#0x04-Fuzz-ByPass" class="headerlink" title="0x04 Fuzz-ByPass"></a>0x04 Fuzz-ByPass</h4><h5 id="1-wfuzz"><a href="#1-wfuzz" class="headerlink" title="(1)wfuzz"></a>(1)wfuzz</h5><p>描述:wfuzz 是一款Python开发的Web安全模糊测试工具。简而言之就是wfuzz可以用在做请求参数参数类的模糊测试，也可以用来做Web目录扫描等操作。<br>github项目: <a href="https://github.com/xmendez/wfuzz" target="_blank" rel="noopener">https://github.com/xmendez/wfuzz</a> , 安装Wfuzz <code>pip install wfuzz</code><br>字典文本: /usr/share/wfuzz/wordlist</p>
+<ul>
+<li>简单粗暴的功能特点记录：<ul>
+<li>模块化 框架 可编写插件</li>
+<li>接口 可处理BurpSuite所抓的请求和响应报文</li>
+</ul>
+</li>
+</ul>
+<p><br></p>
+<h6 id="基础入门"><a href="#基础入门" class="headerlink" title="基础入门"></a>基础入门</h6><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">Usage: wfuzz [options] -z payload,params &lt;url&gt;</span><br><span class="line">FUZZ, ..., FUZnZ      <span class="comment">#payload占位符，wfuzz会用指定的payload代替相应的占位符，n代表数字. </span></span><br><span class="line">FUZZ&#123;baseline_value&#125;  <span class="comment"># FUZZ 会被 baseline_value替换，并将此作为测试过程中第一个请求来测试，可用来作为过滤的一个基础。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#参数解释</span></span><br><span class="line">-h/--<span class="built_in">help</span>            : 帮助文档</span><br><span class="line">--<span class="built_in">help</span>               : 高级帮助文档</span><br><span class="line">--version            : Wfuzz详细版本信息</span><br><span class="line">-e &lt;<span class="built_in">type</span>&gt;            :  显示可用的encoders/payloads/iterators/printers/scripts列表(查看指定模块类型中的模块列表)</span><br><span class="line">--recipe &lt;filename&gt;  : 从文件中读取参数</span><br><span class="line">--dump-recipe &lt;filename&gt;  : 打印当前的参数并保存成文档</span><br><span class="line">--oF &lt;filename&gt;   : 将测试结果保存到文件，这些结果可被wfuzz payload 处理</span><br><span class="line">-c                : 彩色化输出</span><br><span class="line">-v                : 详细输出</span><br><span class="line">-f filename,printer : 将结果以printer的方式保存到filename (默认为raw printer).</span><br><span class="line">-o printer          : 输出特定printer的输出结果</span><br><span class="line">--interact          : (测试功能) 如果启用，所有的按键将会被捕获，这使得你能够与程序交互</span><br><span class="line">--dry-run           : 打印测试结果，而并不发送HTTP请求</span><br><span class="line">--prev              : 打印之前的HTTP请求（仅当使用payloads来生成测试结果时使用）</span><br><span class="line">-p addr             : 使用代理，格式 ip:port:<span class="built_in">type</span>. 可设置多个代理，<span class="built_in">type</span>可取的值为SOCKS4,SOCKS5 or HTTP（默认）</span><br><span class="line">-t N                : 指定连接的并发数，默认为10</span><br><span class="line">-s N                : 指定请求的间隔时间，默认为0</span><br><span class="line">-R depth            : 递归路径探测，depth指定最大递归数量</span><br><span class="line">-L,--follow         : 跟随HTTP重定向</span><br><span class="line">-Z                : 扫描模式 (连接错误将被忽视).</span><br><span class="line">--req-delay N       : 设置发送请求允许的最大时间，默认为 90，单位为秒.</span><br><span class="line">--conn-delay N      : 设置连接等待的最大时间，默认为 90，单位为秒.</span><br><span class="line">-A                : 是 --script=default -v -c 的简写</span><br><span class="line">--script=           : 与 --script=default 等价</span><br><span class="line">--script=&lt;plugins&gt;  : 进行脚本扫描， &lt;plugins&gt; 是一个以逗号分开的插件或插件分类列表</span><br><span class="line">--script-help=&lt;plugins&gt; : 显示脚本的帮助</span><br><span class="line">--script-args n1=v1,... : 给脚本传递参数. ie. --script-args grep.regex=<span class="string">"&lt;A href=\"(.*?)\"&gt;"</span></span><br><span class="line">-u url                  : 指定请求的URL</span><br><span class="line">-m iterator         : 指定一个处理payloads的迭代器 (默认为product)</span><br><span class="line">-z payload          : 为每一个占位符指定一个payload，格式为 name[,parameter][,encoder].编码可以是一个列表,如 md5-sha1还可以串联起来, 如md5@sha1.还可使用编码各类名如 url;</span><br><span class="line">                      使用<span class="built_in">help</span>作为payload来显示payload的详细帮助信息，还可使用--slice进行过滤(替代了下面的--zP参数)</span><br><span class="line">--zP &lt;params&gt;       : 给指定的payload设置参数。必须跟在 -z 或-w 参数后面</span><br><span class="line">--slice &lt;filter&gt;    : 以指定的表达式过滤payload的信息，必须跟在-z 参数后面</span><br><span class="line">-w wordlist         : 指定一个wordlist文件，等同于 -z file,wordlist</span><br><span class="line">-V alltype          : 暴力测试所有GET/POST参数，无需指定占位符</span><br><span class="line">-X method           : 指定一个发送请求的HTTP方法，如HEAD或FUZZ</span><br><span class="line">-b cookie           : 指定请求的cookie参数，可指定多个cookie</span><br><span class="line">-d postdata         : 设置用于测试的POST data (ex: <span class="string">"id=FUZZ&amp;catalogue=1"</span>)</span><br><span class="line">-H header           : 设置用于测试请求的HEADER (ex:<span class="string">"Cookie:id=1312321&amp;user=FUZZ"</span>). 可指定多个HEADER.</span><br><span class="line">--basic/ntlm/digest auth    : 格式为 <span class="string">"user:pass"</span> or <span class="string">"FUZZ:FUZZ"</span> or <span class="string">"domain\FUZ2Z:FUZZ"</span></span><br><span class="line">--hc/hl/hw/hh N[,N]+        : 以指定的返回码/行数/字数/字符数作为判断条件隐藏返回结果 (用 BBB 来接收 baseline)</span><br><span class="line">--sc/sl/sw/sh N[,N]+        : 以指定的返回码/行数/字数/字符数作为判断条件显示返回结果 (用 BBB 来接收 baseline)</span><br><span class="line">--ss/hs regex            : 显示或隐藏返回结果中符合指定正则表达式的返回结果</span><br><span class="line">--filter &lt;filter&gt;        : 显示或隐藏符合指定filter表达式的返回结果 (用 BBB 来接收 baseline)</span><br><span class="line">--prefilter &lt;filter&gt;        : 用指定的filter表达式在测试之前过滤某些测试条目</span><br><span class="line">--slice 参数来过滤帮助返回信息的结果。</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<p><strong>核心知识:</strong></p>
+<ul>
+<li>wfuzz使用payload来替换相应的FUZZ关键词的位置(占位符),可以使用多个字典使用-z 或-w 参数,相应的占位符应设置为 <code>FUZZ,FUZ2Z,FUZ3Z,….,FUZnZ</code>, 其中n代表了占位序号。</li>
+<li>wfuzz可进行Playload的编码或加密</li>
+</ul>
+<p><br></p>
+<p><strong>Wfuzz模块说明</strong><br>wfuzz是模块化的框架，wfuzz默认自带很多模块，模块分为5种类型分别是：<code>payloads、encoders、iterators、printers和scripts</code>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">wfuzz [options] -z payload,params &lt;url&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment">#比如查看payload类中的模块列表</span></span><br><span class="line">wfuzz -e payloads</span><br><span class="line"><span class="comment"># Available payloads:</span></span><br><span class="line"><span class="comment">#   Name            | Summary</span></span><br><span class="line"><span class="comment">#   guitab          | This payload reads requests from a tab in the GUI</span></span><br><span class="line"><span class="comment">#   dirwalk         | Returns filename's recursively from a local directory.</span></span><br><span class="line"><span class="comment">#模块中的说明过滤显示</span></span><br><span class="line">wfuzz -z <span class="built_in">help</span> --slice <span class="string">"names"</span></span><br></pre></td></tr></table></figure></p>
+<p>1.payload为wfuzz生成的用于测试的特定字符串，一般情况下，会替代被测试URL中的FUZZ占位符。 </p>
+<ul>
+<li>当前版本中的wfuzz中可用payloads列表如下：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Available payloads:</span><br><span class="line">  Name            | Summary                                                                           </span><br><span class="line">------------------------------------------------------------------------------------------------------</span><br><span class="line">  guitab          | 从可视化的标签栏中读取请求                                </span><br><span class="line">  dirwalk         | 递归获得本地某个文件夹中的文件名                            </span><br><span class="line">  file            | 获取一个文件当中的每个词                                                    </span><br><span class="line">  autorize        | 获取autorize的测试结果Returns fuzz results from autororize.                                            </span><br><span class="line">  wfuzzp          | 从之前保存的wfuzz会话中获取测试结果的URL                   </span><br><span class="line">  ipnet           | 获得一个指定网络的IP地址列表                                        </span><br><span class="line">  bing            | 获得一个使用bing API搜索的URL列表 (需要 api key).                   </span><br><span class="line">  stdin           | 获得从标准输入中的条目                                                </span><br><span class="line">  list            | 获得一个列表中的每一个元素，列表用以 - 符号分格                       </span><br><span class="line">  hexrand         | 从一个指定的范围中随机获取一个hex值                                  </span><br><span class="line">  range           | 获得指定范围内的每一个数值                                          </span><br><span class="line">  names           | 从一个以 - 分隔的列表中，获取以组合方式生成的所有usernames值</span><br><span class="line">  burplog         | 从BurpSuite的记录中获得测试结果                                             </span><br><span class="line">  permutation     | 获得一个在指定charset和length时的字符组合                             </span><br><span class="line">  buffer_overflow | 获得一个包含指定个数个A的字符串.                    </span><br><span class="line">  hexrange        | 获得指定范围内的每一个hex值                                   </span><br><span class="line">  iprange         | 获得指定IP范围内的IP地址列表                                 </span><br><span class="line">  burpstate       | 从BurpSuite的状态下获得测试结果</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>2.的作用是将payload进行编码或加密。</p>
+<ul>
+<li>wfuzz的encoder列表如下：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">Available encoders:</span><br><span class="line">  Category      | Name                      | Summary                                                                           </span><br><span class="line">------------------------------------------------------------------------------------------------------------------------</span><br><span class="line">url_safe, url | urlencode                 | 用`%xx`的方式替换特殊字符， 字母/数字/下划线/半角点/减号不替换</span><br><span class="line">url_safe, url | double urlencode             | 用`%25xx`的方式替换特殊字符， 字母/数字/下划线/半角点/减号不替换</span><br><span class="line">url              | uri_double_hex            | 用`%25xx`的方式将所有字符进行编码</span><br><span class="line">html          | html_escape                | 将`&amp;`，`&lt;`，`&gt;`转换为HTML安全的字符</span><br><span class="line">html            | html_hexadecimal             | 用 `&amp;<span class="comment">#xx;` 的方式替换所有字符</span></span><br><span class="line">hashes         | base64                    | 将给定的字符串中的所有字符进行base64编码</span><br><span class="line">url             | doble_nibble_hex             | 将所有字符以`%%dd%dd`格式进行编码</span><br><span class="line">db             | mssql_char                | 将所有字符转换为MsSQL语法的`char(xx)`形式</span><br><span class="line">url             | utf8                        | 将所有字符以`\u00xx` 格式进行编码</span><br><span class="line">hashes         | md5                         | 将给定的字符串进行md5加密</span><br><span class="line">default         | random_upper                | 将字符串中随机字符变为大写</span><br><span class="line">url             | first_nibble_hex          | 将所有字符以`%%dd?` 格式进行编码</span><br><span class="line">default         | hexlify                    | 每个数据的单个比特转换为两个比特表示的hex表示</span><br><span class="line">url             | second_nibble_hex         | 将所有字符以`%?%dd` 格式进行编码</span><br><span class="line">url             | uri_hex                     | 将所有字符以`%xx` 格式进行编码</span><br><span class="line">default         | none                         | 不进行任何编码</span><br><span class="line">hashes         | sha1                        | 将字符串进行sha1加密</span><br><span class="line">url             | utf8_binary                | 将字符串中的所有字符以 `\uxx` 形式进行编码</span><br><span class="line">url             | uri_triple_hex             | 将所有字符以`%25%xx%xx` 格式进行编码</span><br><span class="line">url             | uri_unicode                | 将所有字符以`%u00xx` 格式进行编码</span><br><span class="line">html             | html_decimal                | 将所有字符以 `&amp;<span class="comment">#dd; ` 格式进行编码</span></span><br><span class="line">db             | oracle_char                | 将所有字符转换为Oracle语法的`chr(xx)`形式</span><br><span class="line">db             | mysql_char                 | 将所有字符转换为MySQL语法的`char(xx)`形式</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>3.wfuzz的iterator提供了针对多个payload的处理方式。</p>
+<ul>
+<li>itorators的列表如下：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Available iterators:</span><br><span class="line">product | 返回输入迭代器的笛卡尔积。</span><br><span class="line">zip     | 返回一个迭代器，该迭代器聚合来自每个迭代器的元素。</span><br><span class="line">chain   | 返回一个迭代器从第一个迭代器返回元素，直到它被耗尽，然后继续到下一个迭代器，直到所有的迭代器都被耗尽</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>4.wfuzz的printers用于控制输出打印。 </p>
+<ul>
+<li>printers列表如下：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Available printers:</span><br><span class="line">raw       | `Raw` output format</span><br><span class="line">json      | Results <span class="keyword">in</span> `json` format</span><br><span class="line">csv       | `CSV` printer ftw</span><br><span class="line">magictree | Prints results <span class="keyword">in</span> `magictree` format</span><br><span class="line">html      | Prints results <span class="keyword">in</span> `html` format</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>5.wfuzz中的scripts用监测一些常见的存在漏洞的路径</p>
+<ul>
+<li>scripts列表如下：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Available scripts:</span><br><span class="line">Category                   | Name          | Summary</span><br><span class="line">--------------------------------------------------------------------</span><br><span class="line">default, passive           | cookies       | 查找新的cookies</span><br><span class="line">default, passive           | errors        | 查找错误信息</span><br><span class="line">passive                    | grep          | HTTP response grep</span><br><span class="line">active                     | screenshot    | 用linux cutycapt tool 进行屏幕抓取 </span><br><span class="line">default, active, discovery | links         | 解析HTML并查找新的内容</span><br><span class="line">default, active, discovery | wc_extractor  | 解析subversion的wc.db文件</span><br><span class="line">default, passive           | listing       | 查找列目录漏洞</span><br><span class="line">default, passive           | title         | 解析HTML页面的title</span><br><span class="line">default, active, discovery | robots        | 解析robots.txt文件来查找新内容</span><br><span class="line">default, passive           | headers       | 查找服务器的返回头</span><br><span class="line">default, active, discovery | cvs_extractor | 解析 CVS/Entries 文件</span><br><span class="line">default, active, discovery | svn_extractor | 解析 .svn/entries 文件</span><br><span class="line">active, discovery          | backups       | 查找已知的备份文件名</span><br><span class="line">default, active, discovery | sitemap       | 解析 sitemap.xml 文件</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br></p>
+<p><strong>过滤器</strong><br>描述:wfuzz具有过滤器功能，在做测试的过程中会因为环境的问题需要进行过滤，例如在做目录扫描的时候，你事先探测并知道了这个网站访问不存在目录的时候使用的是自定义404页面（也就是状态码为200），而你可以选择提取该自定义页面的特征来过滤这些返回结果。</p>
+<p>wfuzz过滤分为两种方法：<code>隐藏符合过滤条件的结果</code> 和 <code>显示符合过滤条件的结果</code></p>
+<ul>
+<li>隐藏响应结果:可以隐藏某些HTTP响应。<ul>
+<li>–hc 根据响应报文状态码进行隐藏（hide code）</li>
+<li>–hl根据响应报文行数进行隐藏（hide lines）</li>
+<li>–hw根据响应报文字数进行隐藏（hide word）</li>
+<li>–hh根据响应报文字符数进行隐藏（hide chars 这里因为code和chars首字母都是c，–hc参数已经有了，所以hide chars的参数就变成了–hh）</li>
+</ul>
+</li>
+<li>显示响应结果:显示响应结果的使用方法跟隐藏时的原理一样，只不过参数变为了<ul>
+<li>–sc（show code）</li>
+<li>–sl（show lines）</li>
+<li>–sw（show word）</li>
+<li>–sh （show chars）</li>
+</ul>
+</li>
+<li>使用Baseline(基准线):过滤器可以是某个HTTP响应的引用，这样的引用我们称为Baseline(其实就是<code>标准线 or 及格线</code>)。</li>
+<li>使用正则表达式过滤:-ss和–hs可以使用正则表达式来对返回的结果过滤。<ul>
+<li>–ss 显示指定表达式请求结果</li>
+<li>–hs 隐藏指定表达式请求结果</li>
+</ul>
+</li>
+</ul>
+<p><br></p>
+<p><strong>内置工具</strong></p>
+<ul>
+<li>wfencode 工具: 自带的一个加密/解密（编码/反编码）工具，目前支持内建的encoders的加/解密。</li>
+<li>wfpayload工具: payload生成工具。</li>
+<li>wxfuzz 工具: 看源码是一个wxPython化的wfuzz，也就是GUI图形界面的wfuzz。<ul>
+<li>目前需要wxPython最新版本才能使用，但是在ParrotOS和Kali上都无法正常安装成功;</li>
+</ul>
+</li>
+</ul>
+<p><br></p>
+<p><strong>实际案例:</strong><br><em>示例1实际的使用一遍</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#地址其中FUZZ单词，这个单词可以理解是一个占位符，</span></span><br><span class="line">wfuzz -w 字典 https://weiyigeek.cn/FUZZ </span><br><span class="line">wfuzz -w test_dict.txt https:/weiyigeek..cn/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#返回结果如下：</span></span><br><span class="line">==================================================================</span><br><span class="line">ID	Response   Lines      Word         Chars          Payload</span><br><span class="line">编号、响应状态码、响应报文行数、响应报文字数、响应报文正字符数、测试使用的Payload。</span><br><span class="line">==================================================================</span><br><span class="line">000004:  C=404      1 L	     121 W	   1636 Ch	  <span class="string">"test123"</span></span><br></pre></td></tr></table></figure></p>
+<p><em>示例2第二种方式</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#第一条命令中的wordlist表示为字典位置</span></span><br><span class="line">wfuzz -z file --zP fn=wordlist URL/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#第二条命令简写了第一条命令的赋值</span></span><br><span class="line">wfuzz -z file,wordlist URL/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#第三条命令使用-w，这个参数就是-z file --zP fn的别名。</span></span><br><span class="line">wfuzz -w wordlist URL/FUZZ</span><br></pre></td></tr></table></figure></p>
+<p><em>示例3例如想要同时爆破目录、文件名、后缀</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wfuzz -w 目录字典路径 -w 文件名字典路径 -w 后缀名字典路径 URL/FUZZ/FUZ2Z.FUZ3Z</span><br></pre></td></tr></table></figure></p>
+<p><em>示例4.隐藏设置响应码的结果</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#隐藏404：</span></span><br><span class="line">wfuzz -w wordlist --hc 404 URL/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#隐藏404、403：</span></span><br><span class="line">wfuzz -w wordlist --hc 404,403 URL/FUZZ</span><br><span class="line"></span><br><span class="line">e.g.使用百度举个例子运行wfuzz -w test_dict.txt https://www.baidu.com/FUZZ  <span class="comment">#这里所有的测试请求，都是不存在的页面</span></span><br><span class="line">404页面规则就是如上图结果所示：响应报文状态码（302）、响应报文行数（7）、响应报文字数（18）、响应报文字符数（222）</span><br><span class="line">wfuzz -w wordlist --hl 7 https://www.baidu.com/FUZZ</span><br><span class="line">wfuzz -w wordlist --hw 18 https://www.baidu.com/FUZZ</span><br><span class="line">wfuzz -w wordlist --hh 222 https://www.baidu.com/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#如果根据单个条件判断相对来说肯定是不精确的，所以整合一下就是这样的命令：</span></span><br><span class="line">wfuzz -w wordlist --hc 302 --hl 7 --hw 18 --hh 222 https://www.baidu.com/FUZZ</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920171603.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920171603.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><em>示例5.基准线(Baseline)的使用</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wfuzz -w wordlist --hh BBB https://www.baidu.com/FUZZ&#123;404there&#125;</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920214530.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920214530.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>代表wfuzz第一个请求是请求<a href="https://www.baidu.com/404there这个网址，`在{" target="_blank" rel="noopener">https://www.baidu.com/404there这个网址，`在{</a> }内的值用来指定wfuzz第一个请求中的FUZZ占位符，而这第一个请求被标记为BBB（BBB不能换成别的）基准线`；其次这里使用的参数是–hh，也就是以BBB这条请求中的Chars为基准，其他请求的Chars值与BBB相同则隐藏。</p>
+<p><em>示例6.使用正则表达式过滤的使用</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#e.g. 在这里一个网站自定义返回页面的内容中包含Not Found，想根据这个内容进行过滤可以使用如下的命令：</span></span><br><span class="line">wfuzz -w wordlist --hs <span class="string">"Not Found"</span> http://127.0.0.1/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#总结</span></span><br><span class="line">wfuzz -w wordlist --hs 正则表达式 URL/FUZZ <span class="comment">#隐藏</span></span><br><span class="line">wfuzz -w wordlist --ss 正则表达式 URL/FUZZ <span class="comment">#显示</span></span><br></pre></td></tr></table></figure></p>
+<p><em>示例7.内置工具的使用</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#(1) 目前支持内建的encoders的加/解密</span></span><br><span class="line">wfencode -e base64 123456</span><br><span class="line"><span class="comment">#[RES] MTIzNDU2</span></span><br><span class="line">wfencode -d base64 MTIzNDU2</span><br><span class="line"><span class="comment">#[RES] 123456</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#(2) wfpayload是payload生成工具</span></span><br><span class="line">wfpayload -z range,0-10</span><br><span class="line">[RES]</span><br><span class="line">0</span><br><span class="line">1</span><br><span class="line"></span><br><span class="line"><span class="comment">#(3) wxfuzz 工具</span></span><br><span class="line">wxPython化的wfuzz也就是GUI图形界面的wfuz</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h6 id="自带字典"><a href="#自带字典" class="headerlink" title="自带字典"></a>自带字典</h6><p>描述:wfuzz本身自带字典爆破文件、目录;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">├── Injections  <span class="comment">#注入</span></span><br><span class="line">│   ├── All_attack.txt</span><br><span class="line">│   ├── SQL.txt</span><br><span class="line">│   ├── Traversal.txt</span><br><span class="line">│   ├── XML.txt</span><br><span class="line">│   ├── XSS.txt</span><br><span class="line">│   └── bad_chars.txt</span><br><span class="line">├── general <span class="comment">#通用</span></span><br><span class="line">│   ├── admin-panels.txt</span><br><span class="line">│   ├── big.txt</span><br><span class="line">│   ├── catala.txt</span><br><span class="line">│   ├── common.txt</span><br><span class="line">│   ├── euskera.txt</span><br><span class="line">│   ├── extensions_common.txt</span><br><span class="line">│   ├── http_methods.txt</span><br><span class="line">│   ├── medium.txt</span><br><span class="line">│   ├── megabeast.txt</span><br><span class="line">│   ├── mutations_common.txt</span><br><span class="line">│   ├── spanish.txt</span><br><span class="line">│   └── test.txt</span><br><span class="line">├── others <span class="comment">#其他</span></span><br><span class="line">│   ├── common_pass.txt</span><br><span class="line">│   └── names.txt</span><br><span class="line">├── stress <span class="comment">#压力</span></span><br><span class="line">│   ├── alphanum_case.txt</span><br><span class="line">│   ├── alphanum_case_extra.txt</span><br><span class="line">│   ├── char.txt</span><br><span class="line">│   ├── doble_uri_hex.txt</span><br><span class="line">│   ├── test_ext.txt</span><br><span class="line">│   └── uri_hex.txt</span><br><span class="line">├── vulns <span class="comment">#漏洞测试</span></span><br><span class="line">│   ├── apache.txt</span><br><span class="line">│   ├── cgis.txt</span><br><span class="line">│   ├── coldfusion.txt</span><br><span class="line">│   ├── dirTraversal-nix.txt</span><br><span class="line">│   ├── dirTraversal-win.txt</span><br><span class="line">│   ├── dirTraversal.txt</span><br><span class="line">│   ├── domino.txt</span><br><span class="line">│   ├── fatwire.txt</span><br><span class="line">│   ├── fatwire_pagenames.txt</span><br><span class="line">│   ├── frontpage.txt</span><br><span class="line">│   ├── iis.txt</span><br><span class="line">│   ├── iplanet.txt</span><br><span class="line">│   ├── jrun.txt</span><br><span class="line">│   ├── netware.txt</span><br><span class="line">│   ├── oracle9i.txt</span><br><span class="line">│   ├── sharepoint.txt</span><br><span class="line">│   ├── sql_inj.txt</span><br><span class="line">│   ├── sunas.txt</span><br><span class="line">│   ├── tests.txt</span><br><span class="line">│   ├── tomcat.txt</span><br><span class="line">│   ├── vignette.txt</span><br><span class="line">│   ├── weblogic.txt</span><br><span class="line">│   └── websphere.txt</span><br><span class="line">└── webservices</span><br><span class="line">    ├── ws-dirs.txt</span><br><span class="line">    └── ws-files.txt</span><br></pre></td></tr></table></figure></p>
+<p>实际案例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#爆破文件：</span></span><br><span class="line">wfuzz -w wordlist URL/FUZZ.php</span><br><span class="line"></span><br><span class="line"><span class="comment">#爆破目录：</span></span><br><span class="line">wfuzz -w wordlist URL/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#遍历枚举参数值使用payloads模块类中的range模块进行生成</span></span><br><span class="line">wfuzz -z range,000-999 http://127.0.0.1/getuser.php?uid=FUZZ <span class="comment">#uid参数可以遍历，已知123为三位数纯数字，需要从000-999进行遍历</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#POST请求测试，-d参数传输POST请求正文。</span></span><br><span class="line">wfuzz -w userList -w pwdList -d <span class="string">"username=FUZZ&amp;password=FUZ2Z"</span> http://127.0.0.1/login.php</span><br><span class="line"></span><br><span class="line"><span class="comment">#Cookie测试越权,b参数指定Cookie多个Cookie需要指定多次，也可以对Cookie进行测试，仍然使用FUZZ占位符即可。</span></span><br><span class="line">wfuzz -z range,000-999 -b session=session -b cookie=cookie http://127.0.0.1/getuser.php?uid=FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#HTTP Headers测试伪造XFF头（IP），-H指定HTTP头，多个需要指定多次（同Cookie的-b参数）</span></span><br><span class="line">wfuzz -z range,0000-9999 -H <span class="string">"X-Forwarded-For: FUZZ"</span> http://127.0.0.1/get.php?userid=666</span><br><span class="line"></span><br><span class="line"><span class="comment">#测试HTTP请求方法（Method），-X参数是指定HTTP请求方法类型，因为这里要测试HTTP请求方法，后面的值为FUZZ占位符。</span></span><br><span class="line">wfuzz -z list,<span class="string">"GET-POST-HEAD-PUT"</span> -X FUZZ http://127.0.0.1/</span><br><span class="line"></span><br><span class="line"><span class="comment">#代理设置与关键字隐藏，多个代理可使用多个-p参数同时指定，wfuzz每次请求都会选取不同的代理进行</span></span><br><span class="line">wfuzz -w wordlist -p proxtHost:proxyPort:TYPE URL/FUZZ  <span class="comment">#-p参数指定主机:端口:代理类型</span></span><br><span class="line">wfuzz -z file,starter.txt -p 192.168.31.26:1080:SOCKS5 --hs <span class="string">"Cannot"</span> https://foo.domain.com/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#认证：测试一个需要HTTP Basic Auth保护的内容可使用如下命令：</span></span><br><span class="line"><span class="comment">#wfuzz可以通过--basec --ntml --digest来设置认证头，使用方法都一样：</span></span><br><span class="line"><span class="comment"># --basec/ntml/digest username:password</span></span><br><span class="line">wfuzz -z list,<span class="string">"username-password"</span> --basic FUZZ:FUZZ URL</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#递归测试指定一个payload被递归的深度(数字)。</span></span><br><span class="line"><span class="comment">#例如：爆破目录时，我们想使用相同的payload对已发现的目录进行测试</span></span><br><span class="line">wfuzz -z list,<span class="string">"admin-login.php-test-dorabox"</span> -R 1 http://127.0.0.1/FUZZ</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#并发和间隔，wfuzz提供了一些参数可以用来调节HTTP请求的线程</span></span><br><span class="line"><span class="comment">#使用-t参数设置并发请求，该参数默认设置都是10。</span></span><br><span class="line"><span class="comment">#使用-s参数可以调节每次发送HTTP的时间间隔。</span></span><br><span class="line">wfuzz -z range,0-20 -t 20 -d <span class="string">"money=1"</span> http://127.0.0.1/dorabox/race_condition/pay.php?FUZZ</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#保存测试结果,可以通过printers模块来将结果以不同格式保存到文档中</span></span><br><span class="line"><span class="comment">#使用-f参数，指定值的格式为输出文件位置,输出格式。</span></span><br><span class="line">$ wfuzz -f outfile,json -w wordlist URL/FUZZ</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h6 id="高阶功法"><a href="#高阶功法" class="headerlink" title="高阶功法"></a>高阶功法</h6><p><strong>Iterators-迭代器</strong><br>BurpSuite的Intruder模块中Attack Type有<code>Sniper(狙击手)、Battering ram(撞击物)、Pitchfork(相交叉)、Cluster bomb(集束炸弹)</code>～wfuzz的Iterators模块也可以完成这样的功能，将不同的字典的组合起来</p>
+<p>使用参数-m 迭代器，wfuzz自带的迭代器有三个：<code>zip、chain、product</code>，如果不指定迭代器，默认为product迭代器。</p>
+<ul>
+<li>zip:字典数相同、<code>一一对应进行组合</code>，如果字典数不一致则多余的抛弃掉不请求</li>
+<li>chain:将所有字典全部整合（不做组合）放在一起然后传入占位符FUZZ中。</li>
+<li>product：求的payload交叉组合即提供的两个字典相互配合遍历；<figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921101321.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921101321.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+</ul>
+<p><br></p>
+<p>1.zip命令：</p>
+<ul>
+<li>示例:设置了两个字典两个占位符，一个是range模块生成的0、1、2、3、4、5、6、7、8、9 10个数字，一个是外部字典dict.txt的9行字典，使用zip迭代器组合这两个字典发送。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wfuzz -z range,0-9 -w dict.txt -m zip http://127.0.0.1/ip.php?FUZZ=FUZ2Z</span><br></pre></td></tr></table></figure>
+如上命令结果就是数字9被抛弃了因为没有字典和它组合。<figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921100934.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921100934.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+</ul>
+<p><br></p>
+<p>2.chain命令：</p>
+<ul>
+<li>设置了两个字典，一个占位符FUZZ，使用chain迭代器组合这两个字典发送。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wfuzz -z range,0-9 -w dict.txt -m chain http://127.0.0.1/ip.php?FUZZ</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921101121.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921101121.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+</ul>
+<p><br></p>
+<p>3.product命令：</p>
+<ul>
+<li>设置了两个字典两个占位符，一个是range模块生成的0、1、2 3个数字，一个是外部字典dict.txt的3行字典，使用product迭代器组合这两个字典发送。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wfuzz -z range,0-2 -w dict.txt -m product http://127.0.0.1/ip.php?FUZZ=FUZ2Z</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+
+<p><strong>Encoders-编码加解密</strong><br>wfuzz中encoders模块可以实现编码解码、加密，它支持所列转换功能请参考上面的;</p>
+<p><em>正常使用：</em></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#使用Encoders的md5加密。</span></span><br><span class="line">wfuzz -z file --zP fn=wordlist,encoder=md5 URL/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#简写了第一条命令</span></span><br><span class="line">wfuzz -z file,wordlist,md5 URL/FUZZ</span><br></pre></td></tr></table></figure>
+<p><em>使用多个Encoder：</em></p>
+<ul>
+<li><p>多个转换，使用一个<code>-</code>号分隔的列表来指定</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wfuzz -z file,dict.txt,md5-base64 http://127.0.0.1/ip.php\?FUZZ</span><br><span class="line">wfuzz -z list,1-2-3,md5-sha1-none http://webscantest.com/FUZZ</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>多次转换使用一个@号分隔的列表来按照从右往左顺序多次转换</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#这里让传入的字典先md5加密然后base64编码</span></span><br><span class="line">wfuzz -z file,dict.txt,base64@md5 http://127.0.0.1/ip.php\?FUZZ</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921102357.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921102357.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<hr>
+
+<p><strong>Scripts-脚本插件</strong><br>描述:wfuzz支持插件，其本身也有很多插件，插件大部分都是实现扫描和解析功能，插件共有两大类和一类附加插件：</p>
+<ul>
+<li>passive：分析已有的请求和响应（被动）</li>
+<li>active：会向目标发送请求来探测（主动）</li>
+<li>discovery：自动帮助wfuzz对目标站进行爬取，将发现的内容提供给wfuzz进行请求</li>
+</ul>
+<p>基础使用<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查看script中robots脚本的帮助信息</span></span><br><span class="line">wfuzz --script-help=robots <span class="comment">#该模块解析robots.txt的并且寻找新的内容</span></span><br><span class="line"></span><br><span class="line">wfuzz --script=robots -z list,<span class="string">"robots.txt"</span> http://127.0.0.1/FUZZ</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921102929.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921102929.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure><br><em>script是使用脚本模块的参数，这时候就有个疑惑命令为什么要加上list呢？</em><br>因为在这里robots脚本只是解析robots.txt规则的，所以你需要告诉wfuzz去请求哪个文件而这里我写的就是robots.txt就可以解析；</p>
+<p>自定义插件:需要放在~/.wfuzz/scripts/目录下，具体如何编写可以参考已有的插件：</p>
+<ul>
+<li><a href="https://github.com/xmendez/wfuzz/tree/master/src/wfuzz/plugins/scripts" target="_blank" rel="noopener">https://github.com/xmendez/wfuzz/tree/master/src/wfuzz/plugins/scripts</a></li>
+</ul>
+<hr>
+
+<p><strong>技巧-脚本插件</strong></p>
+<ul>
+<li>recipes用来保存命令，方便下次执行或者分享给别人。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#生成一个recipes：</span></span><br><span class="line">wfuzz --script=robots -z list,<span class="string">"robots.txt"</span> --dumo-recipe outrecipe URL/FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#使用某个recipes：</span></span><br><span class="line">wfuzz --recip outrecipe</span><br></pre></td></tr></table></figure></li>
+<li>网络异常:如DNS解析失败，拒绝连接等时，wfuzz会抛出一个异常并停止执行使用-Z参数即可忽略这些错误继续执行。</li>
+<li>超时:fuzz可以设置超时时间。<ul>
+<li>参数–conn-delay来设置等待服务器响应接连的秒数。 </li>
+<li>参数–req-delay来设置等待响应完成的最大秒数。</li>
+</ul>
+</li>
+<li>结合BurpSuites使用:从Burp的LOG文件中获取测试的URL地址<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#解析burplog里面请求的url</span></span><br><span class="line">wfuzz -z burplog,<span class="string">"1.burp"</span> FUZZ</span><br><span class="line"></span><br><span class="line"><span class="comment">#还有能够读取burpsuite保存的state：</span></span><br><span class="line">wfuzz -z burpstate,a_burp_state.burp FUZZ</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921110045.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190921110045.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+</li>
+</ul>
+<p><em>参考来源补充:</em></p>
+<ul>
+<li><a href="https://gh0st.cn/archives/2018-10-28/3" target="_blank" rel="noopener">https://gh0st.cn/archives/2018-10-28/3</a></li>
+<li><a href="https://gh0st.cn/archives/2018-10-28/2" target="_blank" rel="noopener">https://gh0st.cn/archives/2018-10-28/2</a></li>
+<li><a href="https://gh0st.cn/archives/2018-10-28/1" target="_blank" rel="noopener">https://gh0st.cn/archives/2018-10-28/1</a></li>
+</ul>
+<p><br></p>
+<h5 id="2-W3AF"><a href="#2-W3AF" class="headerlink" title="(2)W3AF"></a>(2)W3AF</h5><p>描述:w3af是一款丰富的Webapplication程序attack和审计框架-还支持Xpath注入、OS命令、错误的应用等。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">w3af_console  <span class="comment">#命令行模式交互式</span></span><br><span class="line">w3af_gui  <span class="comment">#可以用GUI版本的</span></span><br><span class="line"></span><br><span class="line">w3af_console&gt;&gt;&gt;<span class="built_in">help</span>  <span class="comment">#首先使用OUTPUT插件，然后启用特定的Audit测试选项，设置Target然后对其scan. </span></span><br><span class="line"></span><br><span class="line"><span class="comment">#插件帮助</span></span><br><span class="line">w3af&gt;&gt;&gt; plugins </span><br><span class="line">w3af/plugins&gt;&gt;&gt; <span class="built_in">help</span></span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920125327.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920125327.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p><br></p>
+<h5 id="3-WAFWOOF"><a href="#3-WAFWOOF" class="headerlink" title="(3)WAFWOOF"></a>(3)WAFWOOF</h5><p>描述:wafwoof检测Web应用防火墙（WAF），规避Waf规则，涉及一些Http污染、空字节替换和规范化处理.HEX字符或者Unicode字符的URL编码.<br>用法：<code>wafw00f http://xiaomi.com</code><br><figure class="image-box">
+                <a rel=网站扫描与Fuzz测试之敏感信息收集 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920125614.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190920125614.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-30T05:02:09.820Z" itemprop="dateUpdated">2022-03-30 13:02:09</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/网安大类/渗透系统/Kail/网站扫描与Fuzz测试之敏感信息收集.md" target="_blank" rel="noopener noreferrer">_posts/网安大类/渗透系统/Kail/网站扫描与Fuzz测试之敏感信息收集.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/9-20-425.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/9-20-425.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Kail/" rel="tag">Kail</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/9-20-425.html&title=《网站扫描与Fuzz测试之敏感信息收集》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/9-20-425.html&title=《网站扫描与Fuzz测试之敏感信息收集》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员、网站开发人员以及运维人员在日常工作防范恶意攻击,请勿恶意使用下面介绍技术进行非法攻击操作。。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/9-20-425.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《网站扫描与Fuzz测试之敏感信息收集》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/9-20-425.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/9-20-425.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/9-20-424.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">数据库攻击与数据库注入执行验证</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/9-20-286.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">JAVA入门学习七</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-目录扫描"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x01 目录扫描</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-利用扫描"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x02 利用扫描</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-CMS-Scan"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x03 CMS-Scan</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x04-Fuzz-ByPass"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x04 Fuzz-ByPass</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/9-20-425.html&title=《网站扫描与Fuzz测试之敏感信息收集》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/9-20-425.html&title=《网站扫描与Fuzz测试之敏感信息收集》 — WeiyiGeek Blog&source=注意：本文分享给安全从业人员、网站开发人员以及运维人员在日常工作防范恶意攻击,请勿恶意使用下面介绍技术进行非法攻击操作。。
+[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/9-20-425.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《网站扫描与Fuzz测试之敏感信息收集》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/9-20-425.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/9-20-425.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACIElEQVR42u3aSW7DMAwF0Nz/0ukBCtufpF3U0tMqyCDrZUGIw+cTr+/B+v3p0feP9jx6yueJhYGB8VrG93T1vnP+zjmp+lwMDIx9GPnW5w/Lw3SyTx6sMTAwMJJr310hGAMDA+NpRpJjviDgYmBg/EtGkqDOL4LV8twjuTgGBsYLGXnV/e9fP9LfwMDAeBXjW1yTY+UXx/KpMDAwlmbkAW5S3M8T2t55MDAwdmAkQ1rVwa8JpvcOBgbGzozmdsWi/10lPwwMjPUYefMyD6nzIbBqWxQDAwOjd8T8V/kwRzkLx8DAWIKRNymTcYckXOZthuRsGBgY+zCSpLEXoO9qBkS/wsDAWJRRLWxVkUma2kuJL2ZGMDAwlmPce0HMxzUmwf0iF8fAwNiAkQDyg/YKbYWrJwYGxtKMak3urrblvEp2EXYxMDCWY1RbiVVqfoks9DGqG2FgYLyWMRnhysth+eBX3ijFwMDYhzEJu9UH90Yx8jEODAyMtRnVQ89bCEkIru6DgYGxD6NX7q+W2PL0tdDmxMDA2IaRkJ4Isr2C4KiFiYGB8RLGt7iqgLv+lIu/GwMDY2lGNcxVi/V5S2CSKmNgYOzAKBe2WoeYNxIurokYGBgbMO69uiWNyd4IxeFuGBgYGMERq+MUediNzoOBgYERlNh6gTLJsM8HMjAwMPZhJKGzV27rhdcHy20YGBgvZEwmNeakfM88bcbAwFiI8QOZeImH+Rz0OwAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

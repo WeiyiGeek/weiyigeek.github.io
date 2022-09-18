@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 3.ElasticSearch分布式数据分析引擎基础概念与使用|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Elastic">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>3.ElasticSearch分布式数据分析引擎基础概念与使用</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">3.ElasticSearch分布式数据分析引擎基础概念与使用</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2021-08-02T01:34:30.000Z" itemprop="datePublished" class="page-time">
+  2021-08-02
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E5%AE%A1%E8%AE%A1/">日志审计</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E5%AE%A1%E8%AE%A1/%E5%AE%89%E5%85%A8%E5%BB%BA%E8%AE%BE/">安全建设</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-网安防御/安全建设/日志审计/ElasticStack/3.ElasticSearch分布式数据分析引擎基础概念与使用"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">3.ElasticSearch分布式数据分析引擎基础概念与使用</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2021-08-02 09:34:30" datetime="2021-08-02T01:34:30.000Z"  itemprop="datePublished">2021-08-02</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E5%AE%A1%E8%AE%A1/">日志审计</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E6%97%A5%E5%BF%97%E5%AE%A1%E8%AE%A1/%E5%AE%89%E5%85%A8%E5%BB%BA%E8%AE%BE/">安全建设</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-基础快速入门"><a href="#0x00-基础快速入门" class="headerlink" title="0x00 基础快速入门"></a>0x00 基础快速入门</h2><h3 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h3><ul>
+<li><p>索引(Index): 类似于关系型数据中得库(database),一个ES的集群中可以有多个索引,并且每个索引都是一批独立的存储数据,其按照一定的数据结构保存、方便查询。</p>
+</li>
+<li><p>类型(Type): 类似于关系型数据库中的表格(Table),一个索引中可以有多个类型,每个类型中的数据是一致的。</p>
+<p>Tips : 非常注意，在6.x中使用类型，但是在7.x版本中所有索引的类型只有一个叫做<code>_Doc</code>, 并在8.x的版本里将会彻底移除类型的概念,其目的是提升索引的效率。</p>
+</li>
+<li><p>映射(Mapping): 类似于关系型数据库中定义得结构约束(Schema)，用于定义我们想往ES索引里存储的数据结构,是String字符串、还是integer整数、或是Boolean布尔等等</p>
+</li>
+</ul>
+<ul>
+<li>文档(Document): 类似于关系型数据库中的行数据(Rows),它是ES中存储数据的最小数据单元,每个文档都能根据数据的结构存储多个字段field,值得注意Field类型是在存储数据时由Mapping映射决定的。</li>
+</ul>
+<ul>
+<li>字段(Field): 类似于关系型数据库中的列数据(Columns),每个文档都由多个Field组成。</li>
+</ul>
+<ul>
+<li>集群(Cluster): ES支持分布式集群结构,每个ES进程都属于一个集群,即使只有一个ES进程再启动它也是一个集群,注意不同集群由集群名称进行分开。</li>
+</ul>
+<ul>
+<li>节点(Node): 每个ES进程都是一个节点,并且每个节点都拥有自己的名称。</li>
+</ul>
+<ul>
+<li>分片(Shard): 单台机器存储数据量是有限的，而ES可将一个Index索引下的数据划分为多个Shard并存储在不同的机器上,横向扩展以存储更多的数据,而且可以让搜索、分析等操作分配到多个机器上去执行,提升吞吐量金额性能，每个Shard都是一个Lucene Index。</li>
+</ul>
+<ul>
+<li><p>分片复制(Replica): 每台机器都可能会出现宕机的情况，此时Shard上的数据就可能会丢失。因此可以为每个Shard建立多个副本，保证在一个Shard不可用时还可以使用副本且保证数据不丢失、也能提升查询性能。</p>
+<p>Tips: 主分片的个数是在建立索引时定下的不能修改默认为5个，而副本切片(Replica)是我们可以随时修改默认是一个，注意为了保证分布式与高可用集群的正常运行，每个分片的主分片和副本分片不能在一台主机上。</p>
+</li>
+</ul>
+<ul>
+<li>接近实时(NearReatime-NRT): 当数据写入后一般在1秒左右就可以被客户端调用，基于ES执行搜索和分析可以达到秒级。</li>
+</ul>
+<p><br></p>
+<h3 id="工具介绍"><a href="#工具介绍" class="headerlink" title="工具介绍"></a>工具介绍</h3><p>描述: ES是支持以及HTTP协议进行REST风格接口访问,一般得我们需要有个工具帮我们发送http请求,该工具常见的是curl<code>英 [kɜːl]</code>、Head插件、Kibana DeveloperTool软件等。</p>
+<p><strong>Curl  使用</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 示例1.获取ES相关信息</span></span><br><span class="line">curl -XGET <span class="string">"http://10.10.107.225:9200/"</span> -H <span class="string">'Content-Type: application/json'</span> -H <span class="string">'Authorization: Basic ZWxhc3RpYzp3ZWl5aTEyMzQ1Ng=='</span></span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "name" : "elk",</span></span><br><span class="line">  <span class="comment">#   "cluster_name" : "elasticsearch",</span></span><br><span class="line">  <span class="comment">#   "cluster_uuid" : "R8kofupCROGCAt6WrXT8bQ",</span></span><br><span class="line">  <span class="comment">#   "version" : &#123;</span></span><br><span class="line">  <span class="comment">#     "number" : "7.15.0",</span></span><br><span class="line">  <span class="comment">#     .....</span></span><br><span class="line">  <span class="comment">#   &#125;,</span></span><br><span class="line">  <span class="comment">#   "tagline" : "You Know, for Search"</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例2.新增索引并为索引添加数据</span></span><br><span class="line">curl -XPUT <span class="string">"http://10.10.107.225:9200/index01/_doc/curl?pretty"</span> -H <span class="string">'Content-Type: application/json'</span> -H <span class="string">'Authorization: Basic ZWxhc3RpYzp3ZWl5aTEyMzQ1Ng=='</span> -d <span class="string">'&#123;"name":"WeiyiGeek","age": 100,"hobby":"computer"&#125;'</span></span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "_index" : "index01",</span></span><br><span class="line">  <span class="comment">#   "_type" : "_doc",</span></span><br><span class="line">  <span class="comment">#   "_id" : "curl",</span></span><br><span class="line">  <span class="comment">#   "_version" : 1,</span></span><br><span class="line">  <span class="comment">#   "result" : "created",  # 结果显示</span></span><br><span class="line">  <span class="comment">#   "_shards" : &#123;</span></span><br><span class="line">  <span class="comment">#     "total" : 2,</span></span><br><span class="line">  <span class="comment">#     "successful" : 1,</span></span><br><span class="line">  <span class="comment">#     "failed" : 0</span></span><br><span class="line">  <span class="comment">#   &#125;,</span></span><br><span class="line">  <span class="comment">#   "_seq_no" : 0,</span></span><br><span class="line">  <span class="comment">#   "_primary_term" : 1</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 示例3.获取刚才添加的数据</span></span><br><span class="line"><span class="comment"># 示例2.新增索引并为索引添加数据</span></span><br><span class="line">curl -XGET <span class="string">"http://10.10.107.225:9200/index01/_doc/curl?pretty"</span> -H <span class="string">'Content-Type: application/json'</span> -H <span class="string">'Authorization: Basic ZWxhc3RpYzp3ZWl5aTEyMzQ1Ng=='</span></span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "_index" : "index01",</span></span><br><span class="line">  <span class="comment">#   "_type" : "_doc",</span></span><br><span class="line">  <span class="comment">#   "_id" : "curl",</span></span><br><span class="line">  <span class="comment">#   "_version" : 1,</span></span><br><span class="line">  <span class="comment">#   "_seq_no" : 0,</span></span><br><span class="line">  <span class="comment">#   "_primary_term" : 1,</span></span><br><span class="line">  <span class="comment">#   "found" : true,</span></span><br><span class="line">  <span class="comment">#   "_source" : &#123;</span></span><br><span class="line">  <span class="comment">#     "name" : "WeiyiGeek",</span></span><br><span class="line">  <span class="comment">#     "age" : 100,</span></span><br><span class="line">  <span class="comment">#     "hobby" : "computer"</span></span><br><span class="line">  <span class="comment">#   &#125;</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>Head 插件使用</strong><br>描述: 我们也可以利用ES的Head插件进行数据的相关增删改查。<br><figure class="image-box">
+                <a rel=3.ElasticSearch分布式数据分析引擎基础概念与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210929173016.png" target="_blank" title="WeiyiGeek.ES-Plugins-Head" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210929173016.png" alt="WeiyiGeek.ES-Plugins-Head" title="" class=""></a>
+                <p>WeiyiGeek.ES-Plugins-Head</p>
+            </figure></p>
+<p><br></p>
+<p><strong>Kibana DeveloperTool 使用</strong><br>描述: 登陆Kibana后我们可以在左边菜单选择开发工具或者访问<code>http://log.weiyigeek.top:5601/app/dev_tools#/console</code>。打开后Console UI 分为两个窗格：编辑器窗格（左）和响应窗格（右）。使用编辑器键入请求并将它们提交到 Elasticsearch，结果将显示在右侧的响应窗格中。</p>
+<figure class="image-box">
+                <a rel=3.ElasticSearch分布式数据分析引擎基础概念与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210930092400.png" target="_blank" title="WeiyiGeek.Kibana" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210930092400.png" alt="WeiyiGeek.Kibana" title="" class=""></a>
+                <p>WeiyiGeek.Kibana</p>
+            </figure>
+<p>Tips : 非常建议通过按 Enter/Tab 键来进行查询参数补全，它可以有效帮助我们基于请求结构以及索引和类型快速查询。</p>
+<p>Tips : 实际上Kibana的控制台也是通过类似于curl与ES交互的。</p>
+<hr>
+<h2 id="0x01-基础使用操作"><a href="#0x01-基础使用操作" class="headerlink" title="0x01 基础使用操作"></a>0x01 基础使用操作</h2><p>描述: 为了方便学习后续请求演示都基于Kibana的开发工具来验证。</p>
+<h3 id="1-索引-amp-文档操作"><a href="#1-索引-amp-文档操作" class="headerlink" title="1.索引&amp;文档操作"></a>1.索引&amp;文档操作</h3><p><strong>请求示例:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 创建索引</span></span><br><span class="line">PUT /index03</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 为索引提供文档数据</span></span><br><span class="line">PUT /index03/_doc/kibana?pretty</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"id"</span>: 1,</span><br><span class="line">  <span class="string">"name"</span>: <span class="string">"weiyigeek"</span>,</span><br><span class="line">  <span class="string">"hobby"</span>: [<span class="string">"computer"</span>,<span class="string">"Basketball"</span>,<span class="string">"pingpang"</span>]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 获取指定索引插入的数据</span></span><br><span class="line">GET /index03/_doc/kibana</span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 批量写入索引文档数据</span></span><br><span class="line"><span class="comment"># 如果有许多文档需要索引则我们可以通过API批量提交,使用这种方式比单独提交请求要快得多因为其减少了网络往返,例如下列的数据集合。</span></span><br><span class="line">PUT /index03/_bulk</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"0"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:0,<span class="string">"name"</span>:<span class="string">"朴乾"</span>,<span class="string">"job"</span>:<span class="string">"c"</span>,<span class="string">"age"</span>:31,<span class="string">"salary"</span>:35000,<span class="string">"gender"</span>:<span class="string">"female"</span>,<span class="string">"like"</span>:<span class="string">"鲜肉"</span>&#125;</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"1"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:1,<span class="string">"name"</span>:<span class="string">"郝霞"</span>,<span class="string">"job"</span>:<span class="string">"go"</span>,<span class="string">"age"</span>:25,<span class="string">"salary"</span>:18000,<span class="string">"gender"</span>:<span class="string">"male"</span>,<span class="string">"like"</span>:<span class="string">"大叔"</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) 删除索引的指定文档数据</span></span><br><span class="line">DELETE /index03/_doc/kibana</span><br><span class="line"></span><br><span class="line"><span class="comment"># (6) 批量删除索引</span></span><br><span class="line">DELETE /index02,index01</span><br><span class="line"></span><br><span class="line"><span class="comment"># (7) 删除数据（单条、多条、清空、所有）</span></span><br><span class="line"><span class="comment"># 7.1 根据主键删除数据：DELETE /索引名称/类型名称/主键编号</span></span><br><span class="line">DELETE /index09/_doc/LgafeHwBA4hYcZDAvgAo</span><br><span class="line"><span class="comment"># 7.2 根据匹配条件删除数据(注意请求方式) : 索引名称/_delete_by_query</span></span><br><span class="line">POST /index09/_delete_by_query</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"query"</span>:&#123;</span><br><span class="line">    <span class="string">"match_phrase"</span>:&#123;</span><br><span class="line">      <span class="string">"title"</span>: <span class="string">"我爱学习"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 7.3 清空多个索引数据 : 索引名称1,索引名称2/_delete_by_query</span></span><br><span class="line">POST http://es-server:9200/index01,index02/_delete_by_query?pretty</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"query"</span>: &#123;</span><br><span class="line">    <span class="string">"match_all"</span>: &#123;&#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 返回结果</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"took"</span> : 147, <span class="comment">#执行时间，毫秒数</span></span><br><span class="line">  <span class="string">"timed_out"</span>: <span class="literal">false</span>, <span class="comment">#是否超时</span></span><br><span class="line">  <span class="string">"total"</span>: 119, <span class="comment">#处理文档条数</span></span><br><span class="line">  <span class="string">"deleted"</span>: 119, <span class="comment">#删除文档条数</span></span><br><span class="line">  <span class="string">"batches"</span>: 1, <span class="comment"># by_query回调的响应次数</span></span><br><span class="line">  <span class="string">"version_conflicts"</span>: 0, <span class="comment">#by_query命中的版本冲突数</span></span><br><span class="line">  <span class="string">"noops"</span>: 0, <span class="comment">#在by_query方式下为0。</span></span><br><span class="line">  <span class="string">"retries"</span>: &#123; </span><br><span class="line">    <span class="string">"bulk"</span>: 0, <span class="comment">#整体重试次数</span></span><br><span class="line">    <span class="string">"search"</span>: 0 <span class="comment">#查询重试次数</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"throttled_millis"</span>: 0, <span class="comment"># 每秒休眠的时间，已符合requests_per_second的设置</span></span><br><span class="line">  <span class="string">"requests_per_second"</span>: -1.0, <span class="comment"># 每秒最大有效操作数</span></span><br><span class="line">  <span class="string">"throttled_until_millis"</span>: 0, <span class="comment"># 在by_query方式为0，api方式下标识开始的毫秒时间</span></span><br><span class="line">  <span class="string">"failures"</span> : [ ] <span class="comment">#如果进程中有任何不可恢复的错误，则返回失败数组。</span></span><br><span class="line">  <span class="comment"># 如果这是非空的，那么请求会因为这些失败而中止。按查询删除是使用批处理实现的，任何失败都会导致整个进程中止，但当前批处理中的所有失败都会收集到数组中。您可以使用conflicts选项来防止重新索引在版本冲突时中止。</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Tips : 当文档数据过多时不建议使用Kibana工具进行调试提交,而建议使用curl指定json文件提交。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">tee data.json&lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"2"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:2,<span class="string">"name"</span>:<span class="string">"陈哲"</span>,<span class="string">"job"</span>:<span class="string">"c"</span>,<span class="string">"age"</span>:22,<span class="string">"salary"</span>:25000,<span class="string">"gender"</span>:<span class="string">"female"</span>,<span class="string">"like"</span>:<span class="string">"青年"</span>&#125;</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"3"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:3,<span class="string">"name"</span>:<span class="string">"曹洋"</span>,<span class="string">"job"</span>:<span class="string">"html"</span>,<span class="string">"age"</span>:25,<span class="string">"salary"</span>:30000,<span class="string">"gender"</span>:<span class="string">"female"</span>,<span class="string">"like"</span>:<span class="string">"御姐"</span>&#125;</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"4"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:4,<span class="string">"name"</span>:<span class="string">"兰刚"</span>,<span class="string">"job"</span>:<span class="string">"go"</span>,<span class="string">"age"</span>:24,<span class="string">"salary"</span>:10000,<span class="string">"gender"</span>:<span class="string">"female"</span>,<span class="string">"like"</span>:<span class="string">"青年"</span>&#125;</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"5"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:5,<span class="string">"name"</span>:<span class="string">"叶尚青"</span>,<span class="string">"job"</span>:<span class="string">"java"</span>,<span class="string">"age"</span>:34,<span class="string">"salary"</span>:14000,<span class="string">"gender"</span>:<span class="string">"male"</span>,<span class="string">"like"</span>:<span class="string">"青年"</span>&#125;</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"6"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:6,<span class="string">"name"</span>:<span class="string">"肖旭伟"</span>,<span class="string">"job"</span>:<span class="string">"python"</span>,<span class="string">"age"</span>:32,<span class="string">"salary"</span>:22000,<span class="string">"gender"</span>:<span class="string">"female"</span>,<span class="string">"like"</span>:<span class="string">"鲜肉"</span>&#125;</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"7"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:7,<span class="string">"name"</span>:<span class="string">"韩少云"</span>,<span class="string">"job"</span>:<span class="string">"html"</span>,<span class="string">"age"</span>:45,<span class="string">"salary"</span>:20000,<span class="string">"gender"</span>:<span class="string">"female"</span>,<span class="string">"like"</span>:<span class="string">"御姐"</span>&#125;</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"8"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:8,<span class="string">"name"</span>:<span class="string">"刘巧珍"</span>,<span class="string">"job"</span>:<span class="string">"java"</span>,<span class="string">"age"</span>:38,<span class="string">"salary"</span>:15000,<span class="string">"gender"</span>:<span class="string">"female"</span>,<span class="string">"like"</span>:<span class="string">"鲜肉"</span>&#125;</span><br><span class="line"></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">curl -XPOST <span class="string">"http://10.10.107.225:9200/index03/_bulk?pretty"</span> -H <span class="string">'Content-Type: application/json'</span> -H <span class="string">'Authorization: Basic ZWxhc3RpYzp3ZWl5aTEyMzQ1Ng=='</span> --data-binary <span class="string">"@data.json"</span></span><br><span class="line">curl -XPOST <span class="string">"http://10.10.107.225:9200/index03/_bulk?pretty"</span> -H <span class="string">'Content-Type: application/json'</span> -H <span class="string">'Authorization: Basic ZWxhc3RpYzp3ZWl5aTEyMzQ1Ng=='</span> --data-binary <span class="string">"@books.json"</span></span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=3.ElasticSearch分布式数据分析引擎基础概念与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210930100847.png" target="_blank" title="WeiyiGeek.索引操作" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210930100847.png" alt="WeiyiGeek.索引操作" title="" class=""></a>
+                <p>WeiyiGeek.索引操作</p>
+            </figure>
+<p>Tips : 非常注意上面在数据集合的末尾有个回车换行，否则报<code>The bulk request must be terminated by a newline [\\n]，状态400</code>错误。<br>Tips : 非常注意采用POST进行请求并 –data-binary 参数指定数据文件前有<code>@</code></p>
+<p><br></p>
+<h3 id="2-查询操作"><a href="#2-查询操作" class="headerlink" title="2.查询操作"></a>2.查询操作</h3><p>描述: ES提供了非常多的搜索功能方法,我们可以从多维度搜索所需的数据,所有查询条件都是以JSON格式存在的。</p>
+<p>Tips : 值得注意,如果查询返回的数据条数超过十条,则默认只会选择十条进行返回, 如果你想改变他请在请求中设置size和from字段（与query字段同级）。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># size 字段: 返回查询结果的最大条数。(全局有效)</span></span><br><span class="line"><span class="comment"># from 字段: 从第几条进行显示。(全局有效)</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="1-match-all-所有匹配"><a href="#1-match-all-所有匹配" class="headerlink" title="(1) match_all - 所有匹配"></a>(1) match_all - 所有匹配</h4><p>描述: match_all 它是最简单的没有任何查询约束的查询条件,它就是将当前的所有文档数据查询出来。</p>
+<p><br></p>
+<h4 id="2-term-单分词匹配"><a href="#2-term-单分词匹配" class="headerlink" title="(2) term - 单分词匹配"></a>(2) term - 单分词匹配</h4><p>描述：term (词项)在文档数据写入到ES时进行分词计算的一个基础单位,在查询时指定字段如果拥有该词项就会被查询和显示出来。</p>
+<p><strong>Tips : 什么是分词计算?</strong></p>
+<blockquote>
+<p>分词计算是将一个字符串文本按照分词计算器的逻辑拆分的过程。例如当<code>{&quot;name&quot;: &quot;唯一极客&quot;}</code>当写入ES时将拆分为”唯”、”一”、”极”、”客”四个词项,ES默认计算分词是将英文按照词组划分(如<code>Hello</code>)而中午则是按照字进行划分。当然我们也可以指定拆分逻辑。<br>所以当针对词项term查询时,返回的文档是包含查询提供的确切词项进行的,如果文档没有包含这个词项便不会被查询到和显示。</p>
+</blockquote>
+<p>Tips : 值得注意,由于分词计算的存在,所以避免使用Term查询做全文的文本检索,例如:<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"query"</span>: &#123;<span class="attr">"term"</span>: &#123;<span class="attr">"author"</span>: &#123;<span class="attr">"value"</span>: <span class="string">"929 Eldert Lane"</span>,<span class="attr">"boost"</span>: <span class="number">2</span> &#125;&#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="3-range"><a href="#3-range" class="headerlink" title="(3) range"></a>(3) range</h4><p>描述: range 返回指定字段范围内所包含的文档数据,你可以为该范围指定一个上限与下限。<br>条件运输符: <code>gt(大于) / lt(小于) / gte(大于等于) / lte(小于等于)</code></p>
+<p><br></p>
+<h4 id="4-exists"><a href="#4-exists" class="headerlink" title="(4) exists"></a>(4) exists</h4><p>描述: exists 返回包含某些指定的查询字段,包含则返回不包含则不返回文档数据。</p>
+<p>Tips : 值得注意,文档的字段不能存在的原因有如下几种可能<code>写入索引字段值在json中是null或者[]</code>/<code>字段设置了&quot;index&quot;:false的映射导致不会写入到索引中</code>、<code>字段设置了ignore_above当超出长度不会写入到索引中</code><br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"name"</span>:<span class="string">"weiyigeek"</span>,<span class="attr">"age"</span>:<span class="string">"null"</span>,<span class="attr">"hobby"</span>:<span class="string">"[]"</span>&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="5-bool"><a href="#5-bool" class="headerlink" title="(5) bool"></a>(5) bool</h4><p>描述: bool 是由多个子查询组成的布尔查询,您可以定义一个或者多个子查询它会影响最终结果的逻辑关系。</p>
+<p>布尔查询四种逻辑关系值:</p>
+<ul>
+<li>must : 布尔结果必须是must子条件的查询子集。</li>
+<li>must_not : 布尔结果必须不是must_not子条件查询的子集。</li>
+<li>should : 查询结果可能是或者不是这个条件的子集,其唯一的作用就是影响最终结果相关性的评分计算(上升评分),一般得should和must同时使用。</li>
+<li>filter : 查询结果必须是该条件的子集,即满足子条件的结果其评分将被忽略，但是其他子条件的查询评分不会因为filter存在而影响。</li>
+</ul>
+<p>子集概念: 条件结果算子集，空集也算是子集。</p>
+<p><br></p>
+<h4 id="6-match-多字分词匹配"><a href="#6-match-多字分词匹配" class="headerlink" title="(6) match - 多字分词匹配"></a>(6) match - 多字分词匹配</h4><p>描述: match 匹配查询会返回我们提供的查询条件、文本,日期,布尔,数字相匹配的文档数据。</p>
+<p>Tips : match与Term查询不同的是match查询<code>会在查询之前对我们所提供的数据先进行分词计算</code>,默认得只有指定字段中匹配到其中一个词便会被显示。</p>
+<p><br></p>
+<p><strong>实例演示：</strong><br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) match_all : 最简单的没有任何查询约束的查询条件,它就是将当前的所有文档数据查询出来。</span></span><br><span class="line"><span class="comment"># 指定index03索引采用_search方法。</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":&#123;"match_all":</span> <span class="string">&#123;&#125;&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) term : (词项)在文档数据写入到ES时进行分词计算的一个基础单位,在查询时指定字段如果拥有该词项就会被查询和显示出来。</span></span><br><span class="line"><span class="comment"># boost 属性: 该属性使得每个查询结果的文档数据评分会乘以该属性值从而返回`_score`字段所保存的值。(局部)</span></span><br><span class="line"><span class="comment"># 例如,搜索author字段带有宋的字,并将_score*2最后返回1~20条数据</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "query":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">    "term":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "author":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "value":</span> <span class="string">"宋"</span><span class="string">,</span></span><br><span class="line"><span class="attr">        "boost":</span> <span class="number">2</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line">  <span class="string">&#125;</span></span><br><span class="line">  <span class="string">,</span> <span class="string">"size"</span><span class="string">:</span> <span class="number">20</span></span><br><span class="line">  <span class="string">,</span> <span class="string">"from"</span><span class="string">:</span> <span class="number">0</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) range : 返回指定字段范围内所包含的文档数据,你可以为该范围指定一个上限与下限。</span></span><br><span class="line"><span class="comment"># 条件符号: gt(大于) / lt(小于) / gte(大于等于) / lte(小于等于)</span></span><br><span class="line"><span class="comment"># 例如,搜索price价格区间在20~40之间的文档数据。</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "query":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">    "range":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "price":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "gte":</span> <span class="number">20</span><span class="string">,</span></span><br><span class="line"><span class="attr">        "lte":</span> <span class="number">40</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line">  <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) exists ：返回包含某些指定的查询字段,包含则返回不包含则不返回文档数据。</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "query":</span> <span class="string">&#123;"exists":</span> <span class="string">&#123;"field":</span> <span class="string">"price"</span><span class="string">&#125;&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) match : 匹配查询会返回我们提供的查询条件、文本,日期,布尔,数字相匹配的文档数据。</span></span><br><span class="line"><span class="comment"># 与Term查询不同的是match查询会在查询之前对我们所提供的数据先进行分词计算,默认得只有指定字段中匹配到其中一个词便会被显示。</span></span><br><span class="line"><span class="comment"># 只要Type类型包含为`大学教材`其中一个词的文档数据(便会被查询显示)。查询结果550条</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":</span> <span class="string">&#123;"match":</span> <span class="string">&#123;"type":</span> <span class="string">"大学教材"</span><span class="string">&#125;&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示Type类型为`数学`的文档数据(包含多一个或者少一个词都不被查询显示)。查询结果48条</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":</span> <span class="string">&#123;"match":</span> <span class="string">&#123;"type":</span> <span class="string">&#123;"query":</span> <span class="string">"数学"</span><span class="string">,"operator":</span> <span class="string">"and"</span><span class="string">&#125;&#125;&#125;,"from":</span> <span class="number">45</span><span class="string">&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (6) bool : 是由多个子查询组成的布尔查询</span></span><br><span class="line"><span class="comment"># - must 逻辑关系值: 当布尔查询中只有一个字条件match时与其单独使用match查询的结果一致。结果为8条</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":</span> <span class="string">&#123;"bool":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "must":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "author":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "query":</span> <span class="string">"宋天佑"</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;&#125;</span></span><br><span class="line">  <span class="string">]</span></span><br><span class="line"><span class="string">&#125;&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 两个子条件都是must关系,结果即为两个match的交集。</span></span><br><span class="line"><span class="comment"># author(包含词组的)与type包含(大)同时满足的结果为2条</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":</span> <span class="string">&#123;"bool":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "must":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "author":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "query":</span> <span class="string">"宋天佑"</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;&#125;,</span></span><br><span class="line">    <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "term":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "type":</span> <span class="string">&#123;"value":</span> <span class="string">"大"</span><span class="string">&#125;</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line">  <span class="string">]</span></span><br><span class="line"><span class="string">&#125;&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># author与type字段分别分包其词组交集结果为4条。</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":</span> <span class="string">&#123;"bool":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "must":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "author":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "query":</span> <span class="string">"宋天佑"</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;&#125;,</span></span><br><span class="line">    <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "type":</span> <span class="string">"大学"</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line">  <span class="string">]</span></span><br><span class="line"><span class="string">&#125;&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># - must_not ：author包含(宋、天、佑)词组与type字段不包含("大","学")集合结果为4条。</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":</span> <span class="string">&#123;"bool":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "must":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "author":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "query":</span> <span class="string">"宋天佑"</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;&#125;</span></span><br><span class="line">  <span class="string">],</span></span><br><span class="line"><span class="attr">  "must_not":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "type":</span> <span class="string">"大学"</span></span><br><span class="line">    <span class="string">&#125;&#125;</span></span><br><span class="line">  <span class="string">]</span></span><br><span class="line"><span class="string">&#125;&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># - should 与 must 联合使用，影响其评分匹配，越精确其评分越高。结果为8条，例如"type" : "大学教材"和"author" : "宋天佑"评分最高</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":</span> <span class="string">&#123;"bool":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "must":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "author":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "query":</span> <span class="string">"宋天佑"</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;&#125;</span></span><br><span class="line">  <span class="string">],</span></span><br><span class="line"><span class="attr">  "should":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "type":</span> <span class="string">"大学"</span></span><br><span class="line">    <span class="string">&#125;&#125;</span></span><br><span class="line">  <span class="string">]</span></span><br><span class="line"><span class="string">&#125;&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># - filter 单独使用影响其评分，匹配到的评分_score都为0.0，结果为475条</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":</span> <span class="string">&#123;"bool":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "filter":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "type":</span> <span class="string">"大学"</span></span><br><span class="line">    <span class="string">&#125;&#125;</span></span><br><span class="line">  <span class="string">]</span></span><br><span class="line"><span class="string">&#125;&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># filter 与 must 联合使用，条件匹配越精确其评分越高。结果为4条，仍然是"type" : "大学教材"和"author" : "宋天佑"评分最高，此处的评分_score不在为0.0.因为受到must逻辑条件的影响</span></span><br><span class="line"><span class="string">GET</span> <span class="string">/index03/_search</span></span><br><span class="line"><span class="string">&#123;"query":</span> <span class="string">&#123;"bool":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">  "must":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "author":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">        "query":</span> <span class="string">"宋天佑"</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;&#125;</span></span><br><span class="line">  <span class="string">],</span></span><br><span class="line"><span class="attr">  "filter":</span> <span class="string">[</span></span><br><span class="line">    <span class="string">&#123;"match":</span> <span class="string">&#123;</span></span><br><span class="line"><span class="attr">      "type":</span> <span class="string">"大学"</span></span><br><span class="line">    <span class="string">&#125;&#125;</span></span><br><span class="line">  <span class="string">]</span></span><br><span class="line"><span class="string">&#125;&#125;&#125;</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h4 id="7-match-phrase-完全匹配短语"><a href="#7-match-phrase-完全匹配短语" class="headerlink" title="(7)  match_phrase - 完全匹配短语"></a>(7)  match_phrase - 完全匹配短语</h4><p>描述: match_phrase 其可以精准的匹配带有我们制定的关键字短语默认并不会像match进行分词后匹配。</p>
+<p>示例演示:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 例如此时有两个文档数据hobby分别为面向过程编程语言、编程语言</span></span><br><span class="line">GET /logstash-userinfo/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"query"</span>: &#123;</span><br><span class="line">    <span class="string">"match_phrase"</span>: &#123;</span><br><span class="line">      <span class="string">"hobby"</span>: <span class="string">"过程编程"</span> </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 则仅仅会显示 面向过程编程语言 的该条数据</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="7-match-phrase-prefix-完全匹配以指定前缀短语"><a href="#7-match-phrase-prefix-完全匹配以指定前缀短语" class="headerlink" title="(7) match_phrase_prefix - 完全匹配以指定前缀短语"></a>(7) match_phrase_prefix - 完全匹配以指定前缀短语</h4><p>描述: match_phrase_prefix 其可以完全匹配前缀短语查询,例如以下搜索返回包含以开头的短语的文档 quick brown f在里面 message 字段里。 </p>
+<p>示例演示: 此搜索将匹配 message 字段里为 quick brown fox 或者 two quick brown ferrets 但不是 the fox is quick and brown.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">GET /_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"query"</span>: &#123;</span><br><span class="line">    <span class="string">"match_phrase_prefix"</span>: &#123;</span><br><span class="line">      <span class="string">"message"</span>: &#123;</span><br><span class="line">        <span class="string">"query"</span>: <span class="string">"quick brown f"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="8-multi-match-匹配多个字段中的短语"><a href="#8-multi-match-匹配多个字段中的短语" class="headerlink" title="(8) multi_match - 匹配多个字段中的短语"></a>(8) multi_match - 匹配多个字段中的短语</h4><p>描述：multi_match 可以对多个字段进行配置,只要任意一个字段满足则该文档局满足。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">GET /index09/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"query"</span>: &#123;</span><br><span class="line">    <span class="string">"multi_match"</span>: &#123;</span><br><span class="line">      <span class="string">"query"</span>: <span class="string">"我爱学习网络安全技术"</span>,</span><br><span class="line">      <span class="string">"fields"</span>: [<span class="string">"title"</span>,<span class="string">"hobby"</span>],</span><br><span class="line">      <span class="string">"type"</span>: <span class="string">"best_fields"</span>, </span><br><span class="line">      <span class="string">"tie_breaker"</span>: 0.3</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Type 字段可选参数 </span></span><br><span class="line"><span class="comment"># - best_fields ： 完全匹配的文档占的评分比较高</span></span><br><span class="line"><span class="comment"># - most_fields ： 越多字段匹配的文档评分越高</span></span><br><span class="line"><span class="comment"># - cross_fields ：词条的分词词汇是分配到不同字段中</span></span><br><span class="line"><span class="comment"># tie_breaker 字段文档评分次数, 文档评分乘以0.3的系数</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 返回结果</span></span><br><span class="line"><span class="string">"_score"</span> : 5.139209,</span><br><span class="line"><span class="string">"_source"</span> : &#123;</span><br><span class="line">  <span class="string">"title"</span> : <span class="string">"我爱学习网络安全技术,例如安全攻防"</span>,</span><br><span class="line">  <span class="string">"hobby"</span> : <span class="string">"网络安全技术"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="string">"_source"</span> : &#123;</span><br><span class="line">  <span class="string">"title"</span> : <span class="string">"我爱学习计算机技术,例如ES/Kibana"</span>,</span><br><span class="line">  <span class="string">"hobby"</span> : <span class="string">"计算机技术"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="3-映射操作"><a href="#3-映射操作" class="headerlink" title="3.映射操作"></a>3.映射操作</h3><h4 id="1-Mapping-概念"><a href="#1-Mapping-概念" class="headerlink" title="(1) Mapping 概念"></a>(1) Mapping 概念</h4><p>描述: 映射(Mapping)是ES中决定了文档如何存储、如何生成索引、如何定义字段的各种类型的过程。其实它类似于我们在创建数据库表时定义有那些字段以及字段类型。在ES中有两种映射一种是动态映射(<code>Dynamic Mapping</code>),一种是静态映射(<code>Explicit Mapping</code>),它们拥有自己的特点如动态映射可以根据索引数据自动设置字段类型,而静态映射需要采用手动指定字段类型(一般只在特殊需求时使用)。</p>
+<p>TIPS: 从7.0开始ES逐渐丢弃Type类型的概念，在8.x版本中将彻底丢弃。</p>
+<p><br></p>
+<h4 id="2-Mapping-设置"><a href="#2-Mapping-设置" class="headerlink" title="(2) Mapping 设置"></a>(2) Mapping 设置</h4><p><strong>2.1 Dynamic Mapping(动态映射)</strong><br>描述: ES通过索引文档自动添加新字段,您可以向顶级映射、内部对象和嵌套字段添加字段类型。总得来说动态映射你无需做任何修改操作，它会自动识别您添加的字段并为其数据设置类型。</p>
+<p>实际操作:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 当创建一个索引并为随意添加一个字段,它将会动态映射。</span></span><br><span class="line"><span class="comment"># 1.创建索引</span></span><br><span class="line">PUT /index04</span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#  "acknowledged" : true,</span></span><br><span class="line">  <span class="comment">#  "shards_acknowledged" : true,</span></span><br><span class="line">  <span class="comment">#  "index" : "index04"</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.添加索引文档数据（此处我们添加了多种数据类型进行了演示）</span></span><br><span class="line">PUT /index04/_doc/info</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"name"</span>:  <span class="string">"WeiyiGeek"</span>,</span><br><span class="line">  <span class="string">"age"</span>: 25,</span><br><span class="line">  <span class="string">"sex"</span>: <span class="literal">true</span>,</span><br><span class="line">  <span class="string">"birthday"</span>: <span class="string">"2021-01-01 13:00"</span>,</span><br><span class="line">  <span class="string">"hobby"</span>: [<span class="string">"computer"</span>,<span class="string">"Network"</span>],</span><br><span class="line">  <span class="string">"salary"</span>: 20000.0,</span><br><span class="line">  <span class="string">"ip"</span>: <span class="string">"192.168.10.251"</span>,</span><br><span class="line">  <span class="string">"location"</span>: &#123;</span><br><span class="line">    <span class="string">"lat"</span>: 29.511864116937787,</span><br><span class="line">    <span class="string">"lon"</span>:106.57363404248045</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="string">"address"</span>: <span class="string">"重庆市渝北区花卉园xx小区xx栋x号-12"</span>,</span><br><span class="line">  <span class="string">"employed_time"</span>: <span class="string">"2020-01-05"</span></span><br><span class="line">&#125;</span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "_index" : "index04",</span></span><br><span class="line">  <span class="comment">#   "_type" : "_doc",</span></span><br><span class="line">  <span class="comment">#   "_id" : "info",</span></span><br><span class="line">  <span class="comment">#   "_version" : 1,</span></span><br><span class="line">  <span class="comment">#   "result" : "created",</span></span><br><span class="line">  <span class="comment">#   "_shards" : &#123;</span></span><br><span class="line">  <span class="comment">#     "total" : 2,</span></span><br><span class="line">  <span class="comment">#     "successful" : 1,</span></span><br><span class="line">  <span class="comment">#     "failed" : 0</span></span><br><span class="line">  <span class="comment">#   &#125;,</span></span><br><span class="line">  <span class="comment">#   "_seq_no" : 0,</span></span><br><span class="line">  <span class="comment">#   "_primary_term" : 1</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.查看索引以及索引中字段映射信息</span></span><br><span class="line">GET /index04</span><br><span class="line"></span><br><span class="line">GET /index04/_mapping</span><br><span class="line"><span class="comment"># 得到的结果就是动态Mapping映射生成的结构。</span></span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "index04" : &#123;</span></span><br><span class="line">  <span class="comment">#     "mappings" : &#123;</span></span><br><span class="line">  <span class="comment">#       "properties" : &#123;</span></span><br><span class="line">  <span class="comment">#         "address" : &#123;</span></span><br><span class="line">  <span class="comment">#            "type" : "text",</span></span><br><span class="line">  <span class="comment">#            "fields" : &#123;</span></span><br><span class="line">  <span class="comment">#              "keyword" : &#123;</span></span><br><span class="line">  <span class="comment">#                "type" : "keyword",</span></span><br><span class="line">  <span class="comment">#                "ignore_above" : 256</span></span><br><span class="line">  <span class="comment">#              &#125;</span></span><br><span class="line">  <span class="comment">#            &#125;</span></span><br><span class="line">  <span class="comment">#          &#125;,</span></span><br><span class="line">  <span class="comment">#         "age" : &#123;</span></span><br><span class="line">  <span class="comment">#           "type" : "long"</span></span><br><span class="line">  <span class="comment">#         &#125;,</span></span><br><span class="line">  <span class="comment">#         "birthday" : &#123;</span></span><br><span class="line">  <span class="comment">#           "type" : "text",</span></span><br><span class="line">  <span class="comment">#           "fields" : &#123;</span></span><br><span class="line">  <span class="comment">#             "keyword" : &#123;</span></span><br><span class="line">  <span class="comment">#               "type" : "keyword",</span></span><br><span class="line">  <span class="comment">#               "ignore_above" : 256</span></span><br><span class="line">  <span class="comment">#             &#125;</span></span><br><span class="line">  <span class="comment">#           &#125;</span></span><br><span class="line">  <span class="comment">#         &#125;,</span></span><br><span class="line">  <span class="comment">#         "hobby" : &#123;</span></span><br><span class="line">  <span class="comment">#           "type" : "text",</span></span><br><span class="line">  <span class="comment">#           "fields" : &#123;</span></span><br><span class="line">  <span class="comment">#             "keyword" : &#123;</span></span><br><span class="line">  <span class="comment">#               "type" : "keyword",</span></span><br><span class="line">  <span class="comment">#               "ignore_above" : 256</span></span><br><span class="line">  <span class="comment">#             &#125;</span></span><br><span class="line">  <span class="comment">#           &#125;</span></span><br><span class="line">  <span class="comment">#         &#125;,</span></span><br><span class="line">  <span class="comment">#         "ip" : &#123;</span></span><br><span class="line">  <span class="comment">#           "type" : "text",</span></span><br><span class="line">  <span class="comment">#           "fields" : &#123;</span></span><br><span class="line">  <span class="comment">#             "keyword" : &#123;</span></span><br><span class="line">  <span class="comment">#               "type" : "keyword",</span></span><br><span class="line">  <span class="comment">#               "ignore_above" : 256</span></span><br><span class="line">  <span class="comment">#             &#125;</span></span><br><span class="line">  <span class="comment">#           &#125;</span></span><br><span class="line">  <span class="comment">#         &#125;,</span></span><br><span class="line">  <span class="comment">#         "location" : &#123;</span></span><br><span class="line">  <span class="comment">#           "properties" : &#123;</span></span><br><span class="line">  <span class="comment">#             "lat" : &#123;</span></span><br><span class="line">  <span class="comment">#               "type" : "float"</span></span><br><span class="line">  <span class="comment">#             &#125;,</span></span><br><span class="line">  <span class="comment">#             "lon" : &#123;</span></span><br><span class="line">  <span class="comment">#               "type" : "float"</span></span><br><span class="line">  <span class="comment">#             &#125;</span></span><br><span class="line">  <span class="comment">#           &#125;</span></span><br><span class="line">  <span class="comment">#         &#125;,</span></span><br><span class="line">  <span class="comment">#         "name" : &#123;</span></span><br><span class="line">  <span class="comment">#           "type" : "text",</span></span><br><span class="line">  <span class="comment">#           "fields" : &#123;</span></span><br><span class="line">  <span class="comment">#             "keyword" : &#123;</span></span><br><span class="line">  <span class="comment">#               "type" : "keyword",</span></span><br><span class="line">  <span class="comment">#               "ignore_above" : 256</span></span><br><span class="line">  <span class="comment">#             &#125;</span></span><br><span class="line">  <span class="comment">#           &#125;</span></span><br><span class="line">  <span class="comment">#         &#125;,</span></span><br><span class="line">  <span class="comment">#         "salary" : &#123;</span></span><br><span class="line">  <span class="comment">#           "type" : "float"</span></span><br><span class="line">  <span class="comment">#         &#125;,</span></span><br><span class="line">  <span class="comment">#         "sex" : &#123;</span></span><br><span class="line">  <span class="comment">#           "type" : "boolean"</span></span><br><span class="line">  <span class="comment">#         &#125;,</span></span><br><span class="line">  <span class="comment">#         "employed_time" : &#123;</span></span><br><span class="line">  <span class="comment">#           "type" : "date"</span></span><br><span class="line">  <span class="comment">#        &#125;,</span></span><br><span class="line">  <span class="comment">#       &#125;</span></span><br><span class="line">  <span class="comment">#     &#125;</span></span><br><span class="line">  <span class="comment">#   &#125;</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>动态Mapping映射生成的基本结构（JSON 字符串）:<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#123;</span></span><br><span class="line">  <span class="string">"index04"</span> <span class="string">:</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">"mappings"</span> <span class="string">:</span> <span class="string">&#123;</span></span><br><span class="line">      <span class="string">"properties"</span> <span class="string">:</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="string">"字段对应的映射结构"</span><span class="string">:</span> <span class="string">"结构的值"</span></span><br><span class="line">      <span class="string">&#125;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line">  <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>动态Mapping映射自动分字段生成的结构分类说明:</p>
+<ul>
+<li>字符串类型: 在文档索引数据中上述是字符串类型的字段有<code>name,birthday,hobby,ip,address</code>，它们动态映射的结构是一致的。<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">"name" : &#123;   // 字段名称，其后&#123;&#125;包含的内容就是描述这个字段在映射中的结构。</span><br><span class="line">  "type" : "text", // 字段类型，每个字段必须包含一个类型的属性。</span><br><span class="line">  "fields" : &#123;     // 字段扩展属性，例如此处扩展了该字段keyword类型</span><br><span class="line">    "keyword" : &#123;  // 表示当前字符串既拥有text特点也拥有keyword的特点</span><br><span class="line">      "type" : "keyword", // 字段扩展类型</span><br><span class="line">      "ignore_above" : 256 // 表示当该字段值长度超过256时，keyword扩展类型将消失。</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>整数类型: 如age字段其类型就是long，所以整数默认映射的是long类型，但是也可能为integer类型。<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">"age" : &#123;</span><br><span class="line">  "type" : "long"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>浮点数类型: 如salary、location.lon字段其类型就是float，还可以是Double类型<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">"salary" : &#123;</span><br><span class="line">  "type" : "float"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>日期类型: 如employed_time字段其类型就是date日期类型，默认的日期格式yyyy-MM-dd<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">"employed_time" : &#123;</span><br><span class="line">  "type" : "date"</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></li>
+<li><p>布尔类型: 如sex字段其类型就是布尔类型，其值传入时只有true或者false。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">"sex" : &#123;</span><br><span class="line">  "type" : "boolean"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>对象类型: 此处location字段为对象类型，其包含properties属性，来指定子字段的类型，如lat（纬）、lon（经）其属性为浮点数类型。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">"location" : &#123;</span><br><span class="line">  "properties" : &#123;</span><br><span class="line">    "lat" : &#123;</span><br><span class="line">      "type" : "float"</span><br><span class="line">    &#125;,</span><br><span class="line">    "lon" : &#123;</span><br><span class="line">      "type" : "float"</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>Q: Text 和 keyword 类型有何区别?</strong></p>
+<blockquote>
+<p>答: 它们相同点都是可以表示字符串,而text类型会被分词器计算（默认使用索引分词器），而Keyword不会被计算分词。例如针对于姓名名称、邮箱地址、ID值、身份证、url地址做分词是无意义的。但是我们可以通过为其加上字段扩展keyword属性来使其支持分词计算。</p>
+</blockquote>
+<p>差异查看: 验证text与keyword两种不同类型的区别<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) text 类型</span></span><br><span class="line">GET /index04/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"query"</span>: &#123;</span><br><span class="line">    <span class="string">"term"</span>: &#123;</span><br><span class="line">      <span class="string">"address"</span>: &#123;</span><br><span class="line">        <span class="string">"value"</span>: <span class="string">"重"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) keyword 类型: 由于keyword保存的是文本整体的字符串，所以必须输入完整才行查询到</span></span><br><span class="line">GET /index04/_search</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"query"</span>: &#123;</span><br><span class="line">    <span class="string">"term"</span>: &#123;</span><br><span class="line">      <span class="string">"address.keyword"</span>: &#123;</span><br><span class="line">        <span class="string">"value"</span>: <span class="string">"重庆市渝北区花卉园xx小区xx栋x号-12"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><br/></p>
+<p><strong>2.2 Explicit Mapping(静态映射)</strong><br>描述: 当某些特殊场景需要我们自己在创建索引时手动指定mapping或者是在一个已存在的索引中添加Mapping，此时这种方式就是静态映射。</p>
+<p>操作实例:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.创建索引时添加mapping（方法1）</span></span><br><span class="line"><span class="comment"># 注意email类型本身就是keyword无需在查询时添加email.keyword</span></span><br><span class="line">PUT /index05</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"mappings"</span>: &#123;</span><br><span class="line">    <span class="string">"properties"</span>: &#123;</span><br><span class="line">      <span class="string">"email"</span>: &#123;</span><br><span class="line">        <span class="string">"type"</span>: <span class="string">"keyword"</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.查看手动创建的静态映射 （返回信息）</span></span><br><span class="line">GET /index05/_mapping</span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "index05" : &#123;</span></span><br><span class="line">  <span class="comment">#     "mappings" : &#123;</span></span><br><span class="line">  <span class="comment">#       "properties" : &#123;</span></span><br><span class="line">  <span class="comment">#         "email" : &#123;</span></span><br><span class="line">  <span class="comment">#           "type" : "keyword"</span></span><br><span class="line">  <span class="comment">#         &#125;</span></span><br><span class="line">  <span class="comment">#       &#125;</span></span><br><span class="line">  <span class="comment">#     &#125;</span></span><br><span class="line">  <span class="comment">#   &#125;</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.批量插入几条数据演示（此时将除去已经设置过mapping的email，其它的字段将采取自动映射，设置其类型）</span></span><br><span class="line">PUT /index05/_bulk</span><br><span class="line">  <span class="comment"># &#123;"index":&#123;"_id":"0"&#125;&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"id":0,"name":"朴乾","job":"c","age":31,"salary":35000,"gender":"female","like":"鲜肉","email": "master@weiyigeek.top"&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"index":&#123;"_id":"1"&#125;&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"id":1,"name":"郝霞","job":"go","age":25,"salary":18000,"gender":"male","like":"大叔","email": "hao@weiyigeek.top"&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"index":&#123;"_id":"2"&#125;&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"id":2,"name":"陈哲","job":"c","age":22,"salary":25000,"gender":"female","like":"人妖","email": "cheng@weiyigeek.top"&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"index":&#123;"_id":"3"&#125;&#125;</span></span><br><span class="line">  <span class="comment"># &#123;"id":3,"name":"曹洋","job":"html","age":25,"salary":30000,"gender":"female","like":"御姐","email": "cao@weiyigeek.top"&#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.查询数据（此处email必须指定完整的邮箱地址才能查询得到）</span></span><br><span class="line">GET /index05/_search</span><br><span class="line">  <span class="comment"># &#123;"query": &#123;</span></span><br><span class="line">  <span class="comment">#   "term": &#123;</span></span><br><span class="line">  <span class="comment">#     "email": &#123;</span></span><br><span class="line">  <span class="comment">#       "value": "master@weiyigeek.top"</span></span><br><span class="line">  <span class="comment">#     &#125;</span></span><br><span class="line">  <span class="comment">#   &#125;</span></span><br><span class="line">  <span class="comment"># &#125;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.对创建索引之后单独添加Mapping静态映射，直接添加properties属性 (方法2) </span></span><br><span class="line">PUT /index05/_mapping</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"properties"</span>: &#123;</span><br><span class="line">    <span class="string">"address"</span>: &#123;</span><br><span class="line">      <span class="string">"type"</span>: <span class="string">"text"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "acknowledged" : true</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.添加address字段到已存在文档数据中</span></span><br><span class="line">PUT /index05/_bulk</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"0"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:<span class="number">0</span>,<span class="string">"name"</span>:<span class="string">"朴乾"</span>,<span class="string">"job"</span>:<span class="string">"c"</span>,<span class="string">"age"</span>:<span class="number">31</span>,<span class="string">"salary"</span>:<span class="number">35000</span>,<span class="string">"gender"</span>:<span class="string">"female"</span>,<span class="string">"like"</span>:<span class="string">"鲜肉"</span>,<span class="string">"email"</span>: <span class="string">"master@weiyigeek.top"</span>,<span class="string">"address"</span>: <span class="string">"重庆市渝北区花卉园街道"</span>&#125;</span><br><span class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"1"</span>&#125;&#125;</span><br><span class="line">&#123;<span class="string">"id"</span>:<span class="number">1</span>,<span class="string">"name"</span>:<span class="string">"郝霞"</span>,<span class="string">"job"</span>:<span class="string">"go"</span>,<span class="string">"age"</span>:<span class="number">25</span>,<span class="string">"salary"</span>:<span class="number">18000</span>,<span class="string">"gender"</span>:<span class="string">"male"</span>,<span class="string">"like"</span>:<span class="string">"大叔"</span>,<span class="string">"email"</span>: <span class="string">"hao@weiyigeek.top"</span>,<span class="string">"address"</span>: <span class="string">"重庆市沙坪坝区小龙坎街道"</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 7.单独或者多个filed字段查看 (以逗号分隔)</span></span><br><span class="line">GET /index05/_mapping/field/email,address,gender.keyword</span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "index05" : &#123;</span></span><br><span class="line">  <span class="comment">#     "mappings" : &#123;</span></span><br><span class="line">  <span class="comment">#       "address" : &#123;</span></span><br><span class="line">  <span class="comment">#         "full_name" : "address",</span></span><br><span class="line">  <span class="comment">#         "mapping" : &#123;</span></span><br><span class="line">  <span class="comment">#           "address" : &#123;</span></span><br><span class="line">  <span class="comment">#             "type" : "text"</span></span><br><span class="line">  <span class="comment">#           &#125;</span></span><br><span class="line">  <span class="comment">#         &#125;</span></span><br><span class="line">  <span class="comment">#       &#125;,</span></span><br><span class="line">  <span class="comment">#       "gender.keyword" : &#123;</span></span><br><span class="line">  <span class="comment">#         "full_name" : "gender.keyword",</span></span><br><span class="line">  <span class="comment">#         "mapping" : &#123;</span></span><br><span class="line">  <span class="comment">#           "keyword" : &#123;</span></span><br><span class="line">  <span class="comment">#             "type" : "keyword",</span></span><br><span class="line">  <span class="comment">#             "ignore_above" : 256</span></span><br><span class="line">  <span class="comment">#           &#125;</span></span><br><span class="line">  <span class="comment">#         &#125;</span></span><br><span class="line">  <span class="comment">#       &#125;,</span></span><br><span class="line">  <span class="comment">#       "email" : &#123;</span></span><br><span class="line">  <span class="comment">#         "full_name" : "email",</span></span><br><span class="line">  <span class="comment">#         "mapping" : &#123;</span></span><br><span class="line">  <span class="comment">#           "email" : &#123;</span></span><br><span class="line">  <span class="comment">#             "type" : "keyword"</span></span><br><span class="line">  <span class="comment">#           &#125;</span></span><br><span class="line">  <span class="comment">#         &#125;</span></span><br><span class="line">  <span class="comment">#       &#125;</span></span><br><span class="line">  <span class="comment">#     &#125;</span></span><br><span class="line">  <span class="comment">#   &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Tips : 当在Kibana中查询其索引别名时(alias)，会显示如下警告，#!此请求访问为系统索引保留名称的别名：<code>[.kibana_7.15.0, .kibana_task_manager, .kibana_task_manager_7.15.0, .security, .kibana]</code>，但在未来的主要版本中，将不允许直接访问系统索引及其别名<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">"index04"</span> : &#123;</span><br><span class="line">    <span class="string">"aliases"</span> : &#123; &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="4-设置操作"><a href="#4-设置操作" class="headerlink" title="4.设置操作"></a>4.设置操作</h3><p>描述: 每个Index(索引)都有一个Setting属性，它可以对index设置某些值。并且设置时也有动态索引与静态索引之分。</p>
+<ul>
+<li>静态索引: 索引创建后不可修改的值。</li>
+<li>动态索引: 动态索引在使用时可以修改，如分片和副本</li>
+</ul>
+<p><br/></p>
+<h4 id="1-shards-分片"><a href="#1-shards-分片" class="headerlink" title="(1) shards 分片"></a>(1) shards 分片</h4><p>描述: 为了可以让一个索引文件行程并行读写、提升查询效率，每个索引都有一个设置的属性叫做分片，分片被存储到多个节点之中，并且为了保证集群的高可用还设置了副本数量。</p>
+<p>Tips: 在7.x版本中索引的分片默认为1,你可以通过ES的Head插件查看到一个索引拥有一个分片(主从分片)。</p>
+<figure class="image-box">
+                <a rel=3.ElasticSearch分布式数据分析引擎基础概念与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211008142803.png" target="_blank" title="WeiyiGeek.索引分片数" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211008142803.png" alt="WeiyiGeek.索引分片数" title="" class=""></a>
+                <p>WeiyiGeek.索引分片数</p>
+            </figure>
+<p>Tips: 那有童鞋可能要问了我们可以自己配置分片的个数吗?答案是肯定的我们可以在elasticsearch.yml中修改<code>index.number_of_shards</code>来决定分片个数。</p>
+<p><br/></p>
+<h4 id="2-replicas-副本"><a href="#2-replicas-副本" class="headerlink" title="(2) replicas 副本"></a>(2) replicas 副本</h4><p>描述: 为了保证索引的每一个分片的高可用,不会因为部分分片而导致整个索引丢失数据，此时我们可以引入副本的概念及其配置,每一个分片默认都是有一个副本数,副本的设置是动态的,所以我们可以对一个正在使用的索引修改他的副本数量以及属性名称:<code>index.number_of_replicas</code></p>
+<p><strong>实践验证：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.指定索引的分片与副本数查看</span></span><br><span class="line">GET /index05/_settings</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.新增索引的分片和副本个数(3分片、2副本)</span></span><br><span class="line">PUT /index06</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"settings"</span>: &#123;</span><br><span class="line">    <span class="string">"number_of_shards"</span>: 3,</span><br><span class="line">    <span class="string">"number_of_replicas"</span>: 2</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回值</span></span><br><span class="line"><span class="comment"># &#123;</span></span><br><span class="line"><span class="comment">#   "acknowledged" : true,</span></span><br><span class="line"><span class="comment">#   "shards_acknowledged" : true,</span></span><br><span class="line"><span class="comment">#   "index" : "index06"</span></span><br><span class="line"><span class="comment"># &#125;</span></span><br><span class="line"><span class="comment"># 分片数与副本数</span></span><br><span class="line"><span class="comment">#"number_of_shards" : "3",</span></span><br><span class="line"><span class="comment">#"number_of_replicas" : "2",</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.设置已存在的索引分片副本数(不能设置分索引的分片数)</span></span><br><span class="line">PUT /index06/_settings</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"index"</span>: &#123;</span><br><span class="line">    <span class="string">"number_of_replicas"</span>: 5</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回: &#123; "acknowledged" : true &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.再次查看我们创建的index06索引的分片与副本数查看</span></span><br><span class="line">GET /index06/_settings</span><br><span class="line"><span class="comment">#"number_of_shards" : "3",</span></span><br><span class="line"><span class="comment">#"number_of_replicas" : "3",</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips: 如要指定分片请在创建索引前指定，在创建后无法指定分片。</p>
+<p>Tips: 主分片与从分片通常不会放在同一个节点之上，同时从分片也不会放在一个节点。</p>
+<figure class="image-box">
+                <a rel=3.ElasticSearch分布式数据分析引擎基础概念与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211008144636.png" target="_blank" title="WeiyiGeek.创建分片数与副本数" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211008144636.png" alt="WeiyiGeek.创建分片数与副本数" title="" class=""></a>
+                <p>WeiyiGeek.创建分片数与副本数</p>
+            </figure>
+<p>Tips : 分片数与副本数计算方式，如上图所示我们设置三分片、三副本数。</p>
+<blockquote>
+<p>三分片(<code>主分片运行的节点</code>): es01 / es02 / es03<br>三副本(<code>除去了012三个主分片之外的从分片</code>): es02 / es03 / unassigned (无节点可以被分配了)</p>
+</blockquote>
+<hr>
+<h2 id="0x02-进阶使用操作"><a href="#0x02-进阶使用操作" class="headerlink" title="0x02 进阶使用操作"></a>0x02 进阶使用操作</h2><h3 id="1-分词器"><a href="#1-分词器" class="headerlink" title="1.分词器"></a>1.分词器</h3><p><strong>基础概念</strong><br>描述: ES中为了方便查询以及提供多维度的查询功能,对存储在索引中的文档进行分词计算。但由于文本内容不同、类型不同、语言的不同其分词计算逻辑是不一样的，同时我们可以采用ES自带的分词或者采用第三方的分词器,以达到自定义分词的效果。</p>
+<p>文本分析使得ES能够执行全文搜索,其搜索返回的所有相关结果(例如模糊匹配、语义匹配等)而不仅仅是精确匹配。</p>
+<p>例子: 如果您希望搜索”王者荣耀”字符串时,返回的文档中包含”王者”、”荣耀”和”王者荣耀”的文档,还可能希望包含相关”王”或”者”的文档。</p>
+<p>ES的每次分词都会经过以下两个过程步骤。</p>
+<ul>
+<li>Tokenization : 将文本拆分为一小块一小块(每块包含的内容称为Token),通常情况下一个Token代表着一个词语。</li>
+<li>Normalization : 词条允许在单个术语上进行匹配，但每个标记仍然是字面上匹配的，此时我们可以通过该操作流程，将词条规范化标记，使之你不仅能使用精确的匹配收缩，还可以使用相关性搜索查询。</li>
+</ul>
+<p>Tips: 上面说到词条允许在单个术语上进行匹配，但每个标记仍然是字面上匹配的，这将会导致如下结果</p>
+<ul>
+<li>a : 当搜索Quick时并不会匹配quick(大小写敏感)</li>
+<li>b : 当搜索fox时并不会匹配foxex,虽然它拥有相同的词根。</li>
+<li>c : 当搜索jumps时并不糊匹配Leaps,它们不同根但同义。</li>
+</ul>
+<p><br/></p>
+<p><strong>分词类别</strong><br>描述: 为了应对不同的分词计算逻辑，ES中使用底层的不同分词器.</p>
+<ul>
+<li><p>Standard Analyzer<code>英 [ˈænəlaɪzə]</code> : ES默认分词器,该标准分词器应对多种不同的语言文本环境,其按照词进行切分、支持多语言、大小写、可以删除大多数标点符号、小写术语，并支持删除停止词。</p>
+</li>
+<li><p>Simple Analyzer: 简单分词器，按照特殊字符分割而非字母切分,当遇到不是字母的字符时将文本分解为term处理(以特殊字符进行分割).</p>
+</li>
+<li><p>Whitespace Analyzer: 空白分词器,按照空白字符作为分隔符，即当遇到任何空白字符时,空白分词器将文本划分称为Term。</p>
+</li>
+<li><p>Stop Analyzer: 类似于Simple Analyzer 但与之相比Simple Analyzer 支持删除停止字、停止词指语气、助词等修饰性词语,如<code>the an is</code>等。</p>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>操作演示:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 分词器分析测试验证</span></span><br><span class="line"><span class="comment">## 1.Standard Analyzer</span></span><br><span class="line"><span class="comment"># - 中文 (注意其会删除特殊符号)</span></span><br><span class="line">POST /_analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: <span class="string">"空想千万遍,不如做一遍"</span>,</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"standard"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回结果:</span></span><br><span class="line"><span class="comment"># &#123;</span></span><br><span class="line"><span class="comment">#   "tokens" : [</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "空",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 0,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 1,</span></span><br><span class="line"><span class="comment">#       "type" : "&lt;IDEOGRAPHIC&gt;",</span></span><br><span class="line"><span class="comment">#       "position" : 0</span></span><br><span class="line"><span class="comment">#     &#125;,</span></span><br><span class="line"><span class="comment"># ..... [想,千,万,遍,不,如,做,一] ....</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "遍",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 10,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 11,</span></span><br><span class="line"><span class="comment">#       "type" : "&lt;IDEOGRAPHIC&gt;",</span></span><br><span class="line"><span class="comment">#       "position" : 9</span></span><br><span class="line"><span class="comment">#     &#125;</span></span><br><span class="line"><span class="comment">#   ]</span></span><br><span class="line"><span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - 英文</span></span><br><span class="line">POST /_analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: <span class="string">"This is a analyzer demo!"</span>,</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"standard"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回结果（简单化展示）: [This,is,a,analyzer,demo]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 2.Simple analyzer</span></span><br><span class="line">POST /_analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: <span class="string">"空想千万遍,不如做一遍!"</span>,</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"simple"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回结果:</span></span><br><span class="line"><span class="comment"># &#123;</span></span><br><span class="line"><span class="comment">#   "tokens" : [</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "空想千万遍",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 0,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 5,</span></span><br><span class="line"><span class="comment">#       "type" : "word",</span></span><br><span class="line"><span class="comment">#       "position" : 0</span></span><br><span class="line"><span class="comment">#     &#125;,</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "不如做一遍",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 6,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 11,</span></span><br><span class="line"><span class="comment">#       "type" : "word",</span></span><br><span class="line"><span class="comment">#       "position" : 1</span></span><br><span class="line"><span class="comment">#     &#125;</span></span><br><span class="line"><span class="comment">#   ]</span></span><br><span class="line"><span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line">POST /_analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: <span class="string">"This#_is*a^demo!"</span>,</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"simple"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回结果（简单化展示）: [This,is,a,demo]</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">## 3.Whitespace analyzer</span></span><br><span class="line">POST /_analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: <span class="string">"Weiyi Geek"</span>,</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"whitespace"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回结果（简单化展示）:[Weiyi,Geek]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 4.Stop analyzer</span></span><br><span class="line">POST /_analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: <span class="string">"The an is bone."</span>,</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"stop"</span></span><br><span class="line">&#125;</span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "tokens" : [</span></span><br><span class="line">  <span class="comment">#     &#123;</span></span><br><span class="line">  <span class="comment">#       "token" : "bone",</span></span><br><span class="line">  <span class="comment">#       "start_offset" : 10,</span></span><br><span class="line">  <span class="comment">#       "end_offset" : 14,</span></span><br><span class="line">  <span class="comment">#       "type" : "word",</span></span><br><span class="line">  <span class="comment">#       "position" : 3</span></span><br><span class="line">  <span class="comment">#     &#125;</span></span><br><span class="line">  <span class="comment">#   ]</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在此示例中，我们将停止分析器配置为使用指定的单词列表作为停止词：</span></span><br><span class="line">PUT index08</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"settings"</span>: &#123;</span><br><span class="line">    <span class="string">"analysis"</span>: &#123;</span><br><span class="line">      <span class="string">"analyzer"</span>: &#123;</span><br><span class="line">        <span class="string">"my_stop_analyzer"</span>: &#123;</span><br><span class="line">          <span class="string">"type"</span>: <span class="string">"stop"</span>,</span><br><span class="line">          <span class="string">"stopwords"</span>: [<span class="string">"my"</span>, <span class="string">"name"</span>, <span class="string">"is"</span>]</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 使用配置的指定停止分析器单词列表进行分词。</span></span><br><span class="line">POST /index08/_analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"my_stop_analyzer"</span>,</span><br><span class="line">  <span class="string">"text"</span>: <span class="string">"Hello,my name is WeiyiGeek"</span></span><br><span class="line">&#125;</span><br><span class="line">  <span class="comment"># &#123;</span></span><br><span class="line">  <span class="comment">#   "tokens" : [</span></span><br><span class="line">  <span class="comment">#     &#123;</span></span><br><span class="line">  <span class="comment">#       "token" : "hello",</span></span><br><span class="line">  <span class="comment">#       "start_offset" : 0,</span></span><br><span class="line">  <span class="comment">#       "end_offset" : 5,</span></span><br><span class="line">  <span class="comment">#       "type" : "word",</span></span><br><span class="line">  <span class="comment">#       "position" : 0</span></span><br><span class="line">  <span class="comment">#     &#125;,</span></span><br><span class="line">  <span class="comment">#     &#123;</span></span><br><span class="line">  <span class="comment">#       "token" : "weiyigeek",</span></span><br><span class="line">  <span class="comment">#       "start_offset" : 17,</span></span><br><span class="line">  <span class="comment">#       "end_offset" : 26,</span></span><br><span class="line">  <span class="comment">#       "type" : "word",</span></span><br><span class="line">  <span class="comment">#       "position" : 4</span></span><br><span class="line">  <span class="comment">#     &#125;</span></span><br><span class="line">  <span class="comment">#   ]</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="2-热词配置"><a href="#2-热词配置" class="headerlink" title="2.热词配置"></a>2.热词配置</h3><p>描述: ES的内置分词器可以处理常见的通用场景,而针对于某些场景还需要特点的分词器插件进行实现。</p>
+<p>Tips : 例如，对于中文的分词常用的是lk分词器(插件),可以让我们自行的进行扩展分词词语。</p>
+<p>IK分析插件将Lucene IK分析器集成到elasticsearch中，支持自定义字典, 项目地址: <a href="https://github.com/medcl/elasticsearch-analysis-ik" target="_blank" rel="noopener">https://github.com/medcl/elasticsearch-analysis-ik</a></p>
+<p><strong>安装并配置LK分词器</strong><br>(1) 下载安装解压lk插件(注意其与ES的对应版本一致):<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># optional 1 - download pre-build package from here</span></span><br><span class="line">wget https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.14.2/elasticsearch-analysis-ik-7.15.0.zip</span><br><span class="line">mkdir <span class="variable">$&#123;ES_HOME&#125;</span>/plugins/ik</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># optional 2 - use elasticsearch-plugin to install ( supported from version v5.5.1 - 建议先将zip然后再本地指定安装):</span></span><br><span class="line">./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.15.0/elasticsearch-analysis-ik-7.15.0.zip</span><br><span class="line"><span class="comment"># <span class="doctag">NOTE:</span> replace 6.3.0 to your own elasticsearch version</span></span><br></pre></td></tr></table></figure></p>
+<p>(2) 上传到ES各个服务器节点之中,并将其解压到ES家目录下的<code>plugins/</code>目录,之后重启ES服务即可,如上面的两种安装方式。</p>
+<blockquote>
+<p>systemctl restart elasticsearch &amp;&amp; systemctl status elasticsearch</p>
+</blockquote>
+<p>Tips : 注意多个ES节点的集群中所有节点都需要配置lk分词器否则计算将会报错。</p>
+<p>Tips ：如果最新的lk版本与您ES版本有差异，此时是不能运行的，利用一个择中的选择(掩耳盗铃法)直接更改配置lk版本，如<code>7.14.2-&gt;7.15.0</code>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 目录结构</span></span><br><span class="line">  <span class="comment"># /usr/local/elasticsearch-7.15.0/plugins/lk$ tree</span></span><br><span class="line">  <span class="comment"># .</span></span><br><span class="line">  <span class="comment"># ├── commons-codec-1.9.jar</span></span><br><span class="line">  <span class="comment"># ├── commons-logging-1.2.jar</span></span><br><span class="line">  <span class="comment"># ├── config</span></span><br><span class="line">  <span class="comment"># │   ├── extra_main.dic       # 字典文件</span></span><br><span class="line">  <span class="comment"># │   ├── extra_single_word.dic</span></span><br><span class="line">  <span class="comment"># │   ├── extra_single_word_full.dic</span></span><br><span class="line">  <span class="comment"># │   ├── extra_single_word_low_freq.dic</span></span><br><span class="line">  <span class="comment"># │   ├── extra_stopword.dic</span></span><br><span class="line">  <span class="comment"># │   ├── IKAnalyzer.cfg.xml  # 配置文件</span></span><br><span class="line">  <span class="comment"># │   ├── main.dic</span></span><br><span class="line">  <span class="comment"># │   ├── preposition.dic</span></span><br><span class="line">  <span class="comment"># │   ├── quantifier.dic</span></span><br><span class="line">  <span class="comment"># │   ├── stopword.dic</span></span><br><span class="line">  <span class="comment"># │   ├── suffix.dic</span></span><br><span class="line">  <span class="comment"># │   └── surname.dic</span></span><br><span class="line">  <span class="comment"># ├── elasticsearch-analysis-ik-7.15.0.jar</span></span><br><span class="line">  <span class="comment"># ├── httpclient-4.5.2.jar</span></span><br><span class="line">  <span class="comment"># ├── httpcore-4.4.4.jar</span></span><br><span class="line">  <span class="comment"># ├── plugin-descriptor.properties</span></span><br><span class="line">  <span class="comment"># └── plugin-security.policy</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 更改lk版本</span></span><br><span class="line">$ mv elasticsearch-analysis-ik-7.14.2.jar  elasticsearch-analysis-ik-7.15.0.jar</span><br><span class="line">$ vim plugin-descriptor.properties</span><br><span class="line">  <span class="comment"># 'version': plugin's version</span></span><br><span class="line">  version=7.15.0</span><br><span class="line">  <span class="comment"># plugins with the incorrect elasticsearch.version.</span></span><br><span class="line">  elasticsearch.version=7.15.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看插件信息 </span></span><br><span class="line">curl -u weiyigeek:password -XGET http://10.10.107.225:9200/_cat/plugins?v</span><br><span class="line">  <span class="comment"># es03 analysis-ik 7.15.0</span></span><br><span class="line">  <span class="comment"># es01 analysis-ik 7.15.0</span></span><br><span class="line">  <span class="comment"># es02 analysis-ik 7.15.0</span></span><br></pre></td></tr></table></figure></p>
+<p>(3) 简单使用lk分词器插件，这里选择两个不同名称的分词器，一个是ik_smart分词器(粗粒度),一个是ik_max_word(细粒度)分词计算，测试返回结果如下。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 验证ik_smart分词</span></span><br><span class="line">POST _analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: [<span class="string">"王者荣耀"</span>,<span class="string">"绝地求生"</span>,<span class="string">"黑客白帽"</span>],</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"ik_smart"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 验证ik_max_word分词</span></span><br><span class="line">POST _analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: [<span class="string">"王者荣耀"</span>,<span class="string">"绝地求生"</span>,<span class="string">"黑客白帽"</span>],</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"ik_max_word"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 返回结果: [王者,荣耀,绝地,求生,黑客,白,帽]</span></span><br><span class="line"><span class="comment"># &#123;</span></span><br><span class="line"><span class="comment">#   "tokens" : [</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "王者",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 0,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 2,</span></span><br><span class="line"><span class="comment">#       "type" : "CN_WORD",</span></span><br><span class="line"><span class="comment">#       "position" : 0</span></span><br><span class="line"><span class="comment">#     &#125;,</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "荣耀",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 2,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 4,</span></span><br><span class="line"><span class="comment">#       "type" : "CN_WORD",</span></span><br><span class="line"><span class="comment">#       "position" : 1</span></span><br><span class="line"><span class="comment">#     &#125;,</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "绝地",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 5,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 7,</span></span><br><span class="line"><span class="comment">#       "type" : "CN_WORD",</span></span><br><span class="line"><span class="comment">#       "position" : 2</span></span><br><span class="line"><span class="comment">#     &#125;,</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "求生",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 7,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 9,</span></span><br><span class="line"><span class="comment">#       "type" : "CN_WORD",</span></span><br><span class="line"><span class="comment">#       "position" : 3</span></span><br><span class="line"><span class="comment">#     &#125;,</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "黑客",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 10,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 12,</span></span><br><span class="line"><span class="comment">#       "type" : "CN_WORD",</span></span><br><span class="line"><span class="comment">#       "position" : 4</span></span><br><span class="line"><span class="comment">#     &#125;,</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "白",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 12,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 13,</span></span><br><span class="line"><span class="comment">#       "type" : "CN_CHAR",</span></span><br><span class="line"><span class="comment">#       "position" : 5</span></span><br><span class="line"><span class="comment">#     &#125;,</span></span><br><span class="line"><span class="comment">#     &#123;</span></span><br><span class="line"><span class="comment">#       "token" : "帽",</span></span><br><span class="line"><span class="comment">#       "start_offset" : 13,</span></span><br><span class="line"><span class="comment">#       "end_offset" : 14,</span></span><br><span class="line"><span class="comment">#       "type" : "CN_CHAR",</span></span><br><span class="line"><span class="comment">#       "position" : 6</span></span><br><span class="line"><span class="comment">#     &#125;</span></span><br><span class="line"><span class="comment">#   ]</span></span><br><span class="line"><span class="comment"># &#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips : 我们除了可以采用lk自带的热词以外，我们还可以通过lk分词器插件目录中的xml配置文件(<code>IKAnalyzer.cfg.xml</code>)，指定静态或者动态更新热词方式。<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ cat config/IKAnalyzer.cfg.xml</span><br><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd"&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">comment</span>&gt;</span>IK Analyzer 扩展配置<span class="tag">&lt;/<span class="name">comment</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--用户可以在这里配置自己的扩展字典 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">entry</span> <span class="attr">key</span>=<span class="string">"ext_dict"</span>&gt;</span><span class="tag">&lt;/<span class="name">entry</span>&gt;</span></span><br><span class="line">         <span class="comment">&lt;!--用户可以在这里配置自己的扩展停止词字典--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">entry</span> <span class="attr">key</span>=<span class="string">"ext_stopwords"</span>&gt;</span><span class="tag">&lt;/<span class="name">entry</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--用户可以在这里配置远程扩展字典 --&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- &lt;entry key="remote_ext_dict"&gt;words_location&lt;/entry&gt; --&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--用户可以在这里配置远程扩展停止词字典--&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- &lt;entry key="remote_ext_stopwords"&gt;words_location&lt;/entry&gt; --&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips : 从配置文件可以看出无论是location还是remote都拥有两种词典,一种是扩展字典，而另外一种是停止字典。</p>
+<ul>
+<li>扩展字典: 让ES可以根据我们自定义的词典来切分字词。例如：白帽</li>
+<li>扩展停止字典: 让ES可以根据我们自定义的词典来停止计算分析一些无意义或者少意义的词语。例如：那些、那个、the、an、this、that</li>
+</ul>
+<p><br/></p>
+<h4 id="1-静态更新"><a href="#1-静态更新" class="headerlink" title="(1) 静态更新"></a>(1) 静态更新</h4><p>描述: 这里的静态更新指定的是本地扩展字典或者停止字典。</p>
+<p>Tips: 值得注意的是使用本地词典时，其词典配置文件需要指定相对路径，其一般与lk词典配置文件同在config目录下。</p>
+<p><strong>案例演示:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - (1) 字典准备</span></span><br><span class="line"><span class="comment"># 本地扩展字典</span></span><br><span class="line">tee my_extra.dic &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">网络安全</span><br><span class="line">等级保护</span><br><span class="line">白帽</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 本地扩展停止字典</span></span><br><span class="line">tee my_extra_stop.dic &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">黑客</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># - (2) 字典调用配置</span></span><br><span class="line"><span class="variable">$vim</span> IKAnalyzer.cfg.xml</span><br><span class="line">&lt;!--用户可以在这里配置自己的扩展字典 --&gt;</span><br><span class="line">&lt;entry key=<span class="string">"ext_dict"</span>&gt;my_extra.dic&lt;/entry&gt;</span><br><span class="line">&lt;!--用户可以在这里配置自己的扩展停止词字典--&gt;</span><br><span class="line">&lt;entry key=<span class="string">"ext_stopwords"</span>&gt;my_extra_stop.dic&lt;/entry&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># - (3) 重启ES服务 (防止错误，建议以上三步在所有ES集群节点上运行)</span></span><br><span class="line">systemctl restart elasticsearch</span><br><span class="line"></span><br><span class="line"><span class="comment"># - (4) 验证分词</span></span><br><span class="line"><span class="comment"># 验证ik_smart分词，可以查看到黑客在我们停止字典上所以带有该词的数据将不会显示，同时也能看出ik_smart分词与ik_max_word分词的区别。</span></span><br><span class="line">POST _analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: [<span class="string">"网络安全"</span>,<span class="string">"等级保护"</span>,<span class="string">"黑客白帽"</span>],</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"ik_smart"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回结果: [网络安全,等级保护,白帽]</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证ik_max_word分词</span></span><br><span class="line">POST _analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: [<span class="string">"网络安全"</span>,<span class="string">"等级保护"</span>,<span class="string">"黑客白帽"</span>],</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"ik_max_word"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回结果: [网络安全,网络,安全,等级保护,等级,保护,白帽]</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h4 id="2-动态更新"><a href="#2-动态更新" class="headerlink" title="(2) 动态更新"></a>(2) 动态更新</h4><p>描述: 这里的动态更新指定的是使用远程扩展字典或者停止字典，即我们可以从任意一个远程的Web服务器资源中配置词典，从而使lk分词器可以通过网络访问去动态更新我们的热词。</p>
+<p>Tips : 在使用动态更新热词前，你需要搭建一个web服务器，常用Nginx或者tomcat以及Python搭建。</p>
+<p><strong>案例演示:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - (1) 字典准备</span></span><br><span class="line"><span class="comment"># 远程扩展字典</span></span><br><span class="line">tee /tmp/re_my_extra.dic &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">王者荣</span><br><span class="line">EOF</span><br><span class="line"><span class="comment"># 远程扩展停止字典</span></span><br><span class="line">tee /tmp/re_my_extra_stop.dic &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">黑客</span><br><span class="line">白帽</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># - (2) 采用Python启动web服务器</span></span><br><span class="line">/tmp$ python3 -m http.server 8080</span><br><span class="line">Serving HTTP on 0.0.0.0 port 8080 (http://0.0.0.0:8080/) ...</span><br><span class="line"></span><br><span class="line"><span class="comment"># - (3) 配置lk词典配置文件</span></span><br><span class="line">vi IKAnalyzer.cfg.xml</span><br><span class="line">&lt;!--用户可以在这里配置远程扩展字典 --&gt;</span><br><span class="line">&lt;entry key=<span class="string">"remote_ext_dict"</span>&gt;http://10.10.107.227:8080/re_my_extra.dic&lt;/entry&gt;</span><br><span class="line">&lt;!--用户可以在这里配置远程扩展停止词字典--&gt;</span><br><span class="line">&lt;entry key=<span class="string">"remote_ext_stopwords"</span>&gt;http://10.10.107.227:8080/re_my_extra_stop.dic&lt;/entry&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># - (4) 重启ES服务(启动它会进行访问我们远程路径)，建议在所有节点的lk中都进行配置。</span></span><br><span class="line">systemctl restart elasticsearch</span><br><span class="line">  <span class="comment"># 10.10.107.225 - - [08/Oct/2021 20:50:38] "GET /re_my_extra.dic HTTP/1.1" 200 -</span></span><br><span class="line">  <span class="comment"># 10.10.107.225 - - [08/Oct/2021 20:50:38] "GET /re_my_extra_stop.dic HTTP/1.1" 200 -</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - (5) 验证lk分词器</span></span><br><span class="line"><span class="comment"># 验证ik_smart分词</span></span><br><span class="line">POST _analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: [<span class="string">"王者荣耀"</span>,<span class="string">"黑客白帽"</span>],</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"ik_smart"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回结果: [王者,荣耀]</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证ik_max_word分词</span></span><br><span class="line">POST _analyze</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"text"</span>: [<span class="string">"王者荣耀"</span>,<span class="string">"黑客白帽"</span>],</span><br><span class="line">  <span class="string">"analyzer"</span>: <span class="string">"ik_max_word"</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 返回结果:</span></span><br></pre></td></tr></table></figure></p>
+<p>Tips : 配置远程扩展字典后，ES会在启动时GET以及每一分钟进行HEAD请求我们设置的远程扩展字典以及远程扩展停止字典，当发现更新后便会GET请求。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">10.10.107.225 - - [08/Oct/2021 20:50:48] <span class="string">"GET /re_my_extra.dic HTTP/1.1"</span> 200 -</span><br><span class="line">10.10.107.225 - - [08/Oct/2021 20:50:48] <span class="string">"GET /re_my_extra_stop.dic HTTP/1.1"</span> 200 -</span><br><span class="line">10.10.107.225 - - [08/Oct/2021 20:51:48] <span class="string">"HEAD /re_my_extra.dic HTTP/1.1"</span> 304 -</span><br><span class="line">10.10.107.225 - - [08/Oct/2021 20:51:48] <span class="string">"HEAD /re_my_extra_stop.dic HTTP/1.1"</span> 304 -</span><br><span class="line">10.10.107.225 - - [08/Oct/2021 20:52:48] <span class="string">"HEAD /re_my_extra.dic HTTP/1.1"</span> 304 -</span><br><span class="line">10.10.107.225 - - [08/Oct/2021 20:52:48] <span class="string">"HEAD /re_my_extra_stop.dic HTTP/1.1"</span> 304 -</span><br></pre></td></tr></table></figure></p>
+<p><a href="https://www.cnblogs.com/wanghj-15/p/11307999.html" target="_blank" rel="noopener">https://www.cnblogs.com/wanghj-15/p/11307999.html</a></p>
+<p>ES（ElasticSearch）文档的表现形式以及增删改查<br><a href="https://www.cnblogs.com/wangcuican/p/13896973.html" target="_blank" rel="noopener">https://www.cnblogs.com/wangcuican/p/13896973.html</a></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:02.682Z" itemprop="dateUpdated">2022-03-29 13:39:02</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/网安防御/安全建设/日志审计/ElasticStack/3.ElasticSearch分布式数据分析引擎基础概念与使用.md" target="_blank" rel="noopener noreferrer">_posts/网安防御/安全建设/日志审计/ElasticStack/3.ElasticSearch分布式数据分析引擎基础概念与使用.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2021/8-2-614.html" target="_blank" rel="external">https://blog.weiyigeek.top/2021/8-2-614.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Elastic/" rel="tag">Elastic</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/8-2-614.html&title=《3.ElasticSearch分布式数据分析引擎基础概念与使用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/8-2-614.html&title=《3.ElasticSearch分布式数据分析引擎基础概念与使用》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/8-2-614.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《3.ElasticSearch分布式数据分析引擎基础概念与使用》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/8-2-614.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/8-2-614.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2021/8-3-651.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">ElasticStack日志采集监控搭建实践案例</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2021/8-2-613.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">2.ElasticStack分布式数据采集搜索引擎集群搭建配置</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-基础快速入门"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 基础快速入门</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#核心概念"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">核心概念</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#工具介绍"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">工具介绍</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-基础使用操作"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 基础使用操作</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-索引-amp-文档操作"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.索引&amp;文档操作</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-查询操作"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.查询操作</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-match-all-所有匹配"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">(1) match_all - 所有匹配</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-term-单分词匹配"><span class="post-toc-number">2.2.2.</span> <span class="post-toc-text">(2) term - 单分词匹配</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-range"><span class="post-toc-number">2.2.3.</span> <span class="post-toc-text">(3) range</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-exists"><span class="post-toc-number">2.2.4.</span> <span class="post-toc-text">(4) exists</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-bool"><span class="post-toc-number">2.2.5.</span> <span class="post-toc-text">(5) bool</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#6-match-多字分词匹配"><span class="post-toc-number">2.2.6.</span> <span class="post-toc-text">(6) match - 多字分词匹配</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#7-match-phrase-完全匹配短语"><span class="post-toc-number">2.2.7.</span> <span class="post-toc-text">(7)  match_phrase - 完全匹配短语</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#7-match-phrase-prefix-完全匹配以指定前缀短语"><span class="post-toc-number">2.2.8.</span> <span class="post-toc-text">(7) match_phrase_prefix - 完全匹配以指定前缀短语</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#8-multi-match-匹配多个字段中的短语"><span class="post-toc-number">2.2.9.</span> <span class="post-toc-text">(8) multi_match - 匹配多个字段中的短语</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-映射操作"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">3.映射操作</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-Mapping-概念"><span class="post-toc-number">2.3.1.</span> <span class="post-toc-text">(1) Mapping 概念</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-Mapping-设置"><span class="post-toc-number">2.3.2.</span> <span class="post-toc-text">(2) Mapping 设置</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-设置操作"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">4.设置操作</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-shards-分片"><span class="post-toc-number">2.4.1.</span> <span class="post-toc-text">(1) shards 分片</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-replicas-副本"><span class="post-toc-number">2.4.2.</span> <span class="post-toc-text">(2) replicas 副本</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-进阶使用操作"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 进阶使用操作</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-分词器"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">1.分词器</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-热词配置"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">2.热词配置</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-静态更新"><span class="post-toc-number">3.2.1.</span> <span class="post-toc-text">(1) 静态更新</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-动态更新"><span class="post-toc-number">3.2.2.</span> <span class="post-toc-text">(2) 动态更新</span></a></li></ol></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/8-2-614.html&title=《3.ElasticSearch分布式数据分析引擎基础概念与使用》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/8-2-614.html&title=《3.ElasticSearch分布式数据分析引擎基础概念与使用》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/8-2-614.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《3.ElasticSearch分布式数据分析引擎基础概念与使用》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/8-2-614.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/8-2-614.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACJklEQVR42u3a24rDMAxF0f7/T3teC8XJPhIZiLz9VEIuXikolqzPB4/1NX6PfB/fnb+7Z3pVa8iQIeO1jHU5rs8hd75+EeQ3eroMGTIOYJBJ8EB8HVJJEOdzkyFDhgzO6JxTe64MGTJkkNBJFpQ8GZYhQ4aMa0Y6oTREponrg7m4DBkyXsjgVff///3I/oYMGTJexVjh4PdJw+VqDBkyZMxm8ABHJsqXhqQ8lzZ/yJAh4wRGJ70kySdZdHaOyJAh4wQGCazk1mk4roXym++GDBkyBjFWe/CIV0uGUTuaDBkyjmGQzYB0Idg/QsK6DBkyZjM6Zf1OME3PQeU8GTJkjGbUSvNp4Z6nshx/M08ZMmSMY5Bg1wfUwjFZUMqQIWMqg28D8K3HtBiXBv2bXFyGDBnjGLXJ9ctz6dcgXqrKkCFjNIMv4NJgHfeAhK9JhgwZsxm1cn/aNNbKsPvvWIYMGaMZfHJpK0atABfsxMqQIWMQI72MN3LxBo50IxP9JzJkyBjEqBXCao0U/aLb9lkyZMg4jPHcViWZYi2Uy5Ah40wGn2JKeqJ1TIYMGVMZKxxpcZ+X2HiQ3S4KZciQMZRR2x/sLAR5OY9vNsiQIeMERq3ZK001eQhOz5QhQ8Y5jFrjVxqC+1+ALVKGDBkySpuXfAMyfU2o2UKGDBkywLW1F1FrTZMhQ8YJDJLEpk0S6eIvxcuQIeMcBk8da1uP6SRqwVqGDBlDGX8cgiLg9JOCyAAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

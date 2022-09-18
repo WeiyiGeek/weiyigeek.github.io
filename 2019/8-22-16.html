@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 CDN内容分发网络原理解析|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="CDN,内容缓存">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>CDN内容分发网络原理解析</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">CDN内容分发网络原理解析</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-08-22T05:36:30.000Z" itemprop="datePublished" class="page-time">
+  2019-08-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Web%E7%BC%93%E5%AD%98%E6%8A%80%E6%9C%AF/">Web缓存技术</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-基础知识/Web原理/网站缓存/CDN内容分发网络原理解析"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">CDN内容分发网络原理解析</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-08-22 13:36:30" datetime="2019-08-22T05:36:30.000Z"  itemprop="datePublished">2019-08-22</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Web%E7%BC%93%E5%AD%98%E6%8A%80%E6%9C%AF/">Web缓存技术</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><h3 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h3><p><strong>Q:什么是CDN?</strong></p>
+<blockquote>
+<p>A: CDN的全称是 <code>Content Delivery Network</code> 即内容分发网络(互联网世界的物流服务)。是建立并覆盖在承载网之上，由分布在不同区域的边缘节点服务器群组成的分布式网络, 它可以帮助分担源站压力，避免网络拥塞，确保在不同区域、不同场景下加速网站内容的分发，提高资源访问速度。<br>简单的说：其通过广泛的网络节点分布，提供快速、稳定、安全、可编程的全球内容分发加速服务，支持将网站(动态、静态)、音视频、下载等内容分发至接近用户的节点。 系统将源站内容分发至最接近用户的边缘节点之上, 使用户可就近取得所需内容，提高用户访问的响应速度和成功率。</p>
+</blockquote>
+<p><strong>Q: 为啥要使用CDN?</strong></p>
+<blockquote>
+<p>答: 例如阿里云为直播行业提供了边缘节点服务<code>（ENS-最主要的技术就是CDN）</code>,基于阿里云ENS可以轻松地将业务模块放到边缘运行，在主播的推流时，实现就近节点进行转码和分发，同时支持了高并发实时弹幕的边缘分发。在获得网络低时延的同时，减少了对中心的压力，节省了30%以上的中心带宽成本，并且实现了边缘节点网络连接小于5毫秒延时，提升了主播上行质量，以及用户成功连接占比等数指标，有效提升了用户观看体验;</p>
+</blockquote>
+<p><br/></p>
+<p><strong>CDN 原理:</strong><br>描述: 我们可以将CDN比作天猫超市与菜鸟在全国各地建了本地仓库,当用户购买直营的东西的时候(<code>不在是跨区配送而是同城配送</code>),所以下单购买后，由最近的仓发货就近配送，用户购买的体验明显好太多了;</p>
+<p>其实我们在浏览网络的时候其实就和以上这个过程十分相似，我们访问一个网站页面的时候，会向服务器请求很多网络资源，包括<code>各种图片、声音、影片、文字</code>等信息。所以就像天猫超市把货物提前存储在菜鸟建设在全国各地的本地仓库来减少物流时间一样，网站也可以<code>预先把内容分发至全国各地的加速节点</code>。这样用户就可以<code>就近获取所需内容，避免网络拥堵、地域、运营商等因素带来的访问延迟问题</code>，有效提升下载速度、降低响应时间，提供流畅的用户体验。</p>
+<figure class="image-box">
+                <a rel=CDN内容分发网络原理解析 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190823142255.png" target="_blank" title="WeiyiGeek.CDN原理图" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190823142255.png" alt="WeiyiGeek.CDN原理图" title="" class=""></a>
+                <p>WeiyiGeek.CDN原理图</p>
+            </figure>
+<p><br/></p>
+<p><strong>CDN优缺点</strong><br>答:您总是希望网页可以尽可能地快，您希望页面的容量尽可能地小，同时您希望浏览器尽可能多地进行缓存这就需要使用到CDN的内容分发网络。就像前面提到的”全国仓配网络”一样，解决了因分布、带宽、服务器性能带来的访问延迟问题，适用于站点加速、点播、直播等场景。<br>优点: </p>
+<ul>
+<li>1.使用户可就近取得所需内容，<code>解决 Internet网络拥挤的状况，提高用户访问网站的响应速度和成功率</code>。</li>
+<li>2.电信运营商: CDN技术消除了不同运营商之间互联的瓶颈造成的影响，实现了跨运营商的网络加速，保证不同网络中的用户都能得到良好的访问质量;</li>
+<li>3.冗余机制: 广泛分布的CDN节点加上节点之间的智能冗余机制，可以有效地预防黑客入侵以及降低各种DDoS攻击对网站的影响，同时保证较好的服务质量</li>
+<li>4.分担源站压力，避免网络拥塞</li>
+</ul>
+<p><br/></p>
+<p><strong>基础术语</strong></p>
+<ul>
+<li><p>源站：您实际业务的服务器。源站类型可以选择OSS域名、IP、源站或函数计算域名。</p>
+</li>
+<li><p>加速域名: 即您需要使用CDN加速的域名(自定义)。域名是一组服务器的地址，可以是网站、电子邮件、FTP等。</p>
+</li>
+<li><p>DNS：DNS（Domain Name System），即域名解析服务。</p>
+</li>
+<li><p>CNAME记录：即别名用来把一个域名解析到另一个域名，再由另一个域名提供IP地址。</p>
+</li>
+<li><p>CNAME域名: 在阿里云控制台添加加速域名后，阿里云CDN将给您分配一个CNAME域名。</p>
+<ul>
+<li>该CNAME域名的形式为<em>.</em>kunlun<em>.com。 您需要在您的DNS解析服务商添加一条CNAME记录，将自己的加速域名指向`</em>.<em>kunlun</em>.com`的域名。记录生效后，域名解析的工作就正式转向CDN服务，该域名所有的请求都将转向CDN节点达到加速效果。 </li>
+</ul>
+</li>
+<li><p>SSL/TLS：SSL（Secure Sockets Layer，安全通讯协议）是一个架构于TCP之上的安全套接层。</p>
+<ul>
+<li>它可以有效协助Internet应用软件提升通讯时的资料完整性以及安全性。标准化之后的SSL名称改为<code>TLS（Transport Layer Security，传输层安全协议）</code>，因此很多相关的文档将二者并称（SSL/TLS）。 </li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>回源: CDN节点未缓存请求资源或缓存资源已到期时，回源站获取资源，返回给客户端。</p>
+<ul>
+<li>例如：您访问某个URL时，如果解析到的CDN节点未缓存该资源，则您的访问请求会直接到源站获取资源，并根据URL请求返回给您。</li>
+</ul>
+</li>
+<li><p>回源HOST: 源站决定了回源时请求到哪个IP, 回源HOST决定回源请求访问到该IP上的哪个站点（Nginx 虚拟主机）。</p>
+<ul>
+<li>例1：源站是域名 (源站为<a href="http://www.a.com，回源HOST为www.b.com，那么实际回源是请求到www.a.com解析到的IP，即对应的主机上的站点www.b.com" target="_blank" rel="noopener">www.a.com，回源HOST为www.b.com，那么实际回源是请求到www.a.com解析到的IP，即对应的主机上的站点www.b.com</a>)</li>
+<li>例2：源站是IP (源站为1.1.1.1，回源HOST为<a href="http://www.b.com，那么实际回源的是1.1.1.1对应的主机上的站点www.b.com。" target="_blank" rel="noopener">www.b.com，那么实际回源的是1.1.1.1对应的主机上的站点www.b.com。</a>)</li>
+</ul>
+</li>
+<li><p>协议回源: 指回源时使用的协议和客户端访问资源时的协议保持一致，即如果客户端使用HTTPS方式请求资源，当CDN节点上未缓存该资源时，节点会使用相同的HTTPS方式回源获取资源。同理如果客户端使用HTTP协议的请求，CDN节点回源时也使用HTTP协议。</p>
+</li>
+<li><p>过滤参数: 借助过滤参数开关，您可以根据实际业务需要，决定在缓存时是否过滤用户请求URL中?之后的参数(<code>动态变化的比较重要</code>)。 </p>
+<ul>
+<li>如果开启过滤参数，则CDN节点会截取没有参数的URL向源站请求，且CDN节点仅保留一份副本。</li>
+<li>如果关闭过滤参数，则每个不同的URL会缓存不同的副本在CDN的节点上。</li>
+</ul>
+</li>
+</ul>
+<p><br></p>
+<h3 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h3><p>描述:通过以下案例您可以了解CDN的工作原理。</p>
+<p>假设您的加速域名为 <code>www.a.com</code> 接入CDN网络，开始使用加速服务后，当终端用户（北京）发起HTTP请求时，处理流程如下图所示。 </p>
+<ul>
+<li>1.当终端用户（北京）向<a href="http://www.a.com下的指定资源发起请求时，首先向LDNS（本地DNS）发起域名解析请求。" target="_blank" rel="noopener">www.a.com下的指定资源发起请求时，首先向LDNS（本地DNS）发起域名解析请求。</a></li>
+<li>2.LDNS检查缓存中是否有<a href="http://www.a.com的IP地址记录。如果有，则直接返回给终端用户；如果没有，则向授权DNS查询。" target="_blank" rel="noopener">www.a.com的IP地址记录。如果有，则直接返回给终端用户；如果没有，则向授权DNS查询。</a></li>
+<li>3.当授权DNS解析<a href="http://www.a.com时，返回域名CNAME" target="_blank" rel="noopener">www.a.com时，返回域名CNAME</a> <a href="http://www.a.tbcdn.com对应IP地址。" target="_blank" rel="noopener">www.a.tbcdn.com对应IP地址。</a></li>
+<li>4.域名解析请求发送至阿里云DNS调度系统，并为请求分配最佳节点IP地址。</li>
+<li>5.LDNS获取DNS返回的解析IP地址。</li>
+<li>6.用户获取解析IP地址。</li>
+<li>7.用户向获取的IP地址发起对该资源的访问请求。<ul>
+<li>如果该IP地址对应的节点已缓存该资源，则会将数据直接返回给用户，例如，图中步骤7和8，请求结束。</li>
+<li>如果该IP地址对应的节点未缓存该资源，则节点向源站发起对该资源的请求。获取资源后，结合用户自定义配置的缓存策略，将资源缓存至节点，例如，图中的北京节点，并返回给用户，请求结束。配置缓存策略的操作方法，请参见缓存配置。</li>
+</ul>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=CDN内容分发网络原理解析 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210315165814.png" target="_blank" title="WeiyiGeek.工作流程" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210315165814.png" alt="WeiyiGeek.工作流程" title="" class=""></a>
+                <p>WeiyiGeek.工作流程</p>
+            </figure>
+<p><br/></p>
+<p>然后我们还是拿快递行业为例进行讲解<code>CDN的工作过程</code>更能方便加深读者的理解;</p>
+<p><strong>传统快递企业采用的配送模式：</strong></p>
+<blockquote>
+<p>商家→网点→分拨→分拨→网点→客户”的环节进行配送<br>存在的问题: 如环节多、时效慢、易破损；</p>
+</blockquote>
+<p>上面这个过程和传统网站的请求响应过程类似，一般经历以下步骤：</p>
+<ul>
+<li>用户在自己的浏览器中输入要访问的网站域名。</li>
+<li>浏览器向本地DNS服务器请求对该域名的解析。</li>
+<li>本地DNS服务器中如果缓存有这个域名的解析结果，则直接响应用户的解析请求。</li>
+<li>本地DNS服务器中如果没有关于这个域名的解析结果的缓存，则以迭代方式向整个DNS系统请求解析，获得应答后将结果反馈给浏览器。</li>
+<li>浏览器得到域名解析结果，就是该域名相应的服务设备的IP地址 。</li>
+<li>浏览器获取IP地址之后，经过标准的TCP握手流程，建立TCP连接。</li>
+<li>浏览器向服务器发起HTTP请求。</li>
+<li>服务器将用户请求内容传送给浏览器。</li>
+<li>经过标准的TCP挥手流程，断开TCP连接。</li>
+</ul>
+<p><br></p>
+<p><strong>互联网快递企业的新型配送方式：</strong></p>
+<ul>
+<li>电商自建物流提前备货将异地件转化成同城件，<code>省去干线环节提升时效，仓储高自动化分拣保证快速出库的同时也保证了分拣破损率较低</code>。</li>
+</ul>
+<p>所以，引入CDN之后，用户访问网站一般经历以下步骤：</p>
+<ul>
+<li>当用户点击网站页面上的内容URL，先经过本地DNS系统解析，如果本地DNS服务器没有相应域名的缓存，<code>则本地DNS系统会将域名的解析权交给CNAME指向的CDN专用DNS服务器</code>。</li>
+<li>CDN的DNS服务器将CDN的<code>全局负载均衡设备IP地址返回给用户</code>。</li>
+<li>用户向<code>CDN的全局负载均衡设备发起URL访问请求</code>。</li>
+<li>CDN全局负载均衡设备<code>根据用户IP地址，以及用户请求的URL，选择一台用户所属区域的区域负载均衡设备</code>，并将请求转发到此设备上。</li>
+<li>基于以下这些条件的综合分析之后，区域负载均衡设备会<code>选择一个最优的缓存服务器节点，并从缓存服务器节点处得到缓存服务器的IP地址</code>，最终将得到的IP地址返回给全局负载均衡设备：</li>
+<li><code>根据用户IP地址，判断哪一个边缘节点距用户最近</code>；</li>
+<li>根据用户所请求的URL中携带的内容名称，判断哪一个边缘节点上有用户所需内容；</li>
+<li>查询各个边缘节点当前的负载情况，判断哪一个边缘节点尚有服务能力。</li>
+<li>全局负载均衡设备把服务器的IP地址返回给用户。</li>
+<li><code>用户向缓存服务器发起请求，缓存服务器响应用户请求</code>，将用户所需内容传送到用户终端。如果这台缓存服务器上并没有用户想要的内容，而区域均衡设备依然将它分配给了用户，那么这台服务器就要<code>向它的上一级缓存服务器请求内容，直至追溯到网站的源服务器将内容拉到本地</code>。</li>
+</ul>
+<figure class="image-box">
+                <a rel=CDN内容分发网络原理解析 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190823143608.png" target="_blank" title="WeiyiGeek.华为云全站加速示意图" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/1/20190823143608.png" alt="WeiyiGeek.华为云全站加速示意图" title="" class=""></a>
+                <p>WeiyiGeek.华为云全站加速示意图</p>
+            </figure>
+<p>简单总结:</p>
+<ul>
+<li>CDN全局负载均衡设备与CDN区域负载均衡设备根据用户IP地址，<code>将域名解析成相应节点中缓存服务器的IP地址</code>，实现用户就近访问，从而提高服务端响应内容的速度。</li>
+<li>用户访问网站先从CDN中查找(就近原则),如果这个节点找不到(再升级查找),最终找不到再访问服务器(一般不会存在这样的情况,除非您的源站出现问题)</li>
+</ul>
+<hr>
+<h3 id="组成部分"><a href="#组成部分" class="headerlink" title="组成部分"></a>组成部分</h3><p>描述：例如上面天猫超市一样一个仓配网络是由多个仓库组成的，同理内容分发网络（CDN）是由多个节点组成的。</p>
+<p>一般来讲CDN网络主要由<code>·中心节点、边缘节点·</code>两部分构成。</p>
+<ul>
+<li>(1) 服务器节点(中心节点) : 中心节点包括CDN网管中心和全局负载均衡<code>·</code>DNS重定向解析系统，负责整个CDN网络的分发及管理`。</li>
+<li>(2) 边缘节点 : CDN边缘节点主要指异地分发节点，<code>由负载均衡设备、高速缓存服务器两部分组成</code>。<ul>
+<li>负载均衡设备<code>负责每个节点中各个Cache的负载均衡</code>，保证节点的工作效率；同时还负责收集节点与周围环境的信息，保持与全局负载均衡DNS的通信，实现整个系统的负载均衡。</li>
+<li>高速缓存服务器（Cache）<code>负责存储客户网站的大量信息</code>，就像一个靠近用户的网站服务器一样响应本地用户的访问请求。通过全局负载均衡DNS的控制，用户的请求被透明地指向离他最近的节点，节点中Cache服务器就像网站的原始服务器一样，响应终端用户的请求。因其距离用户更近，故其响应时间才更快。</li>
+</ul>
+</li>
+</ul>
+<p>Tips ：中心节点就像仓配网络中负责货物调配的总仓，而边缘节点就是负责存储货物的各个城市的本地仓库。</p>
+<p><br/></p>
+<p>描述:首先我们想一下要想建设一个庞大的仓配网络都需要考虑哪些问题，需要哪些技术手段呢？</p>
+<p>四个重要且需要关注的点:</p>
+<ul>
+<li>1、如何妥善的将货物分发到各个城市的本地仓。</li>
+<li>2、如何妥善的各个本地仓存储货物。</li>
+<li>3、如何根据用户的收货地址，智能的匹配出应该优先从哪个仓库发货，选用哪种物流方式等。</li>
+<li>4、对于整个仓配系统如何进行管理，如整体货物分发的精确度、仓配的时效性、发货地的匹配度等。</li>
+</ul>
+<p>CDN中最重要的四大技术不谋而合:</p>
+<ul>
+<li>内容发布: 它<code>借助于建立索引、缓存、流分裂、组播（Multicast）等技术</code>，将内容发布或投递到距离用户最近的远程服务点（POP）处。</li>
+<li>内容存储: CDN系统需要考虑两个方面的内容存储问题, 一个是内容源的存储,一个是内容在 Cache节点中的存储。</li>
+<li>内容路由: 它是<code>整体性的网络负载均衡技术</code>，通过内容路由器中的重定向（DNS）机制，在多个远程POP上均衡用户的请求，以使用户请求得到最近内容源的响应。</li>
+<li>内容管理: 它通过内部和外部监控系统，获取网络部件的状况信息，<code>测量内容发布的端到端性能（如包丢失、延时、平均带宽、启动时间、帧速率等）</code>，保证网络处于最佳的运行状态。</li>
+</ul>
+<hr>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><p>描述: CDN的业务使用场景分为静态内容加速、动态内容加速和安全加速。</p>
+<p>以阿里云CDN的业务场景如下表所示:</p>
+<ul>
+<li>图片小文件 : 网站或应用App的主要业务为图片和小文件下载，包括各类型图片、HTML、CSS、JS小文件等。</li>
+<li>大文件下载 : 网站或应用App的主要业务为大文件下载，平均单个文件大小在20 MB以上，例如游戏、各类客户端下载和App下载商店等。</li>
+<li>视音频点播 : 网站或应用App的主要业务为视频点播或短视频类。支持MP4、FLV等主流视频格式。</li>
+<li>全站加速 : 全站加速是阿里云一款独立产品，主要用于动态内容加速，也可以实现动静分离加速。</li>
+<li>安全加速 : 安全加速适用于游戏、金融、政企安防、电商、医疗领域等易受攻击又必须兼顾加速的业务场景。</li>
+</ul>
+<p>图片小文件请求的典型应用场景如下图所示。<br><figure class="image-box">
+                <a rel=CDN内容分发网络原理解析 href="https://static-aliyun-doc.oss-cn-hangzhou.aliyuncs.com/assets/img/zh-CN/2700074851/p75529.png" target="_blank" title="图片小文件应用场景" data-fancybox="images"><img src="https://static-aliyun-doc.oss-cn-hangzhou.aliyuncs.com/assets/img/zh-CN/2700074851/p75529.png" alt="图片小文件应用场景" title="" class=""></a>
+                <p>图片小文件应用场景</p>
+            </figure></p>
+<hr>
+<h2 id="0x01-基础配置"><a href="#0x01-基础配置" class="headerlink" title="0x01 基础配置"></a>0x01 基础配置</h2><h3 id="CDN-入门配置"><a href="#CDN-入门配置" class="headerlink" title="CDN 入门配置"></a>CDN 入门配置</h3><p>描述: 当您初次使用CDN时，需要先开通CDN服务，再添加加速域名，最后配置CNAME、之后配置访问规则以及缓存规则等。</p>
+<p><strong>阿里云</strong><br>阿里云 CDN 配置帮助文档: <a href="https://help.aliyun.com/document_detail/27112.html?spm=a2c4g.11186623.6.576.28c5504d4RissD" target="_blank" rel="noopener">https://help.aliyun.com/document_detail/27112.html?spm=a2c4g.11186623.6.576.28c5504d4RissD</a></p>
+<p><strong>证书服务配置</strong><br>证书来源:</p>
+<ul>
+<li>云盾（SSL）证书中心</li>
+<li>自定义上传（证书+私钥）</li>
+<li>自定义上传（证书）: 需在CDN证书服务中申请CSR文件后前往CA机构申请证书，适合不希望自助上传私钥的用户 </li>
+<li>免费证书</li>
+</ul>
+<figure class="image-box">
+                <a rel=CDN内容分发网络原理解析 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210315205558.png" target="_blank" title="WeiyiGeek.证书+私钥" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210315205558.png" alt="WeiyiGeek.证书+私钥" title="" class=""></a>
+                <p>WeiyiGeek.证书+私钥</p>
+            </figure>
+<p>Tips : PFX 格式证书转换为 PEM 格式为例<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 例如，通过执行以下两条 openssl 命令即可把 certname.pfx 证书转换成 PEM 格式。</span></span><br><span class="line">提取私钥命令：openssl pkcs12 -<span class="keyword">in</span> certname.pfx -nocerts -out key.pem -nodes</span><br><span class="line">提取证书命令：openssl pkcs12 -<span class="keyword">in</span> certname.pfx -nokeys -out cert.pem</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>七牛云</strong><br>描述: <a href="https://developer.qiniu.com/fusion/kb/1680/cdn-cache-rule-set" target="_blank" rel="noopener">https://developer.qiniu.com/fusion/kb/1680/cdn-cache-rule-set</a></p>
+<p><br/></p>
+<h3 id="CDN-跨域设置"><a href="#CDN-跨域设置" class="headerlink" title="CDN 跨域设置"></a>CDN 跨域设置</h3><p>描述: 我们在使用CDN时常常会遇到一个非常头疼的问题那就是静态资源字体的跨域, 此处以阿里云CDN控制台为例添加自定义响应头从而允许跨域访问。</p>
+<p>CDN边缘节点响应用户的HTTP请求时，可以自定义增加、删除或者修改指定的HTTP header。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.指定允许的跨域请求的来源。填写星号（*）表示全部域名；您也可以填写完整域名，例如www.aliyun.com。</span></span><br><span class="line">Access-Control-Allow-Origin: * </span><br><span class="line">Access-Control-Allow-Origin: http://weiyigeek.top</span><br><span class="line"><span class="comment"># 2.指定允许的跨域请求字段。 	</span></span><br><span class="line">Access-Control-Allow-Header: X-Custom-Header</span><br><span class="line"><span class="comment"># 3.请求方式指定允许的跨域请求方法。可同时设置多个方法，多个方法用英文逗号（,）分隔。 	POST,GET</span></span><br><span class="line">Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS</span><br><span class="line"><span class="comment"># 4.指定客户端程序对特定资源的预请求返回结果的缓存时间，单位为秒</span></span><br><span class="line">Access-Control-Max-Age: 3600</span><br><span class="line"><span class="comment"># 5.指定允许访问的自定义头信息。 </span></span><br><span class="line">Access-Control-Expose-Headers: 	Content-Length</span><br><span class="line"><span class="comment"># 6.是否允许后续请求携带认证信息（cookies）, 返回true：表示可以暴露。返回其他值：表示不可以暴露</span></span><br><span class="line">Access-Control-Allow-Credentials: <span class="literal">true</span></span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=CDN内容分发网络原理解析 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210315102604.png" target="_blank" title="WeiyiGeek.HTTP header" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210315102604.png" alt="WeiyiGeek.HTTP header" title="" class=""></a>
+                <p>WeiyiGeek.HTTP header</p>
+            </figure>
+<p><br/></p>
+<p><strong>代码层面解决方案:</strong><br>采用 JSONP 的方法其优缺点如下:<br>优点：它不像XMLHttpRequest对象实现的Ajax请求那样受到同源策略的限制；它的兼容性更好，在更加古老的浏览器中都可以运行，不需要XMLHttpRequest或ActiveX的支持；并且在请求完毕后可以通过调用callback的方式回传结果。<br>缺点：它只支持GET请求而不支持POST等其它类型的HTTP请求；它只支持跨域HTTP请求这种情况，不能解决不同域的两个页面之间如何进行JavaScript调用的问题。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1:原生</span></span><br><span class="line">&lt;script src=<span class="string">"http://example.com/data.php?callback=dosomething"</span>&gt;&lt;/script&gt;</span><br><span class="line">&lt;script <span class="built_in">type</span>=<span class="string">"text/javascript"</span>&gt;</span><br><span class="line">    <span class="keyword">function</span> dosomething(jsondata)&#123;</span><br><span class="line">        //处理获得的json数据</span><br><span class="line">    &#125;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2:Jquery</span></span><br><span class="line">&lt;script <span class="built_in">type</span>=<span class="string">"text/javascript"</span>&gt;</span><br><span class="line">    $.getJSON(<span class="string">'http://example.com/data.php?callback=?,function(jsondata)'</span>)&#123;</span><br><span class="line">        //处理获得的json数据</span><br><span class="line">    &#125;;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h3 id="CDN-响应头参数-扩充"><a href="#CDN-响应头参数-扩充" class="headerlink" title="CDN 响应头参数 (扩充)"></a>CDN 响应头参数 (扩充)</h3><ul>
+<li>自定义 : Test-Header 支持添加自定义响应头。自定义响应头名称要求如下：由大小写字母、短划线（-）和数字组成。长度为1~100个字符。 </li>
+<li>Cache-Control : no-cache 指定客户端程序请求和响应遵循的缓存机制。     </li>
+<li>Content-Disposition : 123.txt 指定客户端程序把请求所得的内容存为一个文件时提供的默认的文件名。 </li>
+<li>Content-Type : image指定客户端程序响应对象的内容类型。     </li>
+<li>Pragma :no-cache Pragma HTTP 1.0是用于实现特定指令的响应头，具有通过请求和响应链实现各种效果的功能，可用于兼容HTTP 1.1。     </li>
+</ul>
+<hr>
+<h2 id="0x02-边缘脚本与程序"><a href="#0x02-边缘脚本与程序" class="headerlink" title="0x02 边缘脚本与程序"></a>0x02 边缘脚本与程序</h2><h3 id="EdgeScript-边缘脚本"><a href="#EdgeScript-边缘脚本" class="headerlink" title="EdgeScript - 边缘脚本"></a>EdgeScript - 边缘脚本</h3><p>描述: EdgeScript即边缘脚本，用于支持CDN的可编程配置化。通过EdgeScript，您可以快速支持CDN的定制化业务需求，解决定制化需求发布周期长、客户业务变更不敏捷等问题。</p>
+<p><strong>Q: 什么是EdgeScript？</strong></p>
+<blockquote>
+<p>答: EdgeScript是为CDN设计的专用脚本，具有强大领域操控能力的同时，仍然保持简单易学的语法。通过EdgeScript，您可以快速构建基于阿里云CDN的个性化业务体系，全网秒级生效，敏捷的业务迭代会持续地为您赢得交付收益。</p>
+</blockquote>
+<p><br/></p>
+<p><strong>EdgeScript适用场景</strong></p>
+<ul>
+<li>定制化鉴权逻辑</li>
+<li>定制化请求头&amp;响应头控制</li>
+<li>定制化改写&amp;重定向</li>
+<li>定制化A/B Testing</li>
+<li>定制化缓存控制</li>
+<li>定制化限速</li>
+<li>其它定制化业务</li>
+</ul>
+<p><br></p>
+<p>参考来源: <a href="https://help.aliyun.com/document_detail/126565.html?spm=a2c4g.11186623.6.712.22889243b1U4M6" target="_blank" rel="noopener">https://help.aliyun.com/document_detail/126565.html?spm=a2c4g.11186623.6.712.22889243b1U4M6</a></p>
+<h3 id="EdgeRoutine-边缘程序"><a href="#EdgeRoutine-边缘程序" class="headerlink" title="EdgeRoutine - 边缘程序"></a>EdgeRoutine - 边缘程序</h3><p>描述: ER是阿里云CDN推出的边缘Serverless计算环境（<code>类似于 CloudFlare 的 (Serverless) 架构</code>）。ER目前针对CDN场景，支持在CDN边缘节点执行您自行编写的JavaScript代码。ER代码一经上传，即可完成全球阿里云CDN节点的部署，在全球边缘执行，根据您的代码逻辑个性化处理全球各地的请求。</p>
+<hr>
+<h2 id="0x03-扩展说明"><a href="#0x03-扩展说明" class="headerlink" title="0x03 扩展说明"></a>0x03 扩展说明</h2><h3 id="CDN-衡量指标"><a href="#CDN-衡量指标" class="headerlink" title="CDN 衡量指标"></a>CDN 衡量指标</h3><p>描述: 用CDN前后衡量网站加速情况的主要性能指标, 观测这些指标不仅可以帮助您体验CDN加速的效果，也能观测自身业务使用CDN的情况，帮助您更好地做出调整和决策。</p>
+<p><strong>通用指标:</strong></p>
+<ul>
+<li>1.延时：指一个数据包从用户的计算机发送到网站服务器，然后再立即从网站服务器返回用户计算机的来回时间。延时越低，性能越好。</li>
+<li>2.下载速度：指用户从网络上或者网络服务器上下载的数据时的传输速度。下载速度越快，性能越好。</li>
+<li>3.打开速度：指用户打开网站的速度。打开速度越快，性能越好。</li>
+<li>4.丢包率：指用户在网络传输中所丢失数据包数量占所发送数据组的比率。</li>
+<li>5.回源率：回源率分为回源请求数比例及回源流量比例两种。<ul>
+<li>回源请求数比：指边缘节点对于没有缓存、缓存过期（可缓存）和不可缓存的请求占全部请求记录的比例。越低则性能越好。</li>
+<li>回源流量比：回源流量是回源请求文件大小产生的流量和请求本身产生的流量。所以回源流量比 = <code>回源流量 /（回源流量+用户请求访问的流量）</code>，比值越低性能越好。</li>
+</ul>
+</li>
+<li>6.缓存命中率：指终端用户访问加速节点时，该节点已缓存了要被访问的数据的次数占全部访问次数的比例。缓存命中率越高，性能越好。</li>
+</ul>
+<p>Tips : 上文提到的回源率、缓存命中率都是指使用CDN后衡量的指标。如果您还没有使用CDN，那么回源请求数为100%，缓存命中率为0。 </p>
+<p>Tips : 一般情况下，使用CDN后，您的网络延时、丢包率和回源率都会降低，与之相对的下载速度、打开速度、缓存命中率则会提高。</p>
+<p><br/></p>
+<p><strong>主要指标之加速小文件</strong><br>描述: 主要指 html、js、jpg、css 等网页素材, 该类加速对延迟要求较高，因为通常而言页面加载时间的加长对用户流失会造成巨大影响。 </p>
+<p>延迟主要包括以下3个性能指标：建立连接时间、首包时间、内容下载时间。(<code>其中首包时间是最核心的指标</code>)</p>
+<ul>
+<li>1.建立连接时间：指DNS解析完成，然后找到对应IP地址后建立TCP连接的过程。建立连接的时间长短基本可以反映CDN服务的节点资源以及调度能力。</li>
+<li><p>2.首包时间：指从客户端开始发送请求到收到服务器端发来的第一个包之间所需要的时间。反映了CDN服务节点程序的整体性能。 </p>
+<ul>
+<li><p>在上传路径中，首包时间主要包含了DNS解析时间、TCP用时、SSL用时、发送时间和响应时间。<br><a rel=CDN内容分发网络原理解析 href="http://static-aliyun-doc.oss-cn-hangzhou.aliyuncs.com/assets/img/zh-CN/8219025951/p62892.png" target="_blank" title="WeiyiGeek.上传路径" data-fancybox="images"><img src="http://static-aliyun-doc.oss-cn-hangzhou.aliyuncs.com/assets/img/zh-CN/8219025951/p62892.png" alt="WeiyiGeek.上传路径"></a></p>
+</li>
+<li><p>在下载路径中，首包时间主要包含了DNS解析时间、TCP用时、SSL用时、发送时间、响应时间和下载用时。<br><a rel=CDN内容分发网络原理解析 href="http://static-aliyun-doc.oss-cn-hangzhou.aliyuncs.com/assets/img/zh-CN/8219025951/p63717.png" target="_blank" title="WeiyiGeek.下载路径" data-fancybox="images"><img src="http://static-aliyun-doc.oss-cn-hangzhou.aliyuncs.com/assets/img/zh-CN/8219025951/p63717.png" alt="WeiyiGeek.下载路径"></a></p>
+</li>
+</ul>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>主要指标之加速大文件下载</strong><br>描述: 大文件下载，一般指各类单个文件大小大于20M的下载。因此对这类场景，最核心的指标就是下载速度和下载总时间。</p>
+<p><br/></p>
+<p><strong>主要指标之加速视音频点播</strong><br>描述: 视音频点播的场景，主要涵盖 flv、mp4、wmv、mkv 等视音频文件。在这类场景中的主要衡量指标包括首播时间和卡顿率：</p>
+<ul>
+<li>首播时间：首播时间是从打开到看到视频画面的时间。往往会受域名解析、连接、首包时间的影响。</li>
+<li>卡顿率：卡顿指视音频播放、资源加载等场景下出现画面滞帧。因此卡顿率主要指把所有用户播放视频的卡顿时间上报，每100个用户里面播放出现卡顿的比例。卡顿率越低，性能越好。</li>
+</ul>
+<p><br/></p>
+<p><strong>主要指标之加速视直播</strong><br>描述: 与视音频点播相似直播的主要性能指标，也是首播时间和卡顿率。</p>
+<p><br/></p>
+<h3 id="CDN-计费方式"><a href="#CDN-计费方式" class="headerlink" title="CDN 计费方式"></a>CDN 计费方式</h3><ul>
+<li>基础服务计费：按流量、按带宽</li>
+<li>增值服务计费: 按HTTPS静态访问次数、按HTTPS动态访问次、QUIC、实时日志推送。</li>
+</ul>
+<p><br></p>
+<h3 id="CDN-响应头-各厂商"><a href="#CDN-响应头-各厂商" class="headerlink" title="CDN 响应头 (各厂商)"></a>CDN 响应头 (各厂商)</h3><p><strong>阿里云:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">via:cache46.l2et2[0,200-0,H], cache60.l2et2[0,0], cache7.cn286[0,200-0,H], cache8.cn286[3,0]</span><br><span class="line">x-cache:HIT TCP_HIT dirn:11:60349972</span><br><span class="line">x-swift-cachetime:31535950</span><br><span class="line">x-swift-savetime:Tue, 28 Jun 2016 04:04:29 GMT</span><br><span class="line">---------------------------------------------</span><br><span class="line"><span class="comment"># 若：X-Cache:HIT TCP_MEM_HIT 表示命中缓存</span></span><br><span class="line"><span class="comment"># 若：X-Cache:MISS TCP_MISS 则表示未命中缓存</span></span><br></pre></td></tr></table></figure></p>
+<p>Q: 如何通过浏览器的审查元素判断CDN缓存是否成功?</p>
+<blockquote>
+<p>开Chrome浏览器，选择 更多工具 &gt; 开发者工具，打开开发者工具，访问相关资源的URL。在 Response Headers 字段内，可以查看详细的请求和返回的报文信息。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 示例:</span></span><br><span class="line">access-control-allow-methods: GET</span><br><span class="line">access-control-allow-origin: *</span><br><span class="line">access-control-max-age: 86400</span><br><span class="line">age: 2473</span><br><span class="line">ali-swift-global-savetime: 1616376074</span><br><span class="line">content-encoding: gzip</span><br><span class="line">content-type: text/css</span><br><span class="line">date: Mon, 22 Mar 2021 01:21:14 GMT</span><br><span class="line">eagleid: 7754811616163785475568842e</span><br><span class="line">etag: W/<span class="string">"6055e140-591"</span></span><br><span class="line">last-modified: Sat, 20 Mar 2021 11:49:20 GMT</span><br><span class="line">server: Tengine</span><br><span class="line">timing-allow-origin: *</span><br><span class="line">vary: Accept-Encoding, Accept-Encoding</span><br><span class="line">via: cache56.l2cn2630[161,200-0,M], cache61.l2cn2630[162,0], kunlun6.cn1492[0,0,200-0,H], kunlun2.cn1492[6,0]</span><br><span class="line">x-cache: HIT TCP_MEM_HIT dirn:10:674365845</span><br><span class="line">x-swift-cachetime: 604800</span><br><span class="line">x-swift-savetime: Mon, 22 Mar 2021 01:21:14 GMT</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解析:</span></span><br><span class="line">Age：为CDN返回的头部字段，表示该文件在CDN节点上缓存的时间，单位为秒。只有文件存在于节点上Age字段才会出现，当文件被刷新后或者文件被清除的首次访问，在此前文件并未缓存，无Age头部字段，需要注意当Age为0时，表示节点已有文件的缓存，但由于缓存已过期，本次无法直接使用该缓存，需回源校验。</span><br><span class="line">X-Swift-SaveTime：CDN节点上的缓存RS（swift）的时间，即该文件是在什么时间缓存到CDN节点上。</span><br><span class="line">X-Swift-CacheTime：CDN节点上的允许缓存时间，即该文件可以在CDN节点上缓存多久，是指文件在CDN节点缓存的总时间。计算还有多久需要回源刷新= ’X-Swift-CacheTime’ – ‘Age’。</span><br><span class="line">HIT：表示已缓存。</span><br><span class="line">MISS：节点上无该文件的缓存，回源请求。</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p><strong>腾讯云:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Server:Qnginx/1.1.1</span><br><span class="line">X-Cache-Lookup:Hit From Disktank</span><br><span class="line">X-NWS-LOG-UUID:406395d0-7cb8-4630-99cf-8208d04e7750</span><br><span class="line">---------------------------------------------</span><br><span class="line">X-Cache-Lookup:Hit From MemCache　　<span class="comment"># 表示命中CDN节点的内存</span></span><br><span class="line">X-Cache-Lookup:Hit From Disktank　　<span class="comment"># 表示命中CDN节点的磁盘</span></span><br><span class="line">X-Cache-Lookup:Hit From Upstream　　<span class="comment"># 表示没有命中CDN</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h2 id="0x04-F-amp-Q-疑难杂症"><a href="#0x04-F-amp-Q-疑难杂症" class="headerlink" title="0x04 F&amp;Q (疑难杂症)"></a>0x04 F&amp;Q (疑难杂症)</h2><h3 id="1-CDN-显示502网关超时问题。"><a href="#1-CDN-显示502网关超时问题。" class="headerlink" title="1) CDN 显示502网关超时问题。"></a>1) CDN 显示502网关超时问题。</h3><p>Q: 客户端请求服务端超时而返回的一个网络 http 502 错误码，那么 502 一般是什么状态产生的呢？</p>
+<blockquote>
+<p>行为1.如果三次握手失败一般都是返回的 504 网关超时。<br>行为2.三次握手成功但是首包超时或者客户端 read payload 超时，一般是 502 。<br>行为3.如果服务端应用处于不可用状态，一般是直接返回 500 。</p>
+</blockquote>
+<p>问题分析:</p>
+<ul>
+<li>1.通过 ipip.net 解析其他地区覆盖的 CDN 节点，测试看看是否所有地区都是 502;</li>
+<li>2.直接测试访问原站看下返回的状态是否是 200;</li>
+<li>3.查看 CDN 节点的响应头via 头中是否全部都是M的标志;</li>
+<li>4.如果原站时国外或者国内，访问 CDN 需要跨过回源时会经常出现 502 的情况，一般和国际链路出口阻断有关系，需要判断是否存在跨过回源的可能性。</li>
+</ul>
+<p>问题解决:</p>
+<ul>
+<li>1.查看Nginx中配置的proxy是否正确以及绑定回源HOST是否正常。</li>
+<li>2.如果客户端 curl 直接固定 CDN 节点发现测试时正常的 200 没有 502 的情况出现说明 CDN 正常服务。</li>
+</ul>
+<p><br></p>
+<h3 id="2-CDN-解决-Nginx-后端服务器font字体文件跨域"><a href="#2-CDN-解决-Nginx-后端服务器font字体文件跨域" class="headerlink" title="2) CDN 解决 Nginx 后端服务器font字体文件跨域"></a>2) CDN 解决 Nginx 后端服务器font字体文件跨域</h3><p>问题描述: 在页面中使用了bootstrap和font-awesome的字体图标，当通过外部链接（<a href="http://weiyigeek.top/...）引用css文件时会报错，字体不显示，只有把要引用的文件放在本地时字体才正常显示。" target="_blank" rel="noopener">http://weiyigeek.top/...）引用css文件时会报错，字体不显示，只有把要引用的文件放在本地时字体才正常显示。</a></p>
+<ul>
+<li>谷歌调试工具提示：<code>Font from origin &#39;http://weiyigeek.top&#39; has been blocked from loading by Cross-Origin Resource Sharing policy: No &#39;Access-Control-Allow-Origin&#39; header is present on the requested resource. Origin &#39;http://localhost&#39; is therefore not allowed access.</code></li>
+<li>火狐调试工具提示：已阻止交叉源请求：同源策略不允许读取 <code>http://weiyigeek.top/font_aweso ... ebfont.woff?v=4.0.3</code>上的远程资源。可以将资源移动到相同的域名上或者启用 CORS 来解决这个问题。</li>
+</ul>
+<p>问题原因:  在使用子域名访问根域名的CSS时，发现字体无法显示，在确保CSS和Font字体的路径加载无问题后，基本确定是因为跨域的问题。</p>
+<p>问题解决: 通过Nginx模块<code>HttpHeadersModule</code>来添加<code>Access-Control-Allow-Origin</code>允许的地址。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在Nginx的conf目录下修改nginx.conf，添加以下代码：</span></span><br><span class="line">location ~* \.(eot|ttf|woff|woff2|svg|otf)$ &#123;</span><br><span class="line">  add_header Access-Control-Allow-Origin *;</span><br><span class="line">  add_header Access-Control-Allow-Methods <span class="string">'GET,POST'</span>;</span><br><span class="line">  add_header Access-Control-Allow-Headers <span class="string">'DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization'</span>;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-05-21T02:48:54.787Z" itemprop="dateUpdated">2022-05-21 10:48:54</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/基础知识/Web原理/网站缓存/CDN内容分发网络原理解析.md" target="_blank" rel="noopener noreferrer">_posts/基础知识/Web原理/网站缓存/CDN内容分发网络原理解析.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/8-22-16.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/8-22-16.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CDN/" rel="tag">CDN</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%86%85%E5%AE%B9%E7%BC%93%E5%AD%98/" rel="tag">内容缓存</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/8-22-16.html&title=《CDN内容分发网络原理解析》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/8-22-16.html&title=《CDN内容分发网络原理解析》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/8-22-16.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《CDN内容分发网络原理解析》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/8-22-16.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/8-22-16.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/8-22-348.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Java正则表达式</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/8-20-142.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">OpenSSL安全套接字密码库命令</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#基础概念"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">基础概念</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#工作原理"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">工作原理</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#组成部分"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">组成部分</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#应用场景"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">应用场景</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-基础配置"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 基础配置</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CDN-入门配置"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">CDN 入门配置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CDN-跨域设置"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">CDN 跨域设置</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CDN-响应头参数-扩充"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">CDN 响应头参数 (扩充)</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-边缘脚本与程序"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 边缘脚本与程序</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#EdgeScript-边缘脚本"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">EdgeScript - 边缘脚本</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#EdgeRoutine-边缘程序"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">EdgeRoutine - 边缘程序</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-扩展说明"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 扩展说明</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CDN-衡量指标"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">CDN 衡量指标</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CDN-计费方式"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">CDN 计费方式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CDN-响应头-各厂商"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">CDN 响应头 (各厂商)</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x04-F-amp-Q-疑难杂症"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 F&amp;Q (疑难杂症)</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-CDN-显示502网关超时问题。"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">1) CDN 显示502网关超时问题。</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-CDN-解决-Nginx-后端服务器font字体文件跨域"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">2) CDN 解决 Nginx 后端服务器font字体文件跨域</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/8-22-16.html&title=《CDN内容分发网络原理解析》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/8-22-16.html&title=《CDN内容分发网络原理解析》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/8-22-16.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《CDN内容分发网络原理解析》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/8-22-16.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/8-22-16.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACHklEQVR42u3aQXKDMAwF0Nz/0nSm2xT6JdNMkZ9XmUCwHwtFsvx6xeP4Hmffv4+zX73fk1+9YWBgYDyWcVyO6wnO7rkmJc/J14aBgbEP4zrI9mBnS0mWnq8NAwMDIyElYTRHYmBgYNzFSEjX5WgvicTAwNiZsVKC5ttz/6IWx8DAeCCj2hj45Oc/7G9gYGA8hHEUx3oQrLY5o1VhYGCMZuTFZLKUz8T+QoaLgYExgtErX6vNyPxARvJyf0hYMTAwNmD0CtdqgljdJssTUwwMjB0YKyVlws4PWzRfGQYGxgaMatnZw/eSv+hvAAMDYzSj+rNy0nY5fX5PPgsGBsZURq8ZUC07e0Gz0H7AwMAYykhKzV4KWG2IrpwBw8DAmM3IL1cbmSuNgaVgjYGBMZRRLRd706wc1EjaCRgYGFMZvcQuub/3nGopi4GBsQMjWVbv+5XDGb2GKAYGxm6MfCNsJez2NuAKARcDA2MQo7fpn6du1SZl/hwMDIwdGNWttCQs5uAkmEZrwMDA2IxRDbi9FmYvfEe7hhgYGOMY1SMRK0creuG7XMRiYGCMYxzFkbcHei2HZmjGwMAYzcjH+uN6obzZzsTAwBjHuDfIVjHrAR0DA2Mfxl0la/I6Vv4BMDAwMPIN+uqyqs2AZEsOAwMDo7qVlrcEeoxfSmIMDIwNGHkRe0OnNGYXDltgYGCMZqyUjnmToDdx8ooxMDBGM74A2/GOdFykE1MAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

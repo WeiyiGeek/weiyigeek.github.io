@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 MYSQL数据库读写分离实例|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="MYSQL">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>MYSQL数据库读写分离实例</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">MYSQL数据库读写分离实例</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-06-01T12:34:33.000Z" itemprop="datePublished" class="page-time">
+  2019-06-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/DBA/">DBA</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/DBA/%E8%BF%90%E7%BB%B4/">运维</a></li></ul></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-数据存储/Database-运维/MySQL/运维实战/MYSQL数据库读写分离实例"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">MYSQL数据库读写分离实例</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-06-01 20:34:33" datetime="2019-06-01T12:34:33.000Z"  itemprop="datePublished">2019-06-01</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/DBA/">DBA</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/DBA/%E8%BF%90%E7%BB%B4/">运维</a></li></ul></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-利用PHP实现读写分离"><a href="#0x00-利用PHP实现读写分离" class="headerlink" title="0x00 利用PHP实现读写分离"></a>0x00 利用PHP实现读写分离</h4><p>描述：在做PHP读写分离前需要拿到运维部门给好的读写数据库的连接地址,提前定义好数据库的操作类程序,然后编写开发文档让所有的开发同时都统一调用这个类来执行SQL语句;</p>
+<p>目前要实现mysql的主从读写分离，主要有以下几种方案：</p>
+<ul>
+<li>方法1：通过程序实现程序判断SQL语句(DQL-数据查询语言/DML-数据操作语言)比较复杂，如果添加从服务器要更改多台服务器的代码。</li>
+<li>方法2：自己开发接口实现通过自写类调用实现(传入参数的方法)，这种方案门槛高，开发成本高，不是一般的小公司能承担得起。</li>
+<li>方法3：通过mysql-proxy来实现，由于mysql-proxy的主从读写分离是通过lua脚本来实现，目前lua的脚本的开发跟不上节奏，而写没有完美的现成的脚本，因此导致用于生产环境的话风险比较大，据网上很多人说mysql-proxy的性能不高。</li>
+<li>方法4：一些读写分离的软件比如amoeba</li>
+</ul>
+<p><a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601124539.png" target="_blank" title="WeiyiGeek.执行流程" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601124539.png" alt="WeiyiGeek.执行流程"></a></p>
+<p><em>方法优缺点</em>：</p>
+<ul>
+<li>方法1：<ul>
+<li>优点：开发人员无需自行区分是读库还是写库,程序根据SQL语句进行自动鉴别,从而区分连接;</li>
+<li>缺点：需要进行SQL语句的字符截取,影响效率;</li>
+</ul>
+</li>
+<li>方法2：<ul>
+<li>优点：效率高,无需截取多余的字符串进行判断;</li>
+<li>缺点：开发人员在开发的时候容易把读库当作写库来操作,由于传入类是true还是false;</li>
+</ul>
+</li>
+</ul>
+<p>方法1：伪代码<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#首先定义读库和写库（连接数据库的账户密码IP这里不定义）</span></span><br><span class="line">define(<span class="string">'IDATABASE'</span>,<span class="string">'INSERTDB'</span>); </span><br><span class="line">define(<span class="string">'SDATABASE'</span>,<span class="string">'SELECTDB'</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#类方法</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">@ 作用：截取SQL语句的字符，从而判断进行读写分离</span></span><br><span class="line"><span class="comment">@ 参数：传入执行的SQL语句</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">execute</span><span class="params">($sql)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $check_sql = strtolower(trim($sql)); <span class="comment">//去掉空格键字符串转变为空格</span></span><br><span class="line">    <span class="keyword">if</span>(substr($check_sql,<span class="number">0</span>,<span class="number">6</span>)==<span class="string">'select'</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;getAll($sql); <span class="comment">//读库</span></span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;exec($sql);  <span class="comment">//写库</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>方法2：伪代码<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#类ConnectMysql</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">@ 利用实例化类传入的参数进行判断是读库还是写库</span></span><br><span class="line"><span class="comment">@ __construct构造方法：传入flag判断false为读,true为写</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ConnectMysql</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> $flag = <span class="string">'false'</span>;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($flag)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;flag=$flag;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">$this</span>-&gt;flag == <span class="string">'false'</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;DBselect();</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;DBwrite();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<hr/>
+
+<h4 id="0x01-amoeba架构实现读写分离"><a href="#0x01-amoeba架构实现读写分离" class="headerlink" title="0x01 amoeba架构实现读写分离"></a>0x01 amoeba架构实现读写分离</h4><h5 id="1-简介"><a href="#1-简介" class="headerlink" title="1.简介"></a>1.简介</h5><p>Amoeba[英 /ə’miːbə/]是一个以MySQL为底层数据存储，并对应用提供MySQL协议接口的proxy,Amoeba相当于一个SQL请求的路由器(进行转发请求)，它集中地响应应用的请求，依据用户事先设置的规则，将SQL请求发送到特定的数据库上执行,并且需要结合使用MySQL的 Replication等机制来实现副本同步等功能,基于此可以实现负载均衡、读写分离、高可用性等需求，</p>
+<figure class="image-box">
+                <a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601134837.png" target="_blank" title="WeiyiGeek.amoeba执行流程" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601134837.png" alt="WeiyiGeek.amoeba执行流程" title="" class=""></a>
+                <p>WeiyiGeek.amoeba执行流程</p>
+            </figure>
+<p><em>Amoeba体系架构：</em><br><figure class="image-box">
+                <a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601134747.png" target="_blank" title="WeiyiGeek.amoeba架构图" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601134747.png" alt="WeiyiGeek.amoeba架构图" title="" class=""></a>
+                <p>WeiyiGeek.amoeba架构图</p>
+            </figure></p>
+<p><em>为什么要用Amoeba?</em><br>答：利用阿里巴巴的开源项目Amoeba来实现，具有负载均衡、高可用性、sql过滤、读写分离、可路由相关的query到目标数据库，并且安装配置非常简单</p>
+<h5 id="2-环境需求"><a href="#2-环境需求" class="headerlink" title="2.环境需求"></a>2.环境需求</h5><p>安装环境：</p>
+<ul>
+<li>CentOS Linux release 7.6.1810 (Core)</li>
+<li>JDK : Java SE Development Kit 8u211</li>
+<li>MySQL : 8.0.16</li>
+</ul>
+<p>TIPS: #Amoeba框架是居于JDK1.5开发的，采用了JDK1.5的特性，所以还需要安装java环境，建议使用javaSE1.5以上的JDK版本</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>系统IP</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MYSQL</td>
+<td>192.168.1.100</td>
+<td>单机多实例化3306/3307</td>
+</tr>
+<tr>
+<td>Amoeba</td>
+<td>192.168.1.101</td>
+<td>Amoeba主机和phpMyadmin主机</td>
+</tr>
+</tbody>
+</table>
+<p><strong>环境安装</strong><br>Step1. MySQL安装以及主从复制搭建,这里看前面的主从多实例配置文章即可;<br><figure class="image-box">
+                <a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601192019.png" target="_blank" title="WeiyiGeek.MYSQL8.0" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601192019.png" alt="WeiyiGeek.MYSQL8.0" title="" class=""></a>
+                <p>WeiyiGeek.MYSQL8.0</p>
+            </figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#解压二进制包</span></span><br><span class="line">xz -d mysql-8.0.16-linux-glibc2.12-x86_64.tar.xz </span><br><span class="line">tar xf mysql-8.0.16-linux-glibc2.12-x86_64.tar</span><br><span class="line"></span><br><span class="line"><span class="comment">#建立mysql数据库用户</span></span><br><span class="line">useradd mysq</span><br><span class="line"></span><br><span class="line"><span class="comment">#建立软连接</span></span><br><span class="line">ln -s /opt/mysql8/bin/* /usr/<span class="built_in">local</span>/bin/</span><br><span class="line"></span><br><span class="line"><span class="comment">#多实例目录</span></span><br><span class="line">mkdir -vp /data/&#123;&#123;3307,3306&#125;/&#123;data,tmp,binlog,innodb_ts,innodb_log,undo&#125;,backup,scripts&#125;</span><br><span class="line">mkdir: 已创建目录 <span class="string">"/data"</span></span><br><span class="line">mkdir: 已创建目录 <span class="string">"/data/3307"</span></span><br><span class="line">mkdir: 已创建目录 <span class="string">"/data/3307/data"</span></span><br><span class="line">mkdir: 已创建目录 <span class="string">"/data/3307/tmp"</span></span><br><span class="line">mkdir: 已创建目录 <span class="string">"/data/3307/binlog"</span></span><br><span class="line">mkdir: 已创建目录 <span class="string">"/data/3307/innodb_ts"</span></span><br><span class="line"><span class="comment">#非常重要</span></span><br><span class="line">chown -R mysql:mysql /data</span><br><span class="line">chown -R mysql:mysql /opt/mysql8</span><br><span class="line"></span><br><span class="line"><span class="comment">#8.x多实例 my.cnf配置</span></span><br><span class="line">[client]</span><br><span class="line">default-character-set=utf8   <span class="comment"># 设置mysql客户端默认字符集</span></span><br><span class="line">port = 3306</span><br><span class="line">socket = /data/3306/mysql.sock</span><br><span class="line"></span><br><span class="line"><span class="comment"># The MySQL server</span></span><br><span class="line">[mysqld]</span><br><span class="line">port = 3306</span><br><span class="line">mysqlx_port = 33060</span><br><span class="line">user = mysql</span><br><span class="line">server-id = 3306</span><br><span class="line">socket = /data/3306/mysql.sock</span><br><span class="line">mysqlx_socket=/data/3306/mysqlx.sock</span><br><span class="line">pid-file = /data/3306/mysql.pid</span><br><span class="line">basedir = /opt/mysql8/</span><br><span class="line">datadir = /data/3306/data</span><br><span class="line">tmpdir = /data/3306/tmp <span class="comment">#非必须</span></span><br><span class="line"><span class="built_in">log</span>-bin = /data/3306/binlog/mysql-bin  <span class="comment">#从库建议关闭log-bin</span></span><br><span class="line"><span class="built_in">log</span>-error = /data/3306/mysqlerror.log</span><br><span class="line">explicit_defaults_for_timestamp</span><br><span class="line">character-set-server=utf8  <span class="comment">#服务端默认字符集</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#初始化实例与启动数据库：</span></span><br><span class="line">mysqld --defaults-file=/data/3307/my.cnf --initialize --user=mysql --basedir=/opt/mysql8</span><br><span class="line">mysqld --defaults-file=/data/3306/my.cnf --initialize --user=mysql --basedir=/opt/mysql8</span><br><span class="line">mysqld_safe --defaults-file=/data/3306/my.cnf --user=mysql&amp;</span><br><span class="line">mysqld_safe --defaults-file=/data/3307/my.cnf --user=mysql&amp;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#账户密码在mysqlerror.log</span></span><br><span class="line">3306：root@localhost: W=!_hK2qjlFl</span><br><span class="line">3307：root@localhost: l7OuDBq_2zQj</span><br><span class="line"></span><br><span class="line"><span class="comment"># 端口启动验证</span></span><br><span class="line">netstat -tlnp | grep <span class="string">"mysql"</span></span><br><span class="line">tcp6       0      0 :::3306                 :::*                    LISTEN      10402/mysqld</span><br><span class="line">tcp6       0      0 :::3307                 :::*                    LISTEN      10102/mysqld</span><br><span class="line">tcp6       0      0 :::33070                :::*                    LISTEN      10102/mysqld</span><br><span class="line">tcp6       0      0 :::33060                :::*                    LISTEN      10402/mysqld</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mysql&gt; ALTER USER USER() IDENTIFIED BY <span class="string">'/weiye!@#888'</span>;</span><br><span class="line">Query OK, 0 rows affected (0.20 sec)</span><br><span class="line">mysql&gt; flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">##mysql 8.0 主从账户</span></span><br><span class="line">CREATE USER <span class="string">'rep'</span>@<span class="string">'%'</span> IDENTIFIED WITH mysql_native_password BY <span class="string">'System123@'</span>; </span><br><span class="line">GRANT REPLICATION SLAVE ON *.* TO <span class="string">'rep'</span>@<span class="string">'%'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">#获取主节点当前binary log文件名和位置（position）- 不再导入以前的库</span></span><br><span class="line">MASTER&gt; SHOW MASTER STATUS;</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| mysql-bin.000002 |     1659 |              |                  |                   |</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.09 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">#在从（Slave）节点上设置主节点参数 并启动主从（不用导入以前的库）</span></span><br><span class="line">CHANGE MASTER TO MASTER_HOST=<span class="string">'192.168.1.100'</span>,</span><br><span class="line">MASTER_USER=<span class="string">'rep'</span>,</span><br><span class="line">MASTER_PASSWORD=<span class="string">'System123@'</span>,</span><br><span class="line">MASTER_LOG_FILE=<span class="string">'mysql-bin.000002'</span>,</span><br><span class="line">MASTER_LOG_POS=1659;</span><br><span class="line"><span class="comment">#开启从库</span></span><br><span class="line">start slave;</span><br><span class="line"><span class="comment">#主从开启成功</span></span><br><span class="line">mysql&gt; show slave status\G;</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">               Slave_IO_State: Waiting <span class="keyword">for</span> master to send event</span><br><span class="line">                  Master_Host: 192.168.1.100</span><br><span class="line">                  Master_User: rep</span><br><span class="line">                  Master_Port: 3306</span><br><span class="line">                Connect_Retry: 60</span><br><span class="line">              Master_Log_File: mysql-bin.000002</span><br><span class="line">          Read_Master_Log_Pos: 1659</span><br><span class="line">               Relay_Log_File: mysql-relay-bin.000002</span><br><span class="line">                Relay_Log_Pos: 322</span><br><span class="line">        Relay_Master_Log_File: mysql-bin.000002</span><br><span class="line">             Slave_IO_Running: Yes</span><br><span class="line">            Slave_SQL_Running: Yes</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601212228.png" target="_blank" title="WeiyiGeek.成功登陆" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601212228.png" alt="WeiyiGeek.成功登陆" title="" class=""></a>
+                <p>WeiyiGeek.成功登陆</p>
+            </figure>
+<p>Step2. 在Amoeba机器上安装JDK及配置环境：(CENTOS7安装jdk)<br>下载地址：<a href="https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html" target="_blank" rel="noopener">https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html</a></p>
+<figure class="image-box">
+                <a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601191541.png" target="_blank" title="WeiyiGeek.JDK64位" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190601191541.png" alt="WeiyiGeek.JDK64位" title="" class=""></a>
+                <p>WeiyiGeek.JDK64位</p>
+            </figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.下载Linux x64	185.96 MB  	jdk-8u211-linux-x64.tar.gz 上传到opt目录并解压</span></span><br><span class="line"><span class="variable">$tar</span> -zxf jdk-8u211-linux-x64.tar.gz</span><br><span class="line"><span class="variable">$ls</span></span><br><span class="line">jdk1.8.0_211  jdk-8u211-linux-x64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.添加java的环境变量(非常重要)并刷新环境变量</span></span><br><span class="line"><span class="variable">$vi</span> /etc/profile </span><br><span class="line"></span><br><span class="line"><span class="comment">#Java Env</span></span><br><span class="line"><span class="built_in">export</span> JAVA_HOME=/opt/jdk1.8.0_211</span><br><span class="line"><span class="built_in">export</span> CLASSPATH=.:<span class="variable">$JAVA_HOME</span>/lib/dt.jar:<span class="variable">$JAVA_HOME</span>/lib/tools.jar</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$JAVA_HOME</span>/bin</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#更新环境变量</span></span><br><span class="line"><span class="variable">$source</span> /etc/profile</span><br><span class="line"></span><br><span class="line"><span class="comment">#3.查看JDK版本(如果不存在执行权限就添加)</span></span><br><span class="line">java -version</span><br><span class="line">java version <span class="string">"1.8.0_211"</span></span><br><span class="line">Java(TM) SE Runtime Environment (build 1.8.0_211-b12)</span><br><span class="line">Java HotSpot(TM) 64-Bit Server VM (build 25.211-b12, mixed mode)</span><br></pre></td></tr></table></figure>
+<p>Step3. 安装amoeba软件(已经停止开发了-2013年版本3.0.5)<br>下载地址：<a href="https://datapacket.dl.sourceforge.net/project/amoeba/Amoeba%20for%20mysql/2.2.x/amoeba-mysql-binary-2.2.0.tar.gz" target="_blank" rel="noopener">https://datapacket.dl.sourceforge.net/project/amoeba/Amoeba%20for%20mysql/2.2.x/amoeba-mysql-binary-2.2.0.tar.gz</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$tar</span> -zxf amoeba-mysql-binary-2.2.0.tar.gz &amp;&amp; ll</span><br><span class="line">-rw-r--r--. 1 root root 3161433 6月   2 01:00 amoeba-mysql-binary-2.2.0.tar.gz</span><br><span class="line">drwxr-xr-x. 2 root root      63 6月   2 01:00 benchmark</span><br><span class="line">drwxr-xr-x. 2 root root     131 2月  29 2012 bin</span><br><span class="line">-rw-r--r--. 1 root root    3976 8月  29 2012 changelogs.txt</span><br><span class="line">drwxr-xr-x. 2 root root     243 6月   2 01:00 conf</span><br><span class="line">drwxr-xr-x. 3 root root    4096 6月   2 01:00 lib</span><br><span class="line">-rw-r--r--. 1 root root   34520 8月  29 2012 LICENSE.txt</span><br><span class="line">-rw-r--r--. 1 root root    2031 8月  29 2012 README.html</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h5 id="3-实际案例"><a href="#3-实际案例" class="headerlink" title="3.实际案例"></a>3.实际案例</h5><p>Step0. 分别在主从库创建mysqlproxy用户<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CREATE USER <span class="string">'mysqlproxy'</span>@<span class="string">'%'</span> IDENTIFIED WITH mysql_native_password BY <span class="string">'System123@'</span>; <span class="comment">#注意加密方式,不加默认是 Authentication plugin 'caching_sha2_password</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#主库（插入测试数据）</span></span><br><span class="line">GRANT INSERT ON demo.* TO <span class="string">'mysqlproxy'</span>@<span class="string">'%'</span> ;</span><br><span class="line">mysql&gt; insert into demo.user value (1,<span class="string">'weiyigekk'</span>),(2,<span class="string">'k9s'</span>),(3,<span class="string">'docker'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">#从库(执行)</span></span><br><span class="line">GRANT select ON demo.* TO <span class="string">'mysqlproxy'</span>@<span class="string">'%'</span>;</span><br></pre></td></tr></table></figure></p>
+<p>Step1. 修改配置文件 dbServer.xml 文件在 amoeba/conf/目录下<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 数据库连接配置的公共部分 --&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">dbServer</span> <span class="attr">name</span>=<span class="string">"abstractServer"</span> <span class="attr">abstractive</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">factoryConfig</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.mysql.net.MysqlServerConnectionFactory"</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"manager"</span>&gt;</span>$&#123;defaultManager&#125;<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"sendBufferSize"</span>&gt;</span>64<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"receiveBufferSize"</span>&gt;</span>128<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!-- mysql port 端口号 --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"port"</span>&gt;</span>3306<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!-- mysql schema amoeba 访问主从数据库真实库--&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"schema"</span>&gt;</span>demo<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!-- mysql user 主从数据库分配给Amoeba访问数据的用户名 --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"user"</span>&gt;</span>mysqlproxy<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!--  mysql password 主从数据库分配给Amoeba访问数据的密码--&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"password"</span>&gt;</span>System123@<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">               <span class="tag">&lt;/<span class="name">factoryConfig</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">poolConfig</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.net.poolable.PoolableObjectPool"</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"maxActive"</span>&gt;</span>500<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"maxIdle"</span>&gt;</span>500<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"minIdle"</span>&gt;</span>10<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"minEvictableIdleTimeMillis"</span>&gt;</span>600000<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"timeBetweenEvictionRunsMillis"</span>&gt;</span>600000<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"testOnBorrow"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"testWhileIdle"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;/<span class="name">poolConfig</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">dbServer</span>&gt;</span></span><br><span class="line">       <span class="comment">&lt;!-- Master 的独立部分，也就只有 IP 了这里 写了主机名 由于我是单机多实例所有填写一样的IP --&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">dbServer</span> <span class="attr">name</span>=<span class="string">"master"</span>  <span class="attr">parent</span>=<span class="string">"abstractServer"</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">factoryConfig</span>&gt;</span></span><br><span class="line">                       <span class="comment">&lt;!-- mysql ip --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"ipAddress"</span>&gt;</span>192.168.1.100<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;/<span class="name">factoryConfig</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">dbServer</span>&gt;</span></span><br><span class="line">       <span class="comment">&lt;!-- Slave 的独立部分，也就只有 IP 了这里 写了主机名 ,如果有多个Slave服务器，可以配置多个dbServer --&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">dbServer</span> <span class="attr">name</span>=<span class="string">"slave"</span>  <span class="attr">parent</span>=<span class="string">"abstractServer"</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">factoryConfig</span>&gt;</span></span><br><span class="line">                       <span class="comment">&lt;!-- mysql ip --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"ipAddress"</span>&gt;</span>192.168.1.100<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;/<span class="name">factoryConfig</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">dbServer</span>&gt;</span></span><br><span class="line"></span><br><span class="line">       <span class="comment">&lt;!-- 数据库池，虚拟服务器，实现读取的负载均衡，如果有多个Slave，则&lt;property name="poolNames"&gt;slave1,slave2&lt;/property&gt;用逗号隔开 --&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">dbServer</span> <span class="attr">name</span>=<span class="string">"slaves"</span> <span class="attr">virtual</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">poolConfig</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.server.MultipleServerPool"</span>&gt;</span></span><br><span class="line">                       <span class="comment">&lt;!-- Load balancing strategy: 1=ROUNDROBIN , 2=WEIGHTBASED , 3=HA--&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"loadbalance"</span>&gt;</span>1<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!-- Separated by commas,such as: server1,server2,server1 --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"poolNames"</span>&gt;</span>slave<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;/<span class="name">poolConfig</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">dbServer</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>Step2. 修改amoeba.xml文件，设置读写分离<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">proxy</span>&gt;</span></span><br><span class="line"></span><br><span class="line">               <span class="comment">&lt;!-- service class must implements com.meidusa.amoeba.service.Service --&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">service</span> <span class="attr">name</span>=<span class="string">"Amoeba for Mysql"</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.net.ServerableConnectionManager"</span>&gt;</span></span><br><span class="line">                       <span class="comment">&lt;!-- Amoeba 端口号 ，客户端client 链接amoeba端口号，不能和主从数据库 冲突--&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"port"</span>&gt;</span>8066<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!-- bind ipAddress --&gt;</span></span><br><span class="line">                      <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"ipAddress"</span>&gt;</span>192.168.1.100<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">       </span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"manager"</span>&gt;</span>$&#123;clientConnectioneManager&#125;<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"connectionFactory"</span>&gt;</span></span><br><span class="line">                               <span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.mysql.net.MysqlClientConnectionFactory"</span>&gt;</span></span><br><span class="line">                                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"sendBufferSize"</span>&gt;</span>128<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"receiveBufferSize"</span>&gt;</span>64<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                               <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"authenticator"</span>&gt;</span></span><br><span class="line">                               <span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.mysql.server.MysqlClientAuthenticator"</span>&gt;</span></span><br><span class="line">                                       <span class="comment">&lt;!-- Amoeba 账号 ，客户端client 链接amoeba端 账号--&gt;</span></span><br><span class="line">                                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"user"</span>&gt;</span>root<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                                       <span class="comment">&lt;!-- Amoeba 账号 ，客户端client 链接amoeba端 密码--&gt;</span></span><br><span class="line">                                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"password"</span>&gt;</span>root<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"filter"</span>&gt;</span></span><br><span class="line">                                               <span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.server.IPAccessController"</span>&gt;</span></span><br><span class="line">                                                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"ipFile"</span>&gt;</span>$&#123;amoeba.home&#125;/conf/access_list.conf<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                                               <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line">                                       <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                               <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">               <span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br><span class="line"></span><br><span class="line">               <span class="comment">&lt;!-- server class must implements com.meidusa.amoeba.service.Service --&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">service</span> <span class="attr">name</span>=<span class="string">"Amoeba Monitor Server"</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.monitor.MonitorServer"</span>&gt;</span></span><br><span class="line">                       <span class="comment">&lt;!-- port --&gt;</span></span><br><span class="line">                       <span class="comment">&lt;!--  default value: random number</span></span><br><span class="line"><span class="comment">                       &lt;property name="port"&gt;9066&lt;/property&gt;</span></span><br><span class="line"><span class="comment">                       --&gt;</span></span><br><span class="line">                       <span class="comment">&lt;!-- bind ipAddress --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"ipAddress"</span>&gt;</span>192.168.1.100<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"daemon"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"manager"</span>&gt;</span>$&#123;clientConnectioneManager&#125;<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"connectionFactory"</span>&gt;</span></span><br><span class="line">                               <span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.monitor.net.MonitorClientConnectionFactory"</span>&gt;</span><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">               <span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br><span class="line"></span><br><span class="line">               <span class="tag">&lt;<span class="name">runtime</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.mysql.context.MysqlRuntimeContext"</span>&gt;</span></span><br><span class="line">                       <span class="comment">&lt;!-- proxy server net IO Read thread size --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"readThreadPoolSize"</span>&gt;</span>20<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!-- proxy server client process thread size --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"clientSideThreadPoolSize"</span>&gt;</span>30<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!-- mysql server data packet process thread size --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"serverSideThreadPoolSize"</span>&gt;</span>30<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!-- per connection cache prepared statement size  --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"statementCacheSize"</span>&gt;</span>500<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!-- query timeout( default: 60 second , TimeUnit:second) --&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"queryTimeout"</span>&gt;</span>60<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;/<span class="name">runtime</span>&gt;</span></span><br><span class="line"></span><br><span class="line">       <span class="tag">&lt;/<span class="name">proxy</span>&gt;</span></span><br><span class="line"></span><br><span class="line">       <span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">               Each ConnectionManager will start as thread</span></span><br><span class="line"><span class="comment">               manager responsible for the Connection IO read , Death Detection</span></span><br><span class="line"><span class="comment">       --&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">connectionManagerList</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">connectionManager</span> <span class="attr">name</span>=<span class="string">"clientConnectioneManager"</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.net.MultiConnectionManagerWrapper"</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"subManagerClassName"</span>&gt;</span>com.meidusa.amoeba.net.ConnectionManager<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">                         default value is avaliable Processors</span></span><br><span class="line"><span class="comment">                       &lt;property name="processors"&gt;5&lt;/property&gt;</span></span><br><span class="line"><span class="comment">                        --&gt;</span></span><br><span class="line">               <span class="tag">&lt;/<span class="name">connectionManager</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">connectionManager</span> <span class="attr">name</span>=<span class="string">"defaultManager"</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.net.MultiConnectionManagerWrapper"</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"subManagerClassName"</span>&gt;</span>com.meidusa.amoeba.net.AuthingableConnectionManager<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                       <span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">                         default value is avaliable Processors</span></span><br><span class="line"><span class="comment">                       &lt;property name="processors"&gt;5&lt;/property&gt;</span></span><br><span class="line"><span class="comment">                        --&gt;</span></span><br><span class="line">               <span class="tag">&lt;/<span class="name">connectionManager</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">connectionManagerList</span>&gt;</span></span><br><span class="line"></span><br><span class="line">               <span class="comment">&lt;!-- default using file loader --&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">dbServerLoader</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.context.DBServerConfigFileLoader"</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"configFile"</span>&gt;</span>$&#123;amoeba.home&#125;/conf/dbServers.xml<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">dbServerLoader</span>&gt;</span></span><br><span class="line"></span><br><span class="line">       <span class="tag">&lt;<span class="name">queryRouter</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.mysql.parser.MysqlQueryRouter"</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"ruleLoader"</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;<span class="name">bean</span> <span class="attr">class</span>=<span class="string">"com.meidusa.amoeba.route.TableRuleFileLoader"</span>&gt;</span></span><br><span class="line">                               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"ruleFile"</span>&gt;</span>$&#123;amoeba.home&#125;/conf/rule.xml<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"functionFile"</span>&gt;</span>$&#123;amoeba.home&#125;/conf/ruleFunctionMap.xml<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">                       <span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"sqlFunctionFile"</span>&gt;</span>$&#123;amoeba.home&#125;/conf/functionMap.xml<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"LRUMapSize"</span>&gt;</span>1500<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"></span><br><span class="line">               <span class="comment">&lt;!-- 默认数据库，主数据库 --&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"defaultPool"</span>&gt;</span>master<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="comment">&lt;!-- 写数据库 / 读数据库，dbServer.xml 中配置的 虚拟数据库，数据库池 --&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"writePool"</span>&gt;</span>master<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"readPool"</span>&gt;</span>slaves<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"needParse"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">queryRouter</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>Step3. 启动amoeba启动失败了，原因 Amoeba 启动 指定的堆栈大小太小,指定至少228k；<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">./amoeba</span><br><span class="line">The stack size specified is too small, Specify at least 228k</span><br><span class="line">Error: Could not create the Java Virtual Machine.</span><br><span class="line">Error: A fatal exception has occurred. Program will <span class="built_in">exit</span>.</span><br><span class="line"></span><br><span class="line"><span class="comment">#解决办法 ：</span></span><br><span class="line">打开bin/amoeba，DEFAULT_OPTS=”-server -Xms256m -Xmx256m -Xss128k”改成：DEFAULT_OPTS=<span class="string">"-server -Xms512m -Xmx512m -Xmn100m -Xss1204k"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#再次启动</span></span><br><span class="line">./amoeba start</span><br><span class="line">log4j:WARN log4j config load completed from file:/opt/amoeba/conf/log4j.xml</span><br><span class="line">2019-06-02 01:08:48,521 INFO  context.MysqlRuntimeContext - Amoeba <span class="keyword">for</span> Mysql current versoin=5.1.45-mysql-amoeba-proxy-2.2.0</span><br><span class="line">log4j:WARN ip access config load completed from file:/opt/amoeba/conf/access_list.conf</span><br><span class="line">2019-06-02 01:08:49,517 INFO  net.ServerableConnectionManager - Amoeba <span class="keyword">for</span> Mysql listening on /192.168.1.101:8066.</span><br><span class="line">2019-06-02 01:08:49,522 INFO  net.ServerableConnectionManager - Amoeba Monitor Server listening on /192.168.1.101:39401.</span><br></pre></td></tr></table></figure></p>
+<p>Step 4.读写分离测试<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在amoeba机器上执行 (注意amoeba客户端端口-在上面的配置文件里面)</span></span><br><span class="line">mysql -h 192.168.1.101 -P8066 -uroot -proot</span><br><span class="line">Welcome to the MariaDB monitor.  Commands end with ; or \g.</span><br><span class="line">Your MySQL connection id is 1186796719</span><br><span class="line">Server version: 5.1.45-mysql-amoeba-proxy-2.2.0  <span class="comment">#注意观察这里不一样</span></span><br><span class="line"></span><br><span class="line">mysql&gt; insert into demo.user value(5,<span class="string">'zhangwei'</span>);</span><br><span class="line">Query OK, 1 row affected (0.10 sec)</span><br><span class="line"></span><br><span class="line">主从mysql&gt; select * from user;</span><br><span class="line">+----+-----------+</span><br><span class="line">| id | name      |</span><br><span class="line">+----+-----------+</span><br><span class="line">|  1 | weiyigekk |</span><br><span class="line">|  2 | k9s       |</span><br><span class="line">|  3 | docker    |</span><br><span class="line">|  5 | zhangwei  |</span><br><span class="line">+----+-----------+</span><br><span class="line">4 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.01 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">#下面关闭slave</span></span><br><span class="line">mysql&gt; stop slave;</span><br><span class="line">mysql&gt; insert into demo.user value(4,<span class="string">'this is slave insert'</span>);</span><br><span class="line">Query OK, 1 row affected (0.02 sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">#采用amoeba进行读取</span></span><br><span class="line">MySQL [(none)]&gt; select * from demo.user;</span><br><span class="line">+----+----------------------+</span><br><span class="line">| id | name                 |</span><br><span class="line">+----+----------------------+</span><br><span class="line">|  1 | weiyigekk            |</span><br><span class="line">|  2 | k9s                  |</span><br><span class="line">|  3 | docker               |</span><br><span class="line">|  5 | zhangwei             |</span><br><span class="line">|  4 | this is slave insert |</span><br><span class="line">+----+----------------------+</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602012918.png" target="_blank" title="WeiyiGeek.mysql" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602012918.png" alt="WeiyiGeek.mysql" title="" class=""></a>
+                <p>WeiyiGeek.mysql</p>
+            </figure></p>
+<hr/>
+
+<h4 id="0x02-mysql-proxy实现读写分离"><a href="#0x02-mysql-proxy实现读写分离" class="headerlink" title="0x02 mysql-proxy实现读写分离"></a>0x02 mysql-proxy实现读写分离</h4><h5 id="1-简介-1"><a href="#1-简介-1" class="headerlink" title="1. 简介"></a>1. 简介</h5><p>前言：在实际的生产环境中由单台Mysql作为独立的数据库是完全不能满足实际需求的无论是在安全性，高可用性以及高并发等各个方面;<br>常常在大规模集群中通过主从复制（Master-Slave）的方式来同步数据，再通过读写分离（MySQL-Proxy）来提升数据库的并发负载能力,常使用这样的方案来进行部署与实施的。</p>
+<p>MySQL-proxy 是通过网络利用MySQL的网络协议,并且提供一个或多个MySQL服务器与一个或多个MySQL客户端相互沟通的程序,又因为MySQL-Proxy使用MySQL网络协议,所以它兼容任何MySQL客户端并且无需修改,其功能：</p>
+<ul>
+<li>MySQL-Proxy 可以在查询队列发送到服务器之前插入一些查询请求</li>
+<li>MySQL-Proxy 可以在服务器应答中将对应的应答删除</li>
+<li>管理员可以对每个查询进行跟踪并获取报告,如监控其执行时间或其他调试信息,并分别记录,同时还能降正确应答返还给客户端：</li>
+</ul>
+<p>MySQL-Proxy的读写分离主要是通过lua脚本实现的因此需要安装lua(后面会进行相应安装的介绍),并且从设定上将lua分为两类：</p>
+<ul>
+<li>一类负责管理模块的控制,对应参数admin-lua-script</li>
+<li>另一类负责代理模块控制,对应参数proxy-lua-script<br>两类脚本的编码规则完全相同,只是对应功能有差异,管理模块侧重与代理服务器相关状态的控制,代理模块则侧重于客户端的CRUD操作;</li>
+</ul>
+<p>TIPS: 貌似只有alpha版本,可能不稳定不建议在实际环境中使用;</p>
+<hr>
+
+<h5 id="2-安装环境"><a href="#2-安装环境" class="headerlink" title="2. 安装环境"></a>2. 安装环境</h5><p><em>环境准备</em>：</p>
+<ul>
+<li>系统：</li>
+<li>lua版本: <a href="http://www.lua.org/ftp/lua-5.3.5.tar.gz" target="_blank" rel="noopener">http://www.lua.org/ftp/lua-5.3.5.tar.gz</a></li>
+<li>mysql-proxy版本：0.8.5 </li>
+</ul>
+<p><a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602183824.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602183824.png" alt="WeiyiGeek."></a></p>
+<p><em>场景描述：</em></p>
+<ul>
+<li>192.168.1.100:3306/3307：数据库Master主服务器/Slave从服务器</li>
+<li>192.168.1.101:4040/4041：MySQL-Proxy调度服务器（客户端/管理端） </li>
+</ul>
+<p><a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602180508.png" target="_blank" title="WeiyiGeek.场景接收" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602180508.png" alt="WeiyiGeek.场景接收"></a></p>
+<p><strong>环境安装：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1. MySQL-Proxy上安装所需软件包</span></span><br><span class="line">yum install -y gcc* gcc-c++* autoconf* automake* zlib* libxml* ncurses-devel* libmcrypt* libtool* flex* pkgconfig* libevent* glib* readline-devel*</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#2. 编译安装LUA</span></span><br><span class="line"><span class="comment">#从http://www.lua.org/download.html下载源码包并安装</span></span><br><span class="line">wget http://www.lua.org/ftp/lua-5.3.5.tar.gz -O /opt/</span><br><span class="line">tar -zxf lua-5.3.5.tar.gz &amp;&amp; <span class="built_in">cd</span> lua-5.3.5</span><br><span class="line">make linux &amp;&amp; make install  <span class="comment">#注意发生错误的先执行make clean 编译过程中遗留的文件</span></span><br><span class="line"><span class="comment"># make[1]: 进入目录“/opt/lua-5.3.5/src”</span></span><br><span class="line"><span class="comment"># make all SYSCFLAGS="-DLUA_USE_LINUX" SYSLIBS="-Wl,-E -ldl -lreadline"</span></span><br><span class="line"><span class="comment"># make[2]: 进入目录“/opt/lua-5.3.5/src”</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#3. 下载mysql-proxy的二进制包解压并复制</span></span><br><span class="line">wget https://downloads.mysql.com/archives/get/file/mysql-proxy-0.8.5-linux-glibc2.3-x86-64bit.tar.gz</span><br><span class="line">tar -zxf mysql-proxy-0.8.5-linux-glibc2.3-x86-64bit.tar.gz</span><br><span class="line">mv mysql-proxy-0.8.5-linux-glibc2.3-x86-64bit/ mysql-proxy/</span><br><span class="line"><span class="built_in">cd</span> mysql-proxy</span><br><span class="line">mkdir lua logs  <span class="comment">#创建脚本存放目录/与日志文件</span></span><br><span class="line">cp share/doc/mysql-proxy/rw-splitting.lua ./lua/</span><br><span class="line">cp share/doc/mysql-proxy/admin-sql.lua ./lua/</span><br></pre></td></tr></table></figure><br><br/><br>Step 3. 配置修改<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.创建配置文件</span></span><br><span class="line">vi /etc/mysql-proxy.cnf   <span class="comment">#创建配置文件</span></span><br><span class="line">[mysql-proxy]</span><br><span class="line">user=root </span><br><span class="line"><span class="comment">#运行mysql-proxy用户</span></span><br><span class="line">admin-username=admin </span><br><span class="line"><span class="comment">#主从mysql共有的用户</span></span><br><span class="line">admin-password=admin</span><br><span class="line"><span class="comment">#用户的密码</span></span><br><span class="line">proxy-address=192.168.1.101:4040</span><br><span class="line"><span class="comment">#mysql-proxy运行ip和端口，不加端口，默认4040 ip:port</span></span><br><span class="line">proxy-read-only-backend-addresses=192.168.1.100:3307</span><br><span class="line"><span class="comment">#指定后端从slave读取数据 ip:port （简写  -r）</span></span><br><span class="line">proxy-backend-addresses=192.168.1.100:3306 </span><br><span class="line"><span class="comment">#指定后端主master写入数据 （简写  -b）</span></span><br><span class="line">proxy-lua-script=/opt/mysql-proxy/lua/rw-splitting.lua</span><br><span class="line"><span class="comment">#指定读写分离配置文件位置</span></span><br><span class="line">admin-lua-script=/opt/mysql-proxy/lua/admin-sql.lua</span><br><span class="line"><span class="comment">#指定管理脚本</span></span><br><span class="line"><span class="built_in">log</span>-file=/opt/mysql-proxy/logs/mysql-proxy.log </span><br><span class="line"><span class="comment">#日志位置</span></span><br><span class="line"><span class="built_in">log</span>-level=info</span><br><span class="line"><span class="comment">#定义log日志级别，由高到低分别有(error|warning|info|message|debug)</span></span><br><span class="line">pid-file=/opt/mysql-proxy/mysql-proxy.pid</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.修改读写分离脚本//修改默认连接，进行快速测试，不修改的话要达到连接数为4时才启用读写分离</span></span><br><span class="line"><span class="variable">$vi</span> /opt/mysql-proxy/lua/rw-splitting.lua </span><br><span class="line"><span class="keyword">if</span> not proxy.global.config.rwsplit <span class="keyword">then</span></span><br><span class="line">        proxy.global.config.rwsplit = &#123;</span><br><span class="line">                min_idle_connections = 1, <span class="comment">##默认超过4个连接数时，才开始读写分离改为1</span></span><br><span class="line">                max_idle_connections = 1, <span class="comment">#默认为8</span></span><br><span class="line">                is_debug = <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"><span class="comment">#3.手动启用并且验证是否启用</span></span><br><span class="line">chmod 600 /etc/mysql-proxy.cnf </span><br><span class="line">/opt/mysql-proxy/bin/mysql-proxy --defaults-file=/etc/mysql-proxy.cnf</span><br><span class="line"><span class="comment">#支持的选项</span></span><br><span class="line"><span class="comment"># --daemon \ //定义以守护进程模式启动</span></span><br><span class="line"><span class="comment"># --keepalive \ //使进程在异常关闭后能够自动恢复</span></span><br><span class="line"><span class="comment"># --pid-file=$PROXY_PID \ //定义mysql-proxy PID文件路径</span></span><br><span class="line"><span class="comment"># --user=mysql \ //以mysql用户身份启动服务</span></span><br><span class="line"><span class="comment"># --log-level=warning \ //定义log日志级别，由高到低分别有(error|warning|info|message|debug)</span></span><br><span class="line"><span class="comment"># --log-file=/opt/mysql-proxy/log/mysql-proxy.log //定义log日志文件路径</span></span><br><span class="line"></span><br><span class="line">netstat -tupln | grep 4040 <span class="comment">#已经启动</span></span><br><span class="line">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name</span><br><span class="line">tcp        0      0 192.168.1.101:4040      0.0.0.0:*               LISTEN      10767/mysql-proxy</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">killall -9 mysql-proxy <span class="comment">#关闭mysql-proxy使用</span></span><br></pre></td></tr></table></figure></p>
+<p><br/><br>4.或者创建mysql-proxy服务管理脚本<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">$vi &#x2F;etc&#x2F;init.d&#x2F;mysql-proxy</span><br><span class="line">#!&#x2F;bin&#x2F;sh</span><br><span class="line"># mysql-proxy This script starts and stops the mysql-proxy daemon</span><br><span class="line"># chkconfig: - 78 30</span><br><span class="line"># processname: mysql-proxy</span><br><span class="line"># description: mysql-proxy is a proxy daemon to mysql</span><br><span class="line"># Source function library.</span><br><span class="line">. &#x2F;etc&#x2F;rc.d&#x2F;init.d&#x2F;functions</span><br><span class="line"></span><br><span class="line">#定义mysql-proxy服务二进制文件路径 </span><br><span class="line">PROXY_PATH&#x3D;&#x2F;opt&#x2F;mysql-proxy&#x2F;bin</span><br><span class="line">prog&#x3D;&quot;mysql-proxy&quot;</span><br><span class="line"></span><br><span class="line"># Source networking configuration.</span><br><span class="line">. &#x2F;etc&#x2F;sysconfig&#x2F;network</span><br><span class="line"># Check that networking is up.</span><br><span class="line">#[ $&#123;NETWORKING&#125; &#x3D;&#x3D; &quot;no&quot; ] &amp;&amp; exit 0</span><br><span class="line"></span><br><span class="line">#设置默认mysql-proxy选项(也可以采用配置文件的形式 -b为mater -r 指定slave) </span><br><span class="line">PROXY_OPTIONS&#x3D;&quot;--log-level&#x3D;info \</span><br><span class="line">--plugins&#x3D;proxy -b 192.168.1.100:3306 -r 192.168.1.100:3307 \</span><br><span class="line">--proxy-lua-script&#x3D;&#x2F;opt&#x2F;mysql-proxy&#x2F;lua&#x2F;rw-splitting.lua \</span><br><span class="line">--plugins&#x3D;admin \</span><br><span class="line">--admin-username&#x3D;admin \</span><br><span class="line">--admin-password&#x3D;admin \</span><br><span class="line">--admin-lua-script&#x3D;&#x2F;opt&#x2F;mysql-proxy&#x2F;lib&#x2F;mysql-proxy&#x2F;lua&#x2F;admin.lua&quot;</span><br><span class="line"></span><br><span class="line">#pid文件路径</span><br><span class="line">PROXY_PID&#x3D;&#x2F;opt&#x2F;mysql-proxy&#x2F;mysql-proxy.pid</span><br><span class="line"></span><br><span class="line"># Source mysql-proxy configuration.</span><br><span class="line">if [ -f &#x2F;etc&#x2F;sysconfig&#x2F;mysql-proxy ]; then</span><br><span class="line">        . &#x2F;etc&#x2F;sysconfig&#x2F;mysql-proxy</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">PATH&#x3D;$PATH:&#x2F;usr&#x2F;bin:&#x2F;usr&#x2F;local&#x2F;bin:$PROXY_PATH</span><br><span class="line"># By default it&#39;s all good</span><br><span class="line">RETVAL&#x3D;0</span><br><span class="line"></span><br><span class="line"># See how we were called.</span><br><span class="line">case &quot;$1&quot; in</span><br><span class="line">  start)</span><br><span class="line">        # Start daemon.</span><br><span class="line">        echo -n $&quot;Starting $prog: &quot;</span><br><span class="line">        $NICELEVEL $PROXY_PATH&#x2F;mysql-proxy $PROXY_OPTIONS --daemon --pid-file&#x3D;$PROXY_PID --user&#x3D;mysql</span><br><span class="line">        RETVAL&#x3D;$?</span><br><span class="line">        echo</span><br><span class="line">        if [ $RETVAL &#x3D; 0 ]; then</span><br><span class="line">                touch &#x2F;var&#x2F;lock&#x2F;subsys&#x2F;mysql-proxy</span><br><span class="line">        fi</span><br><span class="line">       ;;</span><br><span class="line"></span><br><span class="line">  stop)</span><br><span class="line">        # Stop daemons.</span><br><span class="line">        echo -n $&quot;Stopping $prog: &quot;</span><br><span class="line">        killproc $prog</span><br><span class="line">        RETVAL&#x3D;$?</span><br><span class="line">        echo</span><br><span class="line">        if [ $RETVAL &#x3D; 0 ]; then</span><br><span class="line">                rm -f &#x2F;var&#x2F;lock&#x2F;subsys&#x2F;mysql-proxy</span><br><span class="line">                rm -f $PROXY_PID</span><br><span class="line"></span><br><span class="line">        fi</span><br><span class="line">       ;;</span><br><span class="line">  restart)</span><br><span class="line">        $0 stop</span><br><span class="line">        sleep 3</span><br><span class="line">        $0 start</span><br><span class="line">       ;;</span><br><span class="line"></span><br><span class="line">  condrestart)</span><br><span class="line">       [ -e &#x2F;var&#x2F;lock&#x2F;subsys&#x2F;mysql-proxy ] &amp;&amp; $0 restart</span><br><span class="line">      ;;</span><br><span class="line"></span><br><span class="line">  status)</span><br><span class="line">        status mysql-proxy</span><br><span class="line">        RETVAL&#x3D;$?</span><br><span class="line">       ;;</span><br><span class="line">  *)</span><br><span class="line"></span><br><span class="line">        echo &quot;Usage: $0 &#123;start|stop|restart|status|condrestart&#125;&quot;</span><br><span class="line">        RETVAL&#x3D;1</span><br><span class="line">       ;;</span><br><span class="line">esac</span><br><span class="line">exit $RETVAL</span><br></pre></td></tr></table></figure><br><br></p>
+<h5 id="3-操作实例"><a href="#3-操作实例" class="headerlink" title="3. 操作实例"></a>3. 操作实例</h5><p>mysql-proxy读写分离的流程步骤：<br>当在mysql-proxy插入数据时写入到了master上,查询数据是从slave上查看插入主库数据,停止主从后当在slave上插入数据，在mysql-proxy上可以看到,则说明读是从slave上，写是在master上。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.启动nysql-proxy和赋值权限</span></span><br><span class="line">chmod 755 /etc/init.d/mysql-proxy</span><br><span class="line">chmod 600 /etc/mysql-proxy.cnf</span><br><span class="line">/etc/init.d/mysql-proxy start</span><br><span class="line">/etc/init.d/mysql-proxy status</span><br><span class="line"><span class="comment"># ● mysql-proxy.service - SYSV: mysql-proxy is a proxy daemon to mysql</span></span><br><span class="line"><span class="comment">#    Loaded: loaded (/etc/rc.d/init.d/mysql-proxy; bad; vendor preset: disabled)</span></span><br><span class="line"><span class="comment">#    Active: active (running) since 日 2019-06-02 21:29:00 CST; 2s ago</span></span><br><span class="line"></span><br><span class="line">netstat -tlnp</span><br><span class="line"><span class="comment"># Active Internet connections (only servers)</span></span><br><span class="line"><span class="comment"># Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name</span></span><br><span class="line"><span class="comment"># tcp        0      0 0.0.0.0:4040            0.0.0.0:*               LISTEN      12741/mysql-proxy</span></span><br><span class="line"><span class="comment"># tcp        0      0 0.0.0.0:4041            0.0.0.0:*               LISTEN      12741/mysql-proxy</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#2.登录主库建立一个test用户从数据库中暂时关闭主从复制的功能</span></span><br><span class="line">%         | <span class="built_in">test</span>             | mysql_native_password |  <span class="comment">#注意认证插件</span></span><br><span class="line">mysql&gt; grant select on *.* to <span class="string">'test'</span>@<span class="string">'%'</span>;  <span class="comment">#从库在停止主从前执行</span></span><br><span class="line">mysql&gt; stop slave;</span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">mysql&gt;flush privileges;</span><br><span class="line">Query OK, 0 rows affected (0.01 sec)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#3. 登录mysql-porxy管理段主从查看状态（与/opt/mysql-proxy/lua/rw-splitting.lua 配置文件有关）</span></span><br><span class="line">MySQL [(none)]&gt; SELECT * FROM <span class="built_in">help</span>;</span><br><span class="line">+------------------------+------------------------------------+</span><br><span class="line">| <span class="built_in">command</span>                | description                        |</span><br><span class="line">+------------------------+------------------------------------+</span><br><span class="line">| SELECT * FROM <span class="built_in">help</span>     | shows this <span class="built_in">help</span>                    |</span><br><span class="line">| SELECT * FROM backends | lists the backends and their state |</span><br><span class="line">+------------------------+------------------------------------+</span><br><span class="line">2 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">MySQL [(none)]&gt; SELECT * FROM backends;  <span class="comment">#有可能需要登录有多个终端才能触发从库up</span></span><br><span class="line">+-------------+--------------------+-------+------+------+-------------------+</span><br><span class="line">| backend_ndx | address            | state | <span class="built_in">type</span> | uuid | connected_clients |</span><br><span class="line">+-------------+--------------------+-------+------+------+-------------------+</span><br><span class="line">|           1 | 192.168.1.100:3306 | up    | rw   | NULL |                 1 |</span><br><span class="line">|           2 | 192.168.1.100:3307 | up    | ro   | NULL |                 1 |</span><br><span class="line">+-------------+--------------------+-------+------+------+-------------------+</span><br><span class="line"><span class="comment"># up：表示读写分离生效</span></span><br><span class="line"><span class="comment"># unKnown：还没生效</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#4.连接连接MySQL-Proxy并且插入数据到主库（注意这里是数据库的账号密码）</span></span><br><span class="line"><span class="variable">$mysql</span> -h 192.168.1.101 -P 4040 -utest -pweiye!@<span class="comment">#888</span></span><br><span class="line">Welcome to the MariaDB monitor.  Commands end with ; or \g.</span><br><span class="line">Your MySQL connection id is 22</span><br><span class="line">Server version: 8.0.16 MySQL Community Server - GPL</span><br><span class="line"></span><br><span class="line"><span class="variable">$MySQL</span> [(none)]&gt; show databases;</span><br><span class="line">+--------------------+</span><br><span class="line">| Database           |</span><br><span class="line">+--------------------+</span><br><span class="line">| demo               |</span><br><span class="line">| information_schema |</span><br><span class="line">| mysql              |</span><br><span class="line">| performance_schema |</span><br><span class="line">| phpmyadmin         |</span><br><span class="line">| sys                |</span><br><span class="line">+--------------------+</span><br><span class="line">6 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.12 sec)</span><br><span class="line"></span><br><span class="line">MySQL [(none)]&gt; use demo</span><br><span class="line">MySQL [demo]&gt; insert into user value (10,<span class="string">'mysql-proxy-insert'</span>);</span><br><span class="line">Query OK, 1 row affected (0.12 sec)</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602213619.png" target="_blank" title="WeiyiGeek.mysql-proxy-write" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602213619.png" alt="WeiyiGeek.mysql-proxy-write" title="" class=""></a>
+                <p>WeiyiGeek.mysql-proxy-write</p>
+            </figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#4.登录主库查看从MySQL-proxy插入到的数据,再登录从库插入一条数据,然后在MySQL-proxy中查看</span></span><br><span class="line">mysql&gt; insert into user value (11,<span class="string">'SLAVE INSERT - MYSQL-PROXY-READ'</span>);</span><br><span class="line">Query OK, 1 row affected (0.09 sec)</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=MYSQL数据库读写分离实例 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602221810.png" target="_blank" title="WeiyiGeek.mysql-proxy-read" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190602221810.png" alt="WeiyiGeek.mysql-proxy-read" title="" class=""></a>
+                <p>WeiyiGeek.mysql-proxy-read</p>
+            </figure>
+<p><br/></p>
+<h5 id="4-入坑"><a href="#4-入坑" class="headerlink" title="4. 入坑"></a>4. 入坑</h5><p><strong>问题1：编译lua时候出现 lua.c:82:31: 致命错误：readline/readline.h：没有那个文件或目录</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include &lt;readline/readline.h&gt;</span></span><br><span class="line">解决：安装</span><br><span class="line">yum install libtermcap-devel ncurses-devel libevent-devel readline-devel</span><br></pre></td></tr></table></figure><br><br><br><strong>问题2：登录mysql-proxy管理段查看到从库状态为unkown？</strong><br>原因：由于没有达到读写分离连接数限制;<br>解决方法：多登录几个mysql-proxy终端进行查询和插入即可将状态转变成为up;</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:06.312Z" itemprop="dateUpdated">2022-03-29 13:39:06</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/数据存储/Database-运维/MySQL/运维实战/MYSQL数据库读写分离实例.md" target="_blank" rel="noopener noreferrer">_posts/数据存储/Database-运维/MySQL/运维实战/MYSQL数据库读写分离实例.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/6-1-88.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/6-1-88.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MYSQL/" rel="tag">MYSQL</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/6-1-88.html&title=《MYSQL数据库读写分离实例》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/6-1-88.html&title=《MYSQL数据库读写分离实例》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/6-1-88.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《MYSQL数据库读写分离实例》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/6-1-88.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/6-1-88.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/6-3-76.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">VNC远程连接服务安装与配置</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/6-1-119.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">运维之LAMP环境安装与配置</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-利用PHP实现读写分离"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 利用PHP实现读写分离</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-amoeba架构实现读写分离"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 amoeba架构实现读写分离</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-mysql-proxy实现读写分离"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 mysql-proxy实现读写分离</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/6-1-88.html&title=《MYSQL数据库读写分离实例》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/6-1-88.html&title=《MYSQL数据库读写分离实例》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/6-1-88.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《MYSQL数据库读写分离实例》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/6-1-88.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/6-1-88.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACH0lEQVR42u3aO27EMAwFwL3/pZ02TbzviXYAy6MqWPjDccGIFD+feB3x+uv69i2fOxYGBsZjGW1Yv385D2JyVx4bBgbGexh/ZbDza84TZfT6mPQlZgwMDIzTa9o0naRgDAwMjAnjPL2uFajnHwIDAwMjL2LX2nBrpBtrcQwMjAcy8q77//99y/kGBgbGoxhHuSbU/Al1VBgYGFsz8gSXNM7yoPOtYfEEDAyMFzCS0jFpkM0xa79gYGDszVgrHfNAk8PLhBRtNzEwMLZj5E38yfhFC6uPMDEwMF7AaF+/9sq2cC0+KwYGxssY8+ZXMpx68UgrBgbG1oy1nVXbepsfBtyyQcTAwHgIo21y5SXufQefX9ptGBgYL2BMNohtKTtJstGYBQYGxkaM/JV5C2x+b/ERMTAwtmaMat+lhl1SAE/AGBgYezOOYK013aIvF7ftPu0jMDAwHs5Iwp0kzfngV7RNxMDA2JrRJtBrDzjbUbBocgQDA2NrRnvbeTJtU3l+fTQzgoGBsTUjaai111xVvhY9QgwMjE0Z+QBEG9bi6UQbJwYGxqaMo1xtiZsPfp1vFr/8Y8DAwNiaMU92k/GIdjhjnrIxMDCey1hreF1712SrioGB8R7GWhsub5MVAZXlMQYGBkbOmODXRjcwMDAwJiNceaJsj0i/FLEYGBhbM5JytC04J+m1PgTFwMDYmpGXju0vVxW9lx1kYmBgPI/xA4qRvCp4SEz9AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

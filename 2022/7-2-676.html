@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Nginx,Lua">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2022-07-02T05:34:30.000Z" itemprop="datePublished" class="page-time">
+  2022-07-02
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4%E5%AE%9E%E8%B7%B5/">运维实践</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/Web/WebApp/Nginx/7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2022-07-02 13:34:30" datetime="2022-07-02T05:34:30.000Z"  itemprop="datePublished">2022-07-02</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%BF%90%E7%BB%B4%E5%AE%9E%E8%B7%B5/">运维实践</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p><strong>本章目录</strong></p>
+<p>[TOC]</p>
+<hr>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><p><strong>为啥有此篇文章?</strong><br>描述: 在进行公司的图片存储解决方案研究中，最开始准备使用的是FastDFS，但是经过深思熟虑，以及后期运维成本考虑还是放弃了，只能转而使用存储直接存放图片文件，直接请求效率提示杠杠的，但如何最大限度保证业务安全以及减少业务对数据库增删改查的压力? 在 Google 、Github一番查找后发现可以直接使用 Nginx + Lua 进行访问数据进行获取静态资源信息，而不用业务系统进行访问数据库直接获取静态资源路径，而显式的展现资源真实暴露给外部，非常容易被批量抓取。</p>
+<p>其次笔者在实践中发现当前搜索到的安装部署Nginx+Lua可能已将不适用最新稳定版本的Nginx版本，基本上都是 1.15.x ~ 1.18.x，对于当前Nginx 1.22.0 版本来说显然是太老了。<br>所以本章就该问题进行 <code>Nginx + Lua + Redis</code> 模块环境的安装以及简单的实践，希望能帮助到各位有相同需求的Person。</p>
+<a id="more"></a>
+<p><br/></p>
+<p><strong>基础知识:</strong></p>
+<ul>
+<li>Nginx: 是一个高性能的HTTP和反向代理web服务器，同时也提供了IMAP/POP3/SMTP服务, 其三大核心功能，包含静态资源、反向代理、api模块扩展，对于lua脚本的扩展，例如由lua-nginx-module模块，就是api模块扩展的一部分，并且nginx可以通过lua脚本直接调用redis服务器；</li>
+<li>Lua: 是一种功能强大，高效，轻量级，可嵌入的脚本语言，非常容易嵌入到我们应用程序中, 它用于各种应用程序，从游戏到Web应用程序和图像处理。 </li>
+<li>lua-nginx-module : 该模块是 OpenResty 的核心组件，目录是将lua的功能嵌入到Nginx http服务器中。</li>
+<li>lua-resty-redis : 该模块是在 OpenResty 项目下基于 cosocket API 的 ngx_lua 的 Lua redis 客户端驱动。</li>
+</ul>
+<p><br/></p>
+<p>温馨提示: 如果不是现有业务大量使用Nginx进行承载不能直接替换其它优秀的解决方案，只能一步一步来，从而转入 <code>OpenResty</code> 或者 <code>caddy</code> 搭建能够处理超高并发、扩展性极高的动态 Web 应用、Web 服务和动态网关。</p>
+<p>原文地址: <a href="https://blog.weiyigeek.top">https://blog.weiyigeek.top</a></p>
+<hr>
+<h3 id="知识引入"><a href="#知识引入" class="headerlink" title="知识引入"></a>知识引入</h3><p><strong>Nginx 的指令的都是安装执行顺序的吗?</strong></p>
+<blockquote>
+<p>答: 既然我都这样问了答案则是显而易见的，这也是大多数新手频繁遇到的一个困惑，当然也困惑了笔者，否则我也不会这样问。</p>
+</blockquote>
+<p>那我们下来来看这么一个示例: (验证此示例你可能需要先按照下一章的【0x01 部署环境】进行准备相关环境), 此时你可能会说输出不就是<code>WeiyiGeek</code>吗?<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location /sequence_demo_1 &#123;</span><br><span class="line"> <span class="built_in">set</span> <span class="variable">$a</span> Weiyi;</span><br><span class="line"> <span class="built_in">echo</span> <span class="variable">$a</span>;</span><br><span class="line"> <span class="built_in">set</span> <span class="variable">$a</span> Geek;</span><br><span class="line"> <span class="built_in">echo</span> <span class="variable">$a</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>但如果请求该URL你会发现实时并非如此。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ curl http:&#x2F;&#x2F;demo.weiyigeek.top&#x2F;sequence_demo_1</span><br><span class="line">Geek</span><br><span class="line">Geek</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>那为什么出现了这种不合常理的现象呢？</strong></p>
+<blockquote>
+<p>答: 为了解释此现象, 我们不得不介绍Nginx的请求处理的11阶段，分别是post-read、server-rewrite、find-config、rewrite、post-rewrite、preaccess、access、post-access、precontent、content以及log，其中3个比较常见的按照执行时的先后顺序依次是rewrite阶段、access阶段以及content阶段。<br>Nginx 配置指令一般只会注册并运行在其中的某一个处理阶段，比如 <code>set</code> 指令就是在<code>rewrite</code>阶段运行的，而<code>echo</code>指令只会在<code>content</code>阶段运行, 在一次请求处理流程中<code>rewrite</code>阶段总是在content阶段之前执行。</p>
+</blockquote>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802164753.png" target="_blank" title="WeiyiGeek.Nginx的请求处理的11阶段" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802164753.png" alt="WeiyiGeek.Nginx的请求处理的11阶段" title="" class=""></a>
+                <p>WeiyiGeek.Nginx的请求处理的11阶段</p>
+            </figure>
+<p>因此，属于rewrite阶段的配置指令（示例中的set）总是会无条件地在content阶段的配置指令（示例中的echo）之前执行，即便是<code>echo</code>指令出现在<code>set</code>指令的前面, 上面例子中的指令按照请求处理阶段的先后次序排序，实际的执行次序如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">location /sequence_demo_1 &#123;</span><br><span class="line"> <span class="comment"># rewrite阶段的配置指令，执行在前面</span></span><br><span class="line"> <span class="built_in">set</span> <span class="variable">$a</span> Weiyi;</span><br><span class="line"> <span class="built_in">set</span> <span class="variable">$a</span> Geek ;</span><br><span class="line"> <span class="comment"># content阶段的配置指令，执行在后面</span></span><br><span class="line"> <span class="built_in">echo</span> <span class="variable">$a</span>;</span><br><span class="line"> <span class="built_in">echo</span> <span class="variable">$a</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>所以，输出的结果就是Weiyi Geek了。</p>
+<p><br></p>
+<h3 id="Lua模块指令阶段"><a href="#Lua模块指令阶段" class="headerlink" title="Lua模块指令阶段"></a>Lua模块指令阶段</h3><p><strong>各阶段使用Lua模块指令</strong><br>描述: 由于本章 Nginx 也是使用 OpenResty Lua 模块实现的解析Lua脚本,所以其指令我们也需要做一个简单了解，对于后续学习有非常大的帮助。</p>
+<p>指令语法: <a href="https://github.com/openresty/lua-nginx-module#synopsis" target="_blank" rel="noopener">https://github.com/openresty/lua-nginx-module#synopsis</a></p>
+<p>使用Lua来构建nginx脚本就是通过一条条指令来完成的，指令常用于指定 Lua 代码是什么时候执行的以及如何使用运行的结果，lua 指令分为配置指令、控制指令, 而控制指令分为两种方式。</p>
+<ul>
+<li>lua脚本块 ：<code>*_by_lua_block</code></li>
+<li>lua脚本文件 ：<code>*_by_lua_file</code></li>
+</ul>
+<p>下图展示了指令执行的顺序：从上至下：初始化、重写/访问、内容处理、日志输出四个阶段</p>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802171007.png" target="_blank" title="WeiyiGeek.ngx-lua-order" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802171007.png" alt="WeiyiGeek.ngx-lua-order" title="" class=""></a>
+                <p>WeiyiGeek.ngx-lua-order</p>
+            </figure>
+<p><br/></p>
+<p><strong>lua-nginx-module Directives Document（Lua Nginx 模块指令文档）:</strong></p>
+<ul>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_load_resty_core" target="_blank" rel="noopener">lua_load_resty_core</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_capture_error_log" target="_blank" rel="noopener">lua_capture_error_log</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_use_default_type" target="_blank" rel="noopener">lua_use_default_type</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_malloc_trim" target="_blank" rel="noopener">lua_malloc_trim</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_code_cache" target="_blank" rel="noopener">lua_code_cache</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_thread_cache_max_entries" target="_blank" rel="noopener">lua_thread_cache_max_entries</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_regex_cache_max_entries" target="_blank" rel="noopener">lua_regex_cache_max_entries</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_regex_match_limit" target="_blank" rel="noopener">lua_regex_match_limit</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_package_path" target="_blank" rel="noopener">lua_package_path</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_package_cpath" target="_blank" rel="noopener">lua_package_cpath</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#init_by_lua" target="_blank" rel="noopener">init_by_lua</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#init_by_lua_block" target="_blank" rel="noopener">init_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#init_by_lua_file" target="_blank" rel="noopener">init_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#init_worker_by_lua" target="_blank" rel="noopener">init_worker_by_lua</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#init_worker_by_lua_block" target="_blank" rel="noopener">init_worker_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#init_worker_by_lua_file" target="_blank" rel="noopener">init_worker_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#exit_worker_by_lua_block" target="_blank" rel="noopener">exit_worker_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#exit_worker_by_lua_file" target="_blank" rel="noopener">exit_worker_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#set_by_lua" target="_blank" rel="noopener">set_by_lua</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#set_by_lua_block" target="_blank" rel="noopener">set_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#set_by_lua_file" target="_blank" rel="noopener">set_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#content_by_lua" target="_blank" rel="noopener">content_by_lua</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#content_by_lua_block" target="_blank" rel="noopener">content_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#content_by_lua_file" target="_blank" rel="noopener">content_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#server_rewrite_by_lua_block" target="_blank" rel="noopener">server_rewrite_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#server_rewrite_by_lua_file" target="_blank" rel="noopener">server_rewrite_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#rewrite_by_lua" target="_blank" rel="noopener">rewrite_by_lua</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#rewrite_by_lua_block" target="_blank" rel="noopener">rewrite_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#rewrite_by_lua_file" target="_blank" rel="noopener">rewrite_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#access_by_lua" target="_blank" rel="noopener">access_by_lua</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#access_by_lua_block" target="_blank" rel="noopener">access_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#access_by_lua_file" target="_blank" rel="noopener">access_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#header_filter_by_lua" target="_blank" rel="noopener">header_filter_by_lua</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#header_filter_by_lua_block" target="_blank" rel="noopener">header_filter_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#header_filter_by_lua_file" target="_blank" rel="noopener">header_filter_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#body_filter_by_lua" target="_blank" rel="noopener">body_filter_by_lua</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#body_filter_by_lua_block" target="_blank" rel="noopener">body_filter_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#body_filter_by_lua_file" target="_blank" rel="noopener">body_filter_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#log_by_lua" target="_blank" rel="noopener">log_by_lua</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#log_by_lua_block" target="_blank" rel="noopener">log_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#log_by_lua_file" target="_blank" rel="noopener">log_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#balancer_by_lua_block" target="_blank" rel="noopener">balancer_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#balancer_by_lua_file" target="_blank" rel="noopener">balancer_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_need_request_body" target="_blank" rel="noopener">lua_need_request_body</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#ssl_client_hello_by_lua_block" target="_blank" rel="noopener">ssl_client_hello_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#ssl_client_hello_by_lua_file" target="_blank" rel="noopener">ssl_client_hello_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#ssl_certificate_by_lua_block" target="_blank" rel="noopener">ssl_certificate_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#ssl_certificate_by_lua_file" target="_blank" rel="noopener">ssl_certificate_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#ssl_session_fetch_by_lua_block" target="_blank" rel="noopener">ssl_session_fetch_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#ssl_session_fetch_by_lua_file" target="_blank" rel="noopener">ssl_session_fetch_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#ssl_session_store_by_lua_block" target="_blank" rel="noopener">ssl_session_store_by_lua_block</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#ssl_session_store_by_lua_file" target="_blank" rel="noopener">ssl_session_store_by_lua_file</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_shared_dict" target="_blank" rel="noopener">lua_shared_dict</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_socket_connect_timeout" target="_blank" rel="noopener">lua_socket_connect_timeout</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_socket_send_timeout" target="_blank" rel="noopener">lua_socket_send_timeout</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_socket_send_lowat" target="_blank" rel="noopener">lua_socket_send_lowat</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_socket_read_timeout" target="_blank" rel="noopener">lua_socket_read_timeout</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_socket_buffer_size" target="_blank" rel="noopener">lua_socket_buffer_size</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_socket_pool_size" target="_blank" rel="noopener">lua_socket_pool_size</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_socket_keepalive_timeout" target="_blank" rel="noopener">lua_socket_keepalive_timeout</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_socket_log_errors" target="_blank" rel="noopener">lua_socket_log_errors</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_ssl_ciphers" target="_blank" rel="noopener">lua_ssl_ciphers</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_ssl_crl" target="_blank" rel="noopener">lua_ssl_crl</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_ssl_protocols" target="_blank" rel="noopener">lua_ssl_protocols</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_ssl_trusted_certificate" target="_blank" rel="noopener">lua_ssl_trusted_certificate</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_ssl_verify_depth" target="_blank" rel="noopener">lua_ssl_verify_depth</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_ssl_conf_command" target="_blank" rel="noopener">lua_ssl_conf_command</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_http10_buffering" target="_blank" rel="noopener">lua_http10_buffering</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#rewrite_by_lua_no_postpone" target="_blank" rel="noopener">rewrite_by_lua_no_postpone</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#access_by_lua_no_postpone" target="_blank" rel="noopener">access_by_lua_no_postpone</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_transform_underscores_in_response_headers" target="_blank" rel="noopener">lua_transform_underscores_in_response_headers</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_check_client_abort" target="_blank" rel="noopener">lua_check_client_abort</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_max_pending_timers" target="_blank" rel="noopener">lua_max_pending_timers</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_max_running_timers" target="_blank" rel="noopener">lua_max_running_timers</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_sa_restart" target="_blank" rel="noopener">lua_sa_restart</a></li>
+<li><a href="https://github.com/openresty/lua-nginx-module#lua_worker_thread_vm_pool_size" target="_blank" rel="noopener">lua_worker_thread_vm_pool_size</a></li>
+</ul>
+<p><br></p>
+<p>值得注意的是Nginx可以提前终止请求（至少），这意味着跳过正常运行的阶段，例如重写或访问阶段。这也意味着，不管运行的后期阶段（例如log_by_lua）将无法访问通常在这些阶段中设置的信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">400 (Bad Request)</span><br><span class="line">405 (Not Allowed)</span><br><span class="line">408 (Request Timeout)</span><br><span class="line">413 (Request Entity Too Large)</span><br><span class="line">414 (Request URI Too Large)</span><br><span class="line">494 (Request Headers Too Large)</span><br><span class="line">499 (Client Closed Request)</span><br><span class="line">500 (Internal Server Error)</span><br><span class="line">501 (Not Implemented)</span><br></pre></td></tr></table></figure>
+<p>好了，此处就只是先简单点一下，在后续实践中您在回过头来看即可。</p>
+<hr>
+<h2 id="0x01-部署环境"><a href="#0x01-部署环境" class="headerlink" title="0x01 部署环境"></a>0x01 部署环境</h2><h3 id="安装说明"><a href="#安装说明" class="headerlink" title="安装说明"></a>安装说明</h3><p><strong>环境描述:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 系统信息</span></span><br><span class="line">$ cat /etc/issue.net</span><br><span class="line">Ubuntu 20.04.3 LTS</span><br><span class="line">$ uname -a</span><br><span class="line">Linux weiyigeek.top 5.4.0-92-generic \<span class="comment">#103-Ubuntu SMP Fri Nov 26 16:13:00 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 软件版本</span></span><br><span class="line">Nginx - 1.22.0  (stable 版本) </span><br><span class="line">pcre - 8.45</span><br><span class="line">zlib - 1.2.12</span><br><span class="line">Lua - 5.4</span><br><span class="line">openssl - 1.1.1q</span><br><span class="line">ngx_devel_kit - v0.3.1</span><br><span class="line">lua-nginx-module - v0.10.21</span><br><span class="line"><span class="built_in">echo</span>-nginx-module - v0.62</span><br><span class="line">lua-resty-core - v0.1.23</span><br><span class="line">lua-resty-lrucache - v0.13</span><br><span class="line">lua-resty-redis - v0.29</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: 此处使用的是 Ubuntu 20.04 操作系统, 该系统已做安全加固和内核优化符合等保2.0要求【<a href="https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh" target="_blank" rel="noopener">SecOpsDev/Ubuntu-InitializeSecurity.sh at master · WeiyiGeek/SecOpsDev</a> 】, 如你的Linux未进行相应配置环境可能与读者有些许差异, 如需要进行(windows server、Ubuntu、CentOS)安全加固请参照如下加固脚本进行加固, 请大家疯狂的 star 。<br>加固脚本地址:【 <a href="https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh" target="_blank" rel="noopener">https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh</a> 】</p>
+<p style='color:red'><br>为了节省大家的实践时间，我已经把需要用到的源码包上传到空间中，有需要的朋友可以看一下，下载地址: (<a href="http://share.weiyigeek.top/d/36158960-50338508-7c5982?p=2088)（访问密码：2088）" target="_blank" rel="noopener">http://share.weiyigeek.top/d/36158960-50338508-7c5982?p=2088)（访问密码：2088）</a><br><br/>温馨提示: 如提示证书不对，请点击高级继续访问即可.</p>
+
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220806093220.png" target="_blank" title="WeiyiGeek.Nginx及其模块下载" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220806093220.png" alt="WeiyiGeek.Nginx及其模块下载" title="" class=""></a>
+                <p>WeiyiGeek.Nginx及其模块下载</p>
+            </figure>
+<p><br></p>
+<h3 id="安装部署"><a href="#安装部署" class="headerlink" title="安装部署"></a>安装部署</h3><p><strong>源代码编译构建</strong><br>Step 1.在 Ubuntu 20.04 LTS 系统安装编译所需环境.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install -y gcc g++ make perl net-tools</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Step 2.下载 Nginx、PCRE、zlib、OpenSSL 源代码包，并编译构建 <code>PCRE、zlib、OpenSSL</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src</span><br><span class="line"><span class="comment"># Nginx 轻量级的Web代理服务器。</span></span><br><span class="line"><span class="comment"># 官网: https://nginx.org/en/download.html</span></span><br><span class="line">wget -c https://nginx.org/download/nginx-1.22.0.tar.gz -O /usr/<span class="built_in">local</span>/src/nginx-1.22.0.tar.gz</span><br><span class="line">tar -zxf nginx-1.22.0.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># PCRE – 支持正则表达式，NGINX Core 和 Rewrite 模块需要</span></span><br><span class="line"><span class="comment"># 官网： http://pcre.org/</span></span><br><span class="line">wget -c https://nchc.dl.sourceforge.net/project/pcre/pcre/8.45/pcre-8.45.tar.bz2</span><br><span class="line">tar -jxf pcre-8.45.tar.bz2 &amp;&amp; <span class="built_in">cd</span> pcre-8.45</span><br><span class="line">./configure</span><br><span class="line">make &amp;&amp; sudo make install</span><br><span class="line"></span><br><span class="line"><span class="comment"># zlib – 支持标头压缩, NGINX Gzip 模块需要。</span></span><br><span class="line"><span class="comment"># 官网：http://www.zlib.net/</span></span><br><span class="line">wget -c http://www.zlib.net/zlib-1.2.12.tar.gz</span><br><span class="line">tar -zxf zlib-1.2.12.tar.gz &amp;&amp; <span class="built_in">cd</span> zlib-1.2.12</span><br><span class="line">./configure</span><br><span class="line">make &amp;&amp; sudo make install</span><br><span class="line"></span><br><span class="line"><span class="comment"># OpenSSL – 支持 HTTPS 协议, NGINX SSL 模块和其他模块需要。</span></span><br><span class="line"><span class="comment"># 官网: https://www.openssl.org/source/</span></span><br><span class="line">wget -c https://www.openssl.org/<span class="built_in">source</span>/openssl-1.1.1q.tar.gz</span><br><span class="line">tar -zxf openssl-1.1.1q.tar.gz &amp;&amp; <span class="built_in">cd</span> openssl-1.1.1q</span><br><span class="line">./config --prefix=/usr/<span class="built_in">local</span>/openssl</span><br><span class="line">make &amp;&amp; sudo make install</span><br><span class="line">ln -s /usr/<span class="built_in">local</span>/openssl/bin/openssl /usr/<span class="built_in">local</span>/bin/openssl</span><br><span class="line"><span class="comment"># lib 库加载到系统</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"/usr/local/openssl/lib"</span> &gt;&gt; /etc/ld.so.conf.d/libc.conf</span><br><span class="line">ldconfig</span><br><span class="line"><span class="comment"># 执行命令验证系统的 OpenSSL 版本</span></span><br><span class="line">/usr/<span class="built_in">local</span>/bin/openssl version</span><br><span class="line">OpenSSL 1.1.1q 5 Jul 2022</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: 如<code>./configure</code>未指定<code>--prefix</code>参数的将会直接安装在<code>/usr/local</code>目录下的bin、lib、share等子目录中。</p>
+<p><br/></p>
+<p>Step 3.下载编译构建Lua解析器以及Nginx所需的开发工具包和Lua模块。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src</span><br><span class="line"><span class="comment"># ngx_devel_kit - 是Nginx开发工具包，实际上可以看做一个Nginx模块，它添加了额外的通用工具，模块开发人员可以在自己的模块中使用这些工具。</span></span><br><span class="line"><span class="comment"># 项目地址: https://github.com/simpl/ngx_devel_kit</span></span><br><span class="line"><span class="comment"># 项目地址: https://github.com/vision5/ngx_devel_kit</span></span><br><span class="line">wget -c https://github.com/vision5/ngx_devel_kit/archive/refs/tags/v0.3.1.tar.gz -O ngx_devel_kit-v0.3.1.tar.gz</span><br><span class="line">tar -zxf ngx_devel_kit-v0.3.1.tar.gz &amp;&amp; ls ngx_devel_kit-0.3.1</span><br><span class="line">  <span class="comment"># auto  config  docs  examples  LICENSE  ngx_auto_lib_core  notes  objs  patches  README_AUTO_LIB.md  README.md  src</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># lua-nginx-module - 将Lua的强大功能嵌入到NGINX HTTP服务器中</span></span><br><span class="line"><span class="comment"># 项目地址: https://github.com/openresty/lua-nginx-module</span></span><br><span class="line">wget -c https://github.com/openresty/lua-nginx-module/archive/refs/tags/v0.10.21.tar.gz -O /usr/<span class="built_in">local</span>/src/lua-nginx-module-v0.10.21.tar.gz</span><br><span class="line">tar -zxf lua-nginx-module-v0.10.21.tar.gz &amp;&amp; ls lua-nginx-module-0.10.21</span><br><span class="line">  <span class="comment"># config  doc  dtrace  misc  README.markdown  src  t  tapset  util  valgrind.suppress</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># echo-nginx-module - 一个Nginx的输出模块，用于将“echo”、“sleep”、“time”等功能引入Nginx的配置文件, 此模块不随Nginx源一起分发。</span></span><br><span class="line"><span class="comment"># 项目地址: https://github.com/openresty/echo-nginx-module</span></span><br><span class="line">wget --no-check-certificate -c https://github.com/openresty/<span class="built_in">echo</span>-nginx-module/archive/refs/tags/v0.62.tar.gz -O /usr/<span class="built_in">local</span>/src/<span class="built_in">echo</span>-nginx-module-v0.62.tar.gz</span><br><span class="line">tar -zxf <span class="built_in">echo</span>-nginx-module-v0.62.tar.gz &amp;&amp; ls <span class="built_in">echo</span>-nginx-module-0.62</span><br><span class="line">  <span class="comment"># config  LICENSE  README.markdown  src  t  util  valgrind.suppress</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># luajit2 - lua 解析器 LuaJIT 2 OpenResty 的分支，且注意解析器的Lua版本为5.1</span></span><br><span class="line"><span class="comment"># 项目地址: https://github.com/openresty/luajit2 </span></span><br><span class="line">wget -c  https://github.com/openresty/luajit2/archive/refs/tags/v2.1-20220411.tar.gz -O /usr/<span class="built_in">local</span>/src/luajit2-v2.1-20220411.tar.gz</span><br><span class="line">tar -zxvf luajit2-v2.1-20220411.tar.gz &amp;&amp; <span class="built_in">cd</span> luajit2-2.1-20220411</span><br><span class="line">make PREFIX=/usr/<span class="built_in">local</span>/luajit &amp;&amp; make install PREFIX=/usr/<span class="built_in">local</span>/luajit</span><br><span class="line">ln -s /usr/<span class="built_in">local</span>/luajit/bin/luajit /usr/<span class="built_in">local</span>/bin/luajit</span><br><span class="line"></span><br><span class="line"><span class="comment"># 链接库设置</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"/usr/local/luajit/lib"</span> &gt;&gt; /etc/ld.so.conf.d/libc.conf</span><br><span class="line">ldconfig</span><br><span class="line"></span><br><span class="line"><span class="comment"># 临时生效</span></span><br><span class="line"><span class="built_in">export</span> LUAJIT_LIB=/usr/<span class="built_in">local</span>/luajit/lib</span><br><span class="line"><span class="built_in">export</span> LUAJIT_INC=/usr/<span class="built_in">local</span>/luajit/include/luajit-2.1</span><br><span class="line"></span><br><span class="line">/usr/<span class="built_in">local</span>/bin/luajit -v</span><br><span class="line">  <span class="comment"># LuaJIT 2.1.0-beta3 -- Copyright (C) 2005-2017 Mike Pall. http://luajit.org/</span></span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: 上述 lua 解析器此处采用的是 LuaJIT 官方的 OpenResty 分支, 而不是 luajit 的主分支<code>https://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz</code>，后面入坑出坑会解释为啥这样做。</p>
+<p><br/></p>
+<p>Step 4.为了使Nginx可以连接到redis数据库中执行一些列操作，此处借助于lua-nginx-module模块下载并解压所需的lua-resty-core、lua-resty-lrucache、lua-resty-redis。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src</span><br><span class="line"><span class="comment"># 基于 FFI 的 lua-nginx-module API</span></span><br><span class="line"><span class="comment"># 项目地址: https://github.com/openresty/lua-resty-core</span></span><br><span class="line">wget -c https://github.com/openresty/lua-resty-core/archive/refs/tags/v0.1.23.tar.gz -O /usr/<span class="built_in">local</span>/src/lua-resty-core.tar.gz</span><br><span class="line">tar -zxvf lua-resty-core.tar.gz &amp;&amp; ls lua-resty-core-0.1.23</span><br><span class="line">  <span class="comment"># dist.ini  lib  Makefile  README.markdown  t  valgrind.suppress</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基于 LuaJIT FFI 的 Lua-land LRU Cache</span></span><br><span class="line"><span class="comment"># 项目地址: https://github.com/openresty/lua-resty-lrucache</span></span><br><span class="line">wget -c https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v0.13.tar.gz -O /usr/<span class="built_in">local</span>/src/lua-resty-lrucache-v0.13.tar.gz</span><br><span class="line">tar -zxvf lua-resty-lrucache-v0.13.tar.gz &amp;&amp; ls lua-resty-lrucache-0.13/</span><br><span class="line">  <span class="comment"># dist.ini  lib  Makefile  README.markdown  t  valgrind.suppress</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 基于 cosocket API 的 ngx_lua 的 Lua redis 客户端驱动</span></span><br><span class="line"><span class="comment"># 项目地址: https://github.com/openresty/lua-resty-redis</span></span><br><span class="line">wget -c https://github.com/openresty/lua-resty-redis/archive/refs/tags/v0.29.tar.gz -O /usr/<span class="built_in">local</span>/src/lua-resty-redis-v0.29.tar.gz</span><br><span class="line">tar -zxvf lua-resty-redis-v0.29.tar.gz &amp;&amp; ls lua-resty-redis-0.29/</span><br><span class="line"><span class="comment"># 在使用时可将lua脚本放入到nginx配置目录中。</span></span><br><span class="line">mkdir -vp /usr/<span class="built_in">local</span>/nginx/lua/</span><br><span class="line">cp -a  /usr/<span class="built_in">local</span>/src/lua-resty-redis-0.29/lib /usr/<span class="built_in">local</span>/nginx/lua/</span><br><span class="line"><span class="comment"># 以树形结构显示该目录</span></span><br><span class="line">$ tree /usr/<span class="built_in">local</span>/nginx/lua/</span><br><span class="line">/usr/<span class="built_in">local</span>/nginx/lua/</span><br><span class="line">├── hello.lua</span><br><span class="line">└── lib</span><br><span class="line">    └── resty</span><br><span class="line">        └── redis.lua</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>Step 5.在上面步骤操作完毕之后，我们便可以进行nginx编译安装了，构建流程如下(在博主的前面讲解的Nginx系列教程就已经有详细讲述 【[Nginx进阶学习之最佳配置实践指南][<a href="https://blog.weiyigeek.top/2019/9-1-124.html]】，此处就不在大篇幅累述了)">https://blog.weiyigeek.top/2019/9-1-124.html]】，此处就不在大篇幅累述了)</a>:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建允许用户和组,不需要家目录不登录bash</span></span><br><span class="line">useradd -M -s /sbin/nologin nginx </span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建 Nginx 所需目录</span></span><br><span class="line">sudo mkdir -vp /usr/<span class="built_in">local</span>/nginx/&#123;module,modules,lua&#125; /var/cache/nginx/&#123;client_temp,proxy_temp,fastcgi_temp,uwsgi_temp,scgi_temp&#125;</span><br><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src/nginx-1.22.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Nginx 预编译参数设置</span></span><br><span class="line">./configure \</span><br><span class="line">--prefix=/usr/<span class="built_in">local</span>/nginx \</span><br><span class="line">--user=nginx --group=nginx \</span><br><span class="line">--with-pcre=../pcre-8.45 \</span><br><span class="line">--with-zlib=../zlib-1.2.12 \</span><br><span class="line">--with-openssl=../openssl-1.1.1q \</span><br><span class="line">--sbin-path=/usr/sbin/nginx \</span><br><span class="line">--conf-path=/usr/<span class="built_in">local</span>/nginx/nginx.conf \</span><br><span class="line">--pid-path=/usr/<span class="built_in">local</span>/nginx/nginx.pid \</span><br><span class="line">--error-log-path=/var/<span class="built_in">log</span>/nginx/error.log \</span><br><span class="line">--http-log-path=/var/<span class="built_in">log</span>/nginx/access.log \</span><br><span class="line">--lock-path=/var/run/nginx.lock \</span><br><span class="line">--modules-path=/usr/<span class="built_in">local</span>/nginx/modules \</span><br><span class="line">--http-client-body-temp-path=/var/cache/nginx/client_temp \</span><br><span class="line">--http-proxy-temp-path=/var/cache/nginx/proxy_temp \</span><br><span class="line">--http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \</span><br><span class="line">--http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \</span><br><span class="line">--http-scgi-temp-path=/var/cache/nginx/scgi_temp \</span><br><span class="line">--with-threads \</span><br><span class="line">--with-http_sub_module --with-http_v2_module \</span><br><span class="line">--with-http_auth_request_module --with-http_realip_module --with-http_secure_link_module \</span><br><span class="line">--with-http_gunzip_module --with-http_gzip_static_module --with-http_ssl_module \</span><br><span class="line">--with-http_slice_module --with-http_stub_status_module --with-http_image_filter_module \</span><br><span class="line">--with-http_dav_module --with-http_flv_module --with-http_mp4_module \</span><br><span class="line">--with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-stream_geoip_module \</span><br><span class="line">--with-mail --with-mail_ssl_module \</span><br><span class="line">--with-http_addition_module --with-http_random_index_module \</span><br><span class="line">--with-compat --with-file-aio \</span><br><span class="line">--with-cc-opt=<span class="string">'-Os -fomit-frame-pointer -g'</span>  \</span><br><span class="line">--with-ld-opt=<span class="string">'-Wl,-rpath,/usr/local/luajit/lib,--as-needed,-O1,--sort-common'</span> \</span><br><span class="line">--add-module=/usr/<span class="built_in">local</span>/src/ngx_devel_kit-0.3.1 \</span><br><span class="line">--add-module=/usr/<span class="built_in">local</span>/src/lua-nginx-module-0.10.21 \</span><br><span class="line">--add-dynamic-module=/usr/<span class="built_in">local</span>/src/<span class="built_in">echo</span>-nginx-module-0.62 \</span><br><span class="line"></span><br><span class="line"><span class="comment"># 编译构建安装</span></span><br><span class="line">make &amp; make install</span><br></pre></td></tr></table></figure>
+<p>温馨提示: 上述 <code>./configure</code> 编译配置中使用静态链接库方式来添加<code>ngx_devel_kit-0.3.1/lua-nginx-module-0.10.21</code>模块， 又为了演示加入动态链接库的使用方式，此处使用<code>--add-dynamic-module</code>参数指定<code>echo-nginx-module-0.62</code>的解压目录，如果使用动态连接库的方式加载模块将会在后续实践中展示。</p>
+<p><strong>构建结果:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># configure 结果</span></span><br><span class="line">Configuration summary</span><br><span class="line">  <span class="comment"># + using threads</span></span><br><span class="line">  <span class="comment"># + using PCRE library: ../pcre-8.45</span></span><br><span class="line">  <span class="comment"># + using OpenSSL library: ../openssl-1.1.1q</span></span><br><span class="line">  <span class="comment"># + using zlib library: ../zlib-1.2.12</span></span><br><span class="line">  <span class="comment"># nginx path prefix: "/usr/local/nginx"</span></span><br><span class="line">  <span class="comment"># ....................................</span></span><br><span class="line">  <span class="comment"># nginx http scgi temporary files: "/var/cache/nginx/scgi_temp"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Make 构建安装后提示lib动态链接库地址。</span></span><br><span class="line">- add LIBDIR to the <span class="string">'LD_LIBRARY_PATH'</span> environment variable during execution</span><br><span class="line">- add LIBDIR to the <span class="string">'LD_RUN_PATH'</span> environment variable during linking</span><br><span class="line">- use the <span class="string">'-Wl,-rpath -Wl,LIBDIR'</span> linker flag <span class="comment"># 或者在编译是添加依赖的Lib目录。</span></span><br><span class="line">- have your system administrator add LIBDIR to <span class="string">'/etc/ld.so.conf'</span></span><br><span class="line"></span><br><span class="line">/usr/<span class="built_in">local</span>/src/nginx-1.22.0<span class="comment"># ls objs/</span></span><br><span class="line">  <span class="comment"># ls objs/</span></span><br><span class="line">  <span class="comment"># addon         ngx_auto_config.h               </span></span><br><span class="line">  <span class="comment"># autoconf.err  ngx_auto_headers.h              </span></span><br><span class="line">  <span class="comment"># Makefile      ngx_http_echo_module_modules.c  </span></span><br><span class="line">  <span class="comment"># nginx         ngx_http_echo_module_modules.o  </span></span><br><span class="line">  <span class="comment"># ngx_modules.c src</span></span><br><span class="line">  <span class="comment"># nginx.8       ngx_http_echo_module.so   ngx_modules.o</span></span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220730231815.png" target="_blank" title="WeiyiGeek.build Nginx" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220730231815.png" alt="WeiyiGeek.build Nginx" title="" class=""></a>
+                <p>WeiyiGeek.build Nginx</p>
+            </figure>
+<p><br/></p>
+<p>Step 6.在Nginx安装部署成功后，为了验证Nginx + Lua安装环境，我们需要再 nginx 主配置文件入口配置如下关键内容，注意下面带有文字注释部分。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ grep -v <span class="string">"^#|^$|#"</span>  /usr/<span class="built_in">local</span>/nginx/conf.d/nginx.conf</span><br><span class="line">worker_processes  1;</span><br><span class="line">events &#123;</span><br><span class="line">  worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line">http &#123;</span><br><span class="line">  include       mime.types;</span><br><span class="line">  default_type  application/octet-stream;</span><br><span class="line">  <span class="comment"># 去除 log_format 前者的注释符 `#`</span></span><br><span class="line">  log_format  main  <span class="string">'$remote_addr - $remote_user [$time_local] "$request" '</span></span><br><span class="line">                    <span class="string">'$status $body_bytes_sent "$http_referer" '</span></span><br><span class="line">                    <span class="string">'"$http_user_agent" "$http_x_forwarded_for"'</span>;</span><br><span class="line">  sendfile        on;</span><br><span class="line">  keepalive_timeout  65;</span><br><span class="line">  <span class="comment"># lua 包模块依赖路径</span></span><br><span class="line">  lua_package_path <span class="string">'/usr/local/src/lua-resty-core-0.1.23/lib/?.lua;/usr/local/src/lua-resty-lrucache-0.13/lib/?.lua;'</span>;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment"># 添加加载nginx家目录下的conf.d/目录子配置文件 (通配符)</span></span><br><span class="line">  include conf.d/*.conf;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后再创建子配置目录与demo.weiyigeek.top站点配置demo.conf文件中，添加如下server字段内容片段。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">mkdir /usr/<span class="built_in">local</span>/nginx/conf.d</span><br><span class="line">tee /usr/<span class="built_in">local</span>/nginx/conf.d/demo.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># https - demo.weiyigeek.top</span></span><br><span class="line">server &#123;</span><br><span class="line">  listen       80;</span><br><span class="line">  server_name  demo.weiyigeek.top;</span><br><span class="line">  charset utf-8;</span><br><span class="line">  access_log /var/<span class="built_in">log</span>/nginx/demo-access.log main buffer=128k flush=1m;</span><br><span class="line">  <span class="comment"># 方式1.content_by_lua_block lua 片段</span></span><br><span class="line">  location /hello-lua &#123;</span><br><span class="line">    default_type <span class="string">'text/plain'</span>;</span><br><span class="line">    content_by_lua_block &#123;</span><br><span class="line">      ngx.say(<span class="string">"Hello World! Lua &amp; Nginx ."</span>)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">    </span><br><span class="line">  <span class="comment"># 方式2.content_by_lua_file lua 脚本文件路径</span></span><br><span class="line">  location /hello-lua-file &#123;</span><br><span class="line">    default_type <span class="string">'text/html'</span>;</span><br><span class="line">    content_by_lua_file ./lua/hello.lua;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 方式3.access_by_lua 在请求访问阶段处理用于访问控制。</span></span><br><span class="line">  location /hello-lua-access &#123;</span><br><span class="line">    default_type <span class="string">'text/html'</span>;</span><br><span class="line">    access_by_lua <span class="string">'</span></span><br><span class="line"><span class="string">      local message = "403 - Hello World! Lua &amp; Nginx  access_by_lua"</span></span><br><span class="line"><span class="string">      ngx.say(message)</span></span><br><span class="line"><span class="string">    '</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 方式4.content_by_lua 在内容处理阶段接受请求并输出响应。</span></span><br><span class="line">  location /hello-lua-content &#123;</span><br><span class="line">    default_type <span class="string">'text/html'</span>;</span><br><span class="line">    content_by_lua <span class="string">"ngx.print('Hello World!')"</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>温馨提示：<code>access_by_lua</code>与 <code>content_by_lua</code> 的区别是对于Nginx请求的不同处理阶段，前者是访问阶段处理用于访问控制(适用于<code>http、server、location、location if</code>)，后者内容处理器接受请求并输出响应，适用于<code>location、location if</code></p>
+<p><br/></p>
+<p>Step 7.上述配置完成后为了验证配置文件是否存在问题，可执行如下命令如果显示 successful 表示配置没有问题，之后就可重载 nginx 服务。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ nginx -t </span><br><span class="line">  <span class="comment"># nginx: the configuration file /usr/local/nginx/nginx.conf syntax is ok</span></span><br><span class="line">  <span class="comment"># nginx: configuration file /usr/local/nginx/nginx.conf test is successful</span></span><br><span class="line"></span><br><span class="line">$ /usr/sbin/nginx -s reload</span><br><span class="line">$ ps -ef | grep <span class="string">"nginx"</span></span><br><span class="line">  <span class="comment"># root      244962       1  0 16:40 ?        00:00:00 nginx: master process nginx</span></span><br><span class="line">  <span class="comment"># nginx     245707  244962  0 21:42 ?        00:00:00 nginx: worker process</span></span><br><span class="line">  <span class="comment"># root      245710  245523  0 21:42 pts/0    00:00:00 grep nginx</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>Step 8.验证基本的Nginx+Lua环境，我们访问上述配置文件中的域名和子目录，访问结果如下图所示则表示环境OK，否则请排查错误或者查看是否存在下述的入坑出坑中相关问题。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">curl -H <span class="string">"host:demo.weiyigeek.top"</span> 10.20.172.201/hello-lua</span><br><span class="line">Hello World! Lua &amp; Nginx .</span><br><span class="line"></span><br><span class="line">curl -H <span class="string">"host:demo.weiyigeek.top"</span> 10.20.172.201/hello-lua-file</span><br><span class="line">&lt;h2&gt; Hello world! Lua &amp; Nginx with Hello.lua. &lt;/h2&gt;</span><br><span class="line"></span><br><span class="line">curl -H <span class="string">"host:demo.weiyigeek.top"</span> 10.20.172.201/hello-lua-access</span><br><span class="line">Hello World! Lua &amp; Nginx  access_by_lua</span><br><span class="line"></span><br><span class="line">curl -H <span class="string">"host:demo.weiyigeek.top"</span> 10.20.172.201/hello-lua-content</span><br><span class="line">Hello World!</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220731215547.png" target="_blank" title="WeiyiGeek.demo.weiyigeek.top" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220731215547.png" alt="WeiyiGeek.demo.weiyigeek.top" title="" class=""></a>
+                <p>WeiyiGeek.demo.weiyigeek.top</p>
+            </figure>
+<p><br/></p>
+<p><strong>知识扩展</strong>: 编译构建nginx后我们可通过<code>nginx -V</code>命令查看曾经<code>./configure</code>预编译参数的设置。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ nginx -V</span><br><span class="line">nginx version: nginx/1.22.0</span><br><span class="line">built by gcc 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.1)</span><br><span class="line">built with OpenSSL 1.1.1q  5 Jul 2022</span><br><span class="line">TLS SNI support enabled</span><br><span class="line">configure arguments: --prefix=/usr/<span class="built_in">local</span>/nginx  </span><br><span class="line">....</span><br><span class="line">--add-module=/usr/<span class="built_in">local</span>/src/lua-nginx-module-0.10.21 --add-dynamic-module=/usr/<span class="built_in">local</span>/src/<span class="built_in">echo</span>-nginx-module-0.62 -</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h2 id="0x02-使用实践"><a href="#0x02-使用实践" class="headerlink" title="0x02 使用实践"></a>0x02 使用实践</h2><h3 id="1-Nginx-实践使用-echo-nginx-module-模块之动态加载链接库"><a href="#1-Nginx-实践使用-echo-nginx-module-模块之动态加载链接库" class="headerlink" title="1.Nginx 实践使用 echo-nginx-module 模块之动态加载链接库"></a>1.Nginx 实践使用 echo-nginx-module 模块之动态加载链接库</h3><p>描述: 从 NGINX 1.9.11 开始，您还可以将此模块编译为动态模块，方法是在上面的 <code>./configure</code> 命令行中使用 <code>--add-dynamic-module=PATH</code> 选项而不是<code>--add-module=PATH</code>选项，然后你可以通过 <code>load_module</code> 指令在你的 <code>nginx.conf</code> 中显式加载模块，注意必须在 <code>events{}</code> 片段之前.</p>
+<p>模块语法: <a href="https://github.com/openresty/echo-nginx-module#synopsis" target="_blank" rel="noopener">https://github.com/openresty/echo-nginx-module#synopsis</a></p>
+<p>Step 1.在<code>Nginx.conf</code>文件中配置<code>load_module</code>指令以动态加载 <code>echo-nginx-module</code> 模块。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1.绝对路径</span></span><br><span class="line">load_module /usr/<span class="built_in">local</span>/nginx/modules/ngx_http_echo_module.so;</span><br><span class="line"><span class="comment"># 方式2.相对路径</span></span><br><span class="line">load_module ./modules/ngx_http_echo_module.so;</span><br><span class="line">.....</span><br><span class="line">events &#123;</span><br><span class="line">  worker_connections  1024;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p>Step 2.同样在<code>demo.conf</code>文件中的进行该模块常规的使用实践。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">$ cat conf.d/demo.conf</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment"># 示例1.常规输出(注意文本类型则网页中反馈展现数据也不相同)。</span></span><br><span class="line">  location /nginx-module/<span class="built_in">echo</span> &#123;</span><br><span class="line">    default_type <span class="string">'text/html'</span>;</span><br><span class="line">    <span class="built_in">echo</span> -n <span class="string">"&lt;b&gt;Domain: demo.weiyigeek.top&lt;/b&gt; &lt;br/&gt;"</span>;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Hello World! by ngx_http_echo_module.so"</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 示例2.请求延时显示以及重置时间定时器。</span></span><br><span class="line">  location /nginx-module/timed &#123;</span><br><span class="line">    default_type <span class="string">'text/plain'</span>;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Hello World! by ngx_http_echo_module.so \r"</span>;</span><br><span class="line">    echo_reset_timer;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"1.takes about <span class="variable">$echo_timer_elapsed</span> sec \r"</span>;</span><br><span class="line">    echo_flush;</span><br><span class="line">    echo_sleep 2.5;  <span class="comment"># in sec</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"2.takes about <span class="variable">$echo_timer_elapsed</span> sec."</span>;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"End"</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 示例3.Body文档前后插入数据以及在中部插嵌入反向代理网站源码。</span></span><br><span class="line">  location /nginx-module/body &#123;</span><br><span class="line">    resolver 223.6.6.6;</span><br><span class="line">    default_type <span class="string">'text/html'</span>;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"Hello World! by ngx_http_echo_module.so"</span>;</span><br><span class="line">    echo_before_body <span class="string">'Blog - '</span>;</span><br><span class="line">    proxy_pass <span class="variable">$scheme</span>://www.weiyigeek.top:<span class="variable">$server_port</span>/index.html;</span><br><span class="line">    echo_before_body <span class="string">'www.WeiyiGeek.top'</span>;</span><br><span class="line">    echo_after_body <span class="string">'[END]'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment"># 示例4.多次输出同一个字符串以及显示客户端请求header与请求body主体参数</span></span><br><span class="line">  location /nginx-module/duplicate &#123;</span><br><span class="line">    default_type <span class="string">'text/plain'</span>;</span><br><span class="line">    echo_duplicate 3 <span class="string">"--"</span>;</span><br><span class="line">    echo_duplicate 1 <span class="string">"\rHello World! by ngx_http_echo_module.so \r\r"</span>;</span><br><span class="line">    <span class="comment"># echo_duplicate 1000_000 "Hello World! by ngx_http_echo_module.so";</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"\r"</span>;</span><br><span class="line">    echo_duplicate 1 <span class="variable">$echo_client_request_headers</span>;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"\r"</span>;</span><br><span class="line">    echo_read_request_body;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"\r"</span>;</span><br><span class="line">    echo_request_body;</span><br><span class="line">    echo_duplicate 3 <span class="string">"--"</span>;</span><br><span class="line">    <span class="built_in">echo</span>;</span><br><span class="line">   &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="comment"># 示例5.正则匹配请求参数，注意`$arg_var`后面的var是可以自定义设置，此处为flag参数。</span></span><br><span class="line">  location ^~ /nginx-module/<span class="keyword">if</span> &#123;</span><br><span class="line">    default_type <span class="string">'text/plain'</span>;</span><br><span class="line">    <span class="built_in">set</span> <span class="variable">$res</span> default;</span><br><span class="line">    <span class="built_in">echo</span> <span class="variable">$arg_flag</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$arg_flag</span> ~* <span class="string">'^a'</span>) &#123;</span><br><span class="line">      <span class="built_in">set</span> <span class="variable">$res</span> change;</span><br><span class="line">      <span class="built_in">echo</span> <span class="variable">$arg_flag</span>, <span class="variable">$res</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">echo</span> <span class="variable">$res</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>补充 echo_subrequest_async 异步请求</strong><br>描述: 使用 HTTP 方法、可选的 url 参数（或查询字符串）和可选的请求主体发起异步子请求，请求主体可以定义为字符串或包含主体的文件的路径。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># GET /multi will yields</span></span><br><span class="line"> <span class="comment">#   querystring: foo=Foo</span></span><br><span class="line"> <span class="comment">#   method: POST</span></span><br><span class="line"> <span class="comment">#   body: hi</span></span><br><span class="line"> <span class="comment">#   content length: 2</span></span><br><span class="line"> <span class="comment">#   ///</span></span><br><span class="line"> <span class="comment">#   querystring: bar=Bar</span></span><br><span class="line"> <span class="comment">#   method: PUT</span></span><br><span class="line"> <span class="comment">#   body: hello</span></span><br><span class="line"> <span class="comment">#   content length: 5</span></span><br><span class="line"> <span class="comment">#   ///</span></span><br><span class="line"> location /multi &#123;</span><br><span class="line">     echo_subrequest_async POST <span class="string">'/sub'</span> -q <span class="string">'foo=Foo'</span> -b <span class="string">'hi'</span>;</span><br><span class="line">     echo_subrequest_async PUT <span class="string">'/sub'</span> -q <span class="string">'bar=Bar'</span> -b <span class="string">'hello'</span>;</span><br><span class="line"> &#125;</span><br><span class="line"> location /sub &#123;</span><br><span class="line">     <span class="built_in">echo</span> <span class="string">"querystring: <span class="variable">$query_string</span>"</span>;</span><br><span class="line">     <span class="built_in">echo</span> <span class="string">"method: <span class="variable">$echo_request_method</span>"</span>;</span><br><span class="line">     <span class="built_in">echo</span> <span class="string">"body: <span class="variable">$echo_request_body</span>"</span>;</span><br><span class="line">     <span class="built_in">echo</span> <span class="string">"content length: <span class="variable">$http_content_length</span>"</span>;</span><br><span class="line">     <span class="built_in">echo</span> <span class="string">'///'</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Step 3.完成配置后重载nginx服务, 通过浏览器访问上述路径验证模块使用与输出，效果如下图所示:</p>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220801143605.png" target="_blank" title="WeiyiGeek.use ngx_http_echo_module" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220801143605.png" alt="WeiyiGeek.use ngx_http_echo_module" title="" class=""></a>
+                <p>WeiyiGeek.use ngx_http_echo_module</p>
+            </figure>
+<p>该模块的其它使用请参考其项目地址Readme文档，此处演示了如何加载动态链接库到nginx,并且使用链接库中的模块。</p>
+<p><br/></p>
+<h3 id="2-Nginx-实践使用-lua-resty-redis-模块连接-Redis-进行数据操作与展示"><a href="#2-Nginx-实践使用-lua-resty-redis-模块连接-Redis-进行数据操作与展示" class="headerlink" title="2.Nginx 实践使用 lua-resty-redis 模块连接 Redis 进行数据操作与展示"></a>2.Nginx 实践使用 lua-resty-redis 模块连接 Redis 进行数据操作与展示</h3><p>描述: 前面环境部署中已下载 ngx_lua_nginx 模块的 Redis 客户端驱动程序Lua库, 下面将演示如何在 Nginx 基于 ngx_lua_nginx 模块连接到Redis内存数据库进行相应数据查找，好了本小节就直奔主题。</p>
+<p>语法参考: <a href="https://github.com/openresty/lua-resty-redis#synopsis" target="_blank" rel="noopener">https://github.com/openresty/lua-resty-redis#synopsis</a></p>
+<p><strong>废话不多说，实践出真知</strong></p>
+<p>Step 1.在前面环境安装中我们解压在 ngx_lua_nginx 模块使用 Redis 客户端驱动程序Lua库，并将其 Lib 目录复制到 <code>/usr/local/nginx/lua/</code> 目录中，其次我也准备了Redis数据库环境，针对安装部署步骤就不在详述了, 想要快速安装的朋友可以参考我的此篇文章【[Redis内存数据库环境快速搭建部署][<a href="https://blog.weiyigeek.top/2022/4-24-653.html]】。">https://blog.weiyigeek.top/2022/4-24-653.html]】。</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ tree /usr/<span class="built_in">local</span>/nginx/lua/lib/</span><br><span class="line">/usr/<span class="built_in">local</span>/nginx/lua/lib/</span><br><span class="line">└── resty</span><br><span class="line">    └── redis.lua</span><br><span class="line"></span><br><span class="line"><span class="comment"># Redis 数据库 &amp; 为了演示数据准备两个Key即domain/blog</span></span><br><span class="line">192.168.1.22 6379 weiyigeek.top</span><br><span class="line">/data <span class="comment"># redis-cli</span></span><br><span class="line">127.0.0.1:6379&gt; auth  weiyigeek.top</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ping</span><br><span class="line">PONG</span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> domain www.weiyigeek.top </span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> blog blog.weiyigeek.top</span><br><span class="line">OK</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Step 2.想要在Nginx使用该<code>redis.lua</code>链接到数据库，首先我们需要在<code>nginx.conf</code>配置文件中加入该lua包路径<code>/usr/local/nginx/lua/lib/</code>，例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ grep &quot;lua_package_path&quot; &#x2F;usr&#x2F;local&#x2F;nginx&#x2F;nginx.conf</span><br><span class="line">lua_package_path &#39;&#x2F;usr&#x2F;local&#x2F;nginx&#x2F;lua&#x2F;lib&#x2F;?.lua;&#x2F;usr&#x2F;local&#x2F;src&#x2F;lua-resty-core-0.1.23&#x2F;lib&#x2F;?.lua;&#x2F;usr&#x2F;local&#x2F;src&#x2F;lua-resty-lrucache-0.13&#x2F;lib&#x2F;?.lua;&#39;</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>Step 3.此处也是在 <code>demo.conf</code> 中进行配置使用Redis客户端驱动程序Lua库，连接到Redis数据库中, 此处为了方便演示就直接在该配置文件<code>content_by_lua_block</code> 代码块中使用lua语法，在企业生产实践环境中一定要将其写入到lua文件文件中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /usr/local/nginx/conf.d/demo.conf</span></span><br><span class="line">server &#123;</span><br><span class="line">...</span><br><span class="line">  location /redis/get &#123;</span><br><span class="line">    default_type <span class="string">'text/html'</span>;</span><br><span class="line">    <span class="built_in">set</span> <span class="variable">$key</span> <span class="variable">$arg_key</span>;</span><br><span class="line">    content_by_lua_block &#123;</span><br><span class="line">      -- <span class="comment"># 引入resty.redis模块与创建实例化对象</span></span><br><span class="line">      <span class="built_in">local</span> redis = require <span class="string">"resty.redis"</span></span><br><span class="line">      <span class="built_in">local</span> client = redis:new()</span><br><span class="line">      <span class="built_in">local</span> REDIS_HOST = <span class="string">"192.168.1.22"</span></span><br><span class="line">      <span class="built_in">local</span> REDIS_PROT = 6379</span><br><span class="line">      <span class="built_in">local</span> REDIS_AUTH = <span class="string">"weiyigeek.top"</span></span><br><span class="line">      -- <span class="comment"># ngx.log(ngx.ERR, ngx.var.key)</span></span><br><span class="line">      -- <span class="comment"># 分别设置连接、发送和读取超时阈值（以毫秒为单位），用于后续套接字操作。</span></span><br><span class="line">      client:set_timeouts(1000, 1000, 1000)</span><br><span class="line">  </span><br><span class="line">      -- <span class="comment"># 创建链接对象, 连接到Redis数据库</span></span><br><span class="line">      ngx.say(<span class="string">"1.connect redis server..... &lt;br&gt;"</span>);</span><br><span class="line">      <span class="built_in">local</span> ok, err = client:connect(REDIS_HOST, REDIS_PROT)</span><br><span class="line">      <span class="keyword">if</span> not ok <span class="keyword">then</span></span><br><span class="line">        ngx.say(<span class="string">"failed to connect: "</span>, err)</span><br><span class="line">        <span class="built_in">return</span></span><br><span class="line">      end</span><br><span class="line">  </span><br><span class="line">      -- <span class="comment"># 认证</span></span><br><span class="line">      ngx.say(<span class="string">"2.auth redis server..... &lt;br&gt;"</span>);</span><br><span class="line">      <span class="built_in">local</span> res, err = client:auth(REDIS_AUTH)</span><br><span class="line">      <span class="keyword">if</span> not res <span class="keyword">then</span></span><br><span class="line">        ngx.say(<span class="string">"failed to authenticate: "</span>, err)</span><br><span class="line">        <span class="built_in">return</span></span><br><span class="line">      end</span><br><span class="line">  </span><br><span class="line">      -- <span class="comment"># 获取指定请求键值</span></span><br><span class="line">      ngx.say(<span class="string">"3.get custom KV for redis server, Key = "</span>,ngx.var.key,<span class="string">" &lt;br&gt;"</span>);</span><br><span class="line">      <span class="built_in">local</span> res, err = client:get(ngx.var.key)</span><br><span class="line">      <span class="keyword">if</span> not res <span class="keyword">then</span></span><br><span class="line">          ngx.say(<span class="string">"failed to get key: "</span>, err)</span><br><span class="line">          <span class="built_in">return</span></span><br><span class="line">      end</span><br><span class="line">      <span class="keyword">if</span> res == ngx.null <span class="keyword">then</span></span><br><span class="line">          ngx.say(<span class="string">"key not found."</span>)</span><br><span class="line">          <span class="built_in">return</span></span><br><span class="line">      end</span><br><span class="line"></span><br><span class="line">      -- <span class="comment"># 输出结果</span></span><br><span class="line">      ngx.say(<span class="string">"&lt;b style='color:red'&gt;4.result value: "</span>,res,<span class="string">"&lt;/b&gt;&lt;br/&gt;"</span>)</span><br><span class="line"></span><br><span class="line">      -- <span class="comment"># 使用完毕后立即关闭销毁Redis连接(短连接可以如此使用,如果是长链接建议回收该连接池对象即可)</span></span><br><span class="line">      <span class="built_in">local</span> ok, err = client:close()</span><br><span class="line">      <span class="keyword">if</span> not ok <span class="keyword">then</span></span><br><span class="line">        ngx.say(<span class="string">"failed to close: "</span>, err)</span><br><span class="line">        <span class="built_in">return</span></span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">        ngx.say(<span class="string">"5.just close the Redis connection right away &lt;br/&gt;"</span>)</span><br><span class="line">      end</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220801161649.png" target="_blank" title="WeiyiGeek.Lua-redis-demo1" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220801161649.png" alt="WeiyiGeek.Lua-redis-demo1" title="" class=""></a>
+                <p>WeiyiGeek.Lua-redis-demo1</p>
+            </figure>
+<p><br/></p>
+<p>Step 5.在演示一个示例，我们可以一次性执行多个redis操作命令 lua-resty-redis 库支持pipeline提交，下面我们演示使用 <code>content_by_lua_file</code> 关键字指定连接操作redis的lua脚本地址(<code>/usr/local/nginx/lua/custom/nginx-redis.lua</code>)实践, 该方式在线上环境中推荐使用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1) 操作 redis 数据库的 lua 脚本示例。</span></span><br><span class="line">tee /usr/<span class="built_in">local</span>/nginx/lua/custom/nginx-redis.lua &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">-- <span class="comment"># 引入resty.redis模块与创建实例化对象</span></span><br><span class="line"><span class="built_in">local</span> redis = require <span class="string">"resty.redis"</span></span><br><span class="line"><span class="built_in">local</span> client = redis:new()</span><br><span class="line"><span class="built_in">local</span> REDIS_HOST = <span class="string">"192.168.1.22"</span></span><br><span class="line"><span class="built_in">local</span> REDIS_PROT = 6379</span><br><span class="line"><span class="built_in">local</span> REDIS_AUTH = <span class="string">"weiyigeek.top"</span></span><br><span class="line">-- <span class="comment"># ngx.log(ngx.ERR, ngx.var.key)</span></span><br><span class="line">-- <span class="comment"># 分别设置连接、发送和读取超时阈值（以毫秒为单位），用于后续套接字操作。</span></span><br><span class="line">client:set_timeouts(1000, 1000, 1000)</span><br><span class="line"></span><br><span class="line">-- <span class="comment"># 验证请求的参数是否存在</span></span><br><span class="line"><span class="keyword">if</span> (ngx.var.key == ngx.null and ngx.var.value == ngx.null) </span><br><span class="line"><span class="keyword">then</span></span><br><span class="line">  ngx.say(<span class="string">"Request parameters : key + value not found!"</span>)</span><br><span class="line">  ngx.exit(404)</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">-- <span class="comment"># 创建链接对象, 连接到Redis数据库</span></span><br><span class="line">ngx.say(<span class="string">"1.connect redis server..... &lt;br&gt;"</span>);</span><br><span class="line"><span class="built_in">local</span> ok, err = client:connect(REDIS_HOST, REDIS_PROT)</span><br><span class="line"><span class="keyword">if</span> not ok <span class="keyword">then</span></span><br><span class="line">  ngx.say(<span class="string">"failed to connect: "</span>, err)</span><br><span class="line">  <span class="built_in">return</span></span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">-- <span class="comment"># 认证</span></span><br><span class="line">ngx.say(<span class="string">"2.auth redis server..... &lt;br&gt;"</span>);</span><br><span class="line"><span class="built_in">local</span> res, err = client:auth(REDIS_AUTH)</span><br><span class="line"><span class="keyword">if</span> not res <span class="keyword">then</span></span><br><span class="line">  ngx.say(<span class="string">"failed to authenticate: "</span>, err)</span><br><span class="line">  <span class="built_in">return</span></span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">-- <span class="comment"># 使用 pipeline 通道方式进行redis 数据库操作</span></span><br><span class="line">client:init_pipeline()</span><br><span class="line">client:<span class="built_in">set</span>(ngx.var.key, ngx.var.value)</span><br><span class="line">client:get(ngx.var.key)</span><br><span class="line">client:get(<span class="string">"domain"</span>)</span><br><span class="line"><span class="built_in">local</span> results, err = client:commit_pipeline()</span><br><span class="line"><span class="keyword">if</span> not results <span class="keyword">then</span></span><br><span class="line">  ngx.say(<span class="string">"failed to commit the pipelined requests: "</span>, err)</span><br><span class="line">  <span class="built_in">return</span></span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">-- 结果遍历</span><br><span class="line"><span class="keyword">for</span> i, res <span class="keyword">in</span> ipairs(results) <span class="keyword">do</span></span><br><span class="line">  <span class="keyword">if</span> <span class="built_in">type</span>(res) == <span class="string">"table"</span> <span class="keyword">then</span></span><br><span class="line">      <span class="keyword">if</span> res[1] == <span class="literal">false</span> <span class="keyword">then</span></span><br><span class="line">          ngx.say(<span class="string">"failed to run command "</span>, i, <span class="string">": "</span>, res[2],<span class="string">"&lt;br/&gt;"</span>)</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">        -- process the table value</span><br><span class="line">        ngx.say(<span class="string">"3) 3."</span>,i, <span class="string">": "</span>, res[2],<span class="string">"&lt;br/&gt;"</span>)</span><br><span class="line">      end</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    -- process the scalar value</span><br><span class="line">    ngx.say(<span class="string">"&lt;p style='color:red'&gt;3) "</span>,i,<span class="string">"---"</span>,res,<span class="string">"&lt;/p&gt;"</span>)</span><br><span class="line">  end</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">-- 将当前 Redis 连接立即放入 ngx_lua cosocket 连接池（将其放入大小为100的连接池中，最大空闲时间为10秒）。</span><br><span class="line"><span class="built_in">local</span> ok, err = client:set_keepalive(10000, 100)</span><br><span class="line"><span class="keyword">if</span> not ok <span class="keyword">then</span></span><br><span class="line">  ngx.say(<span class="string">"failed to set keepalive: "</span>, err)</span><br><span class="line">  <span class="built_in">return</span></span><br><span class="line">end</span><br><span class="line">ngx.say(<span class="string">"4.将当前 Redis 连接立即放入 ngx_lua cosocket 连接池&lt;br/&gt;"</span>)</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2) 配置 demo.conf 文件 同样在 server 片段中加入如下 location 片段。</span></span><br><span class="line">server &#123;</span><br><span class="line">....</span><br><span class="line">  location /redis/pipeline &#123;</span><br><span class="line">    default_type <span class="string">'text/html'</span>;</span><br><span class="line">    <span class="comment"># 获取请求参数中key的值与value的值并存放到nginx环境变量中</span></span><br><span class="line">    <span class="built_in">set</span> <span class="variable">$key</span> <span class="variable">$arg_key</span>;</span><br><span class="line">    <span class="built_in">set</span> <span class="variable">$value</span> <span class="variable">$arg_value</span>;</span><br><span class="line">    <span class="comment"># 调用并执行指定的lua脚本</span></span><br><span class="line">    content_by_lua_file ./lua/custom/nginx-redis.lua;</span><br><span class="line">  &#125;</span><br><span class="line">....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在配置完成后我们便可以重载nginx，并使用访问浏览器访问上述路径，例如: <code>http://demo.weiyigeek.top/redis/pipeline?key=name&amp;value=WeiyiGeek</code>，此处我演示的结果如下图所示。</p>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220801174916.png" target="_blank" title="WeiyiGeek.lua-redis-pipeline" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220801174916.png" alt="WeiyiGeek.lua-redis-pipeline" title="" class=""></a>
+                <p>WeiyiGeek.lua-redis-pipeline</p>
+            </figure>
+<p><br></p>
+<h3 id="3-Nginx-实践读取Redis数据库中图片绑定对应键值并进行图片展示"><a href="#3-Nginx-实践读取Redis数据库中图片绑定对应键值并进行图片展示" class="headerlink" title="3.Nginx 实践读取Redis数据库中图片绑定对应键值并进行图片展示"></a>3.Nginx 实践读取Redis数据库中图片绑定对应键值并进行图片展示</h3><p>描述: 假如在这样一个场景中，为了避免恶意用户遍历有规律的图片进行下载，那如何解决这个问题呢?</p>
+<p>方法是有得但也不限于本节实践的案例，此处我们可以将其图片名称或者图片md5值存入到Redis数据库中作为Key，而实际的图片路径作为Value，在请求时我们将该md5值作为参数进行传入，经过 Nginx 对请求参数的处理，使用前面的方式在 Lua 脚本中连接Redis，并将URL传递的md5参数作为key进行get查询，并将查询到的图片路径，反馈给set指令设置的变量之中，然后我们便可以通过 proxy_pass 进行代理访问(地址栏中的url不会变化，保证实际的图片路径)，或者也可以加上一个头<code>Content-Disposition</code>直接进行图片下载。</p>
+<p>不在多说废话了,只有实践才是王道。</p>
+<p><strong>实践流程:</strong></p>
+<ul>
+<li>Step 1.准备一个图片目录以及放入几张图片进行演示，此处你可以使用图片名称md5也可使用图形文件本身md5效验值。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$ tree /usr/<span class="built_in">local</span>/nginx/html/</span><br><span class="line">/usr/<span class="built_in">local</span>/nginx/html/</span><br><span class="line">├── 50x.html</span><br><span class="line">├── images</span><br><span class="line">│   ├── 1562941454569.jpeg</span><br><span class="line">│   ├── 1562941454570.jpeg</span><br><span class="line">│   └── 1562941454571.png</span><br><span class="line">└── index.html</span><br><span class="line"></span><br><span class="line"><span class="comment"># 文件的MD5值</span></span><br><span class="line">/usr/<span class="built_in">local</span>/nginx/html/images<span class="comment"># md5sum * | awk '&#123;print "set "$1" "$2&#125;'</span></span><br><span class="line"><span class="built_in">set</span> 6fad4c2466dc7f61fb055021ec65324d  1562941454569.jpeg</span><br><span class="line"><span class="built_in">set</span> 611877180883388de4752ded33a81165  1562941454570.jpeg</span><br><span class="line"><span class="built_in">set</span> 6636d52bfbe068177df5219edf4dd456  1562941454571.png</span><br><span class="line"></span><br><span class="line"><span class="comment"># 写入KV到redis数据库中</span></span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> 6fad4c2466dc7f61fb055021ec65324d 1562941454569.jpeg</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> 611877180883388de4752ded33a81165 1562941454570.jpeg</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; <span class="built_in">set</span> 6636d52bfbe068177df5219edf4dd456 1562941454571.png</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Step 2.在<code>demo.conf</code>文件中的<code>server</code>片段中增加 <code>location</code> 片段，其中进行如下配置:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">$ vim conf.d/demo.conf</span><br><span class="line">server &#123;</span><br><span class="line">......</span><br><span class="line"> location = /api/v2/images/get &#123;</span><br><span class="line">   resolver 223.6.6.6;</span><br><span class="line">   <span class="built_in">set</span> <span class="variable">$key</span> <span class="variable">$arg_md5sum</span>;</span><br><span class="line">   <span class="built_in">set</span> <span class="variable">$name</span> <span class="string">""</span>;</span><br><span class="line">   access_by_lua_block &#123;</span><br><span class="line">    <span class="built_in">local</span> redis = require <span class="string">"resty.redis"</span></span><br><span class="line">    <span class="built_in">local</span> client = redis:new()</span><br><span class="line">    <span class="built_in">local</span> REDIS_HOST = <span class="string">"192.168.1.22"</span></span><br><span class="line">    <span class="built_in">local</span> REDIS_PROT = 6379</span><br><span class="line">    <span class="built_in">local</span> REDIS_AUTH = <span class="string">"weiyigeek.top"</span></span><br><span class="line">    client:set_timeouts(1000, 1000, 1000)</span><br><span class="line">    <span class="built_in">local</span> ok, err = client:connect(REDIS_HOST, REDIS_PROT)</span><br><span class="line">    <span class="keyword">if</span> not ok <span class="keyword">then</span></span><br><span class="line">      ngx.say(<span class="string">"failed to connect: "</span>, err)</span><br><span class="line">      <span class="built_in">return</span></span><br><span class="line">    end</span><br><span class="line">    <span class="built_in">local</span> res, err = client:auth(REDIS_AUTH)</span><br><span class="line">    <span class="keyword">if</span> not res <span class="keyword">then</span></span><br><span class="line">      ngx.say(<span class="string">"failed to authenticate: "</span>, err)</span><br><span class="line">      <span class="built_in">return</span></span><br><span class="line">    end</span><br><span class="line">    <span class="built_in">local</span> res, err = client:get(ngx.var.key)</span><br><span class="line">    <span class="keyword">if</span> not res <span class="keyword">then</span></span><br><span class="line">        ngx.say(<span class="string">"failed to get key: "</span>, err)</span><br><span class="line">        <span class="built_in">return</span></span><br><span class="line">    end</span><br><span class="line">    <span class="keyword">if</span> res == ngx.null <span class="keyword">then</span></span><br><span class="line">        ngx.say(<span class="string">"key not found."</span>)</span><br><span class="line">        <span class="built_in">return</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">      -- <span class="comment"># 关键点将redis中指定键的值赋予给nginx指定变量</span></span><br><span class="line">      ngx.var.name = res</span><br><span class="line">    end</span><br><span class="line">    <span class="built_in">local</span> ok, err = client:set_keepalive(10000, 100)</span><br><span class="line">    <span class="keyword">if</span> not ok <span class="keyword">then</span></span><br><span class="line">      ngx.say(<span class="string">"failed to set keepalive: "</span>, err)</span><br><span class="line">      <span class="built_in">return</span></span><br><span class="line">    end</span><br><span class="line">   &#125;</span><br><span class="line">   proxy_pass <span class="variable">$scheme</span>://<span class="variable">$server_name</span>/images/<span class="variable">$name</span>;</span><br><span class="line">  &#125;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>在配置完成后我们重载 Nginx，然后利用浏览器进行访问如上URL，例如<code>http://demo.weiyigeek.top/api/v2/images/get?md5sum=6636d52bfbe068177df5219edf4dd456</code>，执行结果如下所示:</p>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802145343.png" target="_blank" title="WeiyiGeek.access_by_lua_block-proxy_pass" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802145343.png" alt="WeiyiGeek.access_by_lua_block-proxy_pass" title="" class=""></a>
+                <p>WeiyiGeek.access_by_lua_block-proxy_pass</p>
+            </figure>
+<p><br/></p>
+<ul>
+<li>Step 3.如果我们想通过浏览器访问上述地址就直接弹出源文件名称进行下载的，我们则可以在 <code>proxy_pass</code> 片段后加上如下 <code>header</code> 头: <code>add_header Content-Disposition &quot;attachment;filename=$name&quot;;</code></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">proxy_pass <span class="variable">$scheme</span>://<span class="variable">$server_name</span>/images/<span class="variable">$name</span>;</span><br><span class="line">add_header Content-Disposition <span class="string">"attachment;filename=<span class="variable">$name</span>"</span>;</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重载Nginx后利用CURL访问该URL</span></span><br><span class="line">$ curl -I http://demo.weiyigeek.top/api/v2/images/get?md5sum=6636d52bfbe068177df5219edf4dd456</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: nginx/1.22.0</span><br><span class="line">Date: Tue, 02 Aug 2022 02:23:12 GMT</span><br><span class="line">Content-Type: image/png</span><br><span class="line">Content-Length: 32641</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Last-Modified: Wed, 23 Mar 2022 00:48:26 GMT</span><br><span class="line">ETag: <span class="string">"623a6e5a-7f81"</span></span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Content-Disposition: attachment;filename=1562941454571.png</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802150239.png" target="_blank" title="WeiyiGeek.proxy_pass-Content-Disposition" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802150239.png" alt="WeiyiGeek.proxy_pass-Content-Disposition" title="" class=""></a>
+                <p>WeiyiGeek.proxy_pass-Content-Disposition</p>
+            </figure>
+<p><br/></p>
+<ul>
+<li>Step 4.当然，你也可使用<code>rewrite_by_lua_block</code>代码块包含Lua可直接或者图片路径，然后使用<code>ngx.redirect()</code>方法进行跳转。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">$ vim conf.d/demo.conf</span><br><span class="line">server &#123;</span><br><span class="line">......</span><br><span class="line"> location = /api/v1/images/get &#123;</span><br><span class="line">  resolver 223.6.6.6;</span><br><span class="line">  <span class="built_in">set</span> <span class="variable">$key</span> <span class="variable">$arg_md5sum</span>;</span><br><span class="line">  rewrite_by_lua_block &#123;</span><br><span class="line">    <span class="built_in">local</span> redis = require <span class="string">"resty.redis"</span></span><br><span class="line">    <span class="built_in">local</span> client = redis:new()</span><br><span class="line">    <span class="built_in">local</span> REDIS_HOST = <span class="string">"192.168.1.22"</span></span><br><span class="line">    <span class="built_in">local</span> REDIS_PROT = 6379</span><br><span class="line">    <span class="built_in">local</span> REDIS_AUTH = <span class="string">"weiyigeek.top"</span></span><br><span class="line">    client:set_timeouts(1000, 1000, 1000)</span><br><span class="line">    <span class="built_in">local</span> ok, err = client:connect(REDIS_HOST, REDIS_PROT)</span><br><span class="line">    <span class="keyword">if</span> not ok <span class="keyword">then</span></span><br><span class="line">      ngx.say(<span class="string">"failed to connect: "</span>, err)</span><br><span class="line">      <span class="built_in">return</span></span><br><span class="line">    end</span><br><span class="line">    <span class="built_in">local</span> res, err = client:auth(REDIS_AUTH)</span><br><span class="line">    <span class="keyword">if</span> not res <span class="keyword">then</span></span><br><span class="line">      ngx.say(<span class="string">"failed to authenticate: "</span>, err)</span><br><span class="line">      <span class="built_in">return</span></span><br><span class="line">    end</span><br><span class="line">    <span class="built_in">local</span> res, err = client:get(ngx.var.key)</span><br><span class="line">    <span class="keyword">if</span> not res <span class="keyword">then</span></span><br><span class="line">        ngx.say(<span class="string">"failed to get key: "</span>, err)</span><br><span class="line">        <span class="built_in">return</span></span><br><span class="line">    end</span><br><span class="line">    <span class="keyword">if</span> res == ngx.null <span class="keyword">then</span></span><br><span class="line">      ngx.say(<span class="string">"key not found."</span>)</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">      -- <span class="comment"># 关键点图片格式化。</span></span><br><span class="line">      <span class="built_in">return</span> ngx.redirect(string.format(<span class="string">"%s%s"</span>,<span class="string">"/images/"</span>,res))</span><br><span class="line">    end</span><br><span class="line">    <span class="built_in">local</span> ok, err = client:set_keepalive(10000, 100)</span><br><span class="line">    <span class="keyword">if</span> not ok <span class="keyword">then</span></span><br><span class="line">      ngx.say(<span class="string">"failed to set keepalive: "</span>, err)</span><br><span class="line">      <span class="built_in">return</span></span><br><span class="line">    end</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment"># 若没有匹配搭配到进行跳转进行跳转则访问首页</span></span><br><span class="line">   proxy_pass <span class="variable">$scheme</span>://<span class="variable">$server_name</span>/index.html;</span><br><span class="line">  &#125;</span><br><span class="line">......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802153937.png" target="_blank" title="WeiyiGeek.rewrite_by_lua_block+ngx.redirect" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220802153937.png" alt="WeiyiGeek.rewrite_by_lua_block+ngx.redirect" title="" class=""></a>
+                <p>WeiyiGeek.rewrite_by_lua_block+ngx.redirect</p>
+            </figure>
+<p>好了，本章实践就到此处了，更多的奇技淫巧尽在 [weiyigeek] 公众号.</p>
+<hr>
+<h2 id="0x03-扩展补充"><a href="#0x03-扩展补充" class="headerlink" title="0x03 扩展补充"></a>0x03 扩展补充</h2><p><strong>示例1.使用 ngx.location.capture() 请求内部接口</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">location = /auth &#123;</span><br><span class="line">  internal;</span><br><span class="line">  retur 200 <span class="string">'&#123;"status":"$auth_status"&#125;'</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 此处根据业务的需求来写正则表达式，一定要个 redis 里的 KEY  对应上</span></span><br><span class="line">location  ~/[0-9].*\.(gif|jpg|jpeg|png)$ &#123;</span><br><span class="line">  <span class="built_in">set</span> <span class="variable">$target</span> <span class="string">''</span>;</span><br><span class="line">  access_by_lua <span class="string">'</span></span><br><span class="line"><span class="string">  # 使用 nginx 的内部参数 ngx.var.uri 来获取请求的 uri 地址，如 /000001.jpg</span></span><br><span class="line"><span class="string">    local key = ngx.var.uri</span></span><br><span class="line"><span class="string">  # 根据正则匹配到 KEY ，从 redis 数据库里获取文件 ID (路径和文件名)</span></span><br><span class="line"><span class="string">    local res = ngx.location.capture(</span></span><br><span class="line"><span class="string">        "/Redis", &#123; args = &#123; key = key &#125; &#125;</span></span><br><span class="line"><span class="string">    )</span></span><br><span class="line"><span class="string">    if res.status ~= 200 then</span></span><br><span class="line"><span class="string">        ngx.log(ngx.ERR, "Redis server returned bad status: ",res.status)</span></span><br><span class="line"><span class="string">        ngx.exit(res.status)</span></span><br><span class="line"><span class="string">    end</span></span><br><span class="line"><span class="string">    if not res.body then</span></span><br><span class="line"><span class="string">        ngx.log(ngx.ERR, "Redis returned empty body")</span></span><br><span class="line"><span class="string">        ngx.exit(500)</span></span><br><span class="line"><span class="string">    end</span></span><br><span class="line"><span class="string">    local parser = require "Redis.parser"</span></span><br><span class="line"><span class="string">    local filename, typ = parser.parse_reply(res.body)</span></span><br><span class="line"><span class="string">    if typ ~= parser.BULK_REPLY or not server then</span></span><br><span class="line"><span class="string">        ngx.log(ngx.ERR, "bad Redis response: ", res.body)</span></span><br><span class="line"><span class="string">        ngx.exit(500)</span></span><br><span class="line"><span class="string">    end</span></span><br><span class="line"><span class="string">  </span></span><br><span class="line"><span class="string">    ngx.var.target = filename</span></span><br><span class="line"><span class="string">  '</span>;</span><br><span class="line">    proxy_pass http://10.20.172.196/<span class="variable">$target</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>示例2.Nginx在reponse返回的cookie中设置HttpOnly</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">local</span> cookies = ngx.header.set_cookie</span><br><span class="line"><span class="keyword">if</span> cookies <span class="keyword">then</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">type</span>(cookies) == <span class="string">"table"</span> <span class="keyword">then</span></span><br><span class="line">        <span class="keyword">for</span> k,v <span class="keyword">in</span> pairs(cookies) <span class="keyword">do</span></span><br><span class="line">            cookies[k] = v .. <span class="string">"; HttpOnly"</span></span><br><span class="line">            ngx.header.set_cookie = cookies</span><br><span class="line">        end</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">local</span> cookiesStr = cookies .. <span class="string">"; HttpOnly"</span></span><br><span class="line">        ngx.header.set_cookie = cookiesStr;</span><br><span class="line">    end</span><br><span class="line">end</span><br></pre></td></tr></table></figure><br>以上脚本的含义：</p>
+<ul>
+<li>获取 nginx 响应信息中的cookie信息</li>
+<li>如果cookie信息为空，则直接跳过，如果不为空则判断是多个 cookie 还是单个 cookie 返回</li>
+<li>如果是多个 cookie 的话，则遍历数组，每个 cookie 字符串拼接 ‘; HttpOnly’ 的字符串</li>
+<li>如果是单个 cookie 的话，则直接拼接 ‘; HttpOnly’ 的字符串</li>
+</ul>
+<hr>
+<h2 id="0x0n-入坑出坑"><a href="#0x0n-入坑出坑" class="headerlink" title="0x0n 入坑出坑"></a>0x0n 入坑出坑</h2><h3 id="问题1-当编译-Nginx-时报checking-for-LuaJIT-2-x-not-found-configure-error-unsupported-LuaJIT-version-ngx-http-lua-module-requires-LuaJIT-2-x-错误时的解决办法。"><a href="#问题1-当编译-Nginx-时报checking-for-LuaJIT-2-x-not-found-configure-error-unsupported-LuaJIT-version-ngx-http-lua-module-requires-LuaJIT-2-x-错误时的解决办法。" class="headerlink" title="问题1. 当编译 Nginx 时报checking for LuaJIT 2.x ... not found, ./configure: error: unsupported LuaJIT version; ngx_http_lua_module requires LuaJIT 2.x. 错误时的解决办法。"></a>问题1. 当编译 Nginx 时报<code>checking for LuaJIT 2.x ... not found, ./configure: error: unsupported LuaJIT version; ngx_http_lua_module requires LuaJIT 2.x.</code> 错误时的解决办法。</h3><p>问题描述: tell nginx’s build system where to find LuaJIT 2.1<br>解决办法:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 临时生效</span></span><br><span class="line"><span class="built_in">export</span> LUAJIT_LIB=/usr/<span class="built_in">local</span>/luajit/lib</span><br><span class="line"><span class="built_in">export</span> LUAJIT_INC=/usr/<span class="built_in">local</span>/luajit/include/luajit-2.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 永久生效</span></span><br><span class="line">tee -a /etc/profile &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="built_in">export</span> LUAJIT_LIB=/usr/<span class="built_in">local</span>/luajit/lib</span><br><span class="line"><span class="built_in">export</span> LUAJIT_INC=/usr/<span class="built_in">local</span>/luajit/include/luajit-2.1</span><br><span class="line">EOF</span><br><span class="line"><span class="built_in">source</span> /etc/profile</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="问题2-在使用luajit官方主分支LuaJIT-2-1-0-beta3提供LuaJIT安装部署出现nginx-alert-detected-a-LuaJIT-version-which-is-not-OpenResty-39-s-以及nginx-alert-failed-to-load-the-39-resty-core-39-module警告。"><a href="#问题2-在使用luajit官方主分支LuaJIT-2-1-0-beta3提供LuaJIT安装部署出现nginx-alert-detected-a-LuaJIT-version-which-is-not-OpenResty-39-s-以及nginx-alert-failed-to-load-the-39-resty-core-39-module警告。" class="headerlink" title="问题2.在使用luajit官方主分支LuaJIT-2.1.0-beta3提供LuaJIT安装部署出现nginx: [alert] detected a LuaJIT version which is not OpenResty&#39;s;以及nginx: [alert] failed to load the &#39;resty.core&#39; module警告。"></a>问题2.在使用luajit官方主分支<code>LuaJIT-2.1.0-beta3</code>提供LuaJIT安装部署出现<code>nginx: [alert] detected a LuaJIT version which is not OpenResty&#39;s;</code>以及<code>nginx: [alert] failed to load the &#39;resty.core&#39; module</code>警告。</h3><p>错误信息:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ /usr/sbin/nginx </span><br><span class="line">nginx: [alert] detected a LuaJIT version <span class="built_in">which</span> is not OpenResty<span class="string">'s; many optimizations will be disabled and performance will be compromised (see https://github.com/openresty/luajit2 for OpenResty'</span>s LuaJIT or, even better, consider using the OpenResty releases from https://openresty.org/en/download.html)</span><br><span class="line">nginx: [alert] failed to load the <span class="string">'resty.core'</span> module (https://github.com/openresty/lua-resty-core); ensure you are using an OpenResty release from https://openresty.org/en/download.html (reason: module <span class="string">'resty.core'</span> not found:</span><br><span class="line">  no field package.preload[<span class="string">'resty.core'</span>]</span><br><span class="line">  no file <span class="string">'./resty/core.lua'</span></span><br><span class="line">  no file <span class="string">'/usr/local/share/luajit-2.1.0-beta3/resty/core.lua'</span></span><br><span class="line">  no file <span class="string">'/usr/local/share/lua/5.1/resty/core.lua'</span></span><br><span class="line">  no file <span class="string">'/usr/local/share/lua/5.1/resty/core/init.lua'</span></span><br><span class="line">  no file <span class="string">'./resty/core.so'</span></span><br><span class="line">  no file <span class="string">'/usr/local/lib/lua/5.1/resty/core.so'</span></span><br><span class="line">  no file <span class="string">'/usr/local/lib/lua/5.1/loadall.so'</span></span><br><span class="line">  no file <span class="string">'./resty.so'</span></span><br><span class="line">  no file <span class="string">'/usr/local/lib/lua/5.1/resty.so'</span></span><br><span class="line">  no file <span class="string">'/usr/local/lib/lua/5.1/loadall.so'</span>) <span class="keyword">in</span> /usr/<span class="built_in">local</span>/nginx/nginx.conf:117</span><br></pre></td></tr></table></figure><br><br></p>
+<p>问题原因1: 提示LuaJIT的版本不匹配OpenResty’s内核版本, 让我不要用这个luajit版本，可以用openresty提供的luajit优化版本，或者干脆直接用openresty,下面将安装卸载luajit官网版本，下载openresty提供的luajit优化版本（即上面环境安装已经实践了，按照上面版本进行安装一般不会存在该问题）。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 你可能会进行 Lua 脚本解释器的安装 LuaJIT </span></span><br><span class="line">http://luajit.org/download.html</span><br><span class="line">wget -c https://luajit.org/download/LuaJIT-2.1.0-beta3.tar.gz</span><br><span class="line">tar -zxf LuaJIT-2.1.0-beta3.tar.gz &amp;&amp; <span class="built_in">cd</span> LuaJIT-2.1.0-beta3</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">ln -sf /usr/<span class="built_in">local</span>/bin/luajit-2.1.0-beta3 /usr/<span class="built_in">local</span>/bin/luajit</span><br><span class="line"><span class="comment"># 卸载LuaJIT官网主分支版本，然后重新安装openresty提供的luajit优化版即可</span></span><br><span class="line">make uninstall</span><br><span class="line">make clean</span><br></pre></td></tr></table></figure></p>
+<p>问题原因2: 提示加载’resty.core’模块失败，其解决办法，按照<code>https://github.com/openresty/lua-nginx-module/issues/1509</code>上面所说,  安装<code>lua-resty-core</code>和依赖文件<code>lua-resty-lrucache</code>解决问题，即我前面实践中已经进行此部分操作，若不会操作请上翻到 【安装部署】标题进行查看。</p>
+<hr>
+<p>原文地址: <a href="https://blog.weiyigeek.top/2022/7-2-676.html">https://blog.weiyigeek.top/2022/7-2-676.html</a></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-09-08T07:41:17.197Z" itemprop="dateUpdated">2022-09-08 15:41:17</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/系统运维/Application/Web/WebApp/Nginx/7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现.md" target="_blank" rel="noopener noreferrer">_posts/系统运维/Application/Web/WebApp/Nginx/7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2022/7-2-676.html" target="_blank" rel="external">https://blog.weiyigeek.top/2022/7-2-676.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Lua/" rel="tag">Lua</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Nginx/" rel="tag">Nginx</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/7-2-676.html&title=《7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/7-2-676.html&title=《7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现》 — WeiyiGeek Blog&source=本章目录
+[TOC]
+
+0x00 前言简述为啥有此篇文章?描述: 在进行公司的图片存储解决方案研究中，最开始准备使用的是FastDFS，但是经过深思熟虑，..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/7-2-676.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/7-2-676.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/7-2-676.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2022/7-3-677.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">8.Nginx实践之请求图片转换为Google推出的webp格式转换工具实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2022/6-21-659.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">宝德PowerLeader服务器基础知识与管理</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#知识引入"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">知识引入</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Lua模块指令阶段"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">Lua模块指令阶段</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-部署环境"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 部署环境</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装说明"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">安装说明</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装部署"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">安装部署</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-使用实践"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 使用实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-Nginx-实践使用-echo-nginx-module-模块之动态加载链接库"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">1.Nginx 实践使用 echo-nginx-module 模块之动态加载链接库</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-Nginx-实践使用-lua-resty-redis-模块连接-Redis-进行数据操作与展示"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">2.Nginx 实践使用 lua-resty-redis 模块连接 Redis 进行数据操作与展示</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-Nginx-实践读取Redis数据库中图片绑定对应键值并进行图片展示"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">3.Nginx 实践读取Redis数据库中图片绑定对应键值并进行图片展示</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-扩展补充"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 扩展补充</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x0n-入坑出坑"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x0n 入坑出坑</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题1-当编译-Nginx-时报checking-for-LuaJIT-2-x-not-found-configure-error-unsupported-LuaJIT-version-ngx-http-lua-module-requires-LuaJIT-2-x-错误时的解决办法。"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">问题1. 当编译 Nginx 时报checking for LuaJIT 2.x ... not found, .&#x2F;configure: error: unsupported LuaJIT version; ngx_http_lua_module requires LuaJIT 2.x. 错误时的解决办法。</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题2-在使用luajit官方主分支LuaJIT-2-1-0-beta3提供LuaJIT安装部署出现nginx-alert-detected-a-LuaJIT-version-which-is-not-OpenResty-39-s-以及nginx-alert-failed-to-load-the-39-resty-core-39-module警告。"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">问题2.在使用luajit官方主分支LuaJIT-2.1.0-beta3提供LuaJIT安装部署出现nginx: [alert] detected a LuaJIT version which is not OpenResty&#39;s;以及nginx: [alert] failed to load the &#39;resty.core&#39; module警告。</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/7-2-676.html&title=《7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/7-2-676.html&title=《7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现》 — WeiyiGeek Blog&source=本章目录
+[TOC]
+
+0x00 前言简述为啥有此篇文章?描述: 在进行公司的图片存储解决方案研究中，最开始准备使用的是FastDFS，但是经过深思熟虑，..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/7-2-676.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《7.Nginx实践之使用Lua-nginx模块脚本连接Redis数据库读取静态资源并隐式展现》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/7-2-676.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/7-2-676.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACG0lEQVR42u3awY7DIAxF0f7/T2e2lUal99mkUsxlVaGUcLKwsM3rhcf1Nv7PvM9/ev7Tmum/WkOGDBmPZVzLsWaQlckK69/rvcmQIeMcBtnEGs//RYI435sMGTJkkCBI1uHHPhkyZMjYFXB5osuTYRkyZMhYM0gSy6teaTD9aS4uQ4aMBzLSzf3y9y39DRkyZDyKcYWDr5CGy6sxZMiQMZtRS1BJub+2TidhliFDxlRGuihPdHnCuf4oaEaGDBnHMNIrFP2iP3kj2oMMGTJGM+5IRDsF/U5DQoYMGbMZ/eXSoMlnOgmzDBkyJjFI0T/dLqrz4WfQB5UhQ8ZoRgrjJTN+nYIA4haCDBkyxjFqC5FCWLGzWgvxMmTIGMcgbYB0Ji3G1YI+6sTKkCFjBKOWuKbXMtLjYy3oy5AhYyoDBa9GkE3TWh6Cv9wZkSFDxiDGOqRy5K7ENf2sX/qoMmTIGMTgaWrt+Jh+lA3HRBkyZIxj8KI8T2L74Digy5Ah4wDGruJ+rWGwASNDhowDGP3X8PZA7VJFXG6TIUPGUEZtQ+kKe6+OyZAhYzbjCscuHg/T6/fKkCHjBMau62LpDG9IdC5nyJAhYxIjDbJp6S0NwbUmhAwZMk5gkONaurlOgyFGypAhQ0b71JkmpemnkSFDhox063zT/QscMmTIOIdBktj0kkR6+EvxMmTIOIfBU8da6/G+Q6QMGTIOYPwBXABqmM1OqqgAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

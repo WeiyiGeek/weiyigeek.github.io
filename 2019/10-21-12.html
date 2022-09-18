@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 SSL与TLS协议原理与证书签名多种生成方式实践指南|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="SSL-TLS,HTTPS">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>SSL与TLS协议原理与证书签名多种生成方式实践指南</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">SSL与TLS协议原理与证书签名多种生成方式实践指南</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-10-21T02:34:30.000Z" itemprop="datePublished" class="page-time">
+  2019-10-21
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%AF%81%E4%B9%A6%E9%A2%81%E5%8F%91/">证书颁发</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-基础知识/Web原理/Web协议/SSL-TLS/SSL与TLS协议原理与证书签名多种生成方式实践指南"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">SSL与TLS协议原理与证书签名多种生成方式实践指南</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-10-21 10:34:30" datetime="2019-10-21T02:34:30.000Z"  itemprop="datePublished">2019-10-21</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E8%AF%81%E4%B9%A6%E9%A2%81%E5%8F%91/">证书颁发</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<p>原文地址: SSL与TLS协议原理与证书签名多种生成方式实践指南 (<a href="https://mp.weixin.qq.com/s/g-X8UPNwIkuR_Qd2MDvVQw" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/g-X8UPNwIkuR_Qd2MDvVQw</a>)</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><p>简单快速了解<code>HTTP、HTTPS、SSL、TLS</code>概念:</p>
+<ul>
+<li>HTTP 是一个网络协议，是专门用来传输 Web 内容，大部分网站都是通过 HTTP 协议来传输 Web 页面、以及 Web 页面上包含的各种东东（图片、CSS 样式、JS 脚本）。</li>
+<li>SSL 是Secure Sockets Layer的缩写，中文叫做“安全套接层”,它是在上世纪90年代中期，由网景公司设计的, 为了解决http在传输过程中内容会被偷窥（嗅探）和篡改。</li>
+<li>TLS 是 SSL的 标准化，SSL标准化之后的名称改为 TLS（是<code>Transport Layer Security</code>的缩写），中文叫做传输层安全协议。很多相关的文章都把这两者并列称呼（SSL/TLS），因为这两者可以视作同一个东西的不同阶段。</li>
+<li>HTTPS 协议，说白了就是“HTTP 协议”和“SSL/TLS 协议”的组合。你可以把 HTTPS 大致理解为——HTTP over SSL或HTTP over TLS。</li>
+</ul>
+<h3 id="CA-认证原理"><a href="#CA-认证原理" class="headerlink" title="CA 认证原理"></a>CA 认证原理</h3><p>描述: 通过下面介绍信的例子来介绍CA的原理（转载的）。</p>
+<p><strong>场景1.普通的介绍信</strong><br>想必大伙儿都听说过介绍信的例子吧？假设 A 公司的张三先生要到 B 公司去拜访，但是 B 公司的所有人都不认识他，他咋办捏？常用的办法是带公司开的一张介绍信，在信中说：兹有张三先生前往贵公司办理业务，请给予接洽……云云。然后在信上敲上A公司的公章。</p>
+<p>张三先生到了 B 公司后，把介绍信递给 B 公司的前台李四小姐。李小姐一看介绍信上有 A 公司的公章，而且 A 公司是经常和 B 公司有业务往来的，这位李小姐就相信张先生不是歹人了。</p>
+<p>这里，A公司就是CA证书</p>
+<p><strong>场景2.引入中介机构的介绍信</strong><br>好，回到刚才的话题。如果和 B 公司有业务往来的公司很多，每个公司的公章都不同，那前台就要懂得分辨各种公章，非常滴麻烦。所以，有某个中介公司 C，发现了这个商机。C公司专门开设了一项“代理公章”的业务。</p>
+<p>今后，A 公司的业务员去 B 公司，需要带2个介绍信：</p>
+<p>介绍信1：含有 C 公司的公章及 A 公司的公章。并且特地注明：C 公司信任 A 公司。</p>
+<p>介绍信2：仅含有 A 公司的公章，然后写上：兹有张三先生前往贵公司办理业务，请给予接洽……云云。</p>
+<p>某些不开窍的同学会问了，这样不是增加麻烦了吗？有啥好处捏？</p>
+<p>主要的好处在于，对于接待公司的前台，就不需要记住各个公司的公章分别是啥样子的；他/她只要记住中介公司 C 的公章即可。当他/她拿到两份介绍信之后，先对介绍信1的 C 公章，验明正身；确认无误之后，再比对介绍信1和介绍信2的两个 A 公章是否一致。如果是一样的，那就可以证明介绍信2是可以信任的了。</p>
+<h3 id="PKI-公钥基础设施"><a href="#PKI-公钥基础设施" class="headerlink" title="PKI 公钥基础设施"></a>PKI 公钥基础设施</h3><p>PKI借助数字证书和公钥加密技术提供可信任的网络身份。通常，证书就是一个包含如下身份信息的文件：</p>
+<p>证书所有组织的信息<br>公钥<br>证书颁发组织的信息<br>证书颁发组织授予的权限，如证书有效期、适用的主机名、用途等<br>使用证书颁发组织私钥创建的数字签名</p>
+<p>X.509证书包含三个文件：</p>
+<ul>
+<li>key 是服务器上的私钥文件：用于对发送给客户端数据的加密，以及对从客户端接收到数据的解密;</li>
+<li>csr 是证书签名请求文件：用于提交给证书颁发机构（CA）对证书签名</li>
+<li>crt 是由证书颁发机构（CA）签名后的证书或者是开发者自签名的证书：包含证书持有人的信息，持有人的公钥，以及签署者的签名等信息</li>
+</ul>
+<p>备注：在密码学中，X.509是一个标准，规范了公开秘钥认证、证书吊销列表、授权凭证、凭证路径验证算法等。</p>
+<p>CA(Certification Authority)证书，指的是权威机构给我们颁发的证书。</p>
+<p>密钥就是用来加解密用的文件或者字符串。密钥在非对称加密的领域里，指的是私钥和公钥，他们总是成对出现，其主要作用是加密和解密。常用的加密强度是2048bit。</p>
+<p>RSA即非对称加密算法。非对称加密有两个不一样的密码，一个叫私钥，另一个叫公钥，用其中一个加密的数据只能用另一个密码解开，用自己的都解不了，也就是说用公钥加密的数据只能由私钥解开。</p>
+<p><strong>证书的编码格式</strong><br>PEM(Privacy Enhanced Mail)，通常用于数字证书认证机构（Certificate Authorities，CA），扩展名为.pem, .crt, .cer, 和 .key。内容为Base64编码的ASCII码文件，有类似的头尾标记服务器认证证书。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"-----BEGIN CERTIFICATE-----"</span></span><br><span class="line"><span class="string">"-----END CERTIFICATE-----"</span></span><br></pre></td></tr></table></figure><br>中级认证证书和私钥都可以储存为PEM格式（认证证书其实就是公钥）。Apache 和 Nginx 等类似的服务器使用PEM格式证书。</p>
+<p>DER(Distinguished Encoding Rules)，与 PEM 不同之处在于其使用二进制而不是 Base64 编码的 ASCII。扩展名为.der，但也经常使用.cer用作扩展名，所有类型的认证证书和私钥都可以存储为 DER 格式。Java 使其典型使用平台。</p>
+<p><strong>证书签名请求 CSR</strong><br>CSR(Certificate Signing Request)，它是向 CA 机构申请数字 ××× 书时使用的请求文件。在生成请求文件前，我们需要准备一对对称密钥。私钥信息自己保存，请求中会附上公钥信息以及国家，城市，域名，Email 等信息，CSR 中还会附上签名信息。当我们准备好 CSR 文件后就可以提交给CA机构，等待他们给我们签名，签好名后我们会收到 crt 文件，即证书。</p>
+<p>注意：CSR 并不是证书。而是向权威证书颁发机构获得签名证书的申请。</p>
+<p>把 CSR 交给权威证书颁发机构,权威证书颁发机构对此进行签名,完成。保留好CSR,当权威证书颁发机构颁发的证书过期的时候,你还可以用同样的CSR来申请新的证书, Key 保持不变.</p>
+<p><strong>数字签名</strong><br>数字签名就是”非对称加密+摘要算法”，其目的不是为了加密，而是用来防止他人篡改数据。</p>
+<p>其核心思想是：比如A要给B发送数据，A先用摘要算法得到数据的指纹，然后用A的私钥加密指纹，加密后的指纹就是A的签名，B收到数据和A的签名后，也用同样的摘要算法计算指纹，然后用A公开的公钥解密签名，比较两个指纹，如果相同，说明数据没有被篡改，确实是A发过来的数据。假设C想改A发给B的数据来欺骗B，因为篡改数据后指纹会变，要想跟A的签名里面的指纹一致，就得改签名，但由于没有A的私钥，所以改不了，如果C用自己的私钥生成一个新的签名，B收到数据后用A的公钥根本就解不开。</p>
+<p>常用的摘要算法有MD5、SHA1、SHA256。</p>
+<p>使用私钥对需要传输的文本的摘要进行加密，得到的密文即被称为该次传输过程的签名。</p>
+<p><strong>数字证书和公钥</strong><br>数字证书则是由证书认证机构（CA）对证书申请者真实身份验证之后，用CA的根证书对申请人的一些基本信息以及申请人的公钥进行签名（相当于加盖发证书机 构的公章）后形成的一个数字文件。实际上，数字证书就是经过CA认证过的公钥，除了公钥，还有其他的信息，比如Email，国家，城市，域名等。</p>
+<hr>
+<h2 id="0x01-自签名SSL证书生成"><a href="#0x01-自签名SSL证书生成" class="headerlink" title="0x01 自签名SSL证书生成"></a>0x01 自签名SSL证书生成</h2><p>默认情况下，所有基于Linux和Unix的系统上都存在Openssl实用程序, 我们可以基于此创建自签名证书。</p>
+<figure class="image-box">
+                <a rel=SSL与TLS协议原理与证书签名多种生成方式实践指南 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20220120094056.png" target="_blank" title="WeiyiGeek.selfCertificate" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20220120094056.png" alt="WeiyiGeek.selfCertificate" title="" class=""></a>
+                <p>WeiyiGeek.selfCertificate</p>
+            </figure>
+<h3 id="1-在线-脚本-生成"><a href="#1-在线-脚本-生成" class="headerlink" title="1.在线(脚本)生成"></a>1.在线(脚本)生成</h3><p><strong>方式1.脚本生成即一键生成自签名SSL证书和私钥</strong><br>脚本地址: <a href="https://github.com/cookcodeblog/OneDayDevOps/blob/master/components/ssl/create_self_signed_cert.sh" target="_blank" rel="noopener">https://github.com/cookcodeblog/OneDayDevOps/blob/master/components/ssl/create_self_signed_cert.sh</a><br>Syntax:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./create_self_signed_cert.sh <span class="string">"/C=CN/ST=Chongqing/L=Chongqing/O=xdevops/OU=WeiyiGeek/CN=gitlab.WeiyiGeek.top"</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="2-OpenSSL-生成"><a href="#2-OpenSSL-生成" class="headerlink" title="2.OpenSSL 生成"></a>2.OpenSSL 生成</h3><p><strong>(1) OpenSSL生成带有SubjectAltName的自签名SSL证书</strong><br>描述:适用于安装了OpenSSL的服务器或者Linux;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.验证OpenSSL版本</span></span><br><span class="line">openssl version || apt install openssl -y</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.生成私钥(需输入4位以上密码)</span></span><br><span class="line"><span class="comment"># genra	生成RSA私钥</span></span><br><span class="line"><span class="comment"># -des3	des3算法</span></span><br><span class="line"><span class="comment"># -out server.key 生成的私钥文件名</span></span><br><span class="line"><span class="comment"># 2048 私钥长度</span></span><br><span class="line">openssl genrsa -des3 -out server.pass.key 2048</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.去除私钥中的密码</span></span><br><span class="line"><span class="comment"># 注意：有密码的私钥是server.pass.key，没有密码的私钥是server.key</span></span><br><span class="line">openssl rsa -<span class="keyword">in</span> server.pass.key -out server.key</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.生成CSR(证书签名请求)</span></span><br><span class="line"><span class="comment"># req 生成证书签名请求</span></span><br><span class="line"><span class="comment"># -new 新生成</span></span><br><span class="line"><span class="comment"># -key 私钥文件</span></span><br><span class="line"><span class="comment"># -out 生成的CSR文件</span></span><br><span class="line"><span class="comment"># -subj 生成CSR证书的参数</span></span><br><span class="line"><span class="comment"># -subj 参数说明如下：</span></span><br><span class="line"><span class="comment"># 字段	字段含义	示例</span></span><br><span class="line"><span class="comment"># /C=	Country 国家	CN</span></span><br><span class="line"><span class="comment"># /ST=	State or Province 省	Chongqing</span></span><br><span class="line"><span class="comment"># /L=	Location or City 城市	Guangzhou</span></span><br><span class="line"><span class="comment"># /O=	Organization 组织或企业	WeiyiGeek</span></span><br><span class="line"><span class="comment"># /OU=	Organization Unit 部门	WeiyiGeek</span></span><br><span class="line"><span class="comment"># /CN=	Common Name 域名或IP	gitlab.WeiyiGeek.top</span></span><br><span class="line">openssl req -new -key server.key -out server.csr -subj <span class="string">"/C=CN/ST=Chongqing/L=Chongqing/O=xdevops/OU=WeiyiGeek/CN=gitlab.WeiyiGeek.top"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 另外一种方式使用OpenSSL生成带有SubjectAltName的自签名证书</span></span><br><span class="line"><span class="comment"># 首先新建一个配置文件 ssl.conf如下</span></span><br><span class="line">cat &lt;&lt;<span class="string">'EOF'</span> &gt; server.conf</span><br><span class="line">[ req ]</span><br><span class="line">default_bits       = 2048</span><br><span class="line">distinguished_name = req_distinguished_name</span><br><span class="line">req_extensions     = req_ext</span><br><span class="line"></span><br><span class="line">[ req_distinguished_name ]</span><br><span class="line">countryName                 = Country Name (2 letter code)</span><br><span class="line">countryName_default         = CN</span><br><span class="line">stateOrProvinceName         = State or Province Name (full name)</span><br><span class="line">stateOrProvinceName_default = ChongQing</span><br><span class="line">localityName                = Locality Name (eg, city)</span><br><span class="line">localityName_default        = ChongQing</span><br><span class="line">organizationName            = Organization Name (eg, company)</span><br><span class="line">organizationName_default    = weiyigeek</span><br><span class="line">commonName                  = Common Name (e.g. server FQDN or YOUR name)</span><br><span class="line">commonName_max              = 64</span><br><span class="line">commonName_default          = hub.weiyigeek.top</span><br><span class="line"></span><br><span class="line">[ req_ext ]</span><br><span class="line">subjectAltName = @alt_names</span><br><span class="line"></span><br><span class="line">[alt_names]</span><br><span class="line">DNS.1   = weiyigeek.top</span><br><span class="line">DNS.2   = hub.weiyigeek.top</span><br><span class="line">IP      = 10.10.107.201</span><br><span class="line">EOF</span><br><span class="line">openssl req -new -sha256 -out server.csr -key server.key -config server.conf</span><br><span class="line"><span class="comment"># 查看请求签发证书的内容</span></span><br><span class="line"><span class="comment"># openssl req -text -noout -in server.csr</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.生成自签名SSL证书 以及带有 SAN 的SSL证书 （有效期十年）</span></span><br><span class="line">openssl x509 -req -days 3650 -<span class="keyword">in</span> server.csr -signkey server.key -out gitla.bweiyigeek.top.crt</span><br><span class="line">openssl x509 -req -days 3650 -<span class="keyword">in</span> server.csr -signkey server.key -out hub.weiyigeek.top.crt -extensions req_ext -extfile server.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.采用合并的方式获得pem格式证书</span></span><br><span class="line">cat server.crt server.key &gt; server.pem</span><br><span class="line"></span><br><span class="line"><span class="comment"># 7.证书内容查看</span></span><br><span class="line">openssl x509 -text -noout -<span class="keyword">in</span> hub.weiyigeek.top.crt</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>(2) 生成CA证书并签发子证书</strong></p>
+<p>步骤 01.生成CA根证书，首先我们需要准备一个CA配置文件.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;<span class="string">'EOF'</span> &gt; ca.conf</span><br><span class="line">[ req ]</span><br><span class="line">default_bits       = 4096</span><br><span class="line">distinguished_name = req_distinguished_name</span><br><span class="line"></span><br><span class="line">[ req_distinguished_name ]</span><br><span class="line">countryName                 = Country Name (2 letter code)</span><br><span class="line">countryName_default         = CN</span><br><span class="line">stateOrProvinceName         = State or Province Name (full name)</span><br><span class="line">stateOrProvinceName_default = ChongQing</span><br><span class="line">localityName                = Locality Name (eg, city)</span><br><span class="line">localityName_default        = ChongQing</span><br><span class="line">organizationName            = Organization Name (eg, company)</span><br><span class="line">organizationName_default    = weiyigeek</span><br><span class="line">commonName                  = Common Name (e.g. server FQDN or YOUR name)</span><br><span class="line">commonName_max              = 64</span><br><span class="line">commonName_default          = ca.weiyigeek.top </span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>步骤 02.生成ca密钥(ca.key)，并生成ca证书签发请求得到(ca.csr)。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out ca.key 4096</span><br><span class="line">openssl req -new -sha256 -out ca.csr -key ca.key -config ca.conf  <span class="comment"># 因为配置文件中已经有默认值了所以此处不用设置-subj参数</span></span><br></pre></td></tr></table></figure></p>
+<p>步骤 03.生成ca根证书有效期十年并得到ca.crt证书<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -req -days 3650 -<span class="keyword">in</span> ca.csr -signkey ca.key -out ca.crt</span><br></pre></td></tr></table></figure></p>
+<p>步骤 04.准备生成终端用户证书(子证书)，同样首先准备 server.conf 文件。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;<span class="string">'EOF'</span> &gt; server.conf</span><br><span class="line">[ req ]</span><br><span class="line">default_bits       = 2048</span><br><span class="line">distinguished_name = req_distinguished_name</span><br><span class="line">req_extensions     = req_ext</span><br><span class="line"></span><br><span class="line">[ req_distinguished_name ]</span><br><span class="line">countryName                 = Country Name (2 letter code)</span><br><span class="line">countryName_default         = CN</span><br><span class="line">stateOrProvinceName         = State or Province Name (full name)</span><br><span class="line">stateOrProvinceName_default = ChongQing</span><br><span class="line">localityName                = Locality Name (eg, city)</span><br><span class="line">localityName_default        = ChongQing</span><br><span class="line">organizationName            = Organization Name (eg, company)</span><br><span class="line">organizationName_default    = weiyigeek</span><br><span class="line">commonName                  = Common Name (e.g. server FQDN or YOUR name)</span><br><span class="line">commonName_max              = 64</span><br><span class="line">commonName_default          = www.weiyigeek.top</span><br><span class="line"></span><br><span class="line">[ req_ext ]</span><br><span class="line">subjectAltName = @alt_names</span><br><span class="line"></span><br><span class="line">[alt_names]</span><br><span class="line">DNS.1   = weiyigeek.top</span><br><span class="line">DNS.2   = www.weiyigeek.top</span><br><span class="line">IP      = 192.168.1.254</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure><br>温馨提示: Chrome 58以后不再使用CN校验地址（就是就是浏览器地址栏URL中的那个地址host）了而是使用SAN,所以此处需要指定subjectAltName。</p>
+<p>步骤 05.生成秘钥以及证书签发请求文件。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">openssl genrsa -out server.key 2048</span><br><span class="line">openssl req -new -sha256 -out server.csr -key server.key -config server.conf</span><br></pre></td></tr></table></figure></p>
+<p>步骤 06.利用CA证书、密钥进行签发终端用户证书(子证书).<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -req -days 3650 -CA ca.crt -CAkey ca.key -CAcreateserial -<span class="keyword">in</span> server.csr -out server.crt  -extensions req_ext -extfile server.conf</span><br></pre></td></tr></table></figure></p>
+<p>在服务端配置SSL常规流程:</p>
+<ul>
+<li>1.声明开启HTTPS (SSL认证)</li>
+<li>2.声明侦听443端口（并确保已在防火墙上打开443端口）</li>
+<li>3.复制已签名的SSL证书和私钥到指定位置，并设置正确的文件权限</li>
+<li>4.配置已签名的SSL证书（.crt）的位置</li>
+<li>5.配置已签名的SSL证书私钥（.key）的位置</li>
+<li>6.配置将HTTP请求都重定向到HTTPS</li>
+</ul>
+<p>在浏览器中打开<code>https://&lt;domain_name&gt;</code>来访问。</p>
+<p>在Firefox浏览器中可以添加Security Exception来忽略HTTPS错误警告，Chrome浏览器可以尝试通过导入CA证书的方式来忽略HTTPS错误警告。<br>注意Chrome浏览器可能有导入CA证书后仍然无法访问的问题；</p>
+<p>总结</p>
+<ul>
+<li>1.自签名的SSL证书存在安全隐患，在生产环境上需要购买和使用经权威机构认证和办法的证书。</li>
+<li>2.不同浏览器对自签名SSL证书的检查和限制也有所区别。</li>
+</ul>
+<p>补充参考: <a href="https://github.com/kubernetes/ingress-nginx/blob/master/docs/examples/auth/client-certs/README.md#creating-certificate-secrets" target="_blank" rel="noopener">https://github.com/kubernetes/ingress-nginx/blob/master/docs/examples/auth/client-certs/README.md#creating-certificate-secrets</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">TLS certificates</span><br><span class="line"></span><br><span class="line">Unless otherwise mentioned, the TLS secret used <span class="keyword">in</span> examples is a 2048 bit RSA key/cert pair with an arbitrarily chosen hostname, created as follows</span><br><span class="line"></span><br><span class="line">$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj <span class="string">"/CN=nginxsvc/O=nginxsvc"</span></span><br><span class="line">Generating a 2048 bit RSA private key</span><br><span class="line">................+++</span><br><span class="line">................+++</span><br><span class="line">writing new private key to <span class="string">'tls.key'</span></span><br><span class="line">-----</span><br><span class="line"></span><br><span class="line">$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt</span><br><span class="line">secret <span class="string">"tls-secret"</span> created</span><br><span class="line"></span><br><span class="line">Note: If using CA Authentication, described below, you will need to sign the server certificate with the CA.</span><br><span class="line">Client Certificate Authentication</span><br><span class="line"></span><br><span class="line">CA Authentication also known as Mutual Authentication allows both the server and client to verify each others identity via a common CA.</span><br><span class="line"></span><br><span class="line">We have a CA Certificate <span class="built_in">which</span> we obtain usually from a Certificate Authority and use that to sign both our server certificate and client certificate. Then every time we want to access our backend, we must pass the client certificate.</span><br><span class="line"></span><br><span class="line">These instructions are based on the following blog</span><br><span class="line"></span><br><span class="line">Generate the CA Key and Certificate:</span><br><span class="line"></span><br><span class="line">openssl req -x509 -sha256 -newkey rsa:4096 -keyout ca.key -out ca.crt -days 356 -nodes -subj <span class="string">'/CN=My Cert Authority'</span></span><br><span class="line"></span><br><span class="line">Generate the Server Key, and Certificate and Sign with the CA Certificate:</span><br><span class="line"></span><br><span class="line">openssl req -new -newkey rsa:4096 -keyout server.key -out server.csr -nodes -subj <span class="string">'/CN=mydomain.com'</span></span><br><span class="line">openssl x509 -req -sha256 -days 365 -<span class="keyword">in</span> server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt</span><br><span class="line"></span><br><span class="line">Generate the Client Key, and Certificate and Sign with the CA Certificate:</span><br><span class="line"></span><br><span class="line">openssl req -new -newkey rsa:4096 -keyout client.key -out client.csr -nodes -subj <span class="string">'/CN=My Client'</span></span><br><span class="line">openssl x509 -req -sha256 -days 365 -<span class="keyword">in</span> client.csr -CA ca.crt -CAkey ca.key -set_serial 02 -out client.crt</span><br><span class="line"></span><br><span class="line">Once this is complete you can <span class="built_in">continue</span> to follow the instructions here</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="3-CFSSL-生成"><a href="#3-CFSSL-生成" class="headerlink" title="3.CFSSL 生成"></a>3.CFSSL 生成</h3><p>简单介绍: cfssl是CloudFlare开源的一款PKI/TLS工具。CFSSL 包含一个命令行工具和一个用于签名、验证并且捆绑TLS证书的HTTP API 服务, 使用Go语言编写。<br>项目地址：  <a href="https://github.com/cloudflare/cfssl" target="_blank" rel="noopener">https://github.com/cloudflare/cfssl</a><br>下载地址：  <a href="https://pkg.cfssl.org/" target="_blank" rel="noopener">https://pkg.cfssl.org/</a></p>
+<p><strong>CFSSL 组件包括:</strong></p>
+<ul>
+<li>用于生成自定义 TLS PKI 的工具</li>
+<li>cfssl程序，是cfssl的命令行工具</li>
+<li>multirootca程序是可以使用多个签名密钥的证书颁发机构服务器</li>
+<li>mkbundle程序用于构建证书池</li>
+<li>cfssljson程序，从cfssl和multirootca程序获取JSON输出，并将证书，密钥，CSR和bundle写入磁盘</li>
+</ul>
+<p><br/></p>
+<p><strong>cfssl 安装</strong><br>此处我们只安装cfssl工具、cfssljson工具和cfssl-certinfo工具。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cfssl 最新下载地址: https://github.com/cloudflare/cfssl/releases</span></span><br><span class="line">curl -L https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssl_1.6.1_linux_amd64 -o /usr/<span class="built_in">local</span>/bin/cfssl</span><br><span class="line">curl -L https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssljson_1.6.1_linux_amd64 -o /usr/<span class="built_in">local</span>/bin/cfssljson</span><br><span class="line">curl -L https://github.com/cloudflare/cfssl/releases/download/v1.6.1/cfssl-certinfo_1.6.1_linux_amd64 -o /usr/<span class="built_in">local</span>/bin/cfssl-certinfo</span><br><span class="line"><span class="comment"># chmod +x /usr/local/bin/cfssl*</span></span><br></pre></td></tr></table></figure></p>
+<p>温馨提示:  如出现如下警告请注意你的cfssl版本,并将cfssl版本从v1.2更新到v1.6.1(最新版本)。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">2022/04/27 19:11:37 [WARNING] This certificate lacks a <span class="string">"hosts"</span> field. This makes it unsuitable <span class="keyword">for</span></span><br><span class="line">websites. For more information see the Baseline Requirements <span class="keyword">for</span> the Issuance and Management</span><br><span class="line">of Publicly-Trusted Certificates, v.1.1.6, from the CA/Browser Forum (https://cabforum.org);</span><br><span class="line">specifically, section 10.2.3 (<span class="string">"Information Requirements"</span>).</span><br></pre></td></tr></table></figure></p>
+<p><strong>cfssl 常用子命令</strong><br>描述: cfssl用法参考地址(<a href="https://coreos.com/os/docs/latest/generate-self-signed-certificates.html" target="_blank" rel="noopener">https://coreos.com/os/docs/latest/generate-self-signed-certificates.html</a>)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">(0) <span class="built_in">print</span>-defaults: 打印默认配置，这个默认配置可以用作模板</span><br><span class="line"></span><br><span class="line">(1) gencert: 生成新的key(密钥)和签名证书.</span><br><span class="line">-initca: 初始化新CA</span><br><span class="line">-ca：指明ca的证书.</span><br><span class="line">-ca-key：指明ca的私钥文件.</span><br><span class="line">-config：指明请求证书的json文件.</span><br><span class="line">-profile：与-config中的profile对应，是指根据config中的profile段来生成证书的相关信息.</span><br><span class="line"></span><br><span class="line">(2) certinfo: 输出给定证书的证书信息， 跟cfssl-certinfo 工具作用一样</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">bundle: 创建包含客户端证书的证书包</span><br><span class="line">genkey: 生成一个key(私钥)和CSR(证书签名请求)</span><br><span class="line">scan: 扫描主机问题</span><br><span class="line">revoke: 吊销证书</span><br><span class="line">gencrl: 生成新的证书吊销列表</span><br><span class="line">selfsign: 生成一个新的自签名密钥和 签名证书</span><br><span class="line">serve: 启动一个HTTP API服务</span><br><span class="line">ocspdump: 从cert db 中的所有 OCSP 响应中生成一系列连贯的 OCSP 响应，供 ocspserve 使用</span><br><span class="line">ocspsign: 为给定的CA、Cert和状态签署OCSP响应。返回一个base64编码的OCSP响应</span><br><span class="line">info: 获取有关远程签名者的信息</span><br><span class="line">sign: 签名一个客户端证书，通过给定的CA和CA密钥，和主机名</span><br><span class="line">ocsprefresh: 用所有已知未过期证书的新OCSP响应刷新ocsp_responses表。</span><br><span class="line">ocspserve: 设置一个HTTP服务器，处理来自文件或直接来自数据库的OCSP请求（见RFC 5019）。</span><br></pre></td></tr></table></figure></p>
+<p><strong>cfssljson 常用子命令</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Usage of cfssljson:</span><br><span class="line">-bare : 来自CFSSL的响应未包装在API标准响应中</span><br><span class="line">-f string: JSON input (default <span class="string">"-"</span>)</span><br><span class="line">-stdout: 输出响应Response到终端中，而不是保存到文件。</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h2 id="0x03-cfssl-使用实践"><a href="#0x03-cfssl-使用实践" class="headerlink" title="0x03 cfssl 使用实践"></a>0x03 cfssl 使用实践</h2><p><strong>示例1.使用 CFSSL 创建 CA 认证步骤。</strong></p>
+<p>步骤 01.生成并配置证书生成策略.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.打印config模板文件从而进行修改, 其中有两个配置</span></span><br><span class="line">cfssl <span class="built_in">print</span>-defaults config &gt; ca-config.json</span><br><span class="line">vim ca-config.json</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"signing"</span>: &#123;</span><br><span class="line">    <span class="string">"default"</span>: &#123;</span><br><span class="line">      <span class="string">"expiry"</span>: <span class="string">"8760h"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"profiles"</span>: &#123;</span><br><span class="line">      <span class="string">"kubernetes"</span>: &#123;</span><br><span class="line">          <span class="string">"expiry"</span>: <span class="string">"87600h"</span>,</span><br><span class="line">          <span class="string">"usages"</span>: [</span><br><span class="line">              <span class="string">"signing"</span>,</span><br><span class="line">              <span class="string">"key encipherment"</span>,</span><br><span class="line">              <span class="string">"server auth"</span>,</span><br><span class="line">              <span class="string">"client auth"</span></span><br><span class="line">          ]</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="string">"harbor"</span>: &#123;</span><br><span class="line">          <span class="string">"expiry"</span>: <span class="string">"87600h"</span>,</span><br><span class="line">          <span class="string">"usages"</span>: [</span><br><span class="line">              <span class="string">"signing"</span>,</span><br><span class="line">              <span class="string">"key encipherment"</span>,</span><br><span class="line">              <span class="string">"server auth"</span>,</span><br><span class="line">              <span class="string">"client auth"</span></span><br><span class="line">          ]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 注意: 该策略文件，有一个default默认的配置和一个profiles，其中profiles可以设置多个profile，例如此处的kubernetes和harbor配置</span></span><br><span class="line"><span class="comment"># 重点参数解析</span></span><br><span class="line">default 默认策略，指定了证书的默认有效期是一年(8760h)</span><br><span class="line">profile 自定义策略配置</span><br><span class="line">  * kubernetes：表示该配置(profile)的用途是为kubernetes生成证书及相关的校验工作</span><br><span class="line">  * signing：表示该证书可用于签名其它证书；生成的 ca.pem 证书中 CA=TRUE</span><br><span class="line">  * server auth：表示可以该CA 对 server 提供的证书进行验证</span><br><span class="line">  * client auth：表示可以用该 CA 对 client 提供的证书进行验证</span><br><span class="line">  * expiry：也表示过期时间，如果不写以default中的为准</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>步骤 02.CA证书签名请求配置文件 ca-csr.json 生成与设置。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.首先打印csr模板文件输出到ca-csr.json，并进行修改</span></span><br><span class="line">cfssl <span class="built_in">print</span>-defaults csr &gt; ca-csr.json</span><br><span class="line">vim ca-csr.json</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"CN"</span>: <span class="string">"weiyigeek.top"</span>,</span><br><span class="line">  <span class="string">"key"</span>: &#123;</span><br><span class="line">    <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">    <span class="string">"size"</span>: 2048</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"names"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"L"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"ST"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"O"</span>: <span class="string">"weiyigeek"</span>,</span><br><span class="line">      <span class="string">"OU"</span>: <span class="string">"weiyigeek.top"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.关键参数介绍:</span></span><br><span class="line">CN: Common Name，浏览器使用该字段验证网站是否合法，一般写的是域名，非常重要。浏览器使用该字段验证网站是否合法</span><br><span class="line">key：生成证书的算法</span><br><span class="line">hosts：表示哪些主机名(域名)或者IP可以使用此csr申请的证书，为空或者<span class="string">""</span>表示所有的都可以使用(本例中没有`<span class="string">"hosts"</span>: [<span class="string">""</span>]`字段)</span><br><span class="line">names：常见属性设置</span><br><span class="line">  * C: Country， 国家</span><br><span class="line">  * ST: State，州或者是省份</span><br><span class="line">  * L: Locality Name，地区，城市</span><br><span class="line">  * O: Organization Name，组织名称，公司名称(在k8s中常用于指定Group，进行RBAC绑定)</span><br><span class="line">  * OU: Organization Unit Name，组织单位名称，公司部门</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>步骤 03.生成CA证书和私钥(<code>root根证书和私钥</code>)<br>注意: 运行认证中心需要一个 CA 证书和相应的 CA 私钥, 任何知道私钥的人都可以充当CA来颁发证书, 因此私钥的保护至关重要。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.利用CA证书签名请求配置文件 ca-csr.json ，生成CA证书和CA私钥和CSR(证书签名请求):</span></span><br><span class="line"><span class="comment"># cfssl gencert -initca -hostname weiyigeek.top csr.json | cfssljson -bare ca</span></span><br><span class="line">$ cfssl gencert -initca ca-csr.json | cfssljson -bare ca</span><br><span class="line">  <span class="comment"># 2022/01/17 22:02:40 [INFO] generating a new CA key and certificate from CSR</span></span><br><span class="line">  <span class="comment"># 2022/01/17 22:02:40 [INFO] generate received request</span></span><br><span class="line">  <span class="comment"># 2022/01/17 22:02:40 [INFO] received CSR</span></span><br><span class="line">  <span class="comment"># 2022/01/17 22:02:40 [INFO] generating key: rsa-2048</span></span><br><span class="line">  <span class="comment"># 2022/01/17 22:02:41 [INFO] encoded CSR</span></span><br><span class="line">  <span class="comment"># 2022/01/17 22:02:41 [INFO] signed certificate with serial number 581660836920751122545368670593588896183219270559</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.生成的CA证书、私钥、以及签名请求证书，后续将用于交叉签名或重新签名。</span></span><br><span class="line">/tmp/pki$ ls</span><br><span class="line">ca-config.json  ca.csr(签名请求证书)  ca-csr.json  ca-key.pem(CA私钥) ca.pem (CA证书)</span><br></pre></td></tr></table></figure></p>
+<p>步骤 04.利用certinfo子命令查看证书签名请求信息、证书信息。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看cert(证书信息):</span></span><br><span class="line">cfssl certinfo -cert ca.pem</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"subject"</span>: &#123;</span><br><span class="line">    <span class="string">"common_name"</span>: <span class="string">"weiyigeek.top"</span>,</span><br><span class="line">    <span class="string">"country"</span>: <span class="string">"CN"</span>,</span><br><span class="line">    <span class="string">"organization"</span>: <span class="string">"weiyigeek"</span>,</span><br><span class="line">    <span class="string">"organizational_unit"</span>: <span class="string">"weiyigeek.top"</span>,</span><br><span class="line">    <span class="string">"locality"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">    <span class="string">"province"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">    <span class="string">"names"</span>: [</span><br><span class="line">      <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"weiyigeek"</span>,</span><br><span class="line">      <span class="string">"weiyigeek.top"</span>,</span><br><span class="line">      <span class="string">"weiyigeek.top"</span></span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"issuer"</span>: &#123;</span><br><span class="line">    <span class="string">"common_name"</span>: <span class="string">"weiyigeek.top"</span>,</span><br><span class="line">    <span class="string">"country"</span>: <span class="string">"CN"</span>,</span><br><span class="line">    <span class="string">"organization"</span>: <span class="string">"weiyigeek"</span>,</span><br><span class="line">    <span class="string">"organizational_unit"</span>: <span class="string">"weiyigeek.top"</span>,</span><br><span class="line">    <span class="string">"locality"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">    <span class="string">"province"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">    <span class="string">"names"</span>: [</span><br><span class="line">      <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"weiyigeek"</span>,</span><br><span class="line">      <span class="string">"weiyigeek.top"</span>,</span><br><span class="line">      <span class="string">"weiyigeek.top"</span></span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"serial_number"</span>: <span class="string">"581660836920751122545368670593588896183219270559"</span>,</span><br><span class="line">  <span class="string">"not_before"</span>: <span class="string">"2022-01-17T13:58:00Z"</span>,</span><br><span class="line">  <span class="string">"not_after"</span>: <span class="string">"2027-01-16T13:58:00Z"</span>,</span><br><span class="line">  <span class="string">"sigalg"</span>: <span class="string">"SHA256WithRSA"</span>,</span><br><span class="line">  <span class="string">"authority_key_id"</span>: <span class="string">"6A:EC:E5:BA:36:AF:D2:2A:2:35:B3:90:D3:31:7:A7:91:9D:E1:90"</span>,</span><br><span class="line">  <span class="string">"subject_key_id"</span>: <span class="string">"6A:EC:E5:BA:36:AF:D2:2A:2:35:B3:90:D3:31:7:A7:91:9D:E1:90"</span>,</span><br><span class="line">  <span class="string">"pem"</span>: <span class="string">"-----BEGIN CERTIFICATE-----\n*****证书内容base64编码****\n-----END CERTIFICATE-----\n"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看CSR(证书签名请求)信息：</span></span><br><span class="line">cfssl certinfo -csr ca.csr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者利用 openssl x509 命令查看证书相关信息。</span></span><br><span class="line">openssl x509 -<span class="keyword">in</span> ca.pem -text -noout</span><br><span class="line">  <span class="comment"># Certificate:</span></span><br><span class="line">  <span class="comment">#   Data:</span></span><br><span class="line">  <span class="comment">#       Version: 3 (0x2)</span></span><br><span class="line">  <span class="comment">#       Serial Number:</span></span><br><span class="line">  <span class="comment">#           65:e2:92:f1:bc:bd:86:f8:41:c5:ad:f1:cc:aa:46:b2:9f:c2:33:9f</span></span><br><span class="line">  <span class="comment">#       Signature Algorithm: sha256WithRSAEncryption</span></span><br><span class="line">  <span class="comment">#       Issuer: C = CN, ST = ChongQing, L = ChongQing, O = weiyigeek, OU = weiyigeek.top, CN = weiyigeek.top</span></span><br><span class="line">  <span class="comment">#       Validity</span></span><br><span class="line">  <span class="comment">#           Not Before: Jan 17 13:58:00 2022 GMT</span></span><br><span class="line">  <span class="comment">#           Not After : Jan 16 13:58:00 2027 GMT</span></span><br><span class="line">  <span class="comment">#       Subject: C = CN, ST = ChongQing, L = ChongQing, O = weiyigeek, OU = weiyigeek.top, CN = weiyigeek.top</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>示例2.利用CA认证中心证书签发 Kubernetes 集群apiserver认证使用的证书。</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.创建 kubernetes-csr.json 证书配置请求文件。</span></span><br><span class="line">tee kubernetes-csr.json &lt;&lt; <span class="string">'EOF'</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"CN"</span>: <span class="string">"kubernetes"</span>,</span><br><span class="line">  <span class="string">"hosts"</span>: [</span><br><span class="line">      <span class="string">"127.0.0.1"</span>,</span><br><span class="line">      <span class="string">"localhost"</span>,</span><br><span class="line">      <span class="string">"192.168.12.128"</span>,</span><br><span class="line">      <span class="string">"192.168.12.126"</span>,</span><br><span class="line">      <span class="string">"192.168.12.127"</span>,</span><br><span class="line">      <span class="string">"10.99.0.1"</span>,</span><br><span class="line">      <span class="string">"kubernetes"</span>,</span><br><span class="line">      <span class="string">"kubernetes.default"</span>,</span><br><span class="line">      <span class="string">"kubernetes.default.svc"</span>,</span><br><span class="line">      <span class="string">"kubernetes.default.svc.cluster"</span>,</span><br><span class="line">      <span class="string">"kubernetes.default.svc.cluster.local"</span>,</span><br><span class="line">      <span class="string">"*.kubernetes.master"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"key"</span>: &#123;</span><br><span class="line">      <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">      <span class="string">"size"</span>: 2048</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"names"</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">          <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">          <span class="string">"ST"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">          <span class="string">"L"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">          <span class="string">"O"</span>: <span class="string">"k8s"</span>,</span><br><span class="line">          <span class="string">"OU"</span>: <span class="string">"System"</span></span><br><span class="line">      &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.利用 ca-config.json配置中kubernetes模板, 生成 Kubernetes 证书和私钥。</span></span><br><span class="line"><span class="comment"># -config   : 引用的是模板中的默认配置文件，</span></span><br><span class="line"><span class="comment"># -profiles : 是指定特定的使用场景，比如config.json中的kubernetes区域</span></span><br><span class="line">$ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kubernetes-csr.json | cfssljson -bare kubernetes</span><br><span class="line">  2022/01/18 11:23:02 [INFO] generate received request</span><br><span class="line">  2022/01/18 11:23:02 [INFO] received CSR</span><br><span class="line">  2022/01/18 11:23:02 [INFO] generating key: rsa-2048</span><br><span class="line">  2022/01/18 11:23:02 [INFO] encoded CSR</span><br><span class="line">  2022/01/18 11:23:02 [INFO] signed certificate with serial number 146326072922083487956554573890123805193577034490</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.查看生成的证书与密钥</span></span><br><span class="line">$ ls kubernetes*</span><br><span class="line">  kubernetes.csr  kubernetes-csr.json  kubernetes-key.pem  kubernetes.pem</span><br><span class="line"></span><br><span class="line">$ openssl x509 -<span class="keyword">in</span> kubernetes.pem -noout -text</span><br><span class="line">  Certificate:</span><br><span class="line">      Data:</span><br><span class="line">          Version: 3 (0x2)</span><br><span class="line">          Serial Number:</span><br><span class="line">              19:a1:7c:f0:3e:ab:16:45:9a:c1:77:de:a4:b7:3e:d0:b0:49:f2:fa</span><br><span class="line">          Signature Algorithm: sha256WithRSAEncryption</span><br><span class="line">          Issuer: C = CN, ST = ChongQing, L = ChongQing, O = weiyigeek, OU = weiyigeek.top, CN = weiyigeek.top</span><br><span class="line">          Validity</span><br><span class="line">              Not Before: Jan 18 03:18:00 2022 GMT</span><br><span class="line">              Not After : Jan 16 03:18:00 2032 GMT  <span class="comment"># 证书有效期十年。</span></span><br><span class="line">          Subject: C = CN, ST = ChongQing, L = ChongQing, O = k8s, OU = System, CN = kubernetes</span><br><span class="line">          Subject Public Key Info:</span><br><span class="line">              Public Key Algorithm: rsaEncryption</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.创建 admin 证书请求文件admin-csr.json并生成相应的证书、私钥文件。</span></span><br><span class="line">$ tee admin-csr.json &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"CN"</span>: <span class="string">"admin"</span>,</span><br><span class="line">  <span class="string">"hosts"</span>: [],</span><br><span class="line">  <span class="string">"key"</span>: &#123;</span><br><span class="line">    <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">    <span class="string">"size"</span>: 2048</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"names"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"ST"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"L"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"O"</span>: <span class="string">"system:masters"</span>,</span><br><span class="line">      <span class="string">"OU"</span>: <span class="string">"System"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">$ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes admin-csr.json | cfssljson -bare admin</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.同样使用相同方法生成kube-proxy证书,创建 kube-proxy-csr.json 证书配置文件。</span></span><br><span class="line">$ tee kube-proxy-csr.json &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"CN"</span>: <span class="string">"system:kube-proxy"</span>,</span><br><span class="line">  <span class="string">"hosts"</span>: [],</span><br><span class="line">  <span class="string">"key"</span>: &#123;</span><br><span class="line">    <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">    <span class="string">"size"</span>: 2048</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"names"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">      <span class="string">"ST"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"L"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">      <span class="string">"O"</span>: <span class="string">"k8s"</span>,</span><br><span class="line">      <span class="string">"OU"</span>: <span class="string">"System"</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">$ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-proxy.json | cfssljson -bare kube-proxy</span><br><span class="line"><span class="comment"># 此时生成了 kube-proxy-key.pem 和 kube-proxy.pem。</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 关键参数说明:</span></span><br><span class="line">- hosts: 包含的是授权范围，不在此范围的的节点(Master/Node)或者服务使用此证书就会报证书不匹配错误, 其中10.99.0.1是 kube-apiserver 指定的 service-cluster-ip-range 网段的第一个IP。</span><br><span class="line">- apiserver: 该证书属于 apiserver 加了一个 *.kubernetes.master域名以便内部私有 DNS 解析使用，于很多人问过 kubernetes 这几个能不能删掉，答案是不可以的；因为当集群创建好后，default namespace 下会创建一个叫 kubenretes 的svc，有一些组件会直接连接这个 svc 来跟 api 通信的，证书如果不包含可能会出现无法连接的情况。</span><br><span class="line">- 注意组织名称： 例如 admin证书 是用于将来生成管理员用的kubeconfig 配置文件用的，现在我们一般建议使用 RBAC 来对kubernetes 进行角色权限控制， 所以kubernetes 将证书中的CN字段作为User， O 字段作为 Group。</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>示例3.利用CA认证中心证书签发 harbor 仓库证书</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.准备一份harbor证书配置请求文件。</span></span><br><span class="line">tee harbor-csr.json &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">"CN"</span>: <span class="string">"harbor.weiyigeek.top"</span>,</span><br><span class="line">    <span class="string">"hosts"</span>: [</span><br><span class="line">        <span class="string">"127.0.0.1"</span>,</span><br><span class="line">        <span class="string">"192.168.12.108"</span>,</span><br><span class="line">        <span class="string">"harbor.weiyigeek.top"</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="string">"key"</span>: &#123;</span><br><span class="line">        <span class="string">"algo"</span>: <span class="string">"rsa"</span>,</span><br><span class="line">        <span class="string">"size"</span>: 2048</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"names"</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">          <span class="string">"C"</span>: <span class="string">"CN"</span>,</span><br><span class="line">          <span class="string">"L"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">          <span class="string">"ST"</span>: <span class="string">"ChongQing"</span>,</span><br><span class="line">          <span class="string">"O"</span>: <span class="string">"weiyigeek"</span>,</span><br><span class="line">          <span class="string">"OU"</span>: <span class="string">"weiyigeek.top"</span></span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.利用CA签发 harbor 仓库使用的服务端证书。</span></span><br><span class="line">$ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=harbor harbor-csr.json | cfssljson -bare harbor</span><br><span class="line">  <span class="comment"># 2022/01/18 14:20:23 [INFO] generate received request</span></span><br><span class="line">  <span class="comment"># 2022/01/18 14:20:23 [INFO] received CSR</span></span><br><span class="line">  <span class="comment"># 2022/01/18 14:20:23 [INFO] generating key: rsa-2048</span></span><br><span class="line">  <span class="comment"># 2022/01/18 14:20:23 [INFO] encoded CSR</span></span><br><span class="line">  <span class="comment"># 2022/01/18 14:20:23 [INFO] signed certificate with serial number 633490963371902710405149722919884501418274711654</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.生成的对应的证书签名请求文件(harbor.csr)、证书文件、证书私钥。</span></span><br><span class="line">$ ls harbor*</span><br><span class="line">harbor.csr  harbor-csr.json  harbor-key.pem  harbor.pem</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.证书相关信息查询</span></span><br><span class="line"><span class="comment"># 证书信息查看</span></span><br><span class="line">cfssl certinfo -cert harbor.pem</span><br><span class="line"></span><br><span class="line"><span class="comment"># 证书签名请求文件查看</span></span><br><span class="line">cfssl certinfo -csr harbor.csr</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在线请求指定域名配置的证书相关信息。</span></span><br><span class="line">$ cfssl certinfo -domain harbor.weiyigeek.top</span><br></pre></td></tr></table></figure></p>
+<p>至此cfssl使用实践完毕!</p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-04-27T12:22:02.679Z" itemprop="dateUpdated">2022-04-27 20:22:02</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/基础知识/Web原理/Web协议/SSL-TLS/SSL与TLS协议原理与证书签名多种生成方式实践指南.md" target="_blank" rel="noopener noreferrer">_posts/基础知识/Web原理/Web协议/SSL-TLS/SSL与TLS协议原理与证书签名多种生成方式实践指南.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/10-21-12.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/10-21-12.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HTTPS/" rel="tag">HTTPS</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SSL-TLS/" rel="tag">SSL-TLS</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/10-21-12.html&title=《SSL与TLS协议原理与证书签名多种生成方式实践指南》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/10-21-12.html&title=《SSL与TLS协议原理与证书签名多种生成方式实践指南》 — WeiyiGeek Blog&source=[TOC]
+原文地址: SSL与TLS协议原理与证书签名多种生成方式实践指南 (https://mp.weixin.qq.com/s/g-X8UPNwIk..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/10-21-12.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《SSL与TLS协议原理与证书签名多种生成方式实践指南》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/10-21-12.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/10-21-12.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/10-21-10.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">HTTPS原理介绍以及证书签名的申请配置</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/10-18-318.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">PHP网站编程之PDO使用记录</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#CA-认证原理"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">CA 认证原理</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#PKI-公钥基础设施"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">PKI 公钥基础设施</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-自签名SSL证书生成"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 自签名SSL证书生成</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-在线-脚本-生成"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.在线(脚本)生成</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-OpenSSL-生成"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.OpenSSL 生成</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-CFSSL-生成"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">3.CFSSL 生成</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-cfssl-使用实践"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x03 cfssl 使用实践</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/10-21-12.html&title=《SSL与TLS协议原理与证书签名多种生成方式实践指南》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/10-21-12.html&title=《SSL与TLS协议原理与证书签名多种生成方式实践指南》 — WeiyiGeek Blog&source=[TOC]
+原文地址: SSL与TLS协议原理与证书签名多种生成方式实践指南 (https://mp.weixin.qq.com/s/g-X8UPNwIk..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/10-21-12.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《SSL与TLS协议原理与证书签名多种生成方式实践指南》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/10-21-12.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/10-21-12.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACJUlEQVR42u3awW4CMQxFUf7/p6dbKsRwnx1axbmzQrQKPrOwkuc8Hvi5np7nb+7/+vr965r3v7L4kSFDxraM6/a5L4tj3pX+bh1emwwZMs5h8KUJ4L4Ivg5v1jJkyJDBP/dbsAwZMmSsZZB1SFP+54YrQ4aMTRjkENvfCKbx3FfO4jJkyNiQwVP3v//8lfmGDBkytmJc4cNHj6RBdyr5taYMGTJGM3iDI1u3WtHpYfjtCjJkyBjKqF1x4IPJfgCHYDJkyBjN4D+ZBvdp6L8g8pMhQ8ZQBh9e8mhs1SUw3rJlyJBxAqNfIh9Ypi8O1SBDhozRDHJo7GBqI4Ti+VSGDBkHMFJMejGiNgzgG00ZMmRMZdSOmv32ygcJQdwmQ4aM0YxaWbzV3kf/fGyJjq8yZMgYzSAtMr1C0QnaindGZMiQMZSRRvy1KJ+30XjDKkOGjAMYnVFifOBsRHKtyYYMGTK2ZfCWR3h8nVrj/rBNlCFDxmhGH8ND/3SQELdvGTJkDGXwtlgruvM6guYrQ4aMYxhpWbWIjQd5wcBAhgwZBzNqg4G0yXYiQhkyZMxmXOGTAla9lA9NWYYMGaMZ/flg+sOkFFJ6a2YrQ4aMDRmrNnZp9J8OEuK4TYYMGeMYaQRWKys+YfOrYzJkyJBRugBRG3DyC2QyZMiQsfYczIedRbwMGTIOYPQDNb5xrF2nWBa3yZAhY0NG66YG/k8+4EwxMmTIGM34Ab3v8C55pSoaAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

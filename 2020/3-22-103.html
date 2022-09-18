@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 iSCSI块存储网络共享基础介绍与实例操作|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="iSCSI">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>iSCSI块存储网络共享基础介绍与实例操作</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">iSCSI块存储网络共享基础介绍与实例操作</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-03-22T11:35:30.000Z" itemprop="datePublished" class="page-time">
+  2020-03-22
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%A3%81%E7%9B%98%E7%AE%A1%E7%90%86/">磁盘管理</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-系统运维/Application/DiskManagement/NetworkStorage/iSCSI块存储网络共享基础介绍与实例操作"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">iSCSI块存储网络共享基础介绍与实例操作</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-03-22 19:35:30" datetime="2020-03-22T11:35:30.000Z"  itemprop="datePublished">2020-03-22</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/%E7%A3%81%E7%9B%98%E7%AE%A1%E7%90%86/">磁盘管理</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="0x00-简述"><a href="#0x00-简述" class="headerlink" title="0x00 简述"></a>0x00 简述</h4><p>描述:前面我们正针对于iSCSI与SCSI做了一个简单的介绍, 并且在网络共享中使用过 nfs 以及 smb而iSCSI同样有该功能, 本文记录在学习与工作中搭建与使用iSCSI网络存储案例;</p>
+<p><em>问:什么是iSCSI?</em><br>iSCSI(<code>Internet Small Computer System Interface</code>)即Internet小型计算机系统接口;<br>iSCSI又称为IP-SAN(基于IP网络的存储区域网)，是一种基于因特网及SCSI-3协议下的存储技术由IETF提出，并于2003年2月11日成为正式的标准。iSCSI可以实现在IP网络上运行SCSI协议，使其能够在诸如高速千兆以太网上进行快速的数据存取备份操作，也就是基于网络的存储。<br>在现有IP网络上传输SCSI块命令的工业标准，它是一种在现有的IP网络上无需安装单独的光纤网络即可同时传输消息和块数据的突破性技术;</p>
+<ul>
+<li>iSCSI基于应用非常广泛的TCP/IP协议，<code>将SCSI命令/数据块封装为iSCSI包</code>，再封装至TCP报文，然后封装到IP报文中。<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325100013.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325100013.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></li>
+<li>iSCSI通过TCP面向连接的协议来保护数据块的可靠交付。</li>
+<li>由于iSCSI基于IP协议栈，因此可以在标准以太网设备上通过路由器或交换机来传输。</li>
+</ul>
+<p>本质上iSCSI 基于TCP/IPX协议让两台主机通过 IP 网络相互协商(<code>基于了TCP/IP的port 860 和 3260</code>)然后交换SCSI命令,您可以将它看做是一个高性能本地存储总线，从而创建了一个存储局域网（SAN）。但与SAN协议存储解决方案不同的是<code>iSCSI 不需要专用的电缆</code>，它可以在已有的交换和 IP 基础架构上运行;同时也体现出如果<code>不使用专用的网络或者子网（ LAN 或者 VLAN ）</code>，iSCSI SAN 的部署性能可能会严重下降。</p>
+<p>而iSCSI 服务提供数据集中化存取，且以区块为单位的数据存储空间，不仅简化存储空间管理的步骤、优化存储空间的使用，同时也增添了存储空间的弹性。它将SCSI指令通过网络分享出去，让价格低廉且操作简易的网络存储空间在iSCSI上运行。</p>
+<p>对客户端而言，会让你感觉计算机彷佛连接一个本地硬盘，可通过本地端计算机操作系统来管理。事实上，新增的磁盘是NAS上的虚拟硬盘。因为硬盘是虚拟的，因此不必再为计算机添加额外硬件，通过一般网络基础架构就可管理此虚拟硬盘。</p>
+<p>总的来说 ，iSCSI 常常被认为是光纤通道<code>（Fiber Channel）</code>的一个低成本替代方法，让计算机可以透过高速的局域网集线来把SAN以太网的光纤通道（FCoE）则不需要专用的基础架构。由于 iSCSI 服务提供了一个高扩充性和低组建与低维护成本的整合型存储方式，这正是大部份有预算考虑的中小企业和办公室所需求的。</p>
+<p><em>ISCSI SAN基础服务组件介绍</em><br>iSCSI SAN组件与FC SAN组件相类似，组成部分包括以下部件:<br><figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325194614.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325194614.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<ul>
+<li>1.iSCSI Target：它概念类似于一种联机接口，当iSCSI启动器联机至iSCSI Target时，iSCSI Target上连结的所有LUN也会联机至客户端的操作系统。每一个iSCSI target通过唯一的IQN来标识，存储阵列控制器上（或桥接器上）的各端口通过一个或多个IP地址来标识<code>本机与异构IP SAN</code>：</li>
+<li>2.iSCSI initiator：在计算机与存储装置关连中，你的计算机被称为“iSCSI initiator”（iSCSI启动器）客户端或主机，因为它开启链接至存储装置。诸如服务器连接在IP网络并对iSCSI target发起请求以及接收响应。每一个iSCSI主机通过唯一的IQN来识别，类似于光纤通道的WWN；要在IP网络上传递SCSI块命令，必须在iSCSI主机上安装iSCSI驱动。　</li>
+<li>3.iSCSI LUN：在iSCSI环境中的LUN实际上就是经过编号的硬盘或是实体硬盘所建立的一个储存空间，它是真正的存储实体。用户可以在这些iSCSI LUN上建立并管理文件，就像管理本地硬盘一样。</li>
+</ul>
+<p><em>本机iSCSI SAN与异构IP SAN的区别:</em></p>
+<ul>
+<li>本机iSCSI SAN:它包含在TCP/IP上传输SCSI协议的整个组件,包括<code>iSCSI initiator(或client)是主机服务器，而iSCSI target是存储阵列</code>;</li>
+<li>异构IP SAN:包含在TCP/IP与光纤交换结构传输SCSI的组件。为了实现这一点需要在<code>IP与光纤通道之间安装连接桥或网关设备</code>,连接桥用于TCP/IP与光纤通道之间的协议转换;因此iSCSI主机将连接桥看做iSCSI target。</li>
+</ul>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325101441.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325101441.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><em>ISCSI的工作流程:</em></p>
+<ul>
+<li>第一步:iSCSI系统由SCSI适配器发送一个SCSI命令,命令封装到TCP/IP包中并送入到以太网络中进行传输。</li>
+<li>第二步:接收方从TCP/IP包中提取SCSI命令并执行相关操作，执行完毕后，将返回的SCSI命令和数据封装到TCP/IP包中，把它们发回到发送方;</li>
+<li>第三步:发送方的iSCSI系统从接收方发过来的TCP/IP包中提取出数据或命令，并把它们传回到SCSI子系统。</li>
+</ul>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325101757.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325101757.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>解析:我们可以在这里简单的理解为<code>客户端与服务器上的SCSI端口</code>是通过SCSI协议标准虚拟出来的用于建立连接的端口。<br>通过iSCSI实现存储共享，首先创建IQN用于识别启动器和目标，接着建立TPG共享存储组并设置相应的访问控制权限，然后在共享存储组<code>添加lun逻辑单元（即存储设备）</code>，最后建立实现共享portals入口（ip port，就是通过IP进行访问的端口号）。</p>
+<p><em>概念解释:</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">TPG:共享存储组，某个特定iSCSI目标要侦听的接口IP地址和TCP端口的集合。可以将目标配置添加到TPG以协调多个LUN的设置。</span><br><span class="line">ACL:访问权限控制列表，一种使用节点IQN(通常是启动器名称)来验证启动器的访问权限的访问限制。</span><br><span class="line">IQN:iSCSI限定名称，全球唯一名称，用于以强制命名格式来识别启动器和目标。 IQN格式如下:</span><br><span class="line">iqn.YYYY-MM.com.reversed.domain[:optional_string] iqn:表示此名称使用域为标识符;</span><br><span class="line">YYYY-MM:表示拥有域名的年月时间; com.reversed.domain:拥有此iSCSI组织的逆向域名;</span><br><span class="line">:optional_string:以冒号为前缀的可选字符串，全球唯一由域所有者分配，其中可包含冒号为分割符的组织边界;</span><br><span class="line">LUN:逻辑单元号，带有编号的块设备，连接到目标且通过目标来使用。可以有一个或多个LUN连接到单个目标，但通常一个目标提供一个LUN;</span><br><span class="line">portals入口:目标或启动器上用于建立连接的IP地址和端口号端口号一般为`3260`;目标端的portals入口配置使用targetcli命令。</span><br></pre></td></tr></table></figure></p>
+<p>IQN格式说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#为了方便记忆与认证配置建议按照以下设置域为标识符</span></span><br><span class="line">iqn.YYYY-MM.com.reversed.domain[:optional_string]</span><br><span class="line">iqu.YYYY-MM.com.域名反向书写:计算机名称</span><br><span class="line"><span class="comment">#示例</span></span><br><span class="line">iqn.2020-01.top.weiyigeek:weiyigeek.pc</span><br></pre></td></tr></table></figure></p>
+<p><em>iSCSI SAN 应用场景:</em></p>
+<ul>
+<li>(1) 存储集成公司希望将不同的存储资源从分散在网络上的服务器移动到统一的位置（常常是数据中心）,这可以让存储的分配变得更为有效。 SAN 环境中的服务器无需任何更改硬件或电缆连接就可以得到新分配的磁盘卷。</li>
+<li>(2) 灾难恢复公司希望把存储资源从一个数据中心镜像到另一个远程的数据中心上，后者在出现长时间停电的情况下可以用作热备份。 特别是iSCSI SAN 使我们只需要用最小的配置更改就可以在 WAN 上面迁移整个磁盘阵列，实质上就是把存储变成了“可路由的”，就像普通的网络通信一样。</li>
+</ul>
+<BR/>
+
+<p><em>注意事项:</em></p>
+<ul>
+<li>通常情况下不要使用多个iSCSI启动器连接相同的Target，以免硬盘数据损毁，除非使用的是丛集感应文件系统，如Vmware虚拟机或Oracle Clustering文件系统。</li>
+</ul>
+<hr>
+<h4 id="0x01-基础实操"><a href="#0x01-基础实操" class="headerlink" title="0x01 基础实操"></a>0x01 基础实操</h4><p><em>实操实现说明:</em></p>
+<ul>
+<li>Linux 安装 Target 作为iSCSI 服务端，分别采用Windows / Linux 作为 Initiator来访问iSCSI target并<code>挂载iSCSI网络存储(配置ACLS与CHAP认证)</code>;</li>
+<li>Windows Server 安装 Target 作为iSCSI 服务端，然后仍然分别采用Windows / Linux 作为 Initiator <code>[ 英 /ɪˈnɪʃieɪtə(r)/ ]</code> 来访问iSCSI target并<code>挂载置iSCSI网络存储(配置ACLS与CHAP认证)</code>;</li>
+</ul>
+<h5 id="Linux-iSCSI-Target"><a href="#Linux-iSCSI-Target" class="headerlink" title="Linux-iSCSI-Target"></a>Linux-iSCSI-Target</h5><p><em>环境准备:</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Linux OS(Target): CentOS Linux release 7.6.1810 (Core) 3.10.0-957.12.2.el7.x86_64</span><br><span class="line"><span class="comment">#- IQN: iqn.2020-01.top.weiyigeek:target</span></span><br><span class="line">Windows PC: iqn.2020-01.top.weiyigeek:weiyigeek.top</span><br><span class="line">Windows Server(Clint): Microsoft Windows Server 2012 R2 Standard</span><br><span class="line"><span class="comment">#- IQN: iqn.2020-01.top.weiyigeek:server2012</span></span><br><span class="line">Linux OS(Client):CentOS Linux release 7.7.1908 (Core) 3.10.0-1062.1.1.el7.x86_64</span><br><span class="line"><span class="comment">#- IQN: iqn.2020-01.top.weiyigeek:initiator</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><em>操作流程:</em></p>
+<p><strong>iSCSI Target 端配置:</strong></p>
+<p>Step1.本案例中我采用ESXI建立虚拟机并添加两块硬盘，并分别以磁盘上的一个分区来充当ISCSI存储空间的，实际应用中一般会添加新的磁盘或大容量存储的存储设备:<br><figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325143035.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325143035.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></p>
+<p>Step2.开启并进入<code>Linux OS(Target)</code>系统中查看做iscsi网络存储的磁盘,并进行格式化;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.系统中存储块设备查看</span></span><br><span class="line">$ lsblk</span><br><span class="line">NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   10G  0 disk</span><br><span class="line">sdb               8:16   0   10G  0 disk</span><br><span class="line">sdc               8:32   0   40G  0 disk</span><br><span class="line">├─sdc1            8:33   0    1G  0 part /boot</span><br><span class="line">└─sdc2            8:34   0   39G  0 part</span><br><span class="line">  ├─centos-root 253:0    0   37G  0 lvm  /</span><br><span class="line">  └─centos-swap 253:1    0    2G  0 lvm  [SWAP]</span><br><span class="line">sr0              11:0    1 1024M  0 rom</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#2.分别对/dev/sda 与 /dev/sdb 建立分区</span></span><br><span class="line">$ fdisk /dev/sda <span class="comment"># /dev/sdb 是相同的操作这里不重复</span></span><br><span class="line">欢迎使用 fdisk (util-linux 2.23.2)</span><br><span class="line">使用磁盘标识符 0x48305faa 创建新的 DOS 磁盘标签。</span><br><span class="line">命令(输入 m 获取帮助)：n <span class="comment">#创建分区</span></span><br><span class="line">Select Partition <span class="built_in">type</span> (default p): p  <span class="comment">#主分区</span></span><br><span class="line">分区号 (1-4，默认 1)：</span><br><span class="line">起始 扇区 (2048-20971519，默认为 2048)：</span><br><span class="line">将使用默认值 2048</span><br><span class="line">Last 扇区, +扇区 or +size&#123;K,M,G&#125; (2048-20971519，默认为 20971519)：</span><br><span class="line">将使用默认值 20971519</span><br><span class="line">分区 1 已设置为 Linux 类型，大小设为 10 GiB</span><br><span class="line">命令(输入 m 获取帮助)：w  <span class="comment">#将配置写入磁盘</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#3.查看分区后的分区信息</span></span><br><span class="line">$ fdisk -l</span><br><span class="line">fdisk /dev/sdb</span><br><span class="line">磁盘 /dev/sda：10.7 GB, 10737418240 字节，20971520 个扇区</span><br><span class="line">设备 Boot      Start         End      Blocks   Id  System</span><br><span class="line">/dev/sda1            2048    20971519    10484736   83  Linux</span><br><span class="line"></span><br><span class="line">磁盘 /dev/sdb：10.7 GB, 10737418240 字节，20971520 个扇区</span><br><span class="line">设备 Boot      Start         End      Blocks   Id  System</span><br><span class="line">/dev/sdb1            2048    20971519    10484736   83  Linux</span><br><span class="line"></span><br><span class="line">$ lsblk</span><br><span class="line">NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda               8:0    0   10G  0 disk</span><br><span class="line">└─sda1            8:1    0   10G  0 part</span><br><span class="line">sdb               8:16   0   10G  0 disk</span><br><span class="line">└─sdb1            8:17   0   10G  0 part</span><br></pre></td></tr></table></figure></p>
+<p>Step3.安装服务端ISCSI服务对应的相关软件包;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#targetcli命令有两种模式`一种是交互式模式，一种是命令行模式`;</span></span><br><span class="line">yum install targetcli net-tools –y</span><br></pre></td></tr></table></figure></p>
+<p>Step4.设置target开机自动启动和防火墙设置放行target 监听端口（默认为3260/tcp）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$systemctl</span> <span class="built_in">enable</span> target.service</span><br><span class="line"><span class="variable">$firewall</span>-cmd --permanent -add-port=3260/tcp</span><br><span class="line"><span class="variable">$firewall0cmd</span> --reload</span><br></pre></td></tr></table></figure></p>
+<p>Step5.运行targetcli进入交互模式创建服务端的iSCSI服务以及其基本配置;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#(1)采用tragetclit进入交互模式服务端iscsi命令配置信息</span></span><br><span class="line">$ targetcli  </span><br><span class="line">/&gt; ls  <span class="comment">#使用ls命令查看菜单结构</span></span><br><span class="line">o- / ..... [...] <span class="comment">#顶级目录</span></span><br><span class="line">  o- backstores ........................... [...] <span class="comment">#后备存储，主备存储空间要共享的设备或分区需要添加到此处</span></span><br><span class="line">  | o- block ............... [Storage Objects: 0] <span class="comment">#块存储，backstores子目录</span></span><br><span class="line">  | o- fileio .............. [Storage Objects: 0] <span class="comment">#文件存储镜像img根据一个事先准备的文件提供存储功能，backstores子目录</span></span><br><span class="line">  | o- pscsi ............... [Storage Objects: 0] <span class="comment">#真实物理scsi设备不推荐使用，backstores子目录</span></span><br><span class="line">  | o- ramdisk ............. [Storage Objects: 0] <span class="comment">#闪存利用内存当做存储，backstores子目录    </span></span><br><span class="line">  o- iscsi ......................... [Targets: 0] <span class="comment">#以ISCSI的方式共享存储设备的目录</span></span><br><span class="line">  o- loopback ...................... [Targets: 0] <span class="comment">#回路</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#(2)我们需要将我们准备的分区添加进来(注意我们准备的分区是块设备,所以应将其添加到块设备文件之中)</span></span><br><span class="line">/&gt; <span class="built_in">cd</span> backstores/block <span class="comment">#切换到块设备文件目录</span></span><br><span class="line"></span><br><span class="line">/backstores/block&gt; ls <span class="comment">#可以通过Tab键列出了相关命令(命令如名很好理解)</span></span><br><span class="line">o- block ................... [Storage Objects: 0]</span><br><span class="line"></span><br><span class="line">/backstores/block&gt; create dev=/dev/sda name=lun0  <span class="comment">#通过create命令添加设备dev用来指定要添加的设备磁盘，nam为逻辑单元名(可以自定义)</span></span><br><span class="line">Created block storage object lun0 using /dev/sda.</span><br><span class="line"></span><br><span class="line">/backstores/block&gt; create dev=/dev/sdb name=lun1</span><br><span class="line">Created block storage object lun1 using /dev/sdb.</span><br><span class="line"></span><br><span class="line">/backstores/block&gt; ls  <span class="comment">#通过ls命令查看所添加的设备</span></span><br><span class="line">o- block ................... [Storage Objects: 2]</span><br><span class="line">  o- lun0 ............ [/dev/sda (10.0GiB) write-thru deactivated]</span><br><span class="line">  | o- alua .................... [ALUA Groups: 1]</span><br><span class="line">  |   o- default_tg_pt_gp ......... [ALUA state: Active/optimized]</span><br><span class="line">  o- lun1 ............ [/dev/sdb (10.0GiB) write-thru deactivated]</span><br><span class="line">    o- alua .................... [ALUA Groups: 1]</span><br><span class="line">      o- default_tg_pt_gp ......... [ALUA state: Active/optimized]</span><br><span class="line"></span><br><span class="line"><span class="comment">#(3)将添加上来的存储设备通过iSCSI目标服务器共享出去</span></span><br><span class="line">/backstores/block&gt; <span class="built_in">cd</span> /iscsi  <span class="comment">#iscsi目录下实现共享</span></span><br><span class="line">/iscsi&gt; create iqn.2020-01.top.weiyigeek:target <span class="comment">#设置IQN(发起程序服务)</span></span><br><span class="line">Created target iqn.2020-01.top.weiyigeek:target.</span><br><span class="line">Created TPG 1.</span><br><span class="line">Global pref auto_add_default_portal=<span class="literal">true</span></span><br><span class="line">Created default portal listening on all IPs (0.0.0.0), port 3260.  <span class="comment">#默认是任意IP均可访问(为了安全我们必须对其进行修改)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#(4)为target server portal创建一个网络监听信息 &#123;portal&#125; 以发现target</span></span><br><span class="line">/iscsi&gt; <span class="built_in">cd</span> iqn.2020-01.top.weiyigeek:target/tpg1/portals/ </span><br><span class="line">/iscsi/iqn.20.../tpg1/portals&gt; delete 0.0.0.0 3260    <span class="comment">#删除默认监听地址</span></span><br><span class="line">/iscsi/iqn.20.../tpg1/portals&gt; create 192.168.10.222 3260  <span class="comment">#创建监听本机地址，端口可以进行自定义修改；</span></span><br><span class="line">/iscsi/iqn.20.../tpg1/portals&gt; <span class="built_in">cd</span> ../../</span><br><span class="line">/iscsi/iqn.20...yigeek:target&gt; ls</span><br><span class="line">o- iqn.2020-01.top.weiyigeek:target ........................................... [TPGs: 1]</span><br><span class="line">  o- tpg1 ........................................................ [no-gen-acls, no-auth] <span class="comment">#共享存储组</span></span><br><span class="line">    o- acls ................................................................... [ACLs: 0] <span class="comment">#访问控制信息</span></span><br><span class="line">    o- luns ................................................................... [LUNs: 0] <span class="comment">#逻辑单元设备</span></span><br><span class="line">    o- portals ............................................................. [Portals: 1] <span class="comment">#入口</span></span><br><span class="line">      o- 192.168.10.222:3260 ......................................................... [OK] <span class="comment">#网络绑定</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/iscsi/iqn.20...yigeek:target&gt; <span class="built_in">cd</span> tpg1/  <span class="comment">#设置共享存储组的属性</span></span><br><span class="line">/iscsi/iqn.20...k:target/tpg1&gt; <span class="built_in">set</span> attribute authentication=0 demo_mode_write_protect=0 generate_node_acls=1 cache_dynamic_acls=1   </span><br><span class="line">Parameter demo_mode_write_protect is now <span class="string">'0'</span>.</span><br><span class="line">Parameter authentication is now <span class="string">'1'</span>.</span><br><span class="line">Parameter generate_node_acls is now <span class="string">'1'</span>.</span><br><span class="line">Parameter cache_dynamic_acls is now <span class="string">'1'</span>.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#(5)创建LUM代表设备(LUN 逻辑单元关联后端存储)</span></span><br><span class="line">/iscsi/iqn.20.../tpg1/portals&gt; <span class="built_in">cd</span> ../luns</span><br><span class="line">/iscsi/iqn.20...get/tpg1/luns&gt; create /backstores/block/lun0 lun=lun0 <span class="comment">#链接后端存储，lun可以自定义默认死lun0</span></span><br><span class="line">/iscsi/iqn.20...get/tpg1/luns&gt; create /backstores/block/lun1 lun=lun1 <span class="comment">#添加共享指定存储设备  </span></span><br><span class="line">/iscsi/iqn.20...get/tpg1/luns&gt; ls</span><br><span class="line">o- luns ............... [LUNs: 2]</span><br><span class="line">  o- lun0 ............. [block/lun0 (/dev/sda) (default_tg_pt_gp)]</span><br><span class="line">  o- lun1 ............. [block/lun1 (/dev/sdb) (default_tg_pt_gp)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#(6)配置ACL按照需求进行配置(需要得到initiator端的发起名称)</span></span><br><span class="line">/iscsi/iqn.20...get/tpg1/acls&gt; create iqn.2020-01.top.weiyigeek:weiyigeek.top</span><br><span class="line">/iscsi/iqn.20...get/tpg1/acls&gt; create iqn.2020-01.top.weiyigeek:initiator</span><br><span class="line">/iscsi/iqn.20...get/tpg1/acls&gt; ls</span><br><span class="line">o- acls ...........initiatorinitiator........... [ACLs: 2]</span><br><span class="line">  o- iqn.2020-01.top.weiyigeek:initiator initiator...... [Mapped LUNs: 2]</span><br><span class="line">  | o- mapped_lun0 initiator...................... [lun0 block/lun0 (rw)]</span><br><span class="line">  | o- mapped_lun1 initiator...................... [lun1 block/lun1 (rw)]</span><br><span class="line">  o- iqn.2020-01.top.weiyigeek:weiyigeek.top initiator.. [Mapped LUNs: 2]</span><br><span class="line">    o- mapped_lun0 initiator...................... [lun0 block/lun0 (rw)]</span><br><span class="line">    o- mapped_lun1 initiator...................... [lun1 block/lun1 (rw)]</span><br><span class="line">/iscsi/iqn.20...get/tpg1/&gt; <span class="built_in">set</span> attribute generate_node_acls=1 <span class="comment">#开启ACL由于ACL默认是关闭的</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#(7) 配置发现认证discovery authentication:单项认证(注意有密码复杂度要求以及不大于16位否则Windows iscsi发起程序不能成功链接)</span></span><br><span class="line">/iscsi&gt; <span class="built_in">set</span> discovery_auth <span class="built_in">enable</span>=1 userid=target password=WeiyiGeekiSCSI</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#(8)退出默认保存配置信息</span></span><br><span class="line">/iscsi/iqn.20...get/tpg1/luns&gt; <span class="built_in">exit</span> </span><br><span class="line">Global pref auto_save_on_exit=<span class="literal">true</span></span><br><span class="line">Configuration saved to /etc/target/saveconfig.json</span><br></pre></td></tr></table></figure></p>
+<p>Step6.命令行模式进行设置<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.创建需要给iSCSI网络共享的磁盘设备并建立逻辑单元</span></span><br><span class="line">targetcli /backstores/block create dev=/dev/sda name=lun0</span><br><span class="line">targetcli /backstores/block create dev=/dev/sdb name=lun1</span><br><span class="line">targetcli /backstores/block create name=datastore dev=/dev/iscsi_vg/iscsi_lv <span class="comment">#可以创建一个逻辑卷</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#2.查看创建添加的设备</span></span><br><span class="line">targetcli /backstores/block ls</span><br><span class="line"></span><br><span class="line"><span class="comment">#3.将存储设备通过iSCSI目标服务器共享</span></span><br><span class="line">targetcli /iscsi create iqn.2020-01.top.weiyigeek:target</span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1/portals/ delete 0.0.0.0 3260 </span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1/portals/ create 192.168.10.22 3260 </span><br><span class="line"></span><br><span class="line"><span class="comment">#4.设置共享存储组的属性（#属性认证关闭，写保护关闭，生成节点acl ，开启缓存动态acl）</span></span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1/ <span class="built_in">set</span> attribute authentication=0 demo_mode_write_protect=0 generate_node_acls=1 cache_dynamic_acls=1</span><br><span class="line"></span><br><span class="line"><span class="comment">#5.创建LUM代表设备(LUN关联后端存储)</span></span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1/luns create /backstores/block/lun0 lun=lun0</span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1/luns create /backstores/block/lun1 lun=lun1</span><br><span class="line"></span><br><span class="line"><span class="comment">#6.配置ACL并开启ACL</span></span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1/acls create iqn.2020-01.top.weiyigeek:weiyigeek.top</span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1 <span class="built_in">set</span> attribute generate_node_acls=1</span><br><span class="line"></span><br><span class="line"><span class="comment">#7.配置`发现服务单项`认证</span></span><br><span class="line">targetcli /iscsi <span class="built_in">set</span> discovery_auth <span class="built_in">enable</span>=1 userid=target password=WeiyiGeekiSCSI</span><br></pre></td></tr></table></figure></p>
+<p>Step7.systemd启动 target.service 到此 target服务器端配置完成;<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># systemctl restart target.service</span></span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl status target.service</span></span><br></pre></td></tr></table></figure></p>
+<p><em>补充操作:</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#(1)删除iSCSI共享磁盘存储</span></span><br><span class="line">$ targetcli</span><br><span class="line">/iscsi&gt; ls</span><br><span class="line">o- iscsi .......... [1-way disc auth, Targets: 1]</span><br><span class="line">  o- iqn.2003-01.org.linux-iscsi.localhost.x8664:sn.ac4d1254d4da ........................ [TPGs: 1]</span><br><span class="line">    o- tpg1 ................. [gen-acls, no-auth]</span><br><span class="line">      o- luns ......................... [LUNs: 2]</span><br><span class="line">      | o- lun0 ....... [block/lun0 (/dev/sda) (default_tg_pt_gp)]</span><br><span class="line">      | o- lun1 ....... [block/lun1 (/dev/sdb) (default_tg_pt_gp)]</span><br><span class="line">      o- portals ................... [Portals: 1]</span><br><span class="line">        o- 0.0.0.0:3260 .................... [OK]</span><br><span class="line">/iscsi&gt; delete iqn.2003-01.org.linux-iscsi.localhost.x8664:sn.ac4d1254d4da   <span class="comment">#删除主机发起程序名称(IQN)</span></span><br><span class="line">Deleted Target iqn.2003-01.org.linux-iscsi.localhost.x8664:sn.ac4d1254d4da.</span><br><span class="line"></span><br><span class="line"><span class="comment">#(2) 移除iSCSI块存储</span></span><br><span class="line">/iscsi&gt; <span class="built_in">cd</span> /backstores/block</span><br><span class="line">/backstores/block&gt; delete lun0 <span class="comment">#删除磁盘块设备上设置的逻辑单元(有几块就删除几块)</span></span><br><span class="line">/backstores/block&gt; delete lun1</span><br><span class="line"></span><br><span class="line"><span class="comment">#(3) 移除所有配置</span></span><br><span class="line">/&gt; clearconfig confirm=True <span class="comment">#输入此命令删除之前所做的所有设备共享配置。</span></span><br></pre></td></tr></table></figure></p>
+<p><em>补充说明:</em></p>
+<ul>
+<li>1.ACL（访问控制列表）必须要和initiator端/etc/iscsi/initiatorname.iscsi里iqn名字保持一致以及iscsi发起程序名称一致，否则拒绝访问。<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325154740.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325154740.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure></li>
+<li>2.记录配置iSCSI文件路径<code>/etc/target/saveconfig.json</code></li>
+<li>3.非常注意服务认证有两种（坑啊）: 发现认证discovery authentication 、 normal 认证</li>
+</ul>
+<p><br></p>
+<p><strong>iSCSI initiator 端配置:</strong><br><em>(1) windows 连接例子</em></p>
+<ul>
+<li>1.运行iSCSI发起程序，如果是第一次运行需要开启iSCSI服务(个人PC)点击是即可;<br><code>C:\Windows\system32\iscsicpl.exe</code></li>
+</ul>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325160623.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325160623.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<ul>
+<li>2.由于我们配置了单项认证需要进行认证配置;</li>
+</ul>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325161907.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325161907.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<ul>
+<li>3.将发现的iSCSI Target添加到当前计算机会话中(直接连接或者通过属性–添加会话);</li>
+</ul>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325163747.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325163747.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<ul>
+<li>4.此时运行<code>diskmgmt.msc</code>发现本地多个两块10g的磁盘,右键磁盘删除卷然后新建卷，按照提示进行设置盘符，我们测试在iSCSI网络存储里面存放数据;</li>
+</ul>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325164351.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325164351.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<ul>
+<li>5.采用Windows Server 2012 进行链接同一个iqn并连接到iSCSI磁盘存储,如果我们没有设置ACLS并且没认证的时候则只有read only权限;</li>
+</ul>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325164037.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325164037.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<ul>
+<li>6.Server 2012 连接到iSCSI后我们可以看到我们在iSCCI网络存储中存放的数据;</li>
+</ul>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325164906.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325164906.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br/></p>
+<p><em>(2) Linux 连接例子</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.Linux客户端配置,实际环境中建议修改主机名</span></span><br><span class="line">hostnamectl <span class="built_in">set</span>-hostname initiator</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.安装iscsi-initiator-utils软件包</span></span><br><span class="line">yum install -y iscsi-initiator-utils</span><br><span class="line"></span><br><span class="line"><span class="comment">#3.开启iscsi服务并设置开启开机自启动。</span></span><br><span class="line">systemctl start iscsi</span><br><span class="line">systemctl <span class="built_in">enable</span> iscsi</span><br><span class="line"></span><br><span class="line"><span class="comment">#4.设置initiator发起名称IQN</span></span><br><span class="line">cat /etc/iscsi/initiatorname.iscsi</span><br><span class="line">InitiatorName=iqn.2020-01.top.weiyigeek:initiator</span><br><span class="line"></span><br><span class="line"><span class="comment">#5.单向认证配置</span></span><br><span class="line">grep -nE <span class="string">"node.session.auth|discovery.sendtargets.auth"</span> /etc/iscsi/iscsid.conf</span><br><span class="line"><span class="comment"># 57:node.session.auth.authmethod = CHAP</span></span><br><span class="line"><span class="comment"># 61:node.session.auth.username = target</span></span><br><span class="line"><span class="comment"># 62:node.session.auth.password = WeiyiGeekiSCSI</span></span><br><span class="line">71:discovery.sendtargets.auth.authmethod = CHAP</span><br><span class="line">75:discovery.sendtargets.auth.username = target</span><br><span class="line">76:discovery.sendtargets.auth.password = WeiyiGeekiSCSI</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#6.连接发现Target的iSCSI设备(发现的target 信息会保存在/var/lib/iscsi/node 目录下)</span></span><br><span class="line">iscsiadm -m discovery -t sendtargets -p 192.168.10.222 -d2  <span class="comment">#debug 可以看见连接过程</span></span><br><span class="line">192.168.10.222:3260,1 iqn.2020-01.top.weiyigeek:target</span><br><span class="line"></span><br><span class="line"><span class="comment">#7.连接iSCSI Target</span></span><br><span class="line">iscsiadm -m node -T iqn.2020-01.top.weiyigeek:target -p 192.168.10.222 -l</span><br><span class="line">Logging <span class="keyword">in</span> to [iface: default, target: iqn.2020-01.top.weiyigeek:target, portal: 192.168.10.222,3260] (multiple)</span><br><span class="line">Login to [iface: default, target: iqn.2020-01.top.weiyigeek:target, portal: 192.168.10.222,3260] successful. <span class="comment">#表示连接成功</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#8.查看iSCSI存储挂载到本机的磁盘并对其进行磁盘分区与格式化操作(首次需要设置，后期链接则不需要)</span></span><br><span class="line"><span class="variable">$lsscsi</span> <span class="comment">#或者ll /dev/disk/by-path/</span></span><br><span class="line">[0:0:0:0]    disk    VMware   Virtual disk     1.0   /dev/sda</span><br><span class="line">[3:0:0:0]    <span class="built_in">cd</span>/dvd  NECVMWar VMware SATA CD00 1.00  /dev/sr0</span><br><span class="line">[40:0:0:0]   disk    LIO-ORG  lun0             4.0   /dev/sdb <span class="comment"># Windows 使用 iSCSI</span></span><br><span class="line">[40:0:0:1]   disk    LIO-ORG  lun1             4.0   /dev/sdc <span class="comment"># Linux  使用 iSCSI</span></span><br><span class="line"><span class="variable">$mkfs</span>.xfs /dev/sdc1 <span class="comment">#格式化</span></span><br><span class="line"><span class="variable">$mkdir</span> /mnt/iscsi <span class="comment">#创建挂载目录</span></span><br><span class="line"><span class="variable">$mount</span> /dev/sdc1 /mnt/iscsi <span class="comment">#挂载 iSCSI 设备</span></span><br><span class="line"><span class="variable">$mount</span> -l</span><br><span class="line">/dev/sdc1 on /mnt/iscsi <span class="built_in">type</span> xfs (rw,relatime,seclabel,attr2,inode64,noquota)</span><br><span class="line"><span class="variable">$df</span> -h</span><br><span class="line">/dev/sdc1                 10G   33M   10G    1% /mnt/iscsi</span><br><span class="line"></span><br><span class="line"><span class="comment">#9.设置开机自动挂载iSCSI设备（第一中方式未成功建议采用第二种）</span></span><br><span class="line">$ ll /dev/disk/by-uuid/</span><br><span class="line">0e879666-c926-427d-a69b-59004556fe22 -&gt; ../../sdc1</span><br><span class="line">cat &gt;&gt; /etc/fstab &lt;&lt;END</span><br><span class="line">UUID=0e879666-c926-427d-a69b-59004556fe22 /mnt/iscsi xfs  defaults  0 0</span><br><span class="line">END</span><br><span class="line"><span class="comment">#方式2</span></span><br><span class="line">cat &gt;&gt; /etc/rc.d/rc.local&lt;&lt;END</span><br><span class="line">mount /dev/sdc1 /mnt/iscsi/</span><br><span class="line">END</span><br><span class="line"></span><br><span class="line"><span class="comment">#10.退出连接iSCSI Target(临时取消对target的iscsi的访问，如果重启服务依然能发现有一块磁盘)</span></span><br><span class="line"><span class="variable">$umount</span> /mnt/iscsi/</span><br><span class="line"><span class="variable">$iscsiadm</span> -m node -T iqn.2020-01.top.weiyigeek:target -p 192.168.10.222 -u</span><br><span class="line">Logging out of session [sid: 7, target: iqn.2020-01.top.weiyigeek:target, portal: 192.168.10.222,3260]</span><br><span class="line">Logout of [sid: 7, target: iqn.2020-01.top.weiyigeek:target, portal: 192.168.10.222,3260] successful.</span><br><span class="line"></span><br><span class="line"><span class="comment">#11.卸载 iSCSI Target 的设备重启不会自动连接到iSCSI共享磁盘中(实际上这条命令就是删除/var/lib/iscsi/nodes/目录下对应的信息);</span></span><br><span class="line"><span class="variable">$tree</span> /var/lib/iscsi/</span><br><span class="line">/var/lib/iscsi/</span><br><span class="line">├── ifaces</span><br><span class="line">├── isns</span><br><span class="line">├── nodes</span><br><span class="line">│   └── iqn.2020-01.top.weiyigeek:target</span><br><span class="line">│       └── 192.168.10.222,3260,1</span><br><span class="line">│           └── default</span><br><span class="line">├── send_targets</span><br><span class="line">│   └── 192.168.10.222,3260</span><br><span class="line">│       ├── iqn.2020-01.top.weiyigeek:target,192.168.10.222,3260,1,default -&gt; /var/lib/iscsi/nodes/iqn.2020-01.top.weiyigeek:target/192.168.10.222,3260,1</span><br><span class="line">│       └── st_config</span><br><span class="line">├── slp</span><br><span class="line">└── static</span><br><span class="line"></span><br><span class="line"><span class="variable">$iscsiadm</span> -m node -T iqn.2020-01.top.weiyigeek:target -p 192.168.10.222 -o delete</span><br></pre></td></tr></table></figure></p>
+<p><em>注意事项:</em></p>
+<ul>
+<li>1.注意一定要添加写操作保护,如果两个initiator连接到同一磁盘并对其操作，操作的数据会缓存等待断开时候写入磁盘，同时其它成员也可以进行读取，这样会导致读写不一致的情况;但是有了写操作主initiator必须等待另一个client对文件写完才能断开,且如果修改同一个文件则以最后断开的为主：<code>set demo_mode_write_protect=1</code>;</li>
+</ul>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325171051.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200325171051.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br/></p>
+<h5 id="Windows-iSCSI-Target"><a href="#Windows-iSCSI-Target" class="headerlink" title="Windows-iSCSI-Target"></a>Windows-iSCSI-Target</h5><p>描述:通过Windows Server 搭建iscsi网络共享磁盘；<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Target:Windows Server 2012 R2</span></span><br><span class="line">192.168.1.2:iqn.2020-03.top.weiyigeek:server</span><br><span class="line"></span><br><span class="line"><span class="comment">#Initiator:Windows 10</span></span><br><span class="line">192.168.1.3:iqn.2020-03.top.weiyigeek:pc</span><br></pre></td></tr></table></figure></p>
+<p><strong>实际流程:</strong><br>Step1.在Server 2012 R2上安装iSCSI服务:<code>打开服务器管理器&gt;&gt;添加角色和功能&gt;基于角色或基于功能的安装&gt;基于角色或基于功能的安装&gt;选择iSCSI开头的两个选项和文件服务器</code></p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326112849.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326112849.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>Step2.安装功能如下:<code>文件服务器 、 iSCSI目标存储提供程序 、iSCSI目标服务器</code></p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326113056.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326113056.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>Step3.创建iSCSI虚拟磁盘:<code>打开服务器管理器&gt;&gt;文件和存储服务&gt;&gt;iSCSI&gt;&gt;任务&gt;&gt;新建iSCSI虚拟磁盘或者导入</code></p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326113700.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326113700.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>Step4.指定iSCSI虚拟磁盘大小并新建立iSCSI目标，并分别设置目标名称(如不设置则自动生成)，以及发起程序ID<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iSCSI Target: iqn.2020-03.top.weiyigeek:server</span><br><span class="line">iSCSI Initiator: iqn.2020-03.top.weiyigeek:pc</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326114448.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326114448.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>Step5.设置iSCSI的CHAP身份验证:<code>target / WeiyiGeekTop</code></p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326114748.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326114748.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>Step6.查看创建iSCSI的配置情况以及创建iSCSI Target 服务</p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326115000.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326115000.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>Step7.访问服务器配置<code>打开服务器管理器&gt;&gt;文件和存储服务&gt;&gt;iSCSI，右键iSCSI目标，点击属性</code></p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326115117.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326115117.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p><br></p>
+<p><strong>Windows 客户端|Initiator</strong></p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326131643.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326131643.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<hr>
+<p><strong>Windows Linux |Initiator</strong><br>Step 8.选择iSCSI进行分配发起服务&gt;分配iSCSI虚拟磁盘;</p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326133025.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326133025.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<p>Linux Initiator 配置连接iSCSI存储结果:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#创建分区以及格式化</span></span><br><span class="line">fdisk /dev/sdb</span><br><span class="line">mkfs.xfs /dev/sdb1</span><br><span class="line"><span class="comment">#然后挂载即可</span></span><br><span class="line"><span class="variable">$mount</span> /dev/sdb1 /mnt/iscsi/</span><br><span class="line"><span class="variable">$ifconfig</span> &gt; /mnt/iscsi/ip.conf</span><br><span class="line"><span class="variable">$mount</span> -l | grep <span class="string">"iscsi"</span></span><br><span class="line">/dev/sdb1 on /mnt/iscsi <span class="built_in">type</span> xfs (rw,relatime,seclabel,attr2,inode64,noquota)</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326132927.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326132927.png" alt="WeiyiGeek." title="" class=""></a>
+                <p>WeiyiGeek.</p>
+            </figure>
+<hr>
+<h4 id="0x02-进阶实操"><a href="#0x02-进阶实操" class="headerlink" title="0x02 进阶实操"></a>0x02 进阶实操</h4><h5 id="1-配置chap认证"><a href="#1-配置chap认证" class="headerlink" title="1.配置chap认证"></a>1.配置chap认证</h5><p>配置CHAP认证有两种认证类型:</p>
+<ul>
+<li>发现认证(discovery authentication)</li>
+<li>常规认证 normal </li>
+</ul>
+<p><strong>(1) 配置发现认证 discovery authentication</strong><br><em>target服务器端：<code>systemctl restart target</code></em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.1.1单向认证（target服务器认证initiator）</span></span><br><span class="line">targetcli /iscsi <span class="built_in">set</span> discovery_auth <span class="built_in">enable</span>=1 userid=target password=WeiyiGeekiSCSI</span><br><span class="line">targetcli /iscsi get discovery_auth</span><br><span class="line"><span class="comment">#2.1.1双向认证（target服务器端和inititor客户端互相认证）</span></span><br><span class="line">targetcli /iscsi <span class="built_in">set</span> discovery_auth <span class="built_in">enable</span>=1 userid=target password=WeiyiGeekiSCSI mutual_userid=initiator mutual_password=WeiyiGeekTop</span><br></pre></td></tr></table></figure></p>
+<p><em>initiator客户端(Linux):/etc/iscsi/iscsid.conf</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.1.1单向认证配置</span></span><br><span class="line">discovery.sendtargets.auth.authmethod = CHAP</span><br><span class="line">discovery.sendtargets.auth.username = target</span><br><span class="line">discovery.sendtargets.auth.password = WeiyiGeekiSCSI</span><br><span class="line"></span><br><span class="line"><span class="comment">#1.1.2双向认证配置</span></span><br><span class="line">discovery.sendtargets.auth.authmethod = CHAP</span><br><span class="line">discovery.sendtargets.auth.username = target</span><br><span class="line">discovery.sendtargets.auth.password = WeiyiGeekiSCSI</span><br><span class="line">discovery.sendtargets.auth.username_in = target</span><br><span class="line">discovery.sendtargets.auth.password_in = WeiyiGeekTop</span><br></pre></td></tr></table></figure></p>
+<figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326092559.png" target="_blank" title="WeiyiGeek.Linux双向认证" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326092559.png" alt="WeiyiGeek.Linux双向认证" title="" class=""></a>
+                <p>WeiyiGeek.Linux双向认证</p>
+            </figure>
+<p><br/></p>
+<p><em>initiator客户端(Windows):</em><br><figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326094311.png" target="_blank" title="WeiyiGeek.Windows双向认证" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326094311.png" alt="WeiyiGeek.Windows双向认证" title="" class=""></a>
+                <p>WeiyiGeek.Windows双向认证</p>
+            </figure></p>
+<p><em>注意事项:</em></p>
+<ul>
+<li>Windows中发起程序CHAP机密无效，CHAP 密码长度最大16字节，如果未使用IPSec则最小为12字节；</li>
+<li>如果设置CHAP双向验证后认证失败<code>iscsiadm: Login authentication failed with target</code>的解决方法：<ul>
+<li>1.核验initiator客户端配置的<code>discovery.sendtargets.auth</code>认证</li>
+<li>2.删除链接缓存<code>rm -rf /var/lib/iscsi/*</code></li>
+<li>3.重启initiator端<code>systemctl restart iscsi</code></li>
+</ul>
+</li>
+</ul>
+<p><br/></p>
+<p><strong>(2) 常规配置认证 normal</strong><br>描述:normal(tpg)认证和discovery认证类似都分为单向认证和双向认证(在连接IQN的时候使用)，且normal是基于discovery认证基础之上的认证。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#开启Target IQN 连接认证</span></span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1 <span class="built_in">set</span> attribute authentication=1</span><br><span class="line"></span><br><span class="line"><span class="comment">#1.1.1单向认证（target服务器认证initiator）</span></span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1 <span class="built_in">set</span> auth userid=target password=WeiyiGeekiSCSI</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.1.1双向认证（target服务器端和inititor客户端互相认证）</span></span><br><span class="line">targetcli /iscsi/iqn.2020-01.top.weiyigeek:target/tpg1 <span class="built_in">set</span> auth userid=target password=WeiyiGeekiSCSI mutual_userid=target mutual_password=WeiyiGeekTop</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326100906.png" target="_blank" title="WeiyiGeek.常规认证配置结果" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326100906.png" alt="WeiyiGeek.常规认证配置结果" title="" class=""></a>
+                <p>WeiyiGeek.常规认证配置结果</p>
+            </figure></p>
+<p><em>initiator客户端(Linux):/etc/iscsi/iscsid.conf</em><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.1.1单向认证配置（在discovery认证基础之上）</span></span><br><span class="line">node.session.auth.authmethod = CHAP</span><br><span class="line">node.session.auth.username = target</span><br><span class="line">node.session.auth.password = WeiyiGeekiSCSI</span><br><span class="line"></span><br><span class="line"><span class="comment">#1.1.2双向认证配置</span></span><br><span class="line">node.session.auth.authmethod = CHAP</span><br><span class="line">node.session.auth.username = target</span><br><span class="line">node.session.auth.password = WeiyiGeekiSCSI</span><br><span class="line">node.session.auth.username_in = target</span><br><span class="line">node.session.auth.password_in = WeiyiGeekTop</span><br></pre></td></tr></table></figure><br><figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326103353.png" target="_blank" title="WeiyiGeek.Linux认证" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326103353.png" alt="WeiyiGeek.Linux认证" title="" class=""></a>
+                <p>WeiyiGeek.Linux认证</p>
+            </figure></p>
+<p><em>initiator客户端配置常规认证(Windows):</em><br><figure class="image-box">
+                <a rel=iSCSI块存储网络共享基础介绍与实例操作 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326100745.png" target="_blank" title="WeiyiGeek.Windows双向认证" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200326100745.png" alt="WeiyiGeek.Windows双向认证" title="" class=""></a>
+                <p>WeiyiGeek.Windows双向认证</p>
+            </figure></p>
+<p><em>注意事项:</em></p>
+<ul>
+<li>采用认证后启动不成功<code>iscsiadm: Could not login to [iface: default, target: iqn.2020-01.top.weiyigeek:target,</code>解决方案:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#1.核验initiatorname是否是ACLS中有权限的用户(否则挂载只读)</span></span><br><span class="line">/etc/iscsi/initiatorname.iscsi</span><br><span class="line">InitiatorName=iqn.2020-01.top.weiyigeek:initiator <span class="comment">#实际测试是在ACLS中有权限的反而登陆不上</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#2.核验/etc/iscsi/iscsid.conf配置的账号密码是否正确</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#3.重启iscsi服务以及IQN名称服务</span></span><br><span class="line">systemctl restart iscsi &amp;&amp; systemctl restart iscsid</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<h4 id="0x03-知识补充"><a href="#0x03-知识补充" class="headerlink" title="0x03 知识补充"></a>0x03 知识补充</h4><h5 id="1-iscsiadm-命令"><a href="#1-iscsiadm-命令" class="headerlink" title="1.iscsiadm 命令"></a>1.iscsiadm 命令</h5><p>描述:iscsiadm是iscsi的管理程序，通常用在initiator端连接iSCSI Target;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">iscsiadm -m discoverydb [ -hV ] [ -d debug_level ] [-P printlevel] [ -t <span class="built_in">type</span> -p ip:port -I ifaceN ... [ -Dl ] ] | [ [ -p ip:port -t <span class="built_in">type</span>] [ -o operation ] [ -n name ] [ -v value ] [ -lD ] ]</span><br><span class="line"></span><br><span class="line">iscsiadm -m discovery [ -hV ] [ -d debug_level ] [-P printlevel] [ -t <span class="built_in">type</span> -p ip:port -I ifaceN ... [ -l ] ] | [ [ -p ip:port ] [ -l | -D ] ]</span><br><span class="line"></span><br><span class="line">iscsiadm -m node [ -hV ] [ -d debug_level ] [ -P printlevel ] [ -L all,manual,automatic ] [ -U all,manual,automatic ] [ -S ] [ [ -T targetname -p ip:port -I ifaceN ] [ -l | -u | -R | -s] ] [ [ -o  operation  ] [ -n name ] [ -v value ] ]</span><br><span class="line"></span><br><span class="line">iscsiadm -m session [ -hV ] [ -d debug_level ] [ -P  printlevel] [ -r sessionid | sysfsdir [ -R | -u | -s ] [ -o operation ] [ -n name ] [ -v value ] ]</span><br><span class="line"></span><br><span class="line">iscsiadm -m iface [ -hV ] [ -d debug_level ] [ -P printlevel ] [ -I ifacename | -H hostno|MAC ] [ [ -o  operation  ] [ -n name ] [ -v value ] ] [ -C ping [ -a ip ] [ -b packetsize ] [ -c count ] [ -i interval ] ]</span><br><span class="line"></span><br><span class="line">iscsiadm -m fw [ -d debug_level ] [ -l ]</span><br><span class="line"></span><br><span class="line">iscsiadm -m host [ -P printlevel ] [ -H hostno|MAC ] [ [ -C chap [ -x chap_tbl_idx ] ] | [ -C flashnode [ -A portal_type ] [ -x flashnode_idx ] ] | [ -C stats ] ] [ [ -o operation ] [ -n name ] [ -v value ] ]</span><br><span class="line"></span><br><span class="line">iscsiadm -k priority</span><br><span class="line"><span class="comment">#参数说明</span></span><br><span class="line">-m,--mode : 指定模式发现为discovery,登陆为node节点模式,会话模式session</span><br><span class="line">-l,--login : 登陆</span><br><span class="line">-t,--<span class="built_in">type</span> : 一般为 sendtargets 简写为st</span><br><span class="line">-T --targetname=IQN: 指定要使用的服务器端的target名称，有时候服务器端创建了多个target,iqn.2015-10.com.example:</span><br><span class="line">-o,--op=op:指定选项:`new delete update show nonpersistent`,可以用-o delete 对已存在的node进行删除</span><br><span class="line">-p,--portal:指定入口 可以为IP地址或者域名</span><br><span class="line">-P,n:指定输出详细信息，[0|1|2|3]，有四种格式可选</span><br><span class="line">-u,--<span class="built_in">logout</span>:登出</span><br></pre></td></tr></table></figure>
+<p>命令实例:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#(1) iSCSI 发现服务iSCSI存储</span></span><br><span class="line">iscsiadm -m discovery -t sendtargets -p 192.168.10.222 -d2</span><br><span class="line"></span><br><span class="line"><span class="comment">#(2) 登陆iSCSI存储</span></span><br><span class="line">iscsiadm -m node -T iqn.2020-01.top.weiyigeek:target -p 192.168.10.222 -l</span><br><span class="line"></span><br><span class="line"><span class="comment">#(3) 登出iSCSI存储</span></span><br><span class="line">iscsiadm -m node -T iqn.2020-01.top.weiyigeek:target -p 192.168.10.222 -u</span><br><span class="line"></span><br><span class="line"><span class="comment">#(4)删除iSCSI发现记录</span></span><br><span class="line">iscsiadm -m node -T iqn.2020-01.top.weiyigeek:target -p 192.168.10.222 -o delete</span><br><span class="line"></span><br><span class="line"><span class="comment">#(5) 查看iSCSI发现记录</span></span><br><span class="line">iscsiadm -m node         </span><br><span class="line"></span><br><span class="line"><span class="comment">#(6)查看会话情况</span></span><br><span class="line">iscsiadm -m session </span><br><span class="line">iscsiadm -m session -P 3 | grep -i attached <span class="comment"># 验证会话状态</span></span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:06.310Z" itemprop="dateUpdated">2022-03-29 13:39:06</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/系统运维/Application/DiskManagement/NetworkStorage/iSCSI块存储网络共享基础介绍与实例操作.md" target="_blank" rel="noopener noreferrer">_posts/系统运维/Application/DiskManagement/NetworkStorage/iSCSI块存储网络共享基础介绍与实例操作.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2020/3-22-103.html" target="_blank" rel="external">https://blog.weiyigeek.top/2020/3-22-103.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/iSCSI/" rel="tag">iSCSI</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/3-22-103.html&title=《iSCSI块存储网络共享基础介绍与实例操作》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/3-22-103.html&title=《iSCSI块存储网络共享基础介绍与实例操作》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/3-22-103.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《iSCSI块存储网络共享基础介绍与实例操作》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/3-22-103.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/3-22-103.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2020/3-22-222.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Huawei-5310F-V5存储设备简单使用配置</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2020/3-22-644.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Minio分布式的对象存储系统入门介绍与实践(待补充)</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x00-简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 简述</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x01-基础实操"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 基础实操</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x02-进阶实操"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 进阶实操</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#0x03-知识补充"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 知识补充</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2020/3-22-103.html&title=《iSCSI块存储网络共享基础介绍与实例操作》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2020/3-22-103.html&title=《iSCSI块存储网络共享基础介绍与实例操作》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2020/3-22-103.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《iSCSI块存储网络共享基础介绍与实例操作》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2020/3-22-103.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2020/3-22-103.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACIElEQVR42u3aQXLDIAwF0Nz/0u62M63dL0QyBR6rTuoYHgsFSbxe8bh+jLv/Js9/f+b5PZMHBgbGsozrceQTJN9KSM/bcbsSDAyMAxj5q58nGHumw8bAwMBIgmA14CYbhIGBgdFnVJPPfxpwMTAwlmIkSWxy4MsLbdUgPi0Xx8DAWJCRV90///db+hsYGBhLMa7i+EzfsLwqDAyMrRl5gBs7zFUT2s56MDAwdmVUU81ZC80LcNEnGBgYxzDyg2B1oUnRv1Pyw8DAOI0xd7ljDctyAwADA+MAxqz0Mi/J9Tfil4CLgYGxKSMPvnlC+9yMrD5fbnBiYGBsx8iV/QtbY6E8+hYGBsYBjE4yWU2Ax5oNf7wHAwNja0a+oLHW4/PRMzlElpujGBgY2zGqBbL8GsTctmiUf2NgYGzNSKZMWol527K/hsE7IxgYGAsyqmF32pTFH4BoYGBgbM3ovyhvfObluU7ox8DA2I9RbQyMXZXIU+LqFQ0MDIxzGHkRLQ+++Ubk1zhuMRgYGAczqhPkrdB8xmi7MTAwjmFUQ2Q1jFbDdyHNxsDA2JTRL/13FtrfJgwMjBMYY6X/apmsUDIrHhPLGAwMjGUZswpkyTGuGsqTZgMGBsY5jDzwjRXF8mPiYOjHwMDAmFQam5skRzuBgYFxMKNzOSxPdAt4DAyMAxhJEps/0w+vbyy3YWBgLMho3dRotBY6RbrBVWFgYKzH+AL4hYmHglWP8AAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

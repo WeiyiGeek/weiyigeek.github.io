@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 3.Redis基础运维之原理介绍和主从配置|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Redis">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>3.Redis基础运维之原理介绍和主从配置</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">3.Redis基础运维之原理介绍和主从配置</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-04-17T11:35:30.000Z" itemprop="datePublished" class="page-time">
+  2019-04-17
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-数据存储/Redis/3.Redis基础运维之原理介绍与和主从配置"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">3.Redis基础运维之原理介绍和主从配置</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-04-17 19:35:30" datetime="2019-04-17T11:35:30.000Z"  itemprop="datePublished">2019-04-17</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-Redis-组件原理"><a href="#0x00-Redis-组件原理" class="headerlink" title="0x00 Redis 组件原理"></a>0x00 Redis 组件原理</h2><h3 id="Redis-客户端连接"><a href="#Redis-客户端连接" class="headerlink" title="Redis 客户端连接"></a>Redis 客户端连接</h3><p>描述:Redis 通过监听一个 TCP 端口或者 Unix socket(<code>/var/run/redis/redis-server.sock</code>)的方式来接收来自客户端的连接，当一个连接建立后Redis 内部会进行以下一些操作：</p>
+<ul>
+<li>(1) 首先客户端 socket 会被设置为非阻塞模式，因为 Redis 在网络事件处理上采用的是非阻塞多路复用模型。</li>
+<li>(2) 然后为这个 socket 设置 TCP_NODELAY 属性，禁用 Nagle 算法</li>
+<li>(3) 然后创建一个可读的文件事件用于监听这个客户端 socket 的数据发送</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.可以在 redis.conf 中对最大客户端连接数进行修改</span></span><br><span class="line">&gt; config get maxclients</span><br><span class="line">1) <span class="string">"maxclients"</span></span><br><span class="line">2) <span class="string">"4064"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.客户端信息查看</span></span><br><span class="line">&gt; CLIENT <span class="built_in">help</span>  <span class="comment">#帮助</span></span><br><span class="line">&gt; CLIENT LIST  <span class="comment">#返回连接到 redis 服务的客户端列表</span></span><br><span class="line">id=1256 addr=127.0.0.1:41306 fd=7 name= age=708 idle=0 flags=N db=0 sub=0 psub=0 multi=-1 qbuf=26 qbuf-free=32742 obl=0 oll=0 omem=0 events=r cmd=client</span><br><span class="line">&gt; CLIENT <span class="built_in">kill</span> 127.0.0.1:41306 <span class="comment">#关闭客户端连接</span></span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h3 id="Redis-管道技术"><a href="#Redis-管道技术" class="headerlink" title="Redis 管道技术"></a>Redis 管道技术</h3><p>描述: Redis是一种基于客户端-服务端模型以及请求/响应协议的TCP服务。通常情况下一个请求会遵循以下步骤：</p>
+<ul>
+<li>(1) 客户端向服务端发送一个查询请求，并监听Socket返回，通常是以阻塞模式等待服务端响应。</li>
+<li>(2) 服务端处理命令，并将结果返回给客户端。</li>
+</ul>
+<p><strong>管道技术的优势</strong></p>
+<ul>
+<li>(1) 提高了 redis 服务的性能/速度效率提升(特别在网页高速缓存应用开发中、脚本开发之中)</li>
+<li>(2) 管道技术可以一次性读取所有服务端的响应。</li>
+</ul>
+<p><strong>示例演示:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.启动redis-server通过管道符将命令传递给redis服务器</span></span><br><span class="line">(<span class="built_in">echo</span> -en <span class="string">"auth 123456\r\nPING\r\n SET runoobkey redis\r\nGET runoobkey\r\nINCR visitor\r\nINCR visitor\r\nINCR visitor\r\n"</span>; sleep 1) | nc localhost 6379  <span class="comment"># Shell 中</span></span><br><span class="line">$(<span class="built_in">echo</span> -en <span class="string">"auth 123456\r\nPING\r\n SET runoobkey redis\r\nGET runoobkey\r\nINCR visitor\r\nINCR visitor\r\nINCR visitor\r\n"</span>; sleep 1) | nc localhost 6379  <span class="comment"># Shell 脚本中</span></span><br><span class="line"><span class="comment"># 通过使用 PING 命令查看redis服务是否可用， 之后我们设置了 runoobkey 的值为 redis，然后我们获取 runoobkey 的值并使得 visitor 自增 3 次</span></span><br><span class="line">  <span class="comment"># +PONG</span></span><br><span class="line">  <span class="comment"># +OK</span></span><br><span class="line">  <span class="comment"># redis</span></span><br><span class="line">  <span class="comment"># :1</span></span><br><span class="line">  <span class="comment"># :2</span></span><br><span class="line">  <span class="comment"># :3</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.Redis 的 --pipe 参数获取命令执行效率要比普通的管道模式高。</span></span><br><span class="line">tee redis-command.txt &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">SET username weiyigeek</span><br><span class="line">EOF</span><br><span class="line">cat redis-command.txt | redis -a weiyigeek --pipe</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="Redis-分区存储原理"><a href="#Redis-分区存储原理" class="headerlink" title="Redis 分区存储原理"></a>Redis 分区存储原理</h3><p>描述: 分区是分割数据到多个Redis实例的处理过程，因此每个实例只保存key的一个子集</p>
+<p><strong>分区的优势:</strong></p>
+<ul>
+<li>利用多台计算机内存的和值，允许我们构造更大的数据库</li>
+<li>通过多核和多台计算机，允许我们扩展计算能力；通过多台计算机和网络适配器，允许我们扩展网络带宽。</li>
+</ul>
+<p><strong>分区的不足:</strong></p>
+<ul>
+<li>涉及多个key的操作通常是不被支持的</li>
+<li>涉及多个key的redis事务不能使用。</li>
+<li>当使用分区时数据处理较为复杂</li>
+<li>增加或删除容量也比较复杂(redis集群)</li>
+</ul>
+<p><br/></p>
+<p>Redis 有两种类型分区: 有不同的系统来映射某个key到某个Redis服务</p>
+<ul>
+<li><p>(1) 按范围分区<br>就是映射一定范围的对象到特定的Redis实例; 比如ID从0到10000的用户会保存到实例R0，ID从10001到 20000的用户会保存到R1，以此类推。</p>
+</li>
+<li><p>(2) 哈希分区<br>对任何key都适用，也无需是object_name:这种形式，用一个hash函数将key转换为一个数字，</p>
+</li>
+</ul>
+<ul>
+<li>比如使用crc32 hash函数对key foobar 执行会输出类似93024922的整数;</li>
+<li>对这个整数取模将其转化为0-3之间的数字，就可以将这个整数映射到4个Redis实例中的一个了。</li>
+<li>93024922 % 4 = 2 ===&gt;&gt;&gt; 就是说key foobar应该被存到R2实例中。</li>
+</ul>
+<hr>
+<h2 id="0x01-Redis-运行模式"><a href="#0x01-Redis-运行模式" class="headerlink" title="0x01 Redis 运行模式"></a>0x01 Redis 运行模式</h2><p>Redis作为缓存的高效中间件，在我们日常的开发中被频繁的使用，今天就来说一说Redis的四种模式，分别是<code>「单机版、主从复制、哨兵、以及集群模式」</code>(本章显示单机版)。</p>
+<p>在一般公司的程序员使用单机版基本都能解决问题，在Redis的官网给出的数据是10W QPS，这对于应付一般的公司绰绰有余了，再不行就来个主从模式，实现读写分离，性能又大大提高。并且作为程序员在学习Redis时你可能很少听过Redis的<code>「哨兵」和「集群模式」</code></p>
+<p><br></p>
+<h3 id="Redis-单机"><a href="#Redis-单机" class="headerlink" title="Redis 单机"></a>Redis 单机</h3><p>描述: 在前面的基础学习中我们简单安装了单机的Redis-Server服务，在Java项目中使用Redis连接客户端时，我们可以采用官网推荐操作Redis的第三方依赖库是Jedis，在SpringBoot项目中，引入下面依赖就可以直接使用了:<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>redis.clients<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jedis<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;jedis.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure><br><br></p>
+<p><strong>模式优点</strong></p>
+<ul>
+<li>1.单机版的Redis也有很多优点，比如实现实现简单、维护简单、部署简单、维护成本非常低，不需要其它额外的开支。</li>
+</ul>
+<p><br></p>
+<p><strong>模式缺点</strong></p>
+<ul>
+<li>1.单机版的Redis所以也存在很多的问题，比如最明显的<code>单点故障问题</code>，一个Redis挂了，所有的请求就会直接打在了DB上。</li>
+<li>2.并且一个Redis<code>抗并发数量也是有限</code>的，同时要兼顾读写两种请求，只要访问量一上来，Redis就受不了了。</li>
+<li>3.另一方面单机版的Redis<code>数据量存储也是有限的</code>，数据量一大，再重启Redis的时候，就会非常的慢，所以局限性也是比较大的。</li>
+</ul>
+<p><br></p>
+<p><strong>测试环境:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ cat /etc/issue.net </span><br><span class="line">Ubuntu 20.04.2 LTS</span><br><span class="line">➜  ~ uname -a                                     </span><br><span class="line">Linux ubuntu-pc 5.11.0-27-generic <span class="comment">#29~20.04.1-Ubuntu SMP Wed Aug 11 15:58:17 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux</span></span><br><span class="line">➜ ~ lsmem | grep <span class="string">"Total online memory"</span></span><br><span class="line">Total online memory:      12G</span><br><span class="line">➜  ~ lscpu | head -n 10</span><br><span class="line">架构：                           x86_64</span><br><span class="line">CPU 运行模式：                   32-bit, 64-bit</span><br><span class="line">字节序：                         Little Endian</span><br><span class="line">Address sizes:                   36 bits physical, 48 bits virtual</span><br><span class="line">CPU:                             4</span><br><span class="line">在线 CPU 列表：                  0-3</span><br><span class="line">每个核的线程数：                 1</span><br><span class="line">每个座的核数：                   4</span><br><span class="line">座：                             1</span><br><span class="line">NUMA 节点：                      1</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>实操搭建</strong></p>
+<ul>
+<li>Step 1.Redis 单机版本的安装此处可以参照以下按照脚本，相信官网可以找到你想要得,<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#1.基础环境准备</span></span><br><span class="line"><span class="comment"># - REDIS 运行用户创建</span></span><br><span class="line">groupadd redis &amp;&amp; useradd -r -g redis redis -M</span><br><span class="line"><span class="comment"># - 设置内存分配策略</span></span><br><span class="line">sudo sysctl -w vm.overcommit_memory=1</span><br><span class="line"><span class="comment"># - 尽量使用物理内存(速度快)针对内核版本大于&gt;=3.x</span></span><br><span class="line">sudo sysctl -w vm.swapniess=1</span><br><span class="line"><span class="comment"># - SYN队列长度设置，此参数可以容纳更多等待连接的网络。</span></span><br><span class="line">sudo sysctl -w net.ipv4.tcp_max_syn_backlog=2048 </span><br><span class="line"><span class="comment"># - 禁用 THP 特性减少内存消耗</span></span><br><span class="line"><span class="built_in">echo</span> never &gt; /sys/kernel/mm/transparent_hugepage/enabled</span><br><span class="line"></span><br><span class="line"><span class="comment">#2.REDIS基础依赖</span></span><br><span class="line">REDIS_VERSION=<span class="string">"redis-6.2.5"</span></span><br><span class="line">REDIS_URL_TAR=<span class="string">"https://download.redis.io/releases/<span class="variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz"</span></span><br><span class="line">REDIS_TAR=<span class="string">"<span class="variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz"</span></span><br><span class="line">REDIS_DIR=<span class="string">"/usr/local/redis"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#3.下载编译安装与软件软连接</span></span><br><span class="line">wget <span class="variable">$&#123;REDIS_URL_TAR&#125;</span> -O /tmp/<span class="variable">$&#123;REDIS_TAR&#125;</span></span><br><span class="line">tar -zxf /tmp/<span class="variable">$&#123;REDIS_TAR&#125;</span> -C /usr/<span class="built_in">local</span>/</span><br><span class="line">mv /usr/<span class="built_in">local</span>/<span class="variable">$&#123;REDIS_VERSION&#125;</span> <span class="variable">$&#123;REDIS_DIR&#125;</span></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$&#123;REDIS_DIR&#125;</span> &amp;&amp; make</span><br><span class="line">cp <span class="variable">$&#123;REDIS_DIR&#125;</span>/redis.conf /etc/redis/redis.conf</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> $(ls -F <span class="variable">$&#123;REDIS_DIR&#125;</span>/src | grep <span class="string">"*"</span>| sed <span class="string">'s#*##g'</span>);<span class="keyword">do</span></span><br><span class="line">  sudo chmod +700 <span class="variable">$&#123;REDIS_DIR&#125;</span>/src/<span class="variable">$&#123;i&#125;</span></span><br><span class="line">  sudo ln -s <span class="variable">$&#123;REDIS_DIR&#125;</span>/src/<span class="variable">$&#123;i&#125;</span> /usr/<span class="built_in">local</span>/bin/<span class="variable">$&#123;i&#125;</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#4.权限和所属者、组设置</span></span><br><span class="line">chmod +600 /etc/redis/redis.conf</span><br><span class="line">chown redis:redis /etc/redis/redis.conf</span><br><span class="line">chown redis:redis <span class="variable">$&#123;REDIS_DIR&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.以redis用户运行redis-server</span></span><br><span class="line">setsid sudo -u redis redis-server /etc/redis/redis.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.将redis作为systemd服务。(redis.conf 中 supervisor 参数必须设置为systemd)</span></span><br><span class="line">sudo tee /usr/lib/systemd/system/redis.service &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=Redis-Server Systemd</span><br><span class="line">Documentation=https://redis.io</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">User=redis</span><br><span class="line">Group=redis</span><br><span class="line">Type=simple</span><br><span class="line">StandardError=journal</span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/bin/redis-server /etc/redis/redis.conf</span><br><span class="line">Restart=on-failure</span><br><span class="line">RestartSec=3s</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">EOF</span><br><span class="line">systemctl deamon-reload</span><br><span class="line">systemctl redis status</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 2.此Redis常用的redis.conf的配置项可参考编码包中的<code>/etc/redis/redis.conf</code>或者在第一篇<code>&lt;1.Redis数据库基础介绍与安装&gt;</code>文章之中。<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">tee /etc/redis/redis.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># 绑定任意接口、服务端口、后台运行。</span></span><br><span class="line"><span class="built_in">bind</span> 0.0.0.0</span><br><span class="line">port 6379</span><br><span class="line"><span class="comment"># 容器里必须设置为no</span></span><br><span class="line">daemonize no</span><br><span class="line">supervised auto</span><br><span class="line"></span><br><span class="line"><span class="comment"># redis服务pid进程文件名</span></span><br><span class="line">pidfile <span class="string">"/var/run/redis_6379.pid"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭保护模式，并配置使用密码访问</span></span><br><span class="line">protected-mode no</span><br><span class="line">requirepass <span class="string">"123456"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据文件保存路径，rdb/AOF文件也保存在这里</span></span><br><span class="line">dir <span class="string">"/home/redis/6379/datas"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 日志文件记录文件(notice / verbose)</span></span><br><span class="line">logfile <span class="string">"/home/redis/6379/logs/6379.log"</span></span><br><span class="line">loglevel verbose  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 最大客户端连接数</span></span><br><span class="line">maxclients 10000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 客户端连接空闲多久后断开连接，单位秒，0表示禁用</span></span><br><span class="line">timeout 60</span><br><span class="line">tcp-keepalive 60 </span><br><span class="line"></span><br><span class="line"><span class="comment"># Redis 数据持久化(rdb/aof)配置</span></span><br><span class="line"><span class="comment"># RDB 文件名</span></span><br><span class="line">dbfilename <span class="string">"dump.rdb"</span></span><br><span class="line"><span class="comment"># 数据自动保存脚本条件例如300s中有10key发生变化</span></span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br><span class="line"><span class="comment"># 对RDB文件进行压缩，建议以（磁盘）空间换（CPU）时间。</span></span><br><span class="line">rdbcompression yes</span><br><span class="line"><span class="comment"># 版本5的RDB有一个CRC64算法的校验和放在了文件的最后。这将使文件格式更加可靠。</span></span><br><span class="line">rdbchecksum yes</span><br><span class="line"><span class="comment"># RDB自动触发策略是否启用，默认为yes</span></span><br><span class="line">rdb-save-incremental-fsync yes</span><br><span class="line"></span><br><span class="line"><span class="comment"># AOF开启</span></span><br><span class="line">appendonly yes</span><br><span class="line"><span class="comment"># AOF文件名</span></span><br><span class="line">appendfilename <span class="string">"appendonly.aof"</span></span><br><span class="line"><span class="comment"># 可选值 always， everysec，no，建议设置为everysec</span></span><br><span class="line">appendfsync everysec</span><br><span class="line"></span><br><span class="line"><span class="comment"># Redis风险命令重命名</span></span><br><span class="line"><span class="comment"># rename-command CONFIG b840fc02d524045429941cc15f59e41cb7be6c52</span></span><br><span class="line">rename-command FLUSHDB b840fc02d524045429941cc15f59e41cb7be6c53</span><br><span class="line">rename-command FLUSHALL b840fc02d524045429941cc15f59e41cb7be6c54</span><br><span class="line">rename-command EVAL b840fc02d524045429941cc15f59e41cb7be6c55</span><br><span class="line">rename-command DEBUG b840fc02d524045429941cc15f59e41cb7be6c56</span><br><span class="line"><span class="comment"># rename-command SHUTDOWN SHUTDOWN</span></span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><strong>引言</strong><br>由于，单机版的Redis在并发量比较大的时候，并且需要较高性能和可靠性的时候，单机版基本就不适合了，于是就出现了「主从模式」。</p>
+<p><br></p>
+<h3 id="Redis-主从模式"><a href="#Redis-主从模式" class="headerlink" title="Redis 主从模式"></a>Redis 主从模式</h3><p>描述: 主从的原理还算是比较简单的，一主多从<code>「主数据库（master）可以读也可以写（read/write），从数据库仅读（only read）」</code>。但是<code>主从模式一般实现「读写分离」，「主数据库仅写（only write）」</code>，减轻主数据库的压力.</p>
+<p>下面一张图搞懂主从模式的原理以及其执行的过程（工作机制）:</p>
+<ul>
+<li>(1) 当slave启动后会向master发送SYNC命令，master节点收到从数据库的命令后通过bgsave保存快照<code>「RDB持久化」</code>，并且期间的执行的些命令会被缓存起来。</li>
+<li>(2) master 会将保存的快照发送给slave，并且继续缓存期间的写命令。</li>
+<li>(3) slave 收到主数据库发送过来的快照就会加载到自己的数据库中。</li>
+<li>(4) 最后master讲缓存的命令同步给slave，slave收到命令后执行一遍，这样master与slave数据就保持一致了。</li>
+</ul>
+<figure class="image-box">
+                <a rel=3.Redis基础运维之原理介绍和主从配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210827213644.png" target="_blank" title="WeiyiGeek.工作机制" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210827213644.png" alt="WeiyiGeek.工作机制" title="" class=""></a>
+                <p>WeiyiGeek.工作机制</p>
+            </figure>
+<p><br></p>
+<p><strong>模式优点</strong></p>
+<ul>
+<li>1.主从一定程度上<code>解决了单机版并发量大</code>，导致请求延迟或者redis宕机服务停止的问题。</li>
+<li>2.解决了<code>单机版单点故障的问题</code>，若是主数据库挂了，那么从数据库可以随时顶上来，综上来说，主从模式一定程度上<code>提高了系统的可用性和性能</code>，是实现哨兵和集群的基础。</li>
+<li>3.从数据库分担主数据库的读压力，若是主数据库是只写模式，那么<code>实现读写分离</code>，主数据库就没有了读压力了。</li>
+<li>4.主从同步以<code>异步方式进行同</code>步，期间Redis仍然可以响应客户端提交的查询和更新的请求, 保证业务不会被暂停。</li>
+</ul>
+<p><br></p>
+<p><strong>模式缺点</strong></p>
+<ul>
+<li><p>1) 主从模式好是好，他也有自己的缺点，比如<code>数据的一致性问题</code>，假如主数据库写操作完成，那么他的数据会被复制到从数据库，若是还没有即使复制到从数据库，读请求又来了，此时读取的数据就不是最新的数据。</p>
+</li>
+<li><p>2) 若是从主同步的过程<code>网络出故障</code>了，导致主从同步失败，也会<code>出现问题数据一致性的问题</code>。</p>
+</li>
+<li><p>3) 主从模式<code>不具备自动容错和恢复的功能</code>，一旦主数据库，从节点晋升为主数据库的过程需要人为操作，<code>维护的成本就会升高</code>，并且主节点的写能力、存储能力都会受到限制。</p>
+</li>
+</ul>
+<p><br></p>
+<p><strong>实操搭建</strong></p>
+<ul>
+<li><p>Step 1.下面的我们来实操搭建一下主从模式，主从模式的搭建还是比较简单的，我这里一台Ubuntu虚拟机，使用开启redis多实例的方法搭建主从。</p>
+</li>
+<li><p>Step 2.redis中开启多实例的方法，首先创建一个文件夹，用于存放redis集群的配置文件, 复制三份配置文件, 一主两从，<code>6379端口作为主数据库(master)，6380、6381作为从数据库(slave)</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir -vp /home/redis/&#123;6379..6381&#125;/&#123;datas,logs&#125;/</span><br><span class="line">cp /etc/redis/redis.con  /home/redis/6379/redis-6379.conf</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 3.首先是配置主数据库的配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ cat /home/redis/6379/redis-6379.conf  <span class="comment"># 主节点与单机配置一致</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 4.然后，就是修改从数据库的配置文件，在从数据库的配置文件中加入以下的配置信息:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Slave 6381</span></span><br><span class="line">sed <span class="string">'s#6379#6380#g'</span> /home/redis/6379/redis-6379.conf &gt; /home/redis/6380/redis-6380.conf</span><br><span class="line">tee -a /home/redis/6380/redis-6380.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># 配置master的ip，port</span></span><br><span class="line">slaveof 10.20.172.108 6379</span><br><span class="line"><span class="comment"># 配置访问master的密码</span></span><br><span class="line">masterauth 123456</span><br><span class="line"><span class="comment"># 参数设置成yes，主从复制中，从服务器可以响应客户端请求；</span></span><br><span class="line"><span class="comment"># 参数设置成no，主从复制中，从服务器将阻塞所有请求，有客户端请求时返回“SYNC with master in progress”；</span></span><br><span class="line">slave-serve-stale-data no </span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># Slave 6381</span></span><br><span class="line">sed <span class="string">'s#6380#6381#g'</span> /home/weiyigeek/redis/6380/redis-6380.conf &gt; /home/weiyigeek/redis/6381/redis-6381.conf</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 5.接下来就是启动三个redis实例，启动的命令，先cd到redis的src目录下，然后执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 方式1</span></span><br><span class="line">/usr/<span class="built_in">local</span>/bin/redis-server /home/redis/6379/redis-6379.conf</span><br><span class="line">/usr/<span class="built_in">local</span>/bin/redis-server /home/redis/6380/redis-6380.conf</span><br><span class="line">/usr/<span class="built_in">local</span>/bin/redis-server /home/redis/6381/redis-6381.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2(此种方式针对于未配置daemonize yes参数)</span></span><br><span class="line"><span class="comment"># nohup ./redis-server /home/redis/6381/redis-6381.conf &gt;&gt; output-6381.out 2&gt;&amp;1 &amp;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 6.通过命令<code>ps -aux | grep redis</code>，查看启动的redis进程</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ps -aux | grep redis-server</span><br><span class="line">  <span class="comment"># redis  174115  0.0  0.0  60520  4764 ? SNsl 03:41   0:01 ./redis-server 0.0.0.0:6379</span></span><br><span class="line">  <span class="comment"># redis  174416  0.1  0.0 146544  4876 ? SNsl 04:12   0:00 ./redis-server 0.0.0.0:6380</span></span><br><span class="line">  <span class="comment"># redis  174458  0.1  0.0 146544  4892 ? SNsl 04:13   0:00 ./redis-server 0.0.0.0:6381</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 7.如上图所示，表示启动成功，下面就开始进入测试阶段,此处我采用三个终端做为Redis连接的客户端，启动时指定端口以及密码。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Master</span></span><br><span class="line">$ redis-cli -h 10.20.172.108 -a 123456</span><br><span class="line"></span><br><span class="line">10.20.172.108:6379&gt; ping  <span class="comment"># PONG</span></span><br><span class="line">10.20.172.108:6379&gt; INFO replication</span><br><span class="line"><span class="comment"># Replication</span></span><br><span class="line">  role:master  <span class="comment"># 节点角色</span></span><br><span class="line">  connected_slaves:2</span><br><span class="line">  slave0:ip=10.20.172.108,port=6380,state=online,offset=132754,lag=1</span><br><span class="line">  slave1:ip=10.20.172.108,port=6381,state=online,offset=132754,lag=0</span><br><span class="line">  master_failover_state:no-failover</span><br><span class="line">  master_replid:f5664625474d54c9ce4198b279bce85e194bad42</span><br><span class="line">  master_replid2:0000000000000000000000000000000000000000</span><br><span class="line">  master_repl_offset:132754</span><br><span class="line">  second_repl_offset:-1</span><br><span class="line">  repl_backlog_active:1</span><br><span class="line">  repl_backlog_size:1048576</span><br><span class="line">  repl_backlog_first_byte_offset:1</span><br><span class="line">  repl_backlog_histlen:132754</span><br><span class="line">10.20.172.108:6379&gt; sync <span class="comment"># 命令用于同步主从服务器。 (一般会自动进行同步)</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Slave 6380</span></span><br><span class="line">$ redis-cli -h 10.20.172.108 -p 6380    </span><br><span class="line">  10.20.172.108:6380&gt; ping</span><br><span class="line">  (error) NOAUTH Authentication required.</span><br><span class="line">  10.20.172.108:6380&gt; auth 123456  <span class="comment"># OK</span></span><br><span class="line">  10.20.172.108:6380&gt; ping   <span class="comment"># PONG</span></span><br><span class="line">  10.20.172.108:6380&gt; role   <span class="comment"># 查看主从实例所属的角色，角色有master, slave, sentinel。</span></span><br><span class="line">    <span class="comment"># 1) "slave"</span></span><br><span class="line">    <span class="comment"># 2) "10.20.172.108"</span></span><br><span class="line">    <span class="comment"># 3) (integer) 6380</span></span><br><span class="line">    <span class="comment"># 4) "connected"</span></span><br><span class="line">    <span class="comment"># 5) (integer) 467</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Slave 6381</span></span><br><span class="line">./redis-cli -h 10.20.172.108 -p 6381 -a 123456</span><br><span class="line">  10.20.172.108:6381&gt; ping   <span class="comment"># PONG </span></span><br><span class="line">  10.20.172.108:6381&gt; info replication</span><br><span class="line">  <span class="comment"># Replication</span></span><br><span class="line">  role:slave  <span class="comment"># 从节点</span></span><br><span class="line">  master_host:10.20.172.108</span><br><span class="line">  master_port:6379</span><br><span class="line">  master_link_status:up</span><br><span class="line">  master_last_io_seconds_ago:2</span><br><span class="line">  master_sync_in_progress:0</span><br><span class="line">  slave_repl_offset:42</span><br><span class="line">  slave_priority:100</span><br><span class="line">  slave_read_only:1 <span class="comment"># 自读</span></span><br><span class="line">  replica_announced:1</span><br><span class="line">  connected_slaves:0</span><br><span class="line">  master_failover_state:no-failover</span><br><span class="line">  master_replid:3551023c88161ea3735435c95b58230ec15608a2</span><br><span class="line">  master_replid2:0000000000000000000000000000000000000000</span><br><span class="line">  master_repl_offset:42</span><br><span class="line">  second_repl_offset:-1</span><br><span class="line">  repl_backlog_active:1</span><br><span class="line">  repl_backlog_size:1048576</span><br><span class="line">  repl_backlog_first_byte_offset:15</span><br><span class="line">  repl_backlog_histlen:28</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 8.启动后，在master服务端口为6379，输入：<code>set name &#39;WeiyiGeek&#39;</code>，在两个slave中通过 get name 可以查看：</p>
+</li>
+</ul>
+<figure class="image-box">
+                <a rel=3.Redis基础运维之原理介绍和主从配置 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210828122624.png" target="_blank" title="WeiyiGeek.Redis主从" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210828122624.png" alt="WeiyiGeek.Redis主从" title="" class=""></a>
+                <p>WeiyiGeek.Redis主从</p>
+            </figure>
+<ul>
+<li>Step 9.如果有新增从节点或者移除当前从节点可以参考以下:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 如果当前服务器已经是某个主服务器(master server)的从属服务器，那么执行 SLAVEOF host port 将使当前服务器停止对旧主服务器的同步，丢弃旧数据集，转而开始对新主服务器进行同步。</span></span><br><span class="line">redis&gt; SLAVEOF 127.0.0.1 6379  <span class="comment">#将当前服务器转变为指定服务器的从属服务器(slave server)</span></span><br><span class="line">OK</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 另外对一个从属服务器执行命令 SLAVEOF NO ONE 将使得这个从属服务器关闭复制功能，并从从属服务器转变回主服务器，原来同步所得的数据集不会被丢弃。</span></span><br><span class="line">redis&gt; SLAVEOF NO ONE   <span class="comment"># 这时从库角色转变为master，比并且可以写如数据。</span></span><br><span class="line">OK</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-03-29T05:39:06.311Z" itemprop="dateUpdated">2022-03-29 13:39:06</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/数据存储/Redis/3.Redis基础运维之原理介绍与和主从配置.md" target="_blank" rel="noopener noreferrer">_posts/数据存储/Redis/3.Redis基础运维之原理介绍与和主从配置.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2019/4-17-97.html" target="_blank" rel="external">https://blog.weiyigeek.top/2019/4-17-97.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-17-97.html&title=《3.Redis基础运维之原理介绍和主从配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-17-97.html&title=《3.Redis基础运维之原理介绍和主从配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-17-97.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《3.Redis基础运维之原理介绍和主从配置》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-17-97.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-17-97.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2019/4-17-576.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">4.Redis基础运维之哨兵和集群安装配置</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2019/4-17-380.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">模糊测试之攻击回显</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-Redis-组件原理"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 Redis 组件原理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Redis-客户端连接"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">Redis 客户端连接</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Redis-管道技术"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">Redis 管道技术</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Redis-分区存储原理"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">Redis 分区存储原理</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-Redis-运行模式"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 Redis 运行模式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Redis-单机"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">Redis 单机</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Redis-主从模式"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">Redis 主从模式</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2019/4-17-97.html&title=《3.Redis基础运维之原理介绍和主从配置》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2019/4-17-97.html&title=《3.Redis基础运维之原理介绍和主从配置》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2019/4-17-97.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《3.Redis基础运维之原理介绍和主从配置》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2019/4-17-97.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2019/4-17-97.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACK0lEQVR42u3aQY6EMAwFUe5/aeYArTD17XRLOJXVCKWBx8Lj2L4uvO6P9Xl9tf/5numvWkuGDBmvZdyPi+95ftHVPcnf6LkyZMg4gEFeovNC/D7Pd1helyFDhozHPc/Blwfo9LkyZMiQUQud5Fe18C1DhgwZ5BDL611pMP3pWVyGDBkvZPCq++///kp/Q4YMGa9i3OFK0zUeLu/GkiFDxmxGJ+2rJZG8PBenoTJkyBjK6BxNeTOyNhwWXJEhQ8ZoRu3WpFXJhyfIIBr5cDJkyDiHwR/DX2Jv8JUhQ8ZpjPRoyg+ou66g0C9DhozRDD7owENkfxSjlpjKkCFjKqPTtuTpIHkVknouP6IMGTJGM0jwTY+ptTGvNLgHZ3EZMmSMYNQGv9J63q6kc/lbGTJkDGWQrWlLsta85J+gKJYhQ8YIBnkkKdynbYMNqaEMGTIOYPBSV6f1WGt5XukXkiFDxjhGejTt7O8H6GInVoYMGYMY6aDDrpEvfoiNRy5kyJAxjsHLcJ2yWn9oY/k+MmTIOIDRGQjbVfrnQxv/DFvIkCFjKINnWf3yHG+F8rarDBkypjLucPHyWa1JUAu+MmTImM2oNTt5U4EnmmkTYkPPVoYMGa9i8CDbOcTyEJzulCFDxjmM2hBGWm7r/wdY7pchQ4aMdnaZHkqD5qUMGTJkgIDbKZalSecycZQhQ8YBjHS0tLZzV1CWIUPGaYzOpEaa6vG0Lw3iMmTIGMr4A8WGvCp5WhemAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

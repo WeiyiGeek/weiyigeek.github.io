@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 2.基于Containerd运行时搭建Kubernetes多控制平面集群实践|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Containerd,kubernetes">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>2.基于Containerd运行时搭建Kubernetes多控制平面集群实践</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">2.基于Containerd运行时搭建Kubernetes多控制平面集群实践</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2021-06-29T06:36:30.000Z" itemprop="datePublished" class="page-time">
+  2021-06-29
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-虚拟云容/云容器/Containerd/2.基于Containerd安装Kubernetes多控制平面集群实践"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">2.基于Containerd运行时搭建Kubernetes多控制平面集群实践</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2021-06-29 14:36:30" datetime="2021-06-29T06:36:30.000Z"  itemprop="datePublished">2021-06-29</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><p>本章主要讲述，如果使用kubeadm进行安装配置K8S集群，并指定使用containerd作为容器运行时搭配使用的具体安装步骤,以及尽可能在案例中加入k8s集群常用组件及其操作配置。</p>
+<hr>
+<h2 id="0x01-环境准备"><a href="#0x01-环境准备" class="headerlink" title="0x01 环境准备"></a>0x01 环境准备</h2><p>描述: 此Ubuntu操作系统已做安全加固和内核优化(SecOpsDev/Ubuntu-InitializeSecurity.sh at master · WeiyiGeek/SecOpsDev (github.com),如你的Linux未进行相应配置环境可能与读者有些许差异。</p>
+<p>加固脚本: <a href="https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh" target="_blank" rel="noopener">https://github.com/WeiyiGeek/SecOpsDev/blob/master/OS-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/Ubuntu/Ubuntu-InitializeSecurity.sh</a></p>
+<p><strong>主机环境:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">操作系统版本: Ubuntu 20.04.2 LTS</span><br><span class="line">操作内核版本: 5.4.0-78-generic</span><br><span class="line">主机名称与IP:</span><br><span class="line">* k8s-master-1 10.10.107.220  2C 4G  @<span class="comment"># 控制平面节点</span></span><br><span class="line">* k8s-node-1  10.10.107.221   2C 4G  @<span class="comment"># 工作节点</span></span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><strong>软件环境:</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubernetes -- v1.20.8</span><br><span class="line">containerd -- 1.4.6</span><br><span class="line">calico -- v3.18</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<p><strong>节点环境</strong><br>Tips: 以下命令需要再k8s-master-1和k8s-node-1主机上都要运行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.节点hosts信息以及确保每个节点上 MAC 地址和 product_uuid 的唯一性 </span></span><br><span class="line">tee -a /etc/hosts &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">10.10.107.220 k8s-master-1</span><br><span class="line">10.10.107.221 k8s-node-1</span><br><span class="line">10.10.107.220 newcluster.k8s</span><br><span class="line">EOF</span><br><span class="line"><span class="comment"># 你可以使用命令 ip link 或 ifconfig -a 来获取网络接口的 MAC 地址</span></span><br><span class="line">ifconfig -a</span><br><span class="line"><span class="comment"># 可以使用 sudo cat /sys/class/dmi/id/product_uuid 命令对 product_uuid 校验</span></span><br><span class="line">sudo cat /sys/class/dmi/id/product_uuid</span><br><span class="line">  <span class="comment"># k8s-master-1: d0154d56-ffdd-697d-09a6-34c851710f09</span></span><br><span class="line">  <span class="comment"># k8s-node-1: f98c4d56-9fb2-bc92-98be-2648c83eb7b5</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.系统时间时区同步设置 </span></span><br><span class="line">date -R</span><br><span class="line">sudo ntpdate ntp.aliyun.com</span><br><span class="line"><span class="comment"># chronyc sources</span></span><br><span class="line">sudo timedatectl <span class="built_in">set</span>-timezone Asia/Shanghai</span><br><span class="line"><span class="comment"># sudo dpkg-reconfigure tzdata</span></span><br><span class="line">sudo timedatectl <span class="built_in">set</span>-local-rtc 0</span><br><span class="line">timedatectl</span><br><span class="line">  <span class="comment">#  Local time: Tue 2021-07-06 11:28:54 CST</span></span><br><span class="line">  <span class="comment">#            Universal time: Tue 2021-07-06 03:28:54 UTC</span></span><br><span class="line">  <span class="comment">#                  RTC time: Tue 2021-07-06 03:28:55</span></span><br><span class="line">  <span class="comment">#                 Time zone: Asia/Shanghai (CST, +0800)</span></span><br><span class="line">  <span class="comment"># System clock synchronized: yes</span></span><br><span class="line">  <span class="comment">#               NTP service: active</span></span><br><span class="line">  <span class="comment">#           RTC in local TZ: no</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.禁用防火墙与swap分区(新手一定要有这一步操作)</span></span><br><span class="line">ufw <span class="built_in">disable</span> &amp;&amp; systemctl <span class="built_in">disable</span> ufw &amp;&amp; systemctl stop ufw</span><br><span class="line">swapoff -a &amp;&amp; sed -i <span class="string">'s|^/swap.img|#/swap.ing|g'</span> /etc/fstab</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.内核相关参数调整</span></span><br><span class="line">egrep -q <span class="string">"^(#)?vm.swappiness.*"</span> /etc/sysctl.conf &amp;&amp; sed -ri <span class="string">"s|^(#)?vm.swappiness.*|vm.swappiness = 0|g"</span>  /etc/sysctl.conf || <span class="built_in">echo</span> <span class="string">"vm.swappiness = 0"</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line">egrep -q <span class="string">"^(#)?net.ipv4.ip_forward.*"</span> /etc/sysctl.conf &amp;&amp; sed -ri <span class="string">"s|^(#)?net.ipv4.ip_forward.*|net.ipv4.ip_forward = 1|g"</span>  /etc/sysctl.conf || <span class="built_in">echo</span> <span class="string">"net.ipv4.ip_forward = 1"</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line"><span class="comment"># - 允许 iptables 检查桥接流量</span></span><br><span class="line">egrep -q <span class="string">"^(#)?net.bridge.bridge-nf-call-iptables.*"</span> /etc/sysctl.conf &amp;&amp; sed -ri <span class="string">"s|^(#)?net.bridge.bridge-nf-call-iptables.*|net.bridge.bridge-nf-call-iptables = 1|g"</span> /etc/sysctl.conf || <span class="built_in">echo</span> <span class="string">"net.bridge.bridge-nf-call-iptables = 1"</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line">egrep -q <span class="string">"^(#)?net.bridge.bridge-nf-call-ip6tables.*"</span> /etc/sysctl.conf &amp;&amp; sed -ri <span class="string">"s|^(#)?net.bridge.bridge-nf-call-ip6tables.*|net.bridge.bridge-nf-call-ip6tables = 1|g"</span> /etc/sysctl.conf || <span class="built_in">echo</span> <span class="string">"net.bridge.bridge-nf-call-ip6tables = 1"</span> &gt;&gt; /etc/sysctl.conf </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.ipvs负载均衡管理工具安装</span></span><br><span class="line">apt install ipset ipvsadm -y</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 6.模块加载到内核并查看是否已经正确加载所需的内核模块</span></span><br><span class="line"><span class="comment"># 重启后永久生效</span></span><br><span class="line">tee /etc/modules-load.d/k8s.conf &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line"><span class="comment"># netfilter</span></span><br><span class="line">br_netfilter</span><br><span class="line"><span class="comment"># containerd.</span></span><br><span class="line">overlay</span><br><span class="line"><span class="comment"># ipvs</span></span><br><span class="line">ip_vs</span><br><span class="line">ip_vs_rr</span><br><span class="line">ip_vs_wrr</span><br><span class="line">ip_vs_sh</span><br><span class="line">nf_conntrack</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 临时生效</span></span><br><span class="line">mkdir -vp /etc/modules.d/</span><br><span class="line">cat &gt; /etc/modules.d/k8s.modules &lt;&lt;EOF</span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 允许 iptables 检查桥接流量</span></span><br><span class="line">modprobe -- br_netfilter</span><br><span class="line"><span class="comment"># containerd.</span></span><br><span class="line">modprobe -- overlay</span><br><span class="line"><span class="comment"># ipvs</span></span><br><span class="line">modprobe -- ip_vs</span><br><span class="line">modprobe -- ip_vs_rr</span><br><span class="line">modprobe -- ip_vs_wrr</span><br><span class="line">modprobe -- ip_vs_sh</span><br><span class="line">modprobe -- nf_conntrack</span><br><span class="line">EOF</span><br><span class="line">chmod 755 /etc/modules.d/k8s.modules &amp;&amp; bash /etc/modules.d/k8s.modules &amp;&amp; lsmod | grep -e ip_vs -e nf_conntrack</span><br><span class="line">sysctl --system</span><br><span class="line">reboot</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="0x02-安装流程"><a href="#0x02-安装流程" class="headerlink" title="0x02 安装流程"></a>0x02 安装流程</h2><ul>
+<li>Step 1.Master节点与Node节点都进行 Containerd.io 安装与配置。<br>参考地址: <a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank" rel="noopener">https://docs.docker.com/engine/install/ubuntu/</a></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - 卸载原有Docker 以及 containerd</span></span><br><span class="line">sudo apt-get remove docker docker-engine docker.io containerd runc</span><br><span class="line"><span class="comment"># - 更新apt程序包索引并安装程序包，以允许apt通过HTTPS使用存储库</span></span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install \</span><br><span class="line">  apt-transport-https \</span><br><span class="line">  ca-certificates \</span><br><span class="line">  curl \</span><br><span class="line">  gnupg \</span><br><span class="line">  lsb-release</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 添加Docker的官方GPG密钥：</span></span><br><span class="line">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 使用以下命令设置稳定存储库。要添加nightly或test存储库，请在下面的命令中的单词stable后面添加单词nightly或test（或两者）。</span></span><br><span class="line"><span class="built_in">echo</span> \</span><br><span class="line">  <span class="string">"deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \</span></span><br><span class="line"><span class="string">  <span class="variable">$(lsb_release -cs)</span> stable"</span> | sudo tee /etc/apt/sources.list.d/container.list &gt; /dev/null</span><br><span class="line"></span><br><span class="line">      </span><br><span class="line"><span class="comment"># - 更新apt包索引，安装最新版本的containerd或进入下一步安装特定版本：</span></span><br><span class="line">sudo apt-get update</span><br><span class="line"><span class="comment"># - 安装前可查看containerd.io可用的版本: 2021年7月6日 21:03:47 当前最新版本 1.4.6-1</span></span><br><span class="line">apt-cache madison containerd.io &amp;&amp; apt install -y containerd.io=1.4.6-1</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 创建并修改 containerd 配置</span></span><br><span class="line">mkdir -vp /etc/containerd/</span><br><span class="line">containerd config default &gt; /etc/containerd/config.toml</span><br><span class="line">sed -i <span class="string">"s#k8s.gcr.io#registry.cn-hangzhou.aliyuncs.com/google_containers#g"</span>  /etc/containerd/config.toml</span><br><span class="line">sed -i <span class="string">'/containerd.runtimes.runc.options/a\ \ \ \ \ \ \ \ \ \ \ \ SystemdCgroup = true'</span> /etc/containerd/config.toml</span><br><span class="line">sed -i <span class="string">"s#https://registry-1.docker.io#https://xlx9erfu.mirror.aliyuncs.com#g"</span>  /etc/containerd/config.toml</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 启动 Containerd </span></span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl <span class="built_in">enable</span> containerd</span><br><span class="line">systemctl restart containerd</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 验证安装的 Containerd 状态及其版本</span></span><br><span class="line">systemctl status containerd.service &amp;&amp; ctr --version</span><br><span class="line">  <span class="comment"># ctr containerd.io 1.4.6</span></span><br></pre></td></tr></table></figure>
+<p>温馨提示: 当前最新版本 1.5.11 【2022年4月18日 14:10:15】其配置文件发生改变, 需要如下初始化。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">containerd config default &gt; /etc/containerd/config.toml</span><br><span class="line">sed -i <span class="string">"s#k8s.gcr.io/pause#registry.cn-hangzhou.aliyuncs.com/google_containers/pause#g"</span>  /etc/containerd/config.toml</span><br><span class="line">sed -i <span class="string">'s#SystemdCgroup = false#SystemdCgroup = true#g'</span> /etc/containerd/config.toml</span><br><span class="line">sed -i <span class="string">'/registry.mirrors]/a\ \ \ \ \ \ \ \ [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]'</span> /etc/containerd/config.toml</span><br><span class="line">sed -i <span class="string">'/registry.mirrors."docker.io"]/a\ \ \ \ \ \ \ \ \ \ endpoint = ["https://xlx9erfu.mirror.aliyuncs.com"]'</span> /etc/containerd/config.toml</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<ul>
+<li>Step 2.在确保 Containerd安装完成后，现在我们就可以来安装kubernetes相关工具，同样是在两台主机中执行。<br>参考地址: </li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - 为了提升下载速度我们还是使用使用阿里云的源进行安装。</span></span><br><span class="line">curl https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add - </span><br><span class="line">tee /etc/apt/sources.list.d/kubernetes.list &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">deb https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main</span><br><span class="line">EOF</span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line"><span class="comment"># $ sudo add-apt-repository "deb http://mirrors.aliyun.com/kubernetes/apt kubernetes-xenial main"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新 apt 包索引，并查看可用的kubernetes版本为了环境的稳定性</span></span><br><span class="line">apt-get update</span><br><span class="line">apt-cache madison kubeadm | head -n 8</span><br><span class="line">  <span class="comment"># kubeadm |  1.21.2-00 | https://mirrors.aliyun.com/kubernetes/apt kubernetes-xenial/main amd64 Packages</span></span><br><span class="line">  <span class="comment"># kubeadm |  1.21.1-00 | https://mirrors.aliyun.com/kubernetes/apt kubernetes-xenial/main amd64 Packages</span></span><br><span class="line">  <span class="comment"># kubeadm |  1.21.0-00 | https://mirrors.aliyun.com/kubernetes/apt kubernetes-xenial/main amd64 Packages</span></span><br><span class="line">  <span class="comment"># kubeadm |  1.20.8-00 | https://mirrors.aliyun.com/kubernetes/apt kubernetes-xenial/main amd64 Packages</span></span><br><span class="line">  <span class="comment"># kubeadm |  1.20.7-00 | https://mirrors.aliyun.com/kubernetes/apt kubernetes-xenial/main amd64 Packages</span></span><br><span class="line">  <span class="comment"># kubeadm |  1.20.6-00 | https://mirrors.aliyun.com/kubernetes/apt kubernetes-xenial/main amd64 Packages</span></span><br><span class="line">  <span class="comment"># kubeadm |  1.20.5-00 | https://mirrors.aliyun.com/kubernetes/apt kubernetes-xenial/main amd64 Packages</span></span><br><span class="line">  <span class="comment"># kubeadm |  1.20.4-00 | https://mirrors.aliyun.com/kubernetes/apt kubernetes-xenial/main amd64 Packages</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - 安装 kubelet、kubeadm 和 kubectl，并锁定其版本(此处选择1.20.8-00版本)</span></span><br><span class="line">sudo apt-get install -y kubelet=1.20.8-00 kubeadm=1.20.8-00 kubectl=1.20.8-00</span><br><span class="line">sudo apt-mark hold kubelet kubeadm kubectl</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>Step 3.设置容器运行时为containerd，到这里为止上面所有的操作都需要在所有节点执行配置。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># containerd - 运行时设置</span></span><br><span class="line">crictl config runtime-endpoint /run/containerd/containerd.sock</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重载systemd守护进程并将 kubelet 设置成开机启动</span></span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl <span class="built_in">enable</span> kubelet &amp;&amp; systemctl start kubelet</span><br></pre></td></tr></table></figure>
+<p>Tips : kubelet 现在每隔几秒就会重启，因为它陷入了一个等待 kubeadm 指令的死循环。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl status kubelet.service</span><br><span class="line">  <span class="comment"># Active: activating (auto-restart) (Result: exit-code) since Tue 2021-07-06 21:38:26 CST; 9s ago</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>Step 4.初始化集群首先我们初始化Master节点 ( <code>只在 k8s-master-1 机器执行</code> )集群安装参考地址: <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/" target="_blank" rel="noopener">https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/</a></li>
+</ul>
+<p>接下来在 master 节点配置 kubeadm 初始化文件，可以通过如下命令导出默认的初始化配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@k8s-master-1:~/k8s<span class="comment"># kubeadm config print init-defaults &gt; kubeadm.yaml</span></span><br></pre></td></tr></table></figure>
+<p>然后根据我们自己的需求修改配置，比如修改 imageRepository 的值，kube-proxy 的模式为 ipvs 以及 criSocket 设置为 <code>/run/containerd/containerd.sock</code>，需要注意的是由于我们使用的containerd作为运行时，所以在初始化节点的时候需要指定cgroupDriver为systemd</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; kubeadm.yaml &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">apiVersion: kubeadm.k8s.io/v1beta2</span><br><span class="line">bootstrapTokens:</span><br><span class="line">- groups:</span><br><span class="line">  - system:bootstrappers:kubeadm:default-node-token</span><br><span class="line">  token: abcdef.0123456789abcdef</span><br><span class="line">  ttl: 24h0m0s</span><br><span class="line">  usages:</span><br><span class="line">  - signing</span><br><span class="line">  - authentication</span><br><span class="line">kind: InitConfiguration</span><br><span class="line">localAPIEndpoint:</span><br><span class="line">  advertiseAddress: 10.10.107.220</span><br><span class="line">  bindPort: 6443</span><br><span class="line">nodeRegistration:</span><br><span class="line">  criSocket: /run/containerd/containerd.sock</span><br><span class="line">  name: k8s-master-1</span><br><span class="line">  taints:</span><br><span class="line">  - effect: NoSchedule</span><br><span class="line">    key: node-role.kubernetes.io/master</span><br><span class="line">---</span><br><span class="line">apiServer:</span><br><span class="line">  timeoutForControlPlane: 4m0s</span><br><span class="line">apiVersion: kubeadm.k8s.io/v1beta2</span><br><span class="line">certificatesDir: /etc/kubernetes/pki</span><br><span class="line">clusterName: kubernetes</span><br><span class="line">controllerManager: &#123;&#125;</span><br><span class="line">dns:</span><br><span class="line">  <span class="built_in">type</span>: CoreDNS</span><br><span class="line">etcd:</span><br><span class="line">  <span class="built_in">local</span>:</span><br><span class="line">    dataDir: /var/lib/etcd</span><br><span class="line">imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers</span><br><span class="line">kind: ClusterConfiguration</span><br><span class="line">kubernetesVersion: v1.20.8</span><br><span class="line">controlPlaneEndpoint: <span class="string">"newcluster.k8s:6443"</span></span><br><span class="line">networking:</span><br><span class="line">  dnsDomain: cluster.local</span><br><span class="line">  podSubnet: 172.16.0.0/16</span><br><span class="line">  serviceSubnet: 10.96.0.0/12</span><br><span class="line">scheduler: &#123;&#125;</span><br><span class="line">---</span><br><span class="line">apiVersion: kubeproxy.config.k8s.io/v1alpha1</span><br><span class="line">kind: KubeProxyConfiguration</span><br><span class="line">mode: ipvs</span><br><span class="line">---</span><br><span class="line">apiVersion: kubelet.config.k8s.io/v1beta1</span><br><span class="line">kind: KubeletConfiguration</span><br><span class="line">cgroupDriver: systemd</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果想设置APISERVER名称需要再/etc/hosts添加与其对应IP地址</span></span><br><span class="line">tee -a /etc/hosts &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">10.10.107.220 newcluster.k8s</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>然后使用上面的配置文件进行初始化Master节点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">kubeadm init --config=kubeadm.yaml</span><br><span class="line">  <span class="comment"># [preflight] You can also perform this action in beforehand using 'kubeadm config images pull'</span></span><br><span class="line">  <span class="comment"># [certs] Using certificateDir folder "/etc/kubernetes/pki"</span></span><br><span class="line">  <span class="comment"># [certs] Generating "ca" certificate and key</span></span><br><span class="line">  <span class="comment"># [certs] Generating "apiserver" certificate and key</span></span><br><span class="line">  <span class="comment"># [certs] apiserver serving cert is signed for DNS names [k8s-master-1 kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local newcluster.k8s] and IPs [10.96.0.1 10.10.107.220]</span></span><br><span class="line">  ......</span><br><span class="line">  <span class="comment"># [addons] Applied essential addon: CoreDNS</span></span><br><span class="line">  <span class="comment"># [addons] Applied essential addon: kube-proxy</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Your Kubernetes control-plane has initialized successfully!</span></span><br><span class="line">  <span class="comment"># To start using your cluster, you need to run the following as a regular user:</span></span><br><span class="line">  <span class="comment"># - 拷贝 kubeconfig 文件到当前用户的根目录,完毕后即可采用kubectl进行查看管理k8s集群。</span></span><br><span class="line">    mkdir -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">    sudo cp -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">    sudo chown $(id -u):$(id -g) <span class="variable">$HOME</span>/.kube/config</span><br><span class="line"></span><br><span class="line">  <span class="comment"># Alternatively, if you are the root user, you can run:</span></span><br><span class="line">    <span class="built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf</span><br><span class="line"></span><br><span class="line">  <span class="comment"># You should now deploy a pod network to the cluster.</span></span><br><span class="line">  <span class="comment"># Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:</span></span><br><span class="line">    https://kubernetes.io/docs/concepts/cluster-administration/addons/</span><br><span class="line"></span><br><span class="line">  <span class="comment"># You can now join any number of control-plane nodes by copying certificate authorities</span></span><br><span class="line">  <span class="comment"># and service account keys on each node and then running the following as root:</span></span><br><span class="line">  <span class="comment"># 从Master节点执行</span></span><br><span class="line">  kubeadm join newcluster.k8s:6443 --token abcdef.0123456789abcdef \</span><br><span class="line">  --discovery-token-ca-cert-hash sha256:d57743fa8657a959e6f96ea1b2d16ce32c315a2a6dc080a65a2b0fc8849bfbd4 \</span><br><span class="line">  --control-plane</span><br><span class="line"></span><br><span class="line">  <span class="comment"># Then you can join any number of worker nodes by running the following on each as root:</span></span><br><span class="line">  <span class="comment"># 工作节点执行</span></span><br><span class="line">  kubeadm join newcluster.k8s:6443 --token abcdef.0123456789abcdef \</span><br><span class="line">  --discovery-token-ca-cert-hash sha256:d57743fa8657a959e6f96ea1b2d16ce32c315a2a6dc080a65a2b0fc8849bfbd4</span><br></pre></td></tr></table></figure>
+<p>Tips : 由于 kubeadm 把 kubelet 视为一个系统服务来管理，所以对基于 kubeadm 的安装， 我们推荐使用 systemd 驱动，不推荐 cgroupfs 驱动。参考地址: <a href="https://kubernetes.io/zh/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/" target="_blank" rel="noopener">https://kubernetes.io/zh/docs/tasks/administer-cluster/kubeadm/configure-cgroup-driver/</a></p>
+<p><br></p>
+<ul>
+<li>Step 5.添加节点需要完成初始化集群上面的配置和操作要提前做好，将 master 节点上面的 $HOME/.kube/config 文件拷贝到 node 节点对应的文件中，安装 kubeadm、kubelet、kubectl，然后在node节点上(<code>k8s-node-1</code>)执行上面初始化完成后提示的 join 命令即可：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubeadm join newcluster.k8s:6443 --token abcdef.0123456789abcdef \</span><br><span class="line">  --discovery-token-ca-cert-hash sha256:d57743fa8657a959e6f96ea1b2d16ce32c315a2a6dc080a65a2b0fc8849bfbd4</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>Step 6.通过在Master中执行<code>kubectl get node</code>命令可以看到是 NotReady 状态，这是因为还没有安装网络插件，现在应该在集群中部署一个pod网络，可以从<a href="https://kubernetes.io/docs/concepts/cluster-administration/addons" target="_blank" rel="noopener">kubernetes官方提供的各类组件</a>中选择我们自己的网络插件，这里我们安装 calio (是一个安全的三层网络和网络策略驱动), 其Calico版本选择 <a href="https://docs.projectcalico.org/releases" target="_blank" rel="noopener">https://docs.projectcalico.org/releases</a></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - 安装 Pod 网络前节点的状态为NotReady</span></span><br><span class="line">~/k8s<span class="comment"># kubectl get node</span></span><br><span class="line">NAME           STATUS     ROLES                  AGE     VERSION</span><br><span class="line">k8s-master-1   NotReady   control-plane,master   11m     v1.20.8</span><br><span class="line">k8s-node-1     NotReady   &lt;none&gt;                 4m19s   v1.20.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 从calico官方下载calico插件的部署清单。</span></span><br><span class="line">~/k8s<span class="comment"># wget https://docs.projectcalico.org/v3.18/manifests/calico.yaml</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - 自定义更改calico插件的地址池。</span></span><br><span class="line"><span class="comment"># The default IPv4 pool to create on startup if none exists. Pod IPs will be chosen from this range. Changing this value after installation will have no effect. This should fall within `--cluster-cidr`.</span></span><br><span class="line">vim calico.yaml</span><br><span class="line">- name: CALICO_IPV4POOL_CIDR</span><br><span class="line">  value: <span class="string">"192.168.0.0/16"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - 部署 calico 网络插件</span></span><br><span class="line">kubectl apply -f calico.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 部署后查看kube-system中和网络相关的pod的运行状态，一般的状态回从Pending -&gt; Init -&gt; ContainerCreate -&gt; Running过程转变。</span></span><br><span class="line">~/k8s<span class="comment"># kubectl get pod -n kube-system</span></span><br><span class="line">NAME                                       READY   STATUS     RESTARTS   AGE</span><br><span class="line">calico-kube-controllers-77dd468cdb-2lchv   0/1     Pending    0          18s</span><br><span class="line">calico-node-pz9qx                          0/1     Init:0/3   0          18s</span><br><span class="line">calico-node-zvst7                          0/1     Init:0/3   0          18s</span><br><span class="line">coredns-54d67798b7-78n5j                   0/1     Pending    0          15m</span><br><span class="line">coredns-54d67798b7-z9c8f                   0/1     Pending    0          15m</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 等待几分钟后calico插件相关Pod已成功运行</span></span><br><span class="line">~/k8s<span class="comment"># kubectl get pod -n kube-system</span></span><br><span class="line">NAME                                       READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-kube-controllers-77dd468cdb-2lchv   1/1     Running   0          2m18s</span><br><span class="line">calico-node-pz9qx                          1/1     Running   0          2m18s</span><br><span class="line">calico-node-zvst7                          1/1     Running   0          2m18s</span><br><span class="line">coredns-54d67798b7-78n5j                   1/1     Running   0          17m</span><br><span class="line">coredns-54d67798b7-z9c8f                   1/1     Running   0          17m</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 同时可以看到其Node节点的状态已变为Ready，至此calico网络插件安装部署已完毕。</span></span><br><span class="line">~/k8s<span class="comment"># kubectl get node</span></span><br><span class="line">NAME           STATUS   ROLES                  AGE   VERSION</span><br><span class="line">k8s-master-1   Ready    control-plane,master   17m   v1.20.8</span><br><span class="line">k8s-node-1     Ready    &lt;none&gt;                 10m   v1.20.8</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>Step 7.最后添加命令自动补齐不全功能</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">apt install -y bash-completion</span><br><span class="line"><span class="built_in">source</span> /usr/share/bash-completion/bash_completion</span><br><span class="line"><span class="built_in">source</span> &lt;(kubectl completion bash)</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"source &lt;(kubectl completion bash)"</span> &gt;&gt; ~/.bashrc</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="0x03-基础实践"><a href="#0x03-基础实践" class="headerlink" title="0x03 基础实践"></a>0x03 基础实践</h2><p><strong>实践目标:</strong> 在Kubernetes集群中运行Nginx容器并设置<code>nginx-status</code>查看，并尽可能使用k8s相关组件以及控制器的简单使用。</p>
+<p><strong>实践流程:</strong></p>
+<ul>
+<li>Step 1.创建一个<code>weiyigeek</code>的名称空间进行部署 Nginx Web 容器。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl create namespace weiyigeek</span><br><span class="line">  <span class="comment"># namespace/weiyigeek created</span></span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>Step 2.准备Nginx.conf配置文件，我们可以采用ConfigMap来存储Nginx.conf配置文件。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Yaml 方式创建 ConfigMap</span></span><br><span class="line">tee nginx-conf.yaml &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: ConfigMap</span><br><span class="line">metadata:</span><br><span class="line">  name: nginx-conf</span><br><span class="line">  namespace: weiyigeek</span><br><span class="line">data:</span><br><span class="line">  nginx.conf: |</span><br><span class="line">    user  nginx;</span><br><span class="line">    worker_processes  auto;</span><br><span class="line">    worker_cpu_affinity 00000001 00000010 00000100 00001000;</span><br><span class="line">    error_log  /var/<span class="built_in">log</span>/nginx/error.log warn;</span><br><span class="line">    pid        /var/run/nginx.pid;</span><br><span class="line">    worker_rlimit_nofile 65536;</span><br><span class="line"></span><br><span class="line">    events &#123;</span><br><span class="line">      worker_connections  65535;</span><br><span class="line">      accept_mutex on;</span><br><span class="line">      multi_accept on;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    http &#123;</span><br><span class="line">      include       mime.types;</span><br><span class="line">      default_type  application/octet-stream;</span><br><span class="line">      log_format access_json <span class="string">'&#123;"@timestamp":"$time_iso8601",'</span></span><br><span class="line">      <span class="string">'"host":"$server_addr",'</span></span><br><span class="line">      <span class="string">'"clientip":"$remote_addr",'</span></span><br><span class="line">      <span class="string">'"size":$body_bytes_sent,'</span></span><br><span class="line">      <span class="string">'"responsetime":$request_time,'</span></span><br><span class="line">      <span class="string">'"upstreamtime":"$upstream_response_time",'</span></span><br><span class="line">      <span class="string">'"upstreamhost":"$upstream_addr",'</span></span><br><span class="line">      <span class="string">'"http_host":"$host",'</span></span><br><span class="line">      <span class="string">'"url":"$uri",'</span></span><br><span class="line">      <span class="string">'"domain":"$host",'</span></span><br><span class="line">      <span class="string">'"xff":"$http_x_forwarded_for",'</span></span><br><span class="line">      <span class="string">'"referer":"$http_referer",'</span></span><br><span class="line">      <span class="string">'"status":"$status"&#125;'</span>;</span><br><span class="line">      access_log  /var/<span class="built_in">log</span>/nginx/access.log  access_json;</span><br><span class="line">      client_max_body_size 50M;</span><br><span class="line">      keepalive_timeout  300;</span><br><span class="line">      fastcgi_buffers 8 128k;</span><br><span class="line">      fastcgi_buffer_size  128k;</span><br><span class="line">      fastcgi_busy_buffers_size 256k;</span><br><span class="line">      fastcgi_temp_file_write_size 256k;</span><br><span class="line">      proxy_connect_timeout 90;</span><br><span class="line">      proxy_read_timeout 300;</span><br><span class="line">      proxy_send_timeout 300;</span><br><span class="line">      sendfile        on;</span><br><span class="line"></span><br><span class="line">      server &#123;</span><br><span class="line">        listen       80;</span><br><span class="line">        server_name  localhost;</span><br><span class="line">        add_header Cache-Control no-cache;</span><br><span class="line">        location / &#123;</span><br><span class="line">          root   /usr/share/nginx/html;</span><br><span class="line">          index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line">        location /status </span><br><span class="line">        &#123;</span><br><span class="line">          stub_status on;</span><br><span class="line">          access_log off;            </span><br><span class="line">        &#125;       </span><br><span class="line">        error_page 500 502 503 504 /50x.html;</span><br><span class="line">        location = /50x.html &#123;</span><br><span class="line">          root   html;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment"># include /etc/nginx/conf.d/*.conf;</span></span><br><span class="line">    &#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式1.采用 Yaml 方式创建 ConfigMap 存储配置信息</span></span><br><span class="line">$ kubectl apply -f nginx-conf.yaml</span><br><span class="line">  <span class="comment"># configmap/nginx-conf created</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 方式2.采用 nginx.conf 配置创建 ConfigMap 存储配置信息</span></span><br><span class="line"><span class="comment"># kubectl create configmap nginx-conf --from-file=nginx.conf</span></span><br><span class="line"><span class="comment"># kubectl describe configmap nginx-conf</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看创建的 configmap</span></span><br><span class="line">$ kubectl -n weiyigeek  get configmap nginx-conf</span><br><span class="line">  <span class="comment"># NAME               DATA   AGE</span></span><br><span class="line">  <span class="comment"># nginx-conf         1      25m</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置的配置信息</span></span><br><span class="line">$ kubectl describe -n weiyigeek configmap nginx-conf</span><br><span class="line">  <span class="comment"># Name:         nginx-conf</span></span><br><span class="line">  <span class="comment"># Namespace:    weiyigeek</span></span><br><span class="line">  <span class="comment"># Labels:       &lt;none&gt;</span></span><br><span class="line">  <span class="comment"># Annotations:  &lt;none&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Data</span></span><br><span class="line">  <span class="comment"># ====</span></span><br><span class="line">  <span class="comment"># nginx.conf:</span></span><br><span class="line">  <span class="comment"># ----</span></span><br><span class="line">  <span class="comment"># user  nginx;</span></span><br><span class="line">  <span class="comment"># worker_processes  auto;</span></span><br><span class="line">  <span class="comment"># ............</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># events &#123;</span></span><br><span class="line">  <span class="comment">#   ...................</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># http &#123;</span></span><br><span class="line">  <span class="comment">#   ....................</span></span><br><span class="line">  <span class="comment">#   server &#123;</span></span><br><span class="line">  <span class="comment">#     listen       80;</span></span><br><span class="line">  <span class="comment">#     server_name  localhost;</span></span><br><span class="line">  <span class="comment">#     add_header Cache-Control no-cache;</span></span><br><span class="line">  <span class="comment">#     location / &#123;</span></span><br><span class="line">  <span class="comment">#       root   /usr/share/nginx/html;</span></span><br><span class="line">  <span class="comment">#       index  index.html index.htm;</span></span><br><span class="line">  <span class="comment">#     &#125;</span></span><br><span class="line">  <span class="comment">#     location /status</span></span><br><span class="line">  <span class="comment">#     &#123;</span></span><br><span class="line">  <span class="comment">#       stub_status on;</span></span><br><span class="line">  <span class="comment">#       access_log off;</span></span><br><span class="line">  <span class="comment">#     &#125;</span></span><br><span class="line">  <span class="comment">#     error_page 500 502 503 504 /50x.html;</span></span><br><span class="line">  <span class="comment">#     location = /50x.html &#123;</span></span><br><span class="line">  <span class="comment">#       root   html;</span></span><br><span class="line">  <span class="comment">#     &#125;</span></span><br><span class="line">  <span class="comment">#   &#125;</span></span><br><span class="line">  <span class="comment"># &#125;</span></span><br><span class="line">  <span class="comment"># Events:  &lt;none&gt;</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>Step 3.利用 Deployment 控制器编写部署 Nginx 资源清单。<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">tee</span> <span class="string">nginx-deployment.yaml</span> <span class="string">&lt;&lt;'EOF'</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">web-deploy</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">weiyigeek</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">nginx-test</span></span><br><span class="line"><span class="attr">  template:</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">nginx-test</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      initContainers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">init-html</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">        command:</span> <span class="string">['sh',</span> <span class="string">'-c'</span><span class="string">,</span> <span class="string">"env;echo ConfigMap:$&#123;MSG&#125;--HostName-$&#123;HOSTNAME&#125; &gt; /usr/share/nginx/html/index.html"</span><span class="string">]</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/usr/share/nginx/html"</span></span><br><span class="line"><span class="attr">        securityContext:</span></span><br><span class="line"><span class="attr">          privileged:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">        image:</span> <span class="string">"nginx:latest"</span></span><br><span class="line"><span class="attr">        imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">        ports:</span></span><br><span class="line"><span class="attr">        - containerPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">        volumeMounts:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">nginx-conf</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">/etc/nginx/nginx.conf</span></span><br><span class="line"><span class="attr">          subPath:</span> <span class="string">nginx.conf</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">web</span></span><br><span class="line"><span class="attr">          mountPath:</span> <span class="string">"/usr/share/nginx/html"</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">nginx-conf</span></span><br><span class="line"><span class="attr">        configMap:</span></span><br><span class="line"><span class="attr">          name:</span> <span class="string">nginx-conf</span></span><br><span class="line"><span class="attr">          items:</span></span><br><span class="line"><span class="attr">          - key:</span> <span class="string">nginx.conf</span></span><br><span class="line"><span class="attr">            path:</span> <span class="string">nginx.conf</span></span><br><span class="line"><span class="attr">      - name:</span> <span class="string">web</span> </span><br><span class="line"><span class="attr">        emptyDir:</span> <span class="string">&#123;&#125;</span>       </span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">nginx-service</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">weiyigeek</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx-test</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">NodePort</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">nginx</span></span><br><span class="line"><span class="attr">      port:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      targetPort:</span> <span class="number">80</span></span><br><span class="line"><span class="attr">      nodePort:</span> <span class="number">30000</span></span><br><span class="line"><span class="attr">      protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">nginx-test</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 利用 kubectl apply 部署 Nginx 控制器</span></span><br><span class="line"><span class="string">kubectl</span> <span class="string">apply</span> <span class="bullet">-f</span> <span class="string">nginx-deployment.yaml</span></span><br><span class="line">  <span class="comment"># deployment.apps/web-deploy created</span></span><br><span class="line">  <span class="comment"># service/nginx-service created</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<ul>
+<li>Step 4.查看验证创建的 Nginx Pod 和 Services, 访问创建的 nginx Web容器。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">~/k8s/containerd<span class="comment"># kubectl -n weiyigeek get pod</span></span><br><span class="line">  <span class="comment"># NAME                         READY   STATUS    RESTARTS   AGE</span></span><br><span class="line">  <span class="comment"># web-deploy-99fbb677d-jbbwk   1/1     Running   0          48s</span></span><br><span class="line">  <span class="comment"># web-deploy-99fbb677d-md5z9   1/1     Running   0          51s</span></span><br><span class="line"></span><br><span class="line">~/k8s/containerd<span class="comment"># kubectl -n weiyigeek get svc</span></span><br><span class="line">  <span class="comment"># NAME            TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE</span></span><br><span class="line">  <span class="comment"># nginx-service   NodePort   10.105.172.104   &lt;none&gt;        80:30000/TCP   59m</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 可以看到以轮询的方式来访问nginx副本</span></span><br><span class="line">~/k8s/containerd<span class="comment"># curl http://10.105.172.104</span></span><br><span class="line">  <span class="comment"># ConfigMap:--HostName-web-deploy-99fbb677d-md5z9</span></span><br><span class="line">~/k8s/containerd<span class="comment"># curl http://10.105.172.104</span></span><br><span class="line">  <span class="comment"># ConfigMap:--HostName-web-deploy-99fbb677d-jbbwk</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看nginx的状态信息</span></span><br><span class="line">~/k8s/containerd<span class="comment"># curl http://10.105.172.104/status</span></span><br><span class="line">  <span class="comment"># Active connections: 1</span></span><br><span class="line">  <span class="comment"># server accepts handled requests</span></span><br><span class="line">  <span class="comment"># 3 3 3</span></span><br><span class="line">  <span class="comment"># Reading: 0 Writing: 1 Waiting: 0</span></span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<ul>
+<li>Step 5.我们也可以采用 port-forward 子命令进行转发 web-deploy-99fbb677d-jbbwk Pod 到本机的 80 端口</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n weiyigeek port-forward --address 0.0.0.0 web-deploy-99fbb677d-jbbwk 80:80</span><br><span class="line">  <span class="comment"># Forwarding from 0.0.0.0:80 -&gt; 80</span></span><br><span class="line">  <span class="comment"># Handling connection for 80</span></span><br><span class="line">  <span class="comment"># Handling connection for 80</span></span><br></pre></td></tr></table></figure>
+<figure class="image-box">
+                <a rel=2.基于Containerd运行时搭建Kubernetes多控制平面集群实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210713153641.png" target="_blank" title="WeiyiGeek.port-forward" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20210713153641.png" alt="WeiyiGeek.port-forward" title="" class=""></a>
+                <p>WeiyiGeek.port-forward</p>
+            </figure>
+<p><strong>Nginx Status 详解:</strong></p>
+<ul>
+<li>Active connections - 活跃的连接数量</li>
+<li>server accepts handled requests — 总共处理了7个连接 , 成功创建7次握手, 总共处理了36个请求。</li>
+<li>Reading — 读取客户端的连接数。</li>
+<li>Writing — 响应数据到客户端的数量。</li>
+<li>Waiting — 开启 keep-alive 的情况下, 这个值等于 <code>active - (reading+writing)</code> 意思就是 Nginx 已经处理完正在等候下一次请求指令的驻留连接。</li>
+</ul>
+<p><br></p>
+<ul>
+<li>Step 6.至此，在使用containerd运行时的kubernetes集群中, 采用deployments控制器创建多个Nginx副本并访问。</li>
+</ul>
+<hr>
+<h2 id="0x04-入坑出坑"><a href="#0x04-入坑出坑" class="headerlink" title="0x04 入坑出坑"></a>0x04 入坑出坑</h2><h3 id="Containerd-相关问题"><a href="#Containerd-相关问题" class="headerlink" title="Containerd 相关问题"></a>Containerd 相关问题</h3><h4 id="问题1-执行ctr命令时报-connection-error-或者-connect-permission-denied-错误"><a href="#问题1-执行ctr命令时报-connection-error-或者-connect-permission-denied-错误" class="headerlink" title="问题1.执行ctr命令时报 connection error 或者 :connect: permission denied 错误"></a>问题1.执行ctr命令时报 connection error 或者 :connect: permission denied 错误</h4><ul>
+<li>错误信息: </li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ctr: failed to dial <span class="string">"/run/containerd/containerd.sock"</span>: connection error: desc = <span class="string">"transport: error while dialing: dial unix /run/containerd/containerd.sock: connect: permission denied"</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>错误原因: 一是可能未启动containerd相关服务，二可能是该用户没有操作container的权限(一般会存在于低权限用户)</li>
+<li>解决办法:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - 服务状态</span></span><br><span class="line">systemctl status containerd.servic</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 用户切换</span></span><br><span class="line">su - root </span><br><span class="line">ctr images ls</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="问题2-未指定名称空间-namespace-或者该操作对象不在该名称空间-namespace-中执行操作命令"><a href="#问题2-未指定名称空间-namespace-或者该操作对象不在该名称空间-namespace-中执行操作命令" class="headerlink" title="问题2.未指定名称空间(namespace)或者该操作对象不在该名称空间(namespace)中执行操作命令"></a>问题2.未指定名称空间(namespace)或者该操作对象不在该名称空间(namespace)中执行操作命令</h4><ul>
+<li>错误信息: </li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ctr container rm busybox</span><br><span class="line">ERRO[0000] failed to delete container <span class="string">"busybox"</span>          error=<span class="string">"container \"busybox\" in namespace \"default\": not found"</span></span><br><span class="line">ctr: container <span class="string">"busybox"</span> <span class="keyword">in</span> namespace <span class="string">"default"</span>: not found</span><br></pre></td></tr></table></figure>
+<ul>
+<li>错误原因: 由于 default 的默认名称空间内无busybox所以删除时报错.</li>
+<li>解决办法: 查看有那些名称空间<code>ctr namespace ls</code></li>
+</ul>
+<p><br></p>
+<h4 id="问题3-使用ctr拉取镜像时报INFO-0001-trying-next-host-error-quot-failed-to-authorize-failed-to-fetch-anonymous-token-错误"><a href="#问题3-使用ctr拉取镜像时报INFO-0001-trying-next-host-error-quot-failed-to-authorize-failed-to-fetch-anonymous-token-错误" class="headerlink" title="问题3.使用ctr拉取镜像时报INFO[0001] trying next host error=&quot;failed to authorize: failed to fetch anonymous token:错误"></a>问题3.使用ctr拉取镜像时报<code>INFO[0001] trying next host error=&quot;failed to authorize: failed to fetch anonymous token:</code>错误</h4><ul>
+<li>错误信息:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ ctr -n k8s.io images pull docker.io/library/busybox:latest</span><br><span class="line">  <span class="comment"># docker.io/library/busybox:latest: resolving      |--------------------------------------|</span></span><br><span class="line">  <span class="comment"># elapsed: 1.1 s                    total:   0.0 B (0.0 B/s)</span></span><br><span class="line">  <span class="comment"># INFO[0001] trying next host error="failed to authorize: failed to fetch anonymous token: Get https://auth.docker.io/token?scope=repository%3Alibrary%2Fbusybox%3Apull&amp;service=registry.docker.io: read tcp 10.10.107.220:62946-&gt;107.23.149.57:443: read: connection reset by peer" host=registry-1.docker.io</span></span><br><span class="line">  <span class="comment"># ctr: failed to resolve reference "docker.io/library/busybox:latest": failed to authorize: failed to fetch anonymous token: Get https://auth.docker.io/token?scope=repository%3Alibrary%2Fbusybox%3Apull&amp;service=registry.docker.io: read tcp 10.10.107.220:62946-&gt;107.23.149.57:443: read: connection reset by peer</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>解决办法: 不知道是ctr的Bug还是何处配置不对采用ctr images无法拉取而使用ctr image 则可以正常拉取。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ctr command</span></span><br><span class="line"><span class="comment"># images, image, i           manage images</span></span><br><span class="line"></span><br><span class="line">ctr -n k8s.io image pull docker.io/library/busybox:latest</span><br><span class="line">  <span class="comment"># docker.io/library/busybox:latest:                                                 resolved       |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># index-sha256:930490f97e5b921535c153e0e7110d251134cc4b72bbb8133c6a5065cc68580d:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># manifest-sha256:dca71257cd2e72840a21f0323234bb2e33fea6d949fa0f21c5102146f583486b: done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># layer-sha256:b71f96345d44b237decc0c2d6c2f9ad0d17fde83dad7579608f1f0764d9686f2:    done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># config-sha256:69593048aa3acfee0f75f20b77acb549de2472063053f6730c4091b53f2dfb02:   done           |++++++++++++++++++++++++++++++++++++++|</span></span><br><span class="line">  <span class="comment"># elapsed: 2.5 s                                                                    total:   0.0 B (0.0 B/s)</span></span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h3 id="Kubernetes-相关问题-基于Containerd运行时"><a href="#Kubernetes-相关问题-基于Containerd运行时" class="headerlink" title="Kubernetes 相关问题(基于Containerd运行时)"></a>Kubernetes 相关问题(基于Containerd运行时)</h3><h4 id="1-Kubernetes-高可用集群搭建时错误信息排查方式-思路具体情况还需具体分析"><a href="#1-Kubernetes-高可用集群搭建时错误信息排查方式-思路具体情况还需具体分析" class="headerlink" title="1.Kubernetes 高可用集群搭建时错误信息排查方式(思路具体情况还需具体分析)"></a>1.Kubernetes 高可用集群搭建时错误信息排查方式(思路具体情况还需具体分析)</h4><ul>
+<li>错误信息: Unfortunately, an error has occurred: timed out waiting for the condition</li>
+<li>错误排查: </li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># - 此错误可能由以下原因引起：</span></span><br><span class="line">- The kubelet is not running</span><br><span class="line">- The kubelet is unhealthy due to a misconfiguration of the node <span class="keyword">in</span> some way (required cgroups disabled)</span><br><span class="line"></span><br><span class="line"><span class="comment"># - 如果您使用的是systemd的系统，则可以尝试使用以下命令排除错误：</span></span><br><span class="line">- <span class="string">'systemctl status kubelet'</span></span><br><span class="line">- <span class="string">'journalctl -xeu kubelet'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - 此外，当容器运行时启动时，控制平面组件可能已崩溃或退出。要进行故障排除，请使用首选容器运行时CLI列出所有容器。</span></span><br><span class="line">- <span class="string">'crictl --runtime-endpoint /run/containerd/containerd.sock ps -a | grep kube | grep -v pause'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - 找到发生故障的容器后，可以使用以下工具检查其日志：</span></span><br><span class="line">- <span class="string">'crictl --runtime-endpoint /run/containerd/containerd.sock logs CONTAINERID'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># - 集群 pod 排错常用命令指南</span></span><br><span class="line">kubectl get pod &lt;pod-name&gt; -o yaml <span class="comment"># 查看 Pod 的配置是否正确</span></span><br><span class="line">kubectl describe pod &lt;pod-name&gt;    <span class="comment"># 查看 Pod 的事件</span></span><br><span class="line">kubectl logs &lt;pod-name&gt; [-c &lt;container-name&gt;] <span class="comment"># 查看容器日志</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>实际案例:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">journalctl -xeu kubelet</span><br><span class="line">  <span class="comment"># Jul 06 22:15:29 k8s-master-1 kubelet[11333]: E0706 22:15:29.108499   11333 kubelet.go:2183] Container runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:Network plugin returns error: cni plugin not initialized</span></span><br><span class="line">  <span class="comment"># Jul 06 22:15:29 k8s-master-1 kubelet[11333]: E0706 22:15:29.206203   11333 kubelet.go:2263] node "k8s-master-1" not found</span></span><br><span class="line">  <span class="comment"># Jul 06 22:15:29 k8s-master-1 kubelet[11333]: E0706 22:15:29.208552   11333 remote_runtime.go:116] RunPodSandbox from runtime service failed: rpc error: code = Unknown desc = failed to get sandbox image "k8s.gcr.io/pause:3.2": failed to pull image "&gt;</span></span><br><span class="line">  <span class="comment"># Jul 06 22:15:29 k8s-master-1 kubelet[11333]: E0706 22:15:29.208609   11333 kuberuntime_sandbox.go:70] CreatePodSandbox for pod "kube-controller-manager-k8s-master-1_kube-system(d1d11a3cb97124022c9d85b070508dfa)" failed: rpc error: code = Unknown de&gt;</span></span><br><span class="line">  <span class="comment"># Jul 06 22:15:29 k8s-master-1 kubelet[11333]: E0706 22:15:29.208621   11333 kuberuntime_manager.go:755] createPodSandbox for pod "kube-controller-manager-k8s-master-1_kube-system(d1d11a3cb97124022c9d85b070508dfa)" failed: rpc error: code = Unknown d&gt;</span></span><br><span class="line">  <span class="comment"># Jul 06 22:15:29 k8s-master-1 kubelet[11333]: E0706 22:15:29.208682   11333 pod_workers.go:191] Error syncing pod d1d11a3cb97124022c9d85b070508dfa ("kube-controller-manager-k8s-master-1_kube-system(d1d11a3cb97124022c9d85b070508dfa)"), skipping: fail&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>错误原因: 由于从k8s.gcr.io/pause:3.2仓库无法拉取pause镜像导致kubernetes集群没办法创建相应的PodSandbox而最终使得集群安装失败。</li>
+<li>解决办法: 修改 containerd 配置中pause镜像拉取的仓库地址(此处设置为阿里云)</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">"s#k8s.gcr.io#registry.cn-hangzhou.aliyuncs.com/google_containers#g"</span>  /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="2-使用crictl工具拉取镜像时报FATA-0000-pulling-image-failed-rpc-error-code-Unknown-desc-failed-to-pull-and-unpack-image错误。"><a href="#2-使用crictl工具拉取镜像时报FATA-0000-pulling-image-failed-rpc-error-code-Unknown-desc-failed-to-pull-and-unpack-image错误。" class="headerlink" title="2.使用crictl工具拉取镜像时报FATA[0000] pulling image failed: rpc error: code = Unknown desc = failed to pull and unpack image错误。"></a>2.使用crictl工具拉取镜像时报<code>FATA[0000] pulling image failed: rpc error: code = Unknown desc = failed to pull and unpack image</code>错误。</h4><ul>
+<li>错误信息:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ crictl pull docker.io/pollyduan/ingress-nginx-controller:v0.47.0</span><br><span class="line">  <span class="comment"># FATA[0000] pulling image failed: rpc error: code = Unknown desc = failed to pull and unpack image "docker.io/pollyduan/ingress-nginx-controller:v0.47.0": failed to resolve reference "docker.io/pollyduan/ingress-nginx-controller:v0.47.0": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>错误原因: 未在 /etc/crictl.yaml 中设置 image-endpoint 对象, 其次是在 /etc/containerd/config.toml中设置docker.io镜像endpoint有误。</li>
+<li>解决办法: 设置 image-endpoint 端点。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ tee /etc/crictl.yaml &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">runtime-endpoint: unix:///run/containerd/containerd.sock</span><br><span class="line">image-endpoint: <span class="string">"unix:///run/containerd/containerd.sock"</span></span><br><span class="line">timeout: 0</span><br><span class="line">debug: <span class="literal">false</span></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">$ grep -C 3 <span class="string">'registry.mirrors."docker.io" '</span> /etc/containerd/config.toml</span><br><span class="line">  [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry]</span><br><span class="line">        [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.mirrors]</span><br><span class="line">          [plugins.<span class="string">"io.containerd.grpc.v1.cri"</span>.registry.mirrors.<span class="string">"docker.io"</span>]</span><br><span class="line">            endpoint = [<span class="string">"https://xlx9erfu.mirror.aliyuncs.com"</span>]</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="3-创建Pod时报Failed-to-create-pod-sandbox-rpc-error-code-Unknown-desc-failed-to-set-up-sandbox-container-错误"><a href="#3-创建Pod时报Failed-to-create-pod-sandbox-rpc-error-code-Unknown-desc-failed-to-set-up-sandbox-container-错误" class="headerlink" title="3.创建Pod时报Failed to create pod sandbox: rpc error: code = Unknown desc = [failed to set up sandbox container.错误"></a>3.创建Pod时报<code>Failed to create pod sandbox: rpc error: code = Unknown desc = [failed to set up sandbox container.</code>错误</h4><ul>
+<li>错误信息:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Warning  FailedCreatePodSandBox  89s               kubelet            Failed to create pod sandbox: rpc error: code = Unknown desc = [failed to <span class="built_in">set</span> up sandbox container <span class="string">"1c97ad2710e2939c0591477f9d6dde8e0d7d31b3fbc138a7fa38aaa657566a9a"</span> network <span class="keyword">for</span> pod <span class="string">"coredns-7f89b7bc75-qg924"</span>: networkPlugin cni failed to <span class="built_in">set</span> up pod <span class="string">"coredns-7f89b7bc75-qg924_kube-system"</span> network: error getting ClusterInformation: Get <span class="string">"https://[10.96.0.1]:443/apis/crd.projectcalico.org/v1/clusterinformations/default"</span>: x509: certificate signed by unknown authority (possibly because of <span class="string">"crypto/rsa: verification error"</span> <span class="keyword">while</span> trying to verify candidate authority certificate <span class="string">"kubernetes"</span>), failed to clean up sandbox container <span class="string">"1c97ad2710e2939c0591477f9d6dde8e0d7d31b3fbc138a7fa38aaa657566a9a"</span> network <span class="keyword">for</span> pod <span class="string">"coredns-7f89b7bc75-qg924"</span>: networkPlugin cni failed to teardown pod <span class="string">"coredns-7f89b7bc75-qg924_kube-system"</span> network: error getting ClusterInformation: Get <span class="string">"https://[10.96.0.1]:443/apis/crd.projectcalico.org/v1/clusterinformations/default"</span>: x509: certificate signed by unknown authority (possibly because of <span class="string">"crypto/rsa: verification error"</span> <span class="keyword">while</span> trying to verify candidate authority certificate <span class="string">"kubernetes"</span>)]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>表现状态: coredns无法运行<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get pods -n kube-system</span><br><span class="line">NAME                              READY   STATUS              RESTARTS   AGE</span><br><span class="line">coredns-7f89b7bc75-jzs26          0&#x2F;1     ContainerCreating   0          63s</span><br><span class="line">coredns-7f89b7bc75-qg924          0&#x2F;1     ContainerCreating   0          63s</span><br></pre></td></tr></table></figure></li>
+<li>解决办法: 更改calico.yaml</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ vim calico.yaml</span><br><span class="line"><span class="comment"># Cluster type to identify the deployment type</span></span><br><span class="line">  - name: CLUSTER_TYPE</span><br><span class="line">  value: <span class="string">"k8s,bgp"</span></span><br><span class="line"><span class="comment"># 下方熙增新增</span></span><br><span class="line">  - name: IP_AUTODETECTION_METHOD</span><br><span class="line">    value: <span class="string">"interface=ens192"</span></span><br><span class="line">    <span class="comment"># ens192为本地网卡名字</span></span><br><span class="line"></span><br><span class="line">$ kubectl apply -f calico.yaml</span><br><span class="line"></span><br><span class="line">$ kubectl get pods -n kube-system</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="4-Kubeadm-初始化-kubernetes-失败报-ERROR-SystemVerification-unexpected-kernel-config-CONFIG-CGROUP-PIDS错误"><a href="#4-Kubeadm-初始化-kubernetes-失败报-ERROR-SystemVerification-unexpected-kernel-config-CONFIG-CGROUP-PIDS错误" class="headerlink" title="4.Kubeadm 初始化 kubernetes 失败报[ERROR SystemVerification]: unexpected kernel config: CONFIG_CGROUP_PIDS错误"></a>4.Kubeadm 初始化 kubernetes 失败报<code>[ERROR SystemVerification]: unexpected kernel config: CONFIG_CGROUP_PIDS</code>错误</h4><ul>
+<li>错误信息:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">error execution phase preflight: [preflight] Some fatal errors occurred:</span><br><span class="line">[ERROR SystemVerification]: unexpected kernel config: CONFIG_CGROUP_PIDS</span><br><span class="line">[ERROR SystemVerification]: missing required cgroups: pids</span><br></pre></td></tr></table></figure>
+<ul>
+<li>解决办法: 首先你要在 cat /boot/config-$(uname -r) | grep CGROUP 这个文件里面加<code>CONFIG_CGROUP_PIDS=y</code><br>然后你再升级一下内核就可以了。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$ cat /boot/config-`uname -r` | grep CGROUP</span><br><span class="line">CONFIG_CGROUPS=y</span><br><span class="line">CONFIG_BLK_CGROUP=y</span><br><span class="line">CONFIG_CGROUP_WRITEBACK=y</span><br><span class="line">CONFIG_CGROUP_SCHED=y</span><br><span class="line">CONFIG_CGROUP_PIDS=y</span><br><span class="line">CONFIG_CGROUP_RDMA=y</span><br><span class="line">CONFIG_CGROUP_FREEZER=y</span><br><span class="line">CONFIG_CGROUP_HUGETLB=y</span><br><span class="line">CONFIG_CGROUP_DEVICE=y</span><br><span class="line">CONFIG_CGROUP_CPUACCT=y</span><br><span class="line">CONFIG_CGROUP_PERF=y</span><br><span class="line">CONFIG_CGROUP_BPF=y</span><br><span class="line"><span class="comment"># CONFIG_CGROUP_DEBUG is not set</span></span><br><span class="line">CONFIG_SOCK_CGROUP_DATA=y</span><br><span class="line"><span class="comment"># CONFIG_BLK_CGROUP_IOLATENCY is not set</span></span><br><span class="line">CONFIG_BLK_CGROUP_IOCOST=y</span><br><span class="line"><span class="comment"># CONFIG_BFQ_CGROUP_DEBUG is not set</span></span><br><span class="line">CONFIG_NETFILTER_XT_MATCH_CGROUP=m</span><br><span class="line">CONFIG_NET_CLS_CGROUP=m</span><br><span class="line">CONFIG_CGROUP_NET_PRIO=y</span><br><span class="line">CONFIG_CGROUP_NET_CLASSID=y</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="5-使用Kubectl查看工作节点时发现节点状态为NotReady，并报出Network-plugin-returns-error-cni-plugin-not-initialized错误解决办法"><a href="#5-使用Kubectl查看工作节点时发现节点状态为NotReady，并报出Network-plugin-returns-error-cni-plugin-not-initialized错误解决办法" class="headerlink" title="5.使用Kubectl查看工作节点时发现节点状态为NotReady，并报出Network plugin returns error: cni plugin not initialized错误解决办法."></a>5.使用Kubectl查看工作节点时发现节点状态为NotReady，并报出<code>Network plugin returns error: cni plugin not initialized</code>错误解决办法.</h4><ul>
+<li>错误信息:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl describe node master-1</span><br><span class="line">Ready    False   Fri, 22 Apr 2022 14:37:11 +0800   Fri, 22 Apr 2022 11:38:16 +0800   KubeletNotReady   container runtime network not ready: NetworkReady=<span class="literal">false</span> reason:NetworkPluginNotReady message:Network plugin returns error: cni plugin not initialized</span><br><span class="line"></span><br><span class="line">$ journalctl -xeu kubelet</span><br><span class="line">Apr 22 14:41:34 master-1 kubelet[412039]: E0422 14:41:34.064340  412039 kubelet.go:2347] <span class="string">"Container runtime network not ready"</span>  networkReady=<span class="string">"NetworkReady=false reason:NetworkPluginNotReady message:Network plugin returns error: cni plugin not initialized"</span></span><br></pre></td></tr></table></figure></li>
+<li>问题原因: 由于我重新初始化集群节点后，删除了 /etc/cni/net.d/ 目录并未重启containerd服务。</li>
+<li>解决办法:<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 重启 containerd</span></span><br><span class="line">$ systemctl restart containerd</span><br><span class="line">$ ls /etc/cni/net.d/</span><br><span class="line">10-calico.conflist  calico-kubeconfig</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-09-08T03:52:07.931Z" itemprop="dateUpdated">2022-09-08 11:52:07</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Containerd/2.基于Containerd安装Kubernetes多控制平面集群实践.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Containerd/2.基于Containerd安装Kubernetes多控制平面集群实践.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2021/6-29-571.html" target="_blank" rel="external">https://blog.weiyigeek.top/2021/6-29-571.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Containerd/" rel="tag">Containerd</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kubernetes/" rel="tag">kubernetes</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/6-29-571.html&title=《2.基于Containerd运行时搭建Kubernetes多控制平面集群实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/6-29-571.html&title=《2.基于Containerd运行时搭建Kubernetes多控制平面集群实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/6-29-571.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《2.基于Containerd运行时搭建Kubernetes多控制平面集群实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/6-29-571.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/6-29-571.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="prev">
+      <a href="/2021/6-30-581.html" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">3.基于Containerd容器运行时的配置浅析与知识扩充实践</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="next">
+      <a href="/2021/6-27-570.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">1.Containerd容器运行时初识与尝试</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-环境准备"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 环境准备</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-安装流程"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 安装流程</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-基础实践"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 基础实践</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x04-入坑出坑"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x04 入坑出坑</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Containerd-相关问题"><span class="post-toc-number">5.1.</span> <span class="post-toc-text">Containerd 相关问题</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题1-执行ctr命令时报-connection-error-或者-connect-permission-denied-错误"><span class="post-toc-number">5.1.1.</span> <span class="post-toc-text">问题1.执行ctr命令时报 connection error 或者 :connect: permission denied 错误</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题2-未指定名称空间-namespace-或者该操作对象不在该名称空间-namespace-中执行操作命令"><span class="post-toc-number">5.1.2.</span> <span class="post-toc-text">问题2.未指定名称空间(namespace)或者该操作对象不在该名称空间(namespace)中执行操作命令</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#问题3-使用ctr拉取镜像时报INFO-0001-trying-next-host-error-quot-failed-to-authorize-failed-to-fetch-anonymous-token-错误"><span class="post-toc-number">5.1.3.</span> <span class="post-toc-text">问题3.使用ctr拉取镜像时报INFO[0001] trying next host error&#x3D;&quot;failed to authorize: failed to fetch anonymous token:错误</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Kubernetes-相关问题-基于Containerd运行时"><span class="post-toc-number">5.2.</span> <span class="post-toc-text">Kubernetes 相关问题(基于Containerd运行时)</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-Kubernetes-高可用集群搭建时错误信息排查方式-思路具体情况还需具体分析"><span class="post-toc-number">5.2.1.</span> <span class="post-toc-text">1.Kubernetes 高可用集群搭建时错误信息排查方式(思路具体情况还需具体分析)</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-使用crictl工具拉取镜像时报FATA-0000-pulling-image-failed-rpc-error-code-Unknown-desc-failed-to-pull-and-unpack-image错误。"><span class="post-toc-number">5.2.2.</span> <span class="post-toc-text">2.使用crictl工具拉取镜像时报FATA[0000] pulling image failed: rpc error: code &#x3D; Unknown desc &#x3D; failed to pull and unpack image错误。</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-创建Pod时报Failed-to-create-pod-sandbox-rpc-error-code-Unknown-desc-failed-to-set-up-sandbox-container-错误"><span class="post-toc-number">5.2.3.</span> <span class="post-toc-text">3.创建Pod时报Failed to create pod sandbox: rpc error: code &#x3D; Unknown desc &#x3D; [failed to set up sandbox container.错误</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-Kubeadm-初始化-kubernetes-失败报-ERROR-SystemVerification-unexpected-kernel-config-CONFIG-CGROUP-PIDS错误"><span class="post-toc-number">5.2.4.</span> <span class="post-toc-text">4.Kubeadm 初始化 kubernetes 失败报[ERROR SystemVerification]: unexpected kernel config: CONFIG_CGROUP_PIDS错误</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-使用Kubectl查看工作节点时发现节点状态为NotReady，并报出Network-plugin-returns-error-cni-plugin-not-initialized错误解决办法"><span class="post-toc-number">5.2.5.</span> <span class="post-toc-text">5.使用Kubectl查看工作节点时发现节点状态为NotReady，并报出Network plugin returns error: cni plugin not initialized错误解决办法.</span></a></li></ol></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2021/6-29-571.html&title=《2.基于Containerd运行时搭建Kubernetes多控制平面集群实践》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2021/6-29-571.html&title=《2.基于Containerd运行时搭建Kubernetes多控制平面集群实践》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2021/6-29-571.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《2.基于Containerd运行时搭建Kubernetes多控制平面集群实践》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2021/6-29-571.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2021/6-29-571.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACJ0lEQVR42u3ay3KDMAwF0Pz/T9NtZ1rIlUTawT6sOgnBPixUPfx6xdfx4zr7Nrn/+z3Xz7n5wsDAeCzjuLzyBZJfJaTr13G6EwwMjA0Y+aOvF+jdM2FjYGBgVO/pfTJZFwMDA6O33SRx/OeAi4GB8UBGUsQmm84bbUl77iO1OAYGxgMZedf97//+yHwDAwPjUYyjePXGnNXEsbwrDAyMpRl5gOslc9WCdrIfDAyMVRnVUjNf7K4GXPQJBgbGBozecDHHJM+vDjt/CbgYGBiLMpLAN1lgPrBsjjAxMDAWZUzGA8mSeaJZfREYGBi7MfLBQPUwWR6sq8/EwMBYmzEvSqshtdq8i36FgYGxASMvX/PRZt5Eu6GQxsDAWJrRyyWvH52A5422N4U3BgbG0ox7RwKTRluv54+BgbEqo9pcq5ajeQNutAcMDIxFGZOBYp7q5clcnmgWenUYGBhLMKr5Y76hu5LLN6tjYGAszZg3+vNkMW+xVY9oYGBg7MAoW4PfThLHvG13WotjYGBsxqgu0Hsp+eqnaSIGBsYGjDyN6w0Peg24QgmNgYGxKGMSQPPCtRdk838DGBgYazN6B8Xyb/MQ3EsTyxgMDIzHMu5tkF2ncfmQshqyMTAwdmD0Al/+bWFDrWMcGBgYGL3jWXnAzQ9YnL4UDAwMjDiBu7fQLQRxDAyMDRjVYUBSyk7C6wfbbRgYGA9kjE5qtEYLyZhhEtwxMDAWYnwBcb2TYeZpH2sAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

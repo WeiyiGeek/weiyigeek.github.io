@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="Redis">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+            reward:	true,
+            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2022-09-20T14:35:30.000Z" itemprop="datePublished" class="page-time">
+  2022-09-20
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+    <article id="post-数据存储/Redis/9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2022-09-20 22:35:30" datetime="2022-09-20T14:35:30.000Z"  itemprop="datePublished">2022-09-20</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Database/">Database</a></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-快速介绍"><a href="#0x00-快速介绍" class="headerlink" title="0x00 快速介绍"></a>0x00 快速介绍</h2><p><strong>什么是RedisInsight?</strong></p>
+<blockquote>
+<p>RedisInsight 是一个直观而高效的 Redis GUI (<code>可视化工具</code>)，它提供了设计、开发和优化 Redis 应用程序的功能，查询、分析您的 Redis 数据并与之交互，简化您的 Redis 应用程序开发 。（必备）<br>RedisInsight 现在采用了基于流行的 <code>Electron</code> 框架的全新技术堆栈, 它可以跨平台运行，支持 Linux、Windows 和 MacOS。 </p>
+</blockquote>
+<p><strong>为啥用RedisInsight?</strong><br>描述：RedisInsight 提供直观的 Redis 管理 GUI，有助于优化您在应用程序中对 Redis 的使用，相比于其他可视化工具，其实现的功能更强大、执行效率更改，通用性更好等特定，</p>
+<p>下面列举出 RedisInsight 的亮点功能：</p>
+<ul>
+<li>唯一支持 Redis Cluster 的 GUI 工具；</li>
+<li>可以基于 Browser 的界面来进行搜索键、查看和编辑数据；</li>
+<li>支持基于 SSL/TLS 的连接，同时还可以在界面上进行内存分析；</li>
+<li>支持连接 Redis Open Source、 Redis Stack 、 Redis Enterprise Software 、 Redis Enterprise Cloud 和 Amazon ElastiCache等系统；</li>
+<li>支持自定义扩展插件实现更多功能。</li>
+</ul>
+<p><br/></p>
+<p>RedisInsight 支持的功能：</p>
+<ul>
+<li>直观且高效的 GUI: 允许您与数据库交互、监控和管理您的数据。</li>
+<li>CRUD支持更广泛：允许对列表、哈希、字符串、集、排序集以及流Stream 数据库结构支持 CRUD 。</li>
+<li>多行查询编辑器：进行构建查询、探索结果、优化和快速迭代，支持 JSON 、 Search 、 Graph 、 Streams 、 Time Series 和 RedisGears 。 </li>
+<li>内存分析：通过密钥模式、过期密钥和高级搜索来分析内存使用情况，以识别内存问题， 利用建议来减少内存使用量。 </li>
+<li>命令调试: 识别顶部键、键模式和命令，按集群所有节点的客户端 IP 地址、密钥或命令进行过滤，有效地调试 Lua 脚本，并利用 Redis CLI 提供语法突出显示和自动完成功能，并采用集成帮助来提供直观的即时帮助。</li>
+<li>指标监控：通过界面深入了解实时性能指标、检查慢速命令并管理 Redis 配置。 </li>
+<li>发布/订阅：支持 Redis 发布/订阅，支持订阅频道并将消息发布到频道</li>
+<li>数据浏览：浏览、筛选、可视化您的键值 Redis 数据结构，并查看不同格式（包括 JSON、十六进制、ASCII 等）的键值</li>
+<li>平台兼容：适用于苹果操作系统（包括 M1）、Windows和 Linux</li>
+</ul>
+<p>补充：官方推荐的其他Redis数据库相关工具查看 [ <a href="https://redis.io/docs/tools/" target="_blank" rel="noopener">https://redis.io/docs/tools/</a> ]，当然你也可以可以选择客户端桌面管理工具(例如，AnotherRedisDesktopManage [ <a href="https://github.com/qishibo/AnotherRedisDesktopManager" target="_blank" rel="noopener">https://github.com/qishibo/AnotherRedisDesktopManager</a> ] )</p>
+<hr>
+<h2 id="0x01-安装部署"><a href="#0x01-安装部署" class="headerlink" title="0x01 安装部署"></a>0x01 安装部署</h2><p>描述：redis-insight 与现在大多数软件一样，有多种安装方式其中用得比较多的就是二进制、源码编译以及容器化部署的方式。</p>
+<h3 id="二进制方式"><a href="#二进制方式" class="headerlink" title="二进制方式"></a>二进制方式</h3><p>描述：我们需要在Redis官方进行下载 redis-insight 二进制包然后进行安装部署，有可能国内下载比较缓慢，此时我已将其打包下来，方便大家下载。</p>
+<p>Redis GUI redis-insight 工具 下载: </p>
+<ul>
+<li><a href="https://share.weiyigeek.top/d/36158960-51461225-1d5ee1?p=2088" target="_blank" rel="noopener">https://share.weiyigeek.top/d/36158960-51461225-1d5ee1?p=2088</a> (访问密码: 2088)</li>
+<li><a href="https://url60.ctfile.com/d/36158960-51461225-1d5ee1?p=2088" target="_blank" rel="noopener">https://url60.ctfile.com/d/36158960-51461225-1d5ee1?p=2088</a> (访问密码: 2088)</li>
+</ul>
+<p><strong>环境依赖</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Requirement</th>
+<th style="text-align:center">Ubuntu</th>
+<th style="text-align:center">MacOS</th>
+<th style="text-align:center">Windows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Operating System</td>
+<td style="text-align:center">Ubuntu 18.04 LTS or later</td>
+<td style="text-align:center">MacOS 10.13 or later</td>
+<td style="text-align:center">Windows 10</td>
+</tr>
+<tr>
+<td style="text-align:center">Memory (RAM)</td>
+<td style="text-align:center">8GB</td>
+<td style="text-align:center">8GB</td>
+<td style="text-align:center">8GB</td>
+</tr>
+<tr>
+<td style="text-align:center">Processor</td>
+<td style="text-align:center">64 bit</td>
+<td style="text-align:center">64 bit</td>
+<td style="text-align:center">32 bit or 64 bit</td>
+</tr>
+</tbody>
+</table>
+<p><br/></p>
+<p><strong>安装环境</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ lsb_release  -a</span><br><span class="line">No LSB modules are available.</span><br><span class="line">Distributor ID: Ubuntu</span><br><span class="line">Description:    Ubuntu 20.04.3 LTS</span><br><span class="line">Release:        20.04</span><br><span class="line">Codename:       focal</span><br><span class="line"></span><br><span class="line">$ lscpu  | grep <span class="string">"CPU(s)"</span></span><br><span class="line">CPU(s):                          4</span><br><span class="line">On-line CPU(s) list:             0-3</span><br><span class="line"></span><br><span class="line">$ lsmem  | grep <span class="string">"Total online memory"</span></span><br><span class="line">Total online memory:       8G</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p><strong>安装流程</strong></p>
+<p>步骤 01.官网下载 RedisInsight 上传到 /usr/local/bin 目录 并打开 shell 终端赋予其下载权限。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/bin</span><br><span class="line">mv redisinsight-linux64-1.13.0 redisinsight-linux64</span><br><span class="line">chmod +x redisinsight-linux64</span><br></pre></td></tr></table></figure></p>
+<p>步骤 02.设置Redisinsight启动所需的环境变量：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir ~/.redisinsight</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"export RIHOST=0.0.0.0"</span> &gt; ~/.bash_profile</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"export RIPORT=8081"</span> &gt;&gt; ~/.bash_profile</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"export RIHOMEDIR=~/.redisinsight"</span> &gt;&gt; ~/.bash_profile</span><br><span class="line"><span class="built_in">echo</span> <span class="string">"export RILOGDIR=~/.redisinsight"</span> &gt;&gt; ~/.bash_profile</span><br><span class="line"><span class="built_in">source</span> ~/.bash_profile</span><br></pre></td></tr></table></figure>
+<p>温馨提示：如果使用了<code>REDISINSIGHT_HOST, REDISINSIGHT_PORT, REDISINSIGHT_HOME_DIR and LOG_DIR</code>等环境变量便会出现如下提示。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">WARNING 2022-09-20 05:56:33,461 redisinsight_startup REDISINSIGHT_HOST, REDISINSIGHT_PORT, REDISINSIGHT_HOME_DIR and LOG_DIR environment variables will be deprecated in the version v1.9.</span><br><span class="line">Please use RIHOST, RIPORT, RIHOMEDIR and RILOGDIR environment variables for setting host, port, db directory and log directory respectively.</span><br></pre></td></tr></table></figure></p>
+<p>步骤 03.启动Redisinsight并后台运行它</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#  后台运行</span></span><br><span class="line">nohup /usr/<span class="built_in">local</span>/bin/redisinsight-linux64 &gt; ~/.redisinsight/console.log 2&gt;&amp;1 &amp;</span><br><span class="line">``` </span><br><span class="line"></span><br><span class="line">步骤 04.查看 redisinsight 进程运行情况</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line">root@weiyigeek:~<span class="comment"># ps aux | grep "redisinsight"</span></span><br><span class="line">root        6592  8.0  0.0   3220  2212 pts/0    S    13:59   0:00 /usr/<span class="built_in">local</span>/bin/redisinsight-linux64</span><br><span class="line">root        6593  8.9  0.9 602080 74616 pts/0    Sl   13:59   0:00 /usr/<span class="built_in">local</span>/bin/redisinsight-linux64</span><br><span class="line">root        6602  0.0  0.0   6432   724 pts/0    S+   13:59   0:00 grep redisinsight</span><br><span class="line">root@weiyigeek:~<span class="comment"># netstat -ano | grep ":8081"</span></span><br><span class="line">tcp        0      0 0.0.0.0:8081            0.0.0.0:*               LISTEN      off (0.00/0/0)</span><br></pre></td></tr></table></figure>
+<p>步骤 05.访问部署的redisinsight站点 <a href="http://10.20.172.201:8081/" target="_blank" rel="noopener">http://10.20.172.201:8081/</a> 进行下一步配置，继续配置你的 Redis 数据库，此处我已经搭建好了一个redis数据库如需搭建请参考此篇文章【<a href="https://blog.weiyigeek.top/2022/4-24-653.html">https://blog.weiyigeek.top/2022/4-24-653.html</a>】，点击连接到 Redis 数据库进入到下一步。</p>
+<figure class="image-box">
+                <a rel=9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920143243.png" target="_blank" title="WeiyiGeek.redisinsight站点" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920143243.png" alt="WeiyiGeek.redisinsight站点" title="" class=""></a>
+                <p>WeiyiGeek.redisinsight站点</p>
+            </figure>
+<p>步骤 06.进行配置Redis数据库信息，此处我是单节点进行演示，输入主机、端口、名称、以及redis密码。</p>
+<figure class="image-box">
+                <a rel=9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920143416.png" target="_blank" title="WeiyiGeek.配置Redis数据库信息" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920143416.png" alt="WeiyiGeek.配置Redis数据库信息" title="" class=""></a>
+                <p>WeiyiGeek.配置Redis数据库信息</p>
+            </figure>
+<p>至此安装配置完成，使用将在后续实践！</p>
+<p><br/></p>
+<h3 id="容器化方式"><a href="#容器化方式" class="headerlink" title="容器化方式"></a>容器化方式</h3><p>描述：当下大多数企业的应用都是在容器环境中运行，所以redis官方也提供了相应容器镜像以及在kubernetes中部署的资源清单，下述将演示在 Kubernetes 上安装 RedisInsight，安装高可用的K8S可以参照此篇文章 【 <a href="https://blog.weiyigeek.top/2022/6-7-664.html">https://blog.weiyigeek.top/2022/6-7-664.html</a> 】</p>
+<p>镜像主页：<a href="https://hub.docker.com/r/redislabs/redisinsight/tags" target="_blank" rel="noopener">https://hub.docker.com/r/redislabs/redisinsight/tags</a><br>镜像名称：<code>docker pull redislabs/redisinsight:1.13.0</code></p>
+<p><strong>部署方式</strong></p>
+<p>步骤 01.在 k8s 集群中创建一个 RedisInsight 部署和服务 YAML 文件资源清单，注意此处我使用了动态存储卷，如果有需要的部署nfs动态存储卷可参考此篇文章（ <a href="https://blog.weiyigeek.top/2022/6-7-664.html">https://blog.weiyigeek.top/2022/6-7-664.html</a> ）</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">tee</span> <span class="string">redisinsight-1.13.0.yaml</span> <span class="string">&lt;&lt;'EOF'</span></span><br><span class="line"><span class="comment"># RedisInsight service with name 'redisinsight-service'</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redisinsight-service</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">dev</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  type:</span> <span class="string">LoadBalancer</span></span><br><span class="line"><span class="attr">  ports:</span></span><br><span class="line"><span class="attr">    - port:</span> <span class="number">8001</span></span><br><span class="line"><span class="attr">      targetPort:</span> <span class="number">8001</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">redisinsight</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># RedisInsight persistant storage </span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">PersistentVolumeClaim</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redisinsight-pv-claim</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">dev</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">redisinsight</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  accessModes:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">ReadWriteOnce</span></span><br><span class="line"><span class="attr">  resources:</span></span><br><span class="line"><span class="attr">    requests:</span></span><br><span class="line"><span class="attr">      storage:</span> <span class="number">2</span><span class="string">Gi</span></span><br><span class="line"><span class="attr">  storageClassName:</span> <span class="string">managed-nfs-storage</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="comment"># RedisInsight deployment with name 'redisinsight'</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">redisinsight</span>   <span class="comment"># deployment name</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">dev</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    app:</span> <span class="string">redisinsight</span>  <span class="comment"># deployment label</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  replicas:</span> <span class="number">1</span>          <span class="comment"># a single replica pod</span></span><br><span class="line"><span class="attr">  strategy:</span></span><br><span class="line"><span class="attr">    type:</span> <span class="string">Recreate</span></span><br><span class="line"><span class="attr">  selector:</span></span><br><span class="line"><span class="attr">    matchLabels:</span></span><br><span class="line"><span class="attr">      app:</span> <span class="string">redisinsight</span> <span class="comment"># which pods is the deployment managing, as defined by the pod template</span></span><br><span class="line"><span class="attr">  template:</span>             <span class="comment"># pod template</span></span><br><span class="line"><span class="attr">    metadata:</span></span><br><span class="line"><span class="attr">      labels:</span></span><br><span class="line"><span class="attr">        app:</span> <span class="string">redisinsight</span> <span class="comment"># label for pod/s</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      volumes:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">db</span></span><br><span class="line"><span class="attr">          persistentVolumeClaim:</span></span><br><span class="line"><span class="attr">            claimName:</span> <span class="string">redisinsight-pv-claim</span></span><br><span class="line"><span class="attr">      initContainers:</span></span><br><span class="line"><span class="attr">        - name:</span> <span class="string">init</span></span><br><span class="line"><span class="attr">          image:</span> <span class="string">busybox</span></span><br><span class="line"><span class="attr">          command:</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">/bin/sh</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">'-c'</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">|</span></span><br><span class="line"><span class="string">                            chown -R 1001 /db</span></span><br><span class="line"><span class="string"></span><span class="attr">          resources:</span> <span class="string">&#123;&#125;</span></span><br><span class="line"><span class="attr">          volumeMounts:</span></span><br><span class="line"><span class="attr">            - name:</span> <span class="string">db</span></span><br><span class="line"><span class="attr">              mountPath:</span> <span class="string">/db</span></span><br><span class="line"><span class="attr">          terminationMessagePath:</span> <span class="string">/dev/termination-log</span></span><br><span class="line"><span class="attr">          terminationMessagePolicy:</span> <span class="string">File</span></span><br><span class="line"><span class="attr">      containers:</span></span><br><span class="line"><span class="attr">        - name:</span>  <span class="string">redisinsight</span>                  <span class="comment"># Container name (DNS_LABEL, unique)</span></span><br><span class="line"><span class="attr">          image:</span> <span class="string">redislabs/redisinsight:1.13.0</span> <span class="comment"># Hub Image</span></span><br><span class="line"><span class="attr">          imagePullPolicy:</span> <span class="string">IfNotPresent</span>        <span class="comment"># Pull Policy</span></span><br><span class="line"><span class="attr">          env:</span> </span><br><span class="line"><span class="attr">          - name:</span> <span class="string">RIHOST</span></span><br><span class="line"><span class="attr">            value:</span> <span class="string">"0.0.0.0"</span></span><br><span class="line"><span class="attr">          - name:</span> <span class="string">RIPORT</span></span><br><span class="line"><span class="attr">            value:</span> <span class="string">"8001"</span></span><br><span class="line"><span class="attr">          volumeMounts:</span></span><br><span class="line"><span class="attr">          - name:</span> <span class="string">db</span> </span><br><span class="line"><span class="attr">            mountPath:</span> <span class="string">/db</span></span><br><span class="line"><span class="attr">          ports:</span></span><br><span class="line"><span class="attr">          - containerPort:</span> <span class="number">8001</span>        <span class="comment"># exposed container port and protocol</span></span><br><span class="line"><span class="attr">            protocol:</span> <span class="string">TCP</span></span><br><span class="line"><span class="attr">          livenessProbe:</span></span><br><span class="line"><span class="attr">            httpGet:</span></span><br><span class="line">              <span class="string">path</span> <span class="string">:</span> <span class="string">/healthcheck/</span>     <span class="comment"># exposed RI endpoint for healthcheck</span></span><br><span class="line"><span class="attr">              port:</span> <span class="number">8001</span>               <span class="comment"># exposed container port</span></span><br><span class="line"><span class="attr">            initialDelaySeconds:</span> <span class="number">5</span>      <span class="comment"># number of seconds to wait after the container starts to perform liveness probe</span></span><br><span class="line"><span class="attr">            periodSeconds:</span> <span class="number">5</span>            <span class="comment"># period in seconds after which liveness probe is performed</span></span><br><span class="line"><span class="attr">            failureThreshold:</span> <span class="number">1</span>         <span class="comment"># number of liveness probe failures after which container restarts</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
+<p>步骤02.在k8s集群中部署 redisinsight v1.13.0 应用、服务以及持久化卷，查看其部署状态。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl create namespace dev</span><br><span class="line">namespace/dev created</span><br><span class="line"></span><br><span class="line">$ kubectl apply -f redisinsight-1.13.0.yaml</span><br><span class="line">service/redisinsight-service created</span><br><span class="line">persistentvolumeclaim/redisinsight-pv-claim created</span><br><span class="line">deployment.apps/redisinsight created</span><br><span class="line"></span><br><span class="line">$ kubectl get pod,svc -n dev -o wide</span><br><span class="line">NAME                               READY   STATUS    RESTARTS   AGE     IP              NODE       NOMINATED NODE   READINESS GATES</span><br><span class="line">pod/redisinsight-55d44b5bb-xzggg   1/1     Running   0          3m22s   10.66.182.217   weiyigeek-226   &lt;none&gt;           &lt;none&gt;</span><br><span class="line"></span><br><span class="line">NAME                           TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE     SELECTOR</span><br><span class="line">service/redisinsight-service   LoadBalancer   10.108.198.8   &lt;pending&gt;     80:31793/TCP   3m22s   app=redisinsight</span><br><span class="line"></span><br><span class="line">$ curl -I 10.66.182.217:8001</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Cache-Control: max-age=0, no-cache, no-store, must-revalidate, private</span><br><span class="line"></span><br><span class="line"><span class="comment"># 端口转发</span></span><br><span class="line">$ kubectl -n dev port-forward deployment/redisinsight --address 0.0.0.0 30081:8001</span><br><span class="line">Forwarding from 0.0.0.0:30081 -&gt; 8001</span><br><span class="line">Handling connection <span class="keyword">for</span> 30081</span><br><span class="line">Handling connection <span class="keyword">for</span> 30081</span><br></pre></td></tr></table></figure>
+<p>步骤 03.成功应用并完成部署和服务，我们可通过浏览器访问 192.168.1.107:31793 便可看到如下图所示界面。<br><figure class="image-box">
+                <a rel=9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920143243.png" target="_blank" title="WeiyiGeek.redisinsight站点" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920143243.png" alt="WeiyiGeek.redisinsight站点" title="" class=""></a>
+                <p>WeiyiGeek.redisinsight站点</p>
+            </figure></p>
+<p>至此，在k8s集群中部署完毕</p>
+<hr>
+<h2 id="0x02-实践应用"><a href="#0x02-实践应用" class="headerlink" title="0x02 实践应用"></a>0x02 实践应用</h2><h3 id="1-配置连接的Redis数据库"><a href="#1-配置连接的Redis数据库" class="headerlink" title="1.配置连接的Redis数据库"></a>1.配置连接的Redis数据库</h3><p>描述：在使用任何工具处理数据库之前，必须先添加数据库（Add Database），以便 RedisInsight 可以连接到该数据库，添加独立的 Redis 数据库 这是只有一台 Redis 服务器的 Redis 数据库最简单的设置，当然也支持独立 Redis 集群 Redis Sentinel 或者 具有TLS认证的Redis数据库。<br>注意：目前 RedisInsight 支持 Redis 版本 4 及更高版本。</p>
+<figure class="image-box">
+                <a rel=9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920143416.png" target="_blank" title="WeiyiGeek.配置Redis数据库信息" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920143416.png" alt="WeiyiGeek.配置Redis数据库信息" title="" class=""></a>
+                <p>WeiyiGeek.配置Redis数据库信息</p>
+            </figure>
+<h3 id="2-查看Redis数据库实时统计信息"><a href="#2-查看Redis数据库实时统计信息" class="headerlink" title="2.查看Redis数据库实时统计信息"></a>2.查看Redis数据库实时统计信息</h3><p>描述：点击配置好的Redis数据目标，即可看到如下overview页面</p>
+<figure class="image-box">
+                <a rel=9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920173633.png" target="_blank" title="WeiyiGeek.此Redis数据库的实时统计信息" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920173633.png" alt="WeiyiGeek.此Redis数据库的实时统计信息" title="" class=""></a>
+                <p>WeiyiGeek.此Redis数据库的实时统计信息</p>
+            </figure>
+<h3 id="3-操作Redis数据库中的数据"><a href="#3-操作Redis数据库中的数据" class="headerlink" title="3.操作Redis数据库中的数据"></a>3.操作Redis数据库中的数据</h3><p>描述: 可以通过使用 Browser（图形） 或者 cli（命令行）进行Redis数据库的CURD，如下图所示</p>
+<figure class="image-box">
+                <a rel=9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920174712.png" target="_blank" title="WeiyiGeek.Redis数据库的CURD操作" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920174712.png" alt="WeiyiGeek.Redis数据库的CURD操作" title="" class=""></a>
+                <p>WeiyiGeek.Redis数据库的CURD操作</p>
+            </figure>
+<h3 id="4-操作Redis数据库中的流Streams数据"><a href="#4-操作Redis数据库中的流Streams数据" class="headerlink" title="4.操作Redis数据库中的流Streams数据"></a>4.操作Redis数据库中的流Streams数据</h3><p>描述: 可以通过使用 Streams 选项进行 Redis 流操作。</p>
+<figure class="image-box">
+                <a rel=9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920174755.png" target="_blank" title="WeiyiGeek.Redis数据库的流操作" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920174755.png" alt="WeiyiGeek.Redis数据库的流操作" title="" class=""></a>
+                <p>WeiyiGeek.Redis数据库的流操作</p>
+            </figure>
+<h3 id="5-性能内存、慢查询分析"><a href="#5-性能内存、慢查询分析" class="headerlink" title="5.性能内存、慢查询分析"></a>5.性能内存、慢查询分析</h3><p>描述：RedisInsight 提供了强大的分析功能，支持内存使用分析、分析器(<code>在Redis中执行的命令过程摘要分析</code>)以及慢日志查询。</p>
+<figure class="image-box">
+                <a rel=9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920180241.png" target="_blank" title="WeiyiGeek.Redis数据库分析" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920180241.png" alt="WeiyiGeek.Redis数据库分析" title="" class=""></a>
+                <p>WeiyiGeek.Redis数据库分析</p>
+            </figure>
+<h3 id="6-可视化配置redis数据库"><a href="#6-可视化配置redis数据库" class="headerlink" title="6.可视化配置redis数据库"></a>6.可视化配置redis数据库</h3><p>描述：在Database选项卡中我们可以直接配置Redis数据库，包括其网络配置、通用配置以及快照、配置等等。</p>
+<figure class="image-box">
+                <a rel=9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920175742.png" target="_blank" title="WeiyiGeek.在线配置redis数据库" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2022/5/20220920175742.png" alt="WeiyiGeek.在线配置redis数据库" title="" class=""></a>
+                <p>WeiyiGeek.在线配置redis数据库</p>
+            </figure>
+<p>当然对应devops来说使用最多的还是CURD以及性能分析以及优化，此工具还是非常方便的，如需解更多其它功能需的朋友，可参考 redisinsight 用户使用文档：<a href="https://docs.redis.com/latest/ri/using-redisinsight/" target="_blank" rel="noopener">https://docs.redis.com/latest/ri/using-redisinsight/</a></p>
+<hr>
+<h2 id="0x03-入坑出坑"><a href="#0x03-入坑出坑" class="headerlink" title="0x03 入坑出坑"></a>0x03 入坑出坑</h2><h3 id="问题1-运行-RedisInsight-v2-linux-x86-64-时出现不存在libatk-1-0-so-0-libatk-bridge-2-0-so-0-libcups-so-2-libgtk-3-so-0等错误"><a href="#问题1-运行-RedisInsight-v2-linux-x86-64-时出现不存在libatk-1-0-so-0-libatk-bridge-2-0-so-0-libcups-so-2-libgtk-3-so-0等错误" class="headerlink" title="问题1.运行 RedisInsight-v2-linux-x86_64 时出现不存在libatk-1.0.so.0/libatk-bridge-2.0.so.0/libcups.so.2/libgtk-3.so.0等错误"></a>问题1.运行 RedisInsight-v2-linux-x86_64 时出现不存在<code>libatk-1.0.so.0/libatk-bridge-2.0.so.0/libcups.so.2/libgtk-3.so.0</code>等错误</h3><ul>
+<li><p>错误信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@weiyigeek:/usr/<span class="built_in">local</span>/bin<span class="comment"># wget https://download.redisinsight.redis.com/latest/RedisInsight-v2-linux-x86_64.AppImage</span></span><br><span class="line">root@weiyigeek:/usr/<span class="built_in">local</span>/bin<span class="comment"># mv RedisInsight-v2-linux-x86_64.AppImage RedisInsight</span></span><br><span class="line">root@weiyigeek:/usr/<span class="built_in">local</span>/bin<span class="comment"># chmod +x RedisInsight</span></span><br><span class="line">root@weiyigeek:/usr/<span class="built_in">local</span>/bin<span class="comment"># ./RedisInsight</span></span><br><span class="line">/tmp/.mount_RedisIuCY68M/redisinsight: error <span class="keyword">while</span> loading shared libraries: libatk-1.0.so.0: cannot open shared object file: No such file or directory</span><br><span class="line">/tmp/.mount_RedisIbwUuBs/redisinsight: error <span class="keyword">while</span> loading shared libraries: libatk-bridge-2.0.so.0: cannot open shared object file: No such file or directory</span><br><span class="line">/tmp/.mount_RedisIb3qNiD/redisinsight: error <span class="keyword">while</span> loading shared libraries: libcups.so.2: cannot open shared object file: No such file or directory</span><br><span class="line">/tmp/.mount_RedisI9GZsHC/redisinsight: error <span class="keyword">while</span> loading shared libraries: libgtk-3.so.0: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>解决办法：由于我的测试系统是Ubuntu的则使用apt命令安装错误提示中的依赖包。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">apt install libatk1.0-dev</span><br><span class="line">apt install libatk-bridge2.0-dev</span><br><span class="line">apt install libcups2-dev</span><br><span class="line">apt install libgtk-3-dev</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p><br/></p>
+<h3 id="问题2-运行-RedisInsight-v2-linux-x86-64-时出现-root-without-no-sandbox-is-not-supported-错误提示："><a href="#问题2-运行-RedisInsight-v2-linux-x86-64-时出现-root-without-no-sandbox-is-not-supported-错误提示：" class="headerlink" title="问题2.运行 RedisInsight-v2-linux-x86_64 时出现 root without --no-sandbox is not supported 错误提示："></a>问题2.运行 RedisInsight-v2-linux-x86_64 时出现 <code>root without --no-sandbox is not supported</code> 错误提示：</h3><p>错误信息：<code>[0920/133850.852943:FATAL:electron_main_delegate.cc(292)] Running as root without --no-sandbox is not supported. See https://crbug.com/638180.</code><br>解决办法：在低权限用户中执行<code>./RedisInsight</code>启动RedisInsight服务即可。</p>
+<hr>
+<h2 id="0x0n-参考来源"><a href="#0x0n-参考来源" class="headerlink" title="0x0n 参考来源"></a>0x0n 参考来源</h2><p>官网地址：<a href="https://redis.com/redis-enterprise/redis-insight/" target="_blank" rel="noopener">https://redis.com/redis-enterprise/redis-insight/</a><br>项目源码：<a href="https://github.com/RedisInsight/RedisInsight" target="_blank" rel="noopener">https://github.com/RedisInsight/RedisInsight</a><br>项目文档：<a href="https://docs.redis.com/latest/ri" target="_blank" rel="noopener">https://docs.redis.com/latest/ri</a><br>下载地址：<a href="https://redis.com/redis-enterprise/redis-insight/#insight-form" target="_blank" rel="noopener">https://redis.com/redis-enterprise/redis-insight/#insight-form</a></p>
+
+        </div>
+        
+  <hr>
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+
+  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul>
+
+  <div>
+    <img src="https://www.weiyigeek.top/img/wechat-search.png" class="img-responsive" alt="扫描follow(关注)WeiyiGeek公众号"  width="328" height="149">
+  </div>
+
+  <hr>
+  
+
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-09-20T14:13:29.028Z" itemprop="dateUpdated">2022-09-20 22:13:29</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/数据存储/Redis/9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控.md" target="_blank" rel="noopener noreferrer">_posts/数据存储/Redis/9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2022/9-20-686.html" target="_blank" rel="external">https://blog.weiyigeek.top/2022/9-20-686.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/" rel="tag">Redis</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/9-20-686.html&title=《9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/9-20-686.html&title=《9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/9-20-686.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/9-20-686.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/9-20-686.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="next">
+      <a href="/2022/9-1-684.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">使用Kaniko在Kubernetes集群中快速构建推送容器镜像</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-快速介绍"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 快速介绍</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-安装部署"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 安装部署</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#二进制方式"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">二进制方式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#容器化方式"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">容器化方式</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-实践应用"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 实践应用</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-配置连接的Redis数据库"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">1.配置连接的Redis数据库</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-查看Redis数据库实时统计信息"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">2.查看Redis数据库实时统计信息</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-操作Redis数据库中的数据"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">3.操作Redis数据库中的数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-操作Redis数据库中的流Streams数据"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">4.操作Redis数据库中的流Streams数据</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#5-性能内存、慢查询分析"><span class="post-toc-number">3.5.</span> <span class="post-toc-text">5.性能内存、慢查询分析</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#6-可视化配置redis数据库"><span class="post-toc-number">3.6.</span> <span class="post-toc-text">6.可视化配置redis数据库</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x03-入坑出坑"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x03 入坑出坑</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题1-运行-RedisInsight-v2-linux-x86-64-时出现不存在libatk-1-0-so-0-libatk-bridge-2-0-so-0-libcups-so-2-libgtk-3-so-0等错误"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">问题1.运行 RedisInsight-v2-linux-x86_64 时出现不存在libatk-1.0.so.0&#x2F;libatk-bridge-2.0.so.0&#x2F;libcups.so.2&#x2F;libgtk-3.so.0等错误</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#问题2-运行-RedisInsight-v2-linux-x86-64-时出现-root-without-no-sandbox-is-not-supported-错误提示："><span class="post-toc-number">4.2.</span> <span class="post-toc-text">问题2.运行 RedisInsight-v2-linux-x86_64 时出现 root without --no-sandbox is not supported 错误提示：</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x0n-参考来源"><span class="post-toc-number">5.</span> <span class="post-toc-text">0x0n 参考来源</span></a></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+</article>
+
+  <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        人间自有五大情【点赞、投币(赞赏)、收藏、关注，转发】, 谢谢看友支持!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="228" height="228" alt="打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="228" height="228" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+  
+ <!-- 微信公众号关注/文章版权复制 -->
+
+  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+
+
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">个人Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">个人Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">个人知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云+云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved. IT唯一极客 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+        </div>
+      </p>
+    </div>
+</footer>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/9-20-686.html&title=《9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/9-20-686.html&title=《9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/9-20-686.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《9.使用RedisInsight工具对Redis集群CURD操作及数据可视化和性能监控》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/9-20-686.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/9-20-686.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACLklEQVR42u3aS3LDIBBFUe9/08o0KZfwfTRyheYyciUy4jDA9Of1wuP6Nch/r7dx9y3+lgVDhgwZ2zKu4UiXdfetu6W//3383ts1yJAh4wDGE1PzZypsGTJkyEgZZFnjhcqQIUPGNw9cEqBu8LshQ4aMf8MgRycJaOvh7uOxuAwZMjZk8Kz79z8/Ut+QIUPGVowrHIRHAtf6Sv7MKUOGjNYMfsDNXeYqrRtx84cMGTKaMtJQk79sVQIO/UWGDBkHMOaKixxD5udpvtsDV4YMGccwxiFlZUEclpZFZciQcQKDJ+jnAtdVabsPUbgMGTKaMtKWLzIp3whevEQFThkyZDRlzCX00yNyVTEguOHKkCGjHWOuzSLlkWLA5GVUhgwZrRlzd0mSxCffSosQ/IdBhgwZnRj1hVYCYB6BBnsvQ4aM1oy00SHdlLliA1qtDBkyWjPmjlGS6E8TeemT6NdDhgwZjRh8Ov6CVS1llTXIkCGjEyM9LtNkfXr5S1s0ZMiQcQ6Dp/jJtZKXAcg2oY2QIUPGAYz61W2utMlTex+uiTJkyDiSwTGV7agnB2XIkNGbcYWDx4xkofVtkiFDxgmMSjVw7nPatLH4yJYhQ8a2jDixhfeGJ+NIIaF0QZQhQ0YLBj/4gvh46po418YhQ4YMGeNn0lT+qiB52YErQ4aMpgx+HeTPp6QFB64MGTK2YqSNFGTqyvH6YLpNhgwZGzIqnRqV4JPPWWk4kyFDxuaMH6aP0T+fie87AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+</body>
+</html>

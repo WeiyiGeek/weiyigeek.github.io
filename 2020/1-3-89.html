@@ -21,12 +21,13 @@
     <!--  -->
      <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
     <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9134434519967436" crossorigin="anonymous"></script>    
     <script type="text/javascript">
         // Data Center
         var DC = {
-            reward:	true,
-            lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
-            v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+          reward:	true,
+          lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+          v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
         };
     </script>
     <script type="text/javascript">window.lazyScripts=[];</script>
@@ -245,7 +246,7 @@
 
 
 <div class="container body-wrap">
-    <article id="post-数据存储/Database-运维/MySQL/运维实战/MySQL运维常用Shell脚本汇集"
+  <article id="post-数据存储/Database-运维/MySQL/运维实战/MySQL运维常用Shell脚本汇集"
   class="post-article article-type-post" itemprop="blogPost">
     <div class="post-card">
         <h1 class="post-card-title">MySQL运维常用Shell脚本汇集</h1>
@@ -281,6 +282,11 @@
 <h4 id="0x02-主从相关"><a href="#0x02-主从相关" class="headerlink" title="0x02 主从相关"></a>0x02 主从相关</h4><p><strong>1.主从库一键自动化主从复制脚本</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#（1）模式主从同步的步骤，获取到全备及全备过程的binlog位置信息或者直接使用--master-data参数解决；</span></span><br><span class="line"><span class="comment">#---- master 主库 ----#</span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">MYUSER=<span class="string">"root"</span></span><br><span class="line">MYPASS=<span class="string">"123456"</span></span><br><span class="line">MYSOCK=/data/3306/mysql.sock</span><br><span class="line">MAIN_PATH=/server/backup</span><br><span class="line">LOG_FILE=<span class="variable">$&#123;MAIN_PATH&#125;</span>/logs_`date +%F`.<span class="built_in">log</span></span><br><span class="line">DATA_FILE=<span class="variable">$&#123;MAIN_PATH&#125;</span>/backup_`date +%F`.sql.gz</span><br><span class="line">MYSQL_PATH=/usr/<span class="built_in">local</span>/mysql/bin</span><br><span class="line">MYSQL_CMD=<span class="string">"<span class="variable">$&#123;MYSQL_PATH&#125;</span>/mysql -u<span class="variable">$MYUSER</span> -p<span class="variable">$MYPASS</span> -S <span class="variable">$MYSOCK</span>"</span></span><br><span class="line">MYSQL_DUMP=<span class="string">"<span class="variable">$&#123;MYSQL_PATH&#125;</span>/mysqldump -u<span class="variable">$MYUSER</span> -p<span class="variable">$MYPASS</span> -S <span class="variable">$MYSOCK</span> -A -B --master-data=1 --single-transaction -e"</span>  <span class="comment">#single-transaction 针对于Innodb备份 （全备）</span></span><br><span class="line"><span class="comment">#值得学习的地方 (注意采用EOF可以输入多行命令)</span></span><br><span class="line">cat | <span class="variable">$MYSQL_CMD</span>&lt;&lt; EOF</span><br><span class="line">flush tables with <span class="built_in">read</span> lock;</span><br><span class="line">system <span class="built_in">echo</span> <span class="string">"--show master status --"</span> &gt;&gt;<span class="variable">$LOG_FILE</span>;</span><br><span class="line">system MYSQL_CMD -e <span class="string">"show master status;"</span>|tail -l &gt;&gt;<span class="variable">$LOG_FILE</span>;</span><br><span class="line">system <span class="variable">$&#123;MYSQL_DUMP&#125;</span> | gzip &gt;<span class="variable">$DATA_FILE</span>;</span><br><span class="line">EOF</span><br><span class="line"><span class="variable">$MYSQL_CMD</span> -e <span class="string">"unlock tables;"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#---- slave 从库 ----#</span></span><br><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">MYUSER=<span class="string">"root"</span></span><br><span class="line">MYPASS=<span class="string">"123456"</span></span><br><span class="line">MYSOCK=/data/3306/mysql.sock</span><br><span class="line">MAIN_PATH=/server/backup</span><br><span class="line">LOG_FILE=<span class="variable">$&#123;MAIN_PATH&#125;</span>/logs_`date +%F`.<span class="built_in">log</span></span><br><span class="line">DATA_FILE=<span class="variable">$&#123;MAIN_PATH&#125;</span>/backup_`date +%F`.sql.gz</span><br><span class="line">MYSQL_PATH=/usr/<span class="built_in">local</span>/mysql/bin</span><br><span class="line">MYSQL_CMD=<span class="string">"<span class="variable">$&#123;MYSQL_PATH&#125;</span>/mysql -u<span class="variable">$MYUSER</span> -p<span class="variable">$MYPASS</span> -S <span class="variable">$MYSOCK</span>"</span></span><br><span class="line"><span class="comment">#recover</span></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$&#123;MAIN_PATH&#125;</span></span><br><span class="line">gzip -d backup_`date +%F`.sql.gz</span><br><span class="line"><span class="variable">$MYSQL_CMD</span>&lt;backup_`date +%F`.sql</span><br><span class="line"><span class="comment">#config slave (由于是全备所以不需要加pos位置)</span></span><br><span class="line">cat |<span class="variable">$MYSQL_CMD</span>&lt;&lt; EOF</span><br><span class="line">CHANGE MASTER TO</span><br><span class="line">MASTER_HOST=<span class="string">'10.0.0.1'</span>,</span><br><span class="line">MASTER_PORT=<span class="string">"3306"</span>,</span><br><span class="line">MASTER_USER=<span class="string">'rep'</span>,</span><br><span class="line">MASTER_PASSWORD=<span class="string">'oldboy123'</span>,</span><br><span class="line">EOF</span><br><span class="line"><span class="variable">$MYSQL_CMD</span> -e <span class="string">"start slave;"</span></span><br><span class="line"><span class="variable">$MYSQL_CMD</span> -e <span class="string">"show slave status\G"</span> |egrep <span class="string">"IO_Runing|SQL_Runing"</span> &gt;<span class="variable">$LOG_FILE</span></span><br><span class="line">mail -s <span class="string">"mysql slave result"</span> xxx@test.com &lt;<span class="variable">$LOG_FILE</span></span><br></pre></td></tr></table></figure></p>
 
         </div>
+
+         
+          <ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-9134434519967436" data-ad-slot="7905848205"></ins>
+        
+  
         
   <hr>
   <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
@@ -443,9 +449,11 @@
             <div class="toc-bar"><div>
         </aside>
     
-</article>
 
-  <div id="reward" class="page-modal reward-lay">
+
+    <!-- 支付宝微信文章赞赏 -->
+    
+      <div id="reward" class="page-modal reward-lay">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <h3 class="reward-title">
         <i class="icon icon-quote-left"></i>
@@ -470,10 +478,11 @@
     </div>
 </div>
 
-  
- <!-- 微信公众号关注/文章版权复制 -->
+      
 
-  <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+    <!-- 微信公众号关注/文章版权复制 -->
+    
+      <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
 <div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
 <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
 <p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
@@ -492,11 +501,12 @@
     交</button> </div>
 <p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
 </div>
-
-
+        
+</article>
 </div>
 
     </main>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9134434519967436" data-ad-slot="3629930963" data-ad-format="auto" data-full-width-responsive="true"></ins>
     <footer class="footer ">
     
     <div class="top">
@@ -693,8 +703,10 @@
 	searchFunc(path, "local-search-input", "local-search-result");
 </script> 
 
-<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+<script> (adsbygoogle = window.adsbygoogle || []).push({});</script>    
 
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
 
 
   
@@ -752,6 +764,7 @@
     })();
 </script>
  
+
      <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
 </body>
 </html>

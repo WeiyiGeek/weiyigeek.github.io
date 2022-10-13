@@ -146,7 +146,7 @@
             </li>
         
             <li class="">
-              <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank" >
+              <a href="/img/share-wechat.jpg" target="_blank" >
                 <i class="icon icon-lg icon-wechat"></i>
                 公众账号
               </a>
@@ -461,22 +461,17 @@
 <p>client 端:<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">"context"</span></span><br><span class="line">  <span class="string">"fmt"</span></span><br><span class="line">  <span class="string">"io/ioutil"</span></span><br><span class="line">  <span class="string">"net/http"</span></span><br><span class="line">  <span class="string">"sync"</span></span><br><span class="line">  <span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 客户端</span></span><br><span class="line"><span class="keyword">type</span> respData <span class="keyword">struct</span> &#123;</span><br><span class="line">  resp *http.Response</span><br><span class="line">  err  error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">doCall</span><span class="params">(ctx context.Context)</span></span> &#123;</span><br><span class="line">  <span class="comment">// 请求频繁可定义全局的client对象并启用长链接，否则请使用短链接。</span></span><br><span class="line">  transport := http.Transport&#123;</span><br><span class="line">    DisableKeepAlives: <span class="literal">true</span>, </span><br><span class="line">  &#125;</span><br><span class="line">  client := http.Client&#123;</span><br><span class="line">    Transport: &amp;transport,</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 针对指针结构体类型的通道进行内存申请</span></span><br><span class="line">  respChan := <span class="built_in">make</span>(<span class="keyword">chan</span> *respData, <span class="number">1</span>)</span><br><span class="line">  req, err := http.NewRequest(<span class="string">"GET"</span>, <span class="string">"http://127.0.0.1:8000/"</span>, <span class="literal">nil</span>)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Printf(<span class="string">"new requestg failed, err:%v\n"</span>, err)</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 使用带超时的ctx创建一个新的 client request。</span></span><br><span class="line">  req = req.WithContext(ctx) </span><br><span class="line">  <span class="keyword">var</span> wg sync.WaitGroup</span><br><span class="line">  wg.Add(<span class="number">1</span>)</span><br><span class="line">  <span class="keyword">defer</span> wg.Wait()</span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    resp, err := client.Do(req)</span><br><span class="line">    fmt.Printf(<span class="string">"client.do resp:%v, err:%v\n"</span>, resp, err)</span><br><span class="line">    rd := &amp;respData&#123;</span><br><span class="line">      resp: resp,</span><br><span class="line">      err:  err,</span><br><span class="line">    &#125;</span><br><span class="line">    respChan &lt;- rd</span><br><span class="line">    wg.Done()</span><br><span class="line">  &#125;()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">select</span> &#123;</span><br><span class="line">  <span class="keyword">case</span> &lt;-ctx.Done():  <span class="comment">// 当请求超过时间超过WithTimeout设定的时间时将会支持cancel()发送关闭上下文信号给通道。</span></span><br><span class="line">    <span class="comment">//transport.CancelRequest(req)</span></span><br><span class="line">    fmt.Println(<span class="string">"call api timeout"</span>)</span><br><span class="line">  <span class="keyword">case</span> result := &lt;-respChan:</span><br><span class="line">    fmt.Println(<span class="string">"call server api success"</span>)</span><br><span class="line">    <span class="keyword">if</span> result.err != <span class="literal">nil</span> &#123;</span><br><span class="line">      fmt.Printf(<span class="string">"call server api failed, err:%v\n"</span>, result.err)</span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> result.resp.Body.Close()</span><br><span class="line">    data, _ := ioutil.ReadAll(result.resp.Body)</span><br><span class="line">    fmt.Printf(<span class="string">"resp:%v\n"</span>, <span class="keyword">string</span>(data))</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="comment">// 定义一个100毫秒的超时</span></span><br><span class="line">  ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*<span class="number">100</span>)</span><br><span class="line">  <span class="comment">// 调用cancel释放子goroutine资源</span></span><br><span class="line">  <span class="keyword">defer</span> cancel() </span><br><span class="line">  doCall(ctx)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// # 执行结果 #</span></span><br><span class="line">client.do resp:*, err:*</span><br><span class="line">call server api success</span><br></pre></td></tr></table></figure></p>
 
         </div>
-
-         
-          <ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-9134434519967436" data-ad-slot="7905848205"></ins>
+        <!-- Google 广告 -->
         
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-9134434519967436" data-ad-slot="7905848205"></ins>
   
+
         
-  <hr>
+<hr/>
+<div style="text-align: center;font-weight: bold;">
   <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
-
   <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
-
-  <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注，转个发】(人间五大情)</b>，这将对我的肯定，谢谢！。</p>
-
-  <div>
-    <img src="https://www.weiyigeek.top/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
-  </div>
+<!-- 
 
   <ul style="font-weight: bolder;">
     <li>
@@ -494,12 +489,13 @@
     <li>
       <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
     </li>
-  </ul>
-
+  </ul> -->
   <div>
-    <img src="/img/wechat-search.png" class="img-responsive" alt="扫描Follow(关注)WeiyiGeek公众号"  width="380" height="170">
-    <img src="/img/wechat-app.png" class="img-responsive" alt="扫描Visit(浏览)极客全栈修炼小程序"  width="385" height="170">
+    <img src="/img/share-wechat.jpg" class="img-responsive" alt="扫描Follow(关注)WeiyiGeek公众号与Visit(浏览)极客全栈修炼小程序" >
+    <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注、转个发、赞个助】</b>，这将对我的肯定，我将持续整理发布更多优质原创文章！。</p>
+    <img src="/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
   </div>
+</div>
   <hr>
   
 
@@ -526,7 +522,7 @@
 
         
             <div class="page-reward">
-  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">👍 钟意作者</a>
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">☕️ 请作者喝杯咖啡!</a>
 </div>
             
         
@@ -600,18 +596,18 @@
 <nav class="post-nav flex-row flex-justify-between">
   
     <div class="prev">
-      <a href="/2020/4-23-611.html" id="post-prev" class="post-nav-link">
+      <a href="/2020/4-23-604.html" id="post-prev" class="post-nav-link">
         <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">n1.Go语言之三方扩展学习记录</h4>
+        <h4 class="title">2.Go语言之文件操作学习记录.md</h4>
       </a>
     </div>
   
 
   
     <div class="next">
-      <a href="/2020/4-23-476.html" id="post-next" class="post-nav-link">
+      <a href="/2020/4-23-611.html" id="post-next" class="post-nav-link">
         <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">Etcd基础学习之架构及工作原理</h4>
+        <h4 class="title">n1.Go语言之三方扩展学习记录</h4>
       </a>
     </div>
   
@@ -636,7 +632,7 @@
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <h3 class="reward-title">
         <i class="icon icon-quote-left"></i>
-        如果此篇文章对您有帮助，还请支持一下博主哟, 谢谢各位看友♥!
+        如果此篇文章对您有帮助，就请作者喝杯 Coffee ☕️☕️!
         <i class="icon icon-quote-right"></i>
     </h3>
     <div class="reward-content">
@@ -685,7 +681,6 @@
 </div>
 
     </main>
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9134434519967436" data-ad-slot="3629930963" data-ad-format="auto" data-full-width-responsive="true"></ins>
     <footer class="footer ">
     
     <div class="top">

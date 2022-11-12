@@ -21,7 +21,7 @@
     <!--  -->
      <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
     <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9134434519967436" crossorigin="anonymous"></script>    
+        
     <script type="text/javascript">
         // Data Center
         var DC = {
@@ -409,7 +409,7 @@
 <h3 id="6-CronJob"><a href="#6-CronJob" class="headerlink" title="6.CronJob"></a>6.CronJob</h3><p>5.CronJob【本质上是在特定的时间循环创建Job去实现的】批处理脚本程序可用<br>CronJob 管理基于时间的Job，即：<br>·在给定时间点只运行一次 <code>分 时 日 月 周</code><br>·周期性地在给定时间点运行<br>　使用前提条件：<strong>当前使用的Kubernetes集群，版本&gt;=1.8（对Cronjob）。对于先前版本的集群，版本&lt;1.8，启动API Server时，通过传递选项–runtime-config=batch/v2alpha1=true 可以开启batch/v2alpha1API</strong><br>　典型的用法如下所示：<br>·在给定的时间点调度Job运行<br>创建周期性运行的Job，例如：数据库备份、发送邮件</p>
 <p>CronJob Spec<br>　　·spec.template格式同Pod<br>　　·RestartPolicy仅支持Never或OnFailure ·单个Pod时，默认Pod成功运行后Job即结束·<br>　　.spec.completions标志Job结束需要成功运行的Pod个数，默认为1·<br>　　.spec.parallelism 标志并行运行的Pod的个数，默认为1<br>　　·spec.activeDeadlineSeconds 标志失败Pod的重试最大时间，超过这个时间不会继续重试</p>
 <p>　　.spec.schedule：调度，必需字段，指定任务运行周期，格式同 Cron·<br>　　.spec.jobTemplate:Job模板，必需字段，指定需要运行的任务，格式同Job<br>　　.spec.startingDeadlineSeconds:启动Job的期限（秒级别），该字段是可选的。如果因为任何原因而错过了被调度的时间，那么错过执行时间的Job将被认为是失败的。如果没有指定，则没有期限.spec.concurrencyPolicy:并发策略，该字段也是可选的。<br>它指定了如何处理被 Cron Job创建的Job的并发执行。只允许指定下面策略中的一种：<br>　　　　Allow（默认）：允许并发运行Job<br>　　　　Forbid：禁止并发运行，如果前一个还没有完成，则直接跳过下一个<br>　　　　Replace：取消当前正在运行的Job，用一个新的来替换<br>　　注意，当前策略只能应用于同一个CronJob创建的Job。如果存在多个Cron Job，它们创建的Job之间总是允许并发运行。<br>　　.spec.suspend：挂起，该字段也是可选的。如果设置为true，后续所有执行都会被挂起。它对已经开始执行的Job不起作用。默认值为false。<br>　　.spec.successfulJobsHistoryLimit和.spec.failed]obsHistoryLimit:历史限制，是可选的字段。它们指定了可以保留多少完成和失败的Job。默认情况下，它们分别设置为3和1。设置限制的值为0，相关类型的Job完成后将不会被保留。</p>
-<p>CronJob资源文件示例<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; cronjob-demo.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">batch/v1beta1</span> </span><br><span class="line"><span class="attr">kind:</span> <span class="string">CronJob</span> </span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">cronjob-demo</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  schedule:</span> <span class="string">"*/1 * * * *"</span>   <span class="comment"># 表示每一分钟运行一次</span></span><br><span class="line"><span class="attr">  jobTemplate:</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      template:</span></span><br><span class="line"><span class="attr">        spec:</span>               <span class="comment"># 模板配置说明书</span></span><br><span class="line"><span class="attr">          containers:</span>    </span><br><span class="line"><span class="attr">          - name:</span> <span class="string">cronjob-demo</span></span><br><span class="line"><span class="attr">            image:</span> <span class="string">busybox</span> </span><br><span class="line"><span class="attr">            args:</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">/bin/sh</span> </span><br><span class="line"><span class="bullet">            -</span> <span class="bullet">-c</span> </span><br><span class="line"><span class="bullet">            -</span> <span class="string">date;echo</span> <span class="string">Hello</span> <span class="string">from</span> <span class="string">the</span> <span class="string">Kubernetes</span> <span class="string">cluster,</span> <span class="string">This</span> <span class="string">is</span> <span class="string">cronjob-demo;</span></span><br><span class="line"><span class="attr">            imagePullPolicy:</span> <span class="string">IfNotPresent</span>   <span class="comment"># 如果本地存在则不拉取</span></span><br><span class="line"><span class="attr">          restartPolicy:</span> <span class="string">OnFailure</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
+<p>CronJob资源文件示例<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&gt; cronjob-demo.yaml &lt;&lt;'EOF'</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">batch/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">CronJob</span> </span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">cronjob-demo</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  schedule:</span> <span class="string">"*/1 * * * *"</span>   <span class="comment"># 表示每一分钟运行一次</span></span><br><span class="line"><span class="attr">  jobTemplate:</span></span><br><span class="line"><span class="attr">    spec:</span></span><br><span class="line"><span class="attr">      template:</span></span><br><span class="line"><span class="attr">        spec:</span>               <span class="comment"># 模板配置说明书</span></span><br><span class="line"><span class="attr">          containers:</span>    </span><br><span class="line"><span class="attr">          - name:</span> <span class="string">cronjob-demo</span></span><br><span class="line"><span class="attr">            image:</span> <span class="string">busybox</span> </span><br><span class="line"><span class="attr">            args:</span></span><br><span class="line"><span class="bullet">            -</span> <span class="string">/bin/sh</span> </span><br><span class="line"><span class="bullet">            -</span> <span class="bullet">-c</span> </span><br><span class="line"><span class="bullet">            -</span> <span class="string">date;echo</span> <span class="string">Hello</span> <span class="string">from</span> <span class="string">the</span> <span class="string">Kubernetes</span> <span class="string">cluster,</span> <span class="string">This</span> <span class="string">is</span> <span class="string">cronjob-demo;</span></span><br><span class="line"><span class="attr">            imagePullPolicy:</span> <span class="string">IfNotPresent</span>   <span class="comment"># 如果本地存在则不拉取</span></span><br><span class="line"><span class="attr">          restartPolicy:</span> <span class="string">OnFailure</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure></p>
 <p>操作流程:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) 忘记如果编写CronJob的资源清单的时候可以按照下面格式查找帮助; </span></span><br><span class="line">~$ kubectl explain CronJob.spec.jobTemplate.spec.template.spec.containers</span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) 创建</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl create -f cronjob-demo.yaml</span><br><span class="line">cronjob.batch/cronjob-demo created</span><br><span class="line"></span><br><span class="line"><span class="comment"># (3) 查看</span></span><br><span class="line">$ kubectl get cj -o wide --show-labels   <span class="comment"># cronjob 控制创建</span></span><br><span class="line">  <span class="comment"># NAME           SCHEDULE      SUSPEND(是否延迟)   ACTIVE   LAST SCHEDULE(下一次执行)   AGE    CONTAINERS     IMAGES    SELECTOR   LABELS</span></span><br><span class="line">  <span class="comment"># cronjob-demo   */1 * * * *   False                 0      41s             3m3s   cronjob-demo   busybox   &lt;none&gt;     &lt;none&gt;</span></span><br><span class="line">$ kubectl get <span class="built_in">jobs</span> -o wide   <span class="comment"># 实际上 cronjob 调用 Job 创建pod,可以看见已经完成有三个job(缺省保留3次成功或者失败的Job)</span></span><br><span class="line">  <span class="comment"># NAME                      COMPLETIONS   DURATION   AGE     CONTAINERS     IMAGES    SELECTOR                                              </span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082620   1/1           2s         2m46s   cronjob-demo   busybox   controller-uid=0e44795c-d799-4a5a-8f83-4025fd966f18</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082680   1/1           2s         106s    cronjob-demo   busybox   controller-uid=e9ccc654-ed2b-4b49-8456-e4dd2fd21950 </span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082740   1/1           2s         46s     cronjob-demo   busybox   controller-uid=7398827f-14f2-4fc9-b410-3089f9982bbe</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl get pod -o wide --show-labels</span><br><span class="line">  <span class="comment"># NAME                            READY(这里由于完成后便立即退出了)   STATUS      RESTARTS   AGE     IP            NODE         LABELS</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082740-pfw87   0/1     Completed   0          2m32s   10.244.1.62   k8s-node-4   controller-uid=7398827f-14f2-4fc9-b410-3089f9982bbe,job-name=cronjob-demo-1605082740</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082800-6jslj   0/1     Completed   0          92s     10.244.1.63   k8s-node-4   controller-uid=42835ca2-c28e-4c3d-b7ea-107a0acf59f3,job-name=cronjob-demo-1605082800</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605082860-2747h   0/1     Completed   0          32s     10.244.1.65   k8s-node-4   controller-uid=d4b1e587-b881-4721-8330-7a3ef78ddc69,job-name=cronjob-demo-1605082860</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (4) 执行反馈结果</span></span><br><span class="line">~$ kubectl get pod | grep <span class="string">"cronjob"</span> | cut -d <span class="string">" "</span> -f1</span><br><span class="line">  <span class="comment"># cronjob-demo-1605083580-twsb8</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605083640-dtscf</span></span><br><span class="line">  <span class="comment"># cronjob-demo-1605083700-64g88</span></span><br><span class="line"></span><br><span class="line">~$ kubectl logs cronjob-demo-1605083580-twsb8</span><br><span class="line">  <span class="comment"># Wed Nov 11 08:33:03 UTC 2020</span></span><br><span class="line">  <span class="comment"># Hello from the Kubernetes cluster, This is cronjob-demo</span></span><br><span class="line">~$ kubectl logs cronjob-demo-1605083640-dtscf</span><br><span class="line">  <span class="comment"># Wed Nov 11 08:34:03 UTC 2020</span></span><br><span class="line">  <span class="comment"># Hello from the Kubernetes cluster, This is cronjob-demo</span></span><br><span class="line">~$ kubectl logs cronjob-demo-1605083700-64g88</span><br><span class="line">  <span class="comment"># Wed Nov 11 08:35:03 UTC 2020</span></span><br><span class="line">  <span class="comment"># Hello from the Kubernetes cluster, This is cronjob-demo</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (5) 两种方式删除CronJob控制器创建的Job以及附属的Pod资源</span></span><br><span class="line">~/K8s/Day5/demo3$ kubectl delete cronjob --all</span><br><span class="line">~/K8s/Day5/demo3$ kubectl delete -f cronjob-demo.yaml</span><br><span class="line">  cronjob.batch <span class="string">"cronjob-demo"</span> deleted</span><br></pre></td></tr></table></figure></p>
 <p>PS : Cronjob 本身的一些限制创建Job操作应该是幂等的, CronJob并不太好去判断任务是否成功，CronJob通过创建Job去完成任务，Job成功与否可以判断，但CronJob无法链接到Job去获取成功与否，Cron只会定期的去创建Job仅此而已。</p>
 <p><br/></p>
@@ -488,9 +488,7 @@
 
         </div>
         <!-- Google 广告 -->
-        
-<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-9134434519967436" data-ad-slot="7905848205"></ins>
-  
+          
 
         
 <hr/>
@@ -530,7 +528,7 @@
       
         
 <span class="post-time">
-    最后更新时间：<time datetime="2022-05-17T07:42:08.580Z" itemprop="dateUpdated">2022-05-17 15:42:08</time>
+    最后更新时间：<time datetime="2022-10-24T07:55:52.301Z" itemprop="dateUpdated">2022-10-24 15:55:52</time>
 </span><br>
 
 
@@ -823,6 +821,7 @@
           Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
         </span>
         
+        <br/><a id="SiteRunTime"></a>
         <br/>访问统计
         <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
         <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
@@ -831,11 +830,16 @@
         <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
         <br/>
         <div id="cc-myssl-id">
-          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener"><img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto"></a>
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener">
+            <img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto">
+          </a>
         </div>
       </p>
     </div>
 </footer>
+
+
+
     <div class="mask" id="mask"></div>
 <a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
 
@@ -911,7 +915,7 @@
 	searchFunc(path, "local-search-input", "local-search-result");
 </script> 
 
-<script> (adsbygoogle = window.adsbygoogle || []).push({});</script>    
+    
 
 
 <!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
@@ -974,5 +978,20 @@
  
 
      <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+<script type="text/javascript">
+// 站点运行时间
+var BootDate = new Date("2018/01/01 00:00:00");
+function ShowRunTime(id) {
+  var NowDate = new Date();
+  var RunDateM = parseInt(NowDate - BootDate);
+  var RunDays = Math.floor(RunDateM/(24*3600*1000));
+  var RunHours = Math.floor(RunDateM%(24*3600*1000)/(3600*1000));
+  var RunMinutes = Math.floor(RunDateM%(24*3600*1000)%(3600*1000)/(60*1000));
+  var RunSeconds = Math.round(RunDateM%(24*3600*1000)%(3600*1000)%(60*1000)/1000);
+  var RunTime = RunDays + "天" + RunHours + "时" + RunMinutes + "分" + RunSeconds + "秒";
+  document.getElementById(id).innerHTML = "网站已在风雨中勉勉强强运行了【" + RunTime + "】";
+}
+setInterval("ShowRunTime('SiteRunTime')", 1000);
+</script>
 </body>
 </html>

@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-language" content="zh-CN"/>
+    <meta name="author" content="WeiyiGeek" />
+    <meta name="msvalidate.01" content="5C552FB1D885E0E11D2957EC958C8018" />
+    <meta name="shenma-site-verification" content="4c655e91c76be0a93c1b6954c666c9d6_1649049085"/>
+    <meta name="bytedance-verification-code" content="lKs4FqwCHSJ3A/c5tT7X" />
+    <meta name="sogou_site_verification" content="OC65iET6Bk" />
+    
+    <title>🌐 22-kubernetes集群中进行etcd数据快照的备份恢复|WeiyiGeek Blog|唯一极客Geek-IT网络安全运维开发技术知识分享-博客站点</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    
+    <meta name="keywords" content="k8s">
+    <meta name="Description" content="WeiyiGeek-唯一极客博客站点,关注于网络安全运维,Web安全开发,IOT物联网安全开发,应用开发,分享技术学习知识与入坑解决,提升网络安全技术与自身技术能力,立志维护大众网络安全为己任,做一个对国家有用的人,为实现中华民族伟大复兴的中国梦不懈奋斗">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/jquery/3.5.2-jquery.fancybox.min.css?v=1.6.6" />
+    <link rel="stylesheet" href="/css/style.css?v=1.6.6">
+    <!--  -->
+     <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
+    <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
+        
+    <script type="text/javascript">
+        // Data Center
+        var DC = {
+          reward:	true,
+          lv: JSON.parse('{"enable":false,"app_id":null,"app_key":null,"icon":true}'),
+          v: JSON.parse('{"enable":false,"appid":null,"appkey":null,"notify":true,"verify":true,"placeholder":"give me some sugers plz...","avatar":"wavatar"}')
+        };
+    </script>
+    <script type="text/javascript">window.lazyScripts=[];</script>
+<meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="WeiyiGeek Blog" type="application/atom+xml">
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap">
+      
+      <img src="/img/brand.jpg" class="brand-bg" alt="WeiyiGeek-backgroud">
+      
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg" alt="WeiyiGeek-头像">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">WeiyiGeek</h5>
+          <a href="mailto:master@weiyigeek.top" title="master@weiyigeek.top" class="mail">
+            <span>m</span><span>a</span><span>s</span><span>t</span><span>e</span><span>r</span><span>@</span><span>w</span><span>e</span><span>i</span><span>y</span><span>i</span><span>g</span><span>e</span><span>e</span><span>k</span><span>.</span><span>t</span><span>o</span><span>p</span>
+          </a>
+        </hgroup>
+        
+        <ul class="menu-link">
+          
+              <li>
+                <a href="https://weiyigeek.top/img/wechat-search.png" target="_blank">
+                  <i class="icon icon-lg icon-wechat"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://github.com/weiyigeek" target="_blank">
+                  <i class="icon icon-lg icon-github"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://t.me/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-telegram"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://twitter.com/WeiyiGeek" target="_blank">
+                  <i class="icon icon-lg icon-twitter"></i>
+                </a>
+              </li>
+            
+              <li>
+                <a href="https://weibo.com/615643678" target="_blank">
+                  <i class="icon icon-lg icon-weibo"></i>
+                </a>
+              </li>
+            
+        </ul>
+        
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                首页
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                文章分类
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                文章标签
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                文章归档
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/books"  >
+                <i class="icon icon-lg icon-book"></i>
+                学习书籍
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-user"></i>
+                关于作者
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                站点导航
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/img/share-wechat.jpg" target="_blank" >
+                <i class="icon icon-lg icon-wechat"></i>
+                公众账号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://space.bilibili.com/385802642" target="_blank" >
+                <i class="icon icon-lg icon-youtube-play"></i>
+                哔哩哔哩
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://github.com/weiyigeek" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
+                <i class="icon icon-lg icon-twitter"></i>
+                Twitter
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="https://weibo.com/615643678" target="_blank" >
+                <i class="icon icon-lg icon-weibo"></i>
+                Weibo
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row clearfix">
+        <a href="javascript:;" class="header-icon pull-left waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">
+            <span>22-kubernetes集群中进行etcd数据快照的备份恢复</span>
+            
+        </div>
+
+        
+        <a href="javascript:;" id="site_search_btn" class="header-icon pull-right waves-effect waves-circle waves-light">
+            <i class="icon icon-lg icon-search"></i>
+        </a>
+        
+
+        
+            <a href="/atom.xml" class="header-icon pull-right waves-effect waves-circle waves-light">
+                <i class="icon icon-lg icon-rss"></i>
+            </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+    <img src="/img/banner.jpg" class="header-bg" alt="文章头部背景">
+    <div class="container fade-scale">
+        <h1 class="title">22-kubernetes集群中进行etcd数据快照的备份恢复</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2022-10-15T06:36:30.000Z" itemprop="datePublished" class="page-time">
+  2022-10-15
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+            
+        </h5>
+        
+    </div>
+    
+
+</header>
+
+<div id="site_search">
+    <div class="search-title clearfix">
+        <span class="pull-left">
+          <i class="icon icon-lg icon-search"></i>
+        </span>
+        <input type="text" id="local-search-input" name="q" results="0" placeholder="search my blog..." class="form-control pull-left"/>
+        <a href="javascript:;" class="close pull-right waves-effect waves-circle waves-light">
+          <i class="icon icon-lg icon-close"></i>
+        </a>
+    </div>
+    <div id="local-search-result"></div>
+</div>
+
+
+<div class="container body-wrap">
+  <article id="post-虚拟云容/云容器/Kubernetes/22-kubernetes集群中进行etcd数据快照的备份恢复"
+  class="post-article article-type-post" itemprop="blogPost">
+    <div class="post-card">
+        <h1 class="post-card-title">22-kubernetes集群中进行etcd数据快照的备份恢复</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2022-10-15 14:36:30" datetime="2022-10-15T06:36:30.000Z"  itemprop="datePublished">2022-10-15</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/">Containers</a><ul class="article-category-list-child"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Containers/OperationTools/">OperationTools</a></li></ul></li></ul>
+
+
+
+            
+
+            
+
+
+            
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-前言简述"><a href="#0x00-前言简述" class="headerlink" title="0x00 前言简述"></a>0x00 前言简述</h2><p>描述：在 Kubernetes 集群中所有操作的资源数据都是存储在 etcd 数据库上, 所以防止集群节点瘫痪未正常工作或在集群迁移时，以及在出现异常的情况下能尽快的恢复集群数据，则我们需要定期针对etcd集群数据进行相应的容灾操作。</p>
+<p>在K8S集群中或者Docker环境中，我们可以非常方便的针对 etcd 数据进行备份，通我们常在一个节点上对 etcd 做快照就能够实现etcd数据的备份，其快照文件包含所有 Kubernetes 状态和关键信息， 有了etcd集群数据备份后，例如在灾难场景(例如丢失所有控制平面节点)下也能快速恢复 Kubernetes 集群，Boss再也不同担心系统起不来呢。</p>
+<p><br/></p>
+<h2 id="0x01-环境准备"><a href="#0x01-环境准备" class="headerlink" title="0x01 环境准备"></a>0x01 环境准备</h2><h3 id="1-安装的二进制-etcdctl"><a href="#1-安装的二进制-etcdctl" class="headerlink" title="1.安装的二进制 etcdctl"></a>1.安装的二进制 etcdctl</h3><p>描述: etcdctl 二进制文件可以在 <code>github.com/coreos/etcd/releases</code> 选择对应的版本下载，例如可以执行以下 <code>install_etcdctl.sh</code> 的脚本，修改其中的版本信息。</p>
+<p>install_etcdctl.sh<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># Author: WeiyiGeek</span></span><br><span class="line"><span class="comment"># Description: etcd 与 etcdctl 下载安装</span></span><br><span class="line">ETCD_VER=v3.5.5</span><br><span class="line">ETCD_DIR=etcd-download</span><br><span class="line">DOWNLOAD_URL=https://github.com/coreos/etcd/releases/download</span><br><span class="line"></span><br><span class="line"><span class="comment"># Download</span></span><br><span class="line">mkdir <span class="variable">$&#123;ETCD_DIR&#125;</span></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$&#123;ETCD_DIR&#125;</span></span><br><span class="line">wget <span class="variable">$&#123;DOWNLOAD_URL&#125;</span>/<span class="variable">$&#123;ETCD_VER&#125;</span>/etcd-<span class="variable">$&#123;ETCD_VER&#125;</span>-linux-amd64.tar.gz </span><br><span class="line">tar -xzvf etcd-<span class="variable">$&#123;ETCD_VER&#125;</span>-linux-amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># Install</span></span><br><span class="line"><span class="built_in">cd</span> etcd-<span class="variable">$&#123;ETCD_VER&#125;</span>-linux-amd64</span><br><span class="line">cp etcdctl /usr/<span class="built_in">local</span>/bin/</span><br></pre></td></tr></table></figure></p>
+<p>验证安装:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ etcdctl version</span><br><span class="line">etcdctl version: 3.5.5</span><br><span class="line">API version: 3.5</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h3 id="2-拉取带有-etcdctl-的-Docker-镜像"><a href="#2-拉取带有-etcdctl-的-Docker-镜像" class="headerlink" title="2.拉取带有 etcdctl 的 Docker 镜像"></a>2.拉取带有 etcdctl 的 Docker 镜像</h3><p>操作流程:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 镜像拉取与容器创建。</span></span><br><span class="line">docker run --rm \</span><br><span class="line">-v /data/backup:/backup      \</span><br><span class="line">-v /etc/kubernetes/pki/etcd:/etc/kubernetes/pki/etcd \</span><br><span class="line">--env ETCDCTL_API=3          \</span><br><span class="line">registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.5.1-0 \</span><br><span class="line">/bin/sh -c <span class="string">"etcdctl version"</span></span><br></pre></td></tr></table></figure></p>
+<p>安装验证:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">3.5.1-0: Pulling from google_containers/etcd</span><br><span class="line">e8614d09b7be: Pull complete</span><br><span class="line">45b6afb4a92f: Pull complete</span><br><span class="line">.......</span><br><span class="line">Digest: sha256:64b9ea357325d5db9f8a723dcf503b5a449177b17ac87d69481e126bb724c263</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.5.1-0</span><br><span class="line">etcdctl version: 3.5.1</span><br><span class="line">API version: 3.5</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h3 id="3-Kubernetes-使用-etcdctl-镜像创建Pod"><a href="#3-Kubernetes-使用-etcdctl-镜像创建Pod" class="headerlink" title="3.Kubernetes 使用 etcdctl 镜像创建Pod"></a>3.Kubernetes 使用 etcdctl 镜像创建Pod</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 镜像拉取</span></span><br><span class="line">crictl pull registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.5.5-0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Pod 创建以及安装验证</span></span><br><span class="line">$ kubectl run etcdctl --image=registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.5.5-0 --<span class="built_in">command</span> -- /usr/<span class="built_in">local</span>/bin/etcdctl version</span><br><span class="line">$ kubectl logs -f etcdctl</span><br><span class="line">etcdctl version: 3.5.5</span><br><span class="line">API version: 3.5</span><br><span class="line">$ kubectl delete pod etcdctl</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<h2 id="0x02-备份实践"><a href="#0x02-备份实践" class="headerlink" title="0x02 备份实践"></a>0x02 备份实践</h2><h3 id="1-使用二进制安装-etcdctl-客户端工具"><a href="#1-使用二进制安装-etcdctl-客户端工具" class="headerlink" title="1.使用二进制安装 etcdctl 客户端工具"></a>1.使用二进制安装 etcdctl 客户端工具</h3><p>温馨提示: 如果是单节点 Kubernetes 我们只需要对其的 etcd 数据库进行快照备份, 如果是多主多从的集群，我们则需依次备份多个 master 节点中 etcd，防止在备份时etc数据被更改！</p>
+<p>此处实践环境为多master高可用集群节点, 即三主节点、四从工作节点，若你对K8s集群不了解或者项搭建高可用集群的朋友，关注 WeiyiGeek 公众号回复【<code>Kubernetes学习之路汇总</code>】即可获得学习资料：<br><a href="https://www.weiyigeek.top/wechat.html?key=Kubernetes学习之路汇总" target="_blank" rel="noopener">https://www.weiyigeek.top/wechat.html?key=Kubernetes学习之路汇总</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get node</span><br><span class="line">NAME       STATUS   ROLES                  AGE    VERSION</span><br><span class="line">cqzk-107   Ready    control-plane,master   279d   v1.23.1</span><br><span class="line">cqzk-108   Ready    control-plane,master   278d   v1.23.1</span><br><span class="line">cqzk-109   Ready    control-plane,master   278d   v1.23.1</span><br><span class="line">cqzk-223   Ready    work                   278d   v1.23.1</span><br><span class="line">cqzk-224   Ready    work                   278d   v1.23.1</span><br><span class="line">cqzk-225   Ready    work                   279d   v1.23.1</span><br><span class="line">cqzk-226   Ready    work                   118d   v1.23.1</span><br></pre></td></tr></table></figure>
+<p><br/></p>
+<p><strong>操作流程：</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.创建etcd快照备份目录</span></span><br><span class="line">$ mkdir -pv /backup</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.查看etcd证书</span></span><br><span class="line">$ ls /etc/kubernetes/pki/etcd/</span><br><span class="line">ca.crt  ca.key  healthcheck-client.crt  healthcheck-client.key  peer.crt  peer.key  server.crt  server.key</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.查看 etcd 地址以及服务</span></span><br><span class="line">$ kubectl get pod -n kube-system  -o wide | grep <span class="string">"etcd"</span></span><br><span class="line">etcd-cqzk-107     1/1     Running   1   279d   192.168.12.107   cqzk-107   &lt;none&gt;&lt;none&gt;</span><br><span class="line">etcd-cqzk-108     1/1     Running   0   278d   192.168.12.108   cqzk-108   &lt;none&gt;&lt;none&gt;</span><br><span class="line">etcd-cqzk-109     1/1     Running   0   278d   192.168.12.109   cqzk-109   &lt;none&gt;&lt;none&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.此时在 107、 108 、109 主节点上查看你监听情况</span></span><br><span class="line">$ netstat -ano | grep <span class="string">"107:2379"</span></span><br><span class="line">tcp        0      0 192.168.12.107:2379     0.0.0.0:*               LISTEN      off (0.00/0/0)</span><br><span class="line">$ netstat -ano | grep <span class="string">"108:2379"</span></span><br><span class="line">tcp        0      0 192.168.12.108:2379     0.0.0.0:*               LISTEN      off (0.00/0/0)</span><br><span class="line">$ netstat -ano | grep <span class="string">"109:2379"</span></span><br><span class="line">tcp        0      0 192.168.12.109:2379     0.0.0.0:*               LISTEN      off (0.00/0/0)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 使用etcdctl客户端工具依次备份节点中的数据</span></span><br><span class="line">$ etcdctl --endpoints=https://10.20.176.212:2379 \</span><br><span class="line">--cacert=/etc/kubernetes/pki/etcd/ca.crt \</span><br><span class="line">--cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt \</span><br><span class="line">--key=/etc/kubernetes/pki/etcd/healthcheck-client.key \</span><br><span class="line">snapshot save /backup/etcd-snapshot.db</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2022-10-23T16:32:26.020+0800"</span>,<span class="string">"caller"</span>:<span class="string">"snapshot/v3_snapshot.go:65"</span>,<span class="string">"msg"</span>:<span class="string">"created temporary db file"</span>,<span class="string">"path"</span>:<span class="string">"/backup/etcd-snapshot.db.part"</span>&#125;</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2022-10-23T16:32:26.034+0800"</span>,<span class="string">"logger"</span>:<span class="string">"client"</span>,<span class="string">"caller"</span>:<span class="string">"v3/maintenance.go:211"</span>,<span class="string">"msg"</span>:<span class="string">"opened snapshot stream; downloading"</span>&#125;</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2022-10-23T16:32:26.034+0800"</span>,<span class="string">"caller"</span>:<span class="string">"snapshot/v3_snapshot.go:73"</span>,<span class="string">"msg"</span>:<span class="string">"fetching snapshot"</span>,<span class="string">"endpoint"</span>:<span class="string">"https://10.20.176.212:2379"</span>&#125;</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2022-10-23T16:32:26.871+0800"</span>,<span class="string">"logger"</span>:<span class="string">"client"</span>,<span class="string">"caller"</span>:<span class="string">"v3/maintenance.go:219"</span>,<span class="string">"msg"</span>:<span class="string">"completed snapshot read; closing"</span>&#125;</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2022-10-23T16:32:26.946+0800"</span>,<span class="string">"caller"</span>:<span class="string">"snapshot/v3_snapshot.go:88"</span>,<span class="string">"msg"</span>:<span class="string">"fetched snapshot"</span>,<span class="string">"endpoint"</span>:<span class="string">"https://10.20.176.212:2379"</span>,<span class="string">"size"</span>:<span class="string">"112 MB"</span>,<span class="string">"took"</span>:<span class="string">"now"</span>&#125;</span><br><span class="line">&#123;<span class="string">"level"</span>:<span class="string">"info"</span>,<span class="string">"ts"</span>:<span class="string">"2022-10-23T16:32:26.946+0800"</span>,<span class="string">"caller"</span>:<span class="string">"snapshot/v3_snapshot.go:97"</span>,<span class="string">"msg"</span>:<span class="string">"saved"</span>,<span class="string">"path"</span>:<span class="string">"/backup/etcd-snapshot.db"</span>&#125;</span><br><span class="line">Snapshot saved at /backup/etcd-snapshot.db</span><br></pre></td></tr></table></figure></p>
+<p>通过etcdctl查询Kubernetes中etcd数据，由于Kubernetes使用etcd v3版本的API，而且etcd 集群中默认使用tls认证，所以先配置几个环境变量。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.环境变量</span></span><br><span class="line"><span class="built_in">export</span> ETCDCTL_API=3</span><br><span class="line"><span class="built_in">export</span> ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt</span><br><span class="line"><span class="built_in">export</span> ETCDCTL_CERT=/etc/kubernetes/pki/etcd/peer.crt</span><br><span class="line"><span class="built_in">export</span> ETCDCTL_KEY=/etc/kubernetes/pki/etcd/peer.key</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.查询集群中所有的key列表</span></span><br><span class="line"><span class="comment"># –-prefix：表示查找所有以/registry为前缀的key</span></span><br><span class="line"><span class="comment"># --keys-only=true：表示只给出key不给出value</span></span><br><span class="line">etcdctl --endpoints=https://10.20.176.212:2379 get /registry --prefix --keys-only=<span class="literal">true</span> | head -n 1</span><br><span class="line">/registry/apiextensions.k8s.io/customresourcedefinitions/bgpconfigurations.crd.projectcalico.org</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.查询某个key的值</span></span><br><span class="line"><span class="comment"># -–keys-only=false : 表示要给出value，该参数默认值即为false，</span></span><br><span class="line"><span class="comment"># -w=json ：表示输出json格式</span></span><br><span class="line">etcdctl --endpoints=https://10.20.176.212:2379 get /registry/namespaces/default --prefix --keys-only=<span class="literal">false</span> -w=json | python3 -m json.tool</span><br><span class="line"></span><br><span class="line">etcdctl --endpoints=https://10.20.176.212:2379 get /registry/namespaces/default --prefix --keys-only=<span class="literal">false</span> -w=json | python3 -m json.tool</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"header"</span>: &#123;</span><br><span class="line">      <span class="string">"cluster_id"</span>: 11404821125176160774,</span><br><span class="line">      <span class="string">"member_id"</span>: 7099450421952911102,</span><br><span class="line">      <span class="string">"revision"</span>: 30240109,</span><br><span class="line">      <span class="string">"raft_term"</span>: 3</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"kvs"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">"key"</span>: <span class="string">"L3JlZ2lzdHJ5L25hbWVzcGFjZXMvZGVmYXVsdA=="</span>,</span><br><span class="line">        <span class="string">"create_revision"</span>: 192,</span><br><span class="line">        <span class="string">"mod_revision"</span>: 192,</span><br><span class="line">        <span class="string">"version"</span>: 1,</span><br><span class="line">        <span class="string">"value"</span>: <span class="string">"azhzAAoPCg.......XNwYWNlEGgAiAA=="</span></span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"count"</span>: 1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.其 Key / Value 都是采用 base64 编码</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"L3JlZ2lzdHJ5L25hbWVzcGFjZXMvZGVmYXVsdA=="</span> | base64 -d</span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">"azhzAAoPCgJ2MRIJTmFtZXNwYWNlEogCCu0BCgdkZWZhdWx0EgAaACIAKiQ5ZDQyYmYxMy03OGM0LTQ4NzQtOThiYy05NjNlMDg1MDYyZjYyADgAQggIo8yllQYQAFomChtrdWJlcm5ldGVzLmlvL21ldGFkYXRhLm5hbWUSB2RlZmF1bHR6AIoBfQoOa3ViZS1hcGlzZXJ2ZXISBlVwZGF0ZRoCdjEiCAijzKWVBhAAMghGaWVsZHNWMTpJCkd7ImY6bWV0YWRhdGEiOnsiZjpsYWJlbHMiOnsiLiI6e30sImY6a3ViZXJuZXRlcy5pby9tZXRhZGF0YS5uYW1lIjp7fX19fUIAEgwKCmt1YmVybmV0ZXMaCAoGQWN0aXZlGgAiAA=="</span> | base64 -d</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.实际上述value编码解码后的的内容如下:</span></span><br><span class="line">$ kubectl get ns default -o yaml</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Namespace</span><br><span class="line">metadata:</span><br><span class="line">  creationTimestamp: <span class="string">"2022-06-15T04:54:59Z"</span></span><br><span class="line">  labels:</span><br><span class="line">    kubernetes.io/metadata.name: default</span><br><span class="line">  name: default</span><br><span class="line">  resourceVersion: <span class="string">"192"</span></span><br><span class="line">  uid: 9d42bf13-78c4-4874-98bc-963e085062f6</span><br><span class="line">spec:</span><br><span class="line">  finalizers:</span><br><span class="line">  - kubernetes</span><br><span class="line">status:</span><br><span class="line">  phase: Active</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5.Pod 资源信息查看 </span></span><br><span class="line">etcdctl --endpoints=https://10.20.176.212:2379 get /registry/pods/default --prefix --keys-only=<span class="literal">true</span></span><br><span class="line"><span class="comment"># /registry/pods/default/nfs-dev-nfs-subdir-external-provisioner-cf7684f8b-fzl9h</span></span><br><span class="line"><span class="comment"># /registry/pods/default/nfs-local-nfs-subdir-external-provisioner-6f97d44bb8-424tk</span></span><br><span class="line"></span><br><span class="line">etcdctl --endpoints=https://10.20.176.212:2379 get /registry/pods/default --prefix --keys-only=<span class="literal">true</span> -w=json | python3 -m json.tool</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"header"</span>: &#123;</span><br><span class="line">      <span class="string">"cluster_id"</span>: 11404821125176160774,</span><br><span class="line">      <span class="string">"member_id"</span>: 7099450421952911102,</span><br><span class="line">      <span class="string">"revision"</span>: 30442415,</span><br><span class="line">      <span class="string">"raft_term"</span>: 3</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"kvs"</span>: [</span><br><span class="line">      &#123;   <span class="comment"># 实际上该编码是 /registry/pods/default/nfs-dev-nfs-subdir-external-provisioner-cf7684f8b-fzl9h</span></span><br><span class="line">          <span class="string">"key"</span>: <span class="string">"L3JlZ2lzdHJ5L3BvZHMvZGVmYXVsdC9uZnMtZGV2LW5mcy1zdWJkaXItZXh0ZXJuYWwtcHJvdmlzaW9uZXItY2Y3Njg0ZjhiLWZ6bDlo"</span>,  </span><br><span class="line">          <span class="string">"create_revision"</span>: 5510865,</span><br><span class="line">          <span class="string">"mod_revision"</span>: 5510883,</span><br><span class="line">          <span class="string">"version"</span>: 5</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">          <span class="string">"key"</span>: <span class="string">"L3JlZ2lzdHJ5L3BvZHMvZGVmYXVsdC9uZnMtbG9jYWwtbmZzLXN1YmRpci1leHRlcm5hbC1wcm92aXNpb25lci02Zjk3ZDQ0YmI4LTQyNHRr"</span>,</span><br><span class="line">          <span class="string">"create_revision"</span>: 5510967,</span><br><span class="line">          <span class="string">"mod_revision"</span>: 5510987,</span><br><span class="line">          <span class="string">"version"</span>: 5</span><br><span class="line">      &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"count"</span>: 2</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<h3 id="2-使用Docker镜像安装-etcdctl-客户端工具"><a href="#2-使用Docker镜像安装-etcdctl-客户端工具" class="headerlink" title="2.使用Docker镜像安装 etcdctl 客户端工具"></a>2.使用Docker镜像安装 etcdctl 客户端工具</h3><p>描述: 在装有Docker环境的机器,我们可以非常方便的备份K8s集群中的etcd数据库，此处我已经安装好了Docker，若有不了解Docker或者需要搭建Docker环境中童鞋。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.Docker 实践环境</span></span><br><span class="line">$ docker version</span><br><span class="line">Client: Docker Engine - Community</span><br><span class="line"> Version           20.10.3</span><br><span class="line">.......</span><br><span class="line">Server: Docker Engine - Community</span><br><span class="line"> Engine:</span><br><span class="line">  Version:          20.10.3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.etcd 备份文件存储的目录</span></span><br><span class="line">$ mkdir -vp /backup</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.执行docker创建容器，在备份数据库后便删除该容器。</span></span><br><span class="line">$ docker run --rm \</span><br><span class="line">-v /backup:/backup  \</span><br><span class="line">-v /etc/kubernetes/pki/etcd:/etc/kubernetes/pki/etcd \</span><br><span class="line">--env ETCDCTL_API=3   \</span><br><span class="line">registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.5.1-0 \</span><br><span class="line">/bin/sh -c <span class="string">"etcdctl --endpoints=https://192.168.12.107:2379 \</span></span><br><span class="line"><span class="string">--cacert=/etc/kubernetes/pki/etcd/ca.crt  \</span></span><br><span class="line"><span class="string">--key=/etc/kubernetes/pki/etcd/healthcheck-client.key \</span></span><br><span class="line"><span class="string">--cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt \</span></span><br><span class="line"><span class="string">snapshot save /backup/etcd-snapshot.db"</span></span><br><span class="line"><span class="comment"># &#123;"level":"info","ts":1666515535.63076,"caller":"snapshot/v3_snapshot.go:68","msg":"created temporary db file","path":"/backup/etcd-snapshot.db.part"&#125;</span></span><br><span class="line"><span class="comment"># &#123;"level":"info","ts":1666515535.6411893,"logger":"client","caller":"v3/maintenance.go:211","msg":"opened snapshot stream; downloading"&#125;</span></span><br><span class="line"><span class="comment"># &#123;"level":"info","ts":1666515535.6419039,"caller":"snapshot/v3_snapshot.go:76","msg":"fetching snapshot","endpoint":"https://192.168.12.107:2379"&#125;</span></span><br><span class="line"><span class="comment"># &#123;"level":"info","ts":1666515535.9170482,"logger":"client","caller":"v3/maintenance.go:219","msg":"completed snapshot read; closing"&#125;</span></span><br><span class="line"><span class="comment"># &#123;"level":"info","ts":1666515535.931862,"caller":"snapshot/v3_snapshot.go:91","msg":"fetched snapshot","endpoint":"https://192.168.12.107:2379","size":"9.0 MB","took":"now"&#125;</span></span><br><span class="line"><span class="comment"># &#123;"level":"info","ts":1666515535.9322069,"caller":"snapshot/v3_snapshot.go:100","msg":"saved","path":"/backup/etcd-snapshot.db"&#125;</span></span><br><span class="line">Snapshot saved at /backup/etcd-snapshot.db</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.查看备份的etcd快照文件</span></span><br><span class="line">ls -alh /backup/etcd-snapshot.db</span><br><span class="line">-rw------- 1 root root 8.6M Oct 23 16:58 /backup/etcd-snapshot.db</span><br></pre></td></tr></table></figure>
+<p>使用 Docker 容器查看 k8s 集群中的etcd数据库中的数据。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ docker run --rm \</span><br><span class="line">-v /backup:/backup  \</span><br><span class="line">-v /etc/kubernetes/pki/etcd:/etc/kubernetes/pki/etcd \</span><br><span class="line">--env ETCDCTL_API=3   \</span><br><span class="line">--env ETCDCTL_CACERT=/etc/kubernetes/pki/etcd/ca.crt \</span><br><span class="line">--env ETCDCTL_CERT=/etc/kubernetes/pki/etcd/peer.crt \</span><br><span class="line">--env ETCDCTL_KEY=/etc/kubernetes/pki/etcd/peer.key \</span><br><span class="line">registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.5.1-0 \</span><br><span class="line">/bin/sh -c <span class="string">"etcdctl --endpoints=https://192.168.12.107:2379 get /registry/namespaces/default -w=json"</span></span><br></pre></td></tr></table></figure></p>
+<p>执行结果: </p>
+<p><a rel=22-kubernetes集群中进行etcd数据快照的备份恢复 href="https://img.weiyigeek.top/2022/10/20221023173507.png" target="_blank" title="WeiyiGeek.Docker容器查询Kubernetes集群中etcd数据库中k/v示例图" data-fancybox="images"><img src="https://img.weiyigeek.top/2022/10/20221023173507.png" alt="WeiyiGeek.Docker容器查询Kubernetes集群中etcd数据库中k/v示例图"></a></p>
+<p><br></p>
+<h3 id="3-在kubernetes集群中快速创建pod进行手动备份"><a href="#3-在kubernetes集群中快速创建pod进行手动备份" class="headerlink" title="3.在kubernetes集群中快速创建pod进行手动备份"></a>3.在kubernetes集群中快速创建pod进行手动备份</h3><p>准备一个Pod资源清单并部署<br><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">cat</span> <span class="string">&lt;&lt;EOF</span> <span class="string">| kubectl apply -f -</span></span><br><span class="line"><span class="string"></span><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">etcd-backup</span></span><br><span class="line"><span class="attr">  labels:</span></span><br><span class="line"><span class="attr">    tool:</span> <span class="string">backup</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">  containers:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">redis</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.5.5-0</span></span><br><span class="line"><span class="attr">    imagePullPolicy:</span> <span class="string">IfNotPresent</span></span><br><span class="line"><span class="attr">    command:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">sh</span></span><br><span class="line"><span class="bullet">    -</span> <span class="bullet">-c</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">"etcd"</span></span><br><span class="line"><span class="attr">    env:</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">ETCDCTL_API</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">"3"</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">ETCDCTL_CACERT</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">"/etc/kubernetes/pki/etcd/ca.crt"</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">ETCDCTL_CERT</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">"/etc/kubernetes/pki/etcd/healthcheck-client.crt"</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">ETCDCTL_KEY</span></span><br><span class="line"><span class="attr">      value:</span> <span class="string">"/etc/kubernetes/pki/etcd/healthcheck-client.key"</span></span><br><span class="line"><span class="attr">    volumeMounts:</span> </span><br><span class="line"><span class="attr">    - name:</span> <span class="string">"pki"</span></span><br><span class="line"><span class="attr">      mountPath:</span> <span class="string">"/etc/kubernetes"</span></span><br><span class="line"><span class="attr">    - name:</span> <span class="string">"backup"</span></span><br><span class="line"><span class="attr">      mountPath:</span> <span class="string">"/backup"</span></span><br><span class="line"><span class="attr">  volumes:</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">pki</span></span><br><span class="line"><span class="attr">    hostPath:</span> </span><br><span class="line"><span class="attr">      path:</span> <span class="string">"/etc/kubernetes"</span>          <span class="comment"># 证书目录</span></span><br><span class="line"><span class="attr">      type:</span> <span class="string">"DirectoryOrCreate"</span></span><br><span class="line"><span class="attr">  - name:</span> <span class="string">"backup"</span></span><br><span class="line"><span class="attr">    hostPath:</span>     </span><br><span class="line"><span class="attr">      path:</span> <span class="string">"/storage/dev/backup"</span>      <span class="comment"># 数据备份目录</span></span><br><span class="line"><span class="attr">      type:</span> <span class="string">"DirectoryOrCreate"</span></span><br><span class="line"><span class="attr">  restartPolicy:</span> <span class="string">Never</span></span><br><span class="line"><span class="attr">  nodeSelector:</span> </span><br><span class="line">    <span class="string">node-role.kubernetes.io/master:</span> <span class="string">""</span> <span class="comment"># 绑定在主节点中</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"><span class="string">pod/etcd-backup</span> <span class="string">created</span></span><br></pre></td></tr></table></figure></p>
+<p><br/></p>
+<p>进入到该Pod终端之中执行相应的备份命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">~$ kubectl <span class="built_in">exec</span> -it etcd-backup sh</span><br><span class="line"><span class="comment"># 快照备份</span></span><br><span class="line">sh-5.1<span class="comment"># export RAND=$RANDOM</span></span><br><span class="line">sh-5.1<span class="comment"># etcdctl --endpoints=https://192.168.12.107:2379 snapshot save /backup/etcd-107-$&#123;RAND&#125;-snapshot.db</span></span><br><span class="line">sh-5.1<span class="comment"># etcdctl --endpoints=https://192.168.12.108:2379 snapshot save /backup/etcd-108-$&#123;RAND&#125;-snapshot.db</span></span><br><span class="line">Snapshot saved at /backup/etcd-108-32616-snapshot.db</span><br><span class="line">sh-5.1<span class="comment"># etcdctl --endpoints=https://192.168.12.109:2379 snapshot save /backup/etcd-109-$&#123;RAND&#125;-snapshot.db</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># etcd 节点成员</span></span><br><span class="line">sh-5.1<span class="comment"># etcdctl member list --endpoints=https://192.168.12.107:2379 --endpoints=https://192.168.12.108:2379 --endpoints=https://192.168.12.109:2379</span></span><br><span class="line"></span><br><span class="line">2db31a5d67ec1034, started, cqzk-108, https://192.168.12.108:2380, https://192.168.12.108:2379, <span class="literal">false</span></span><br><span class="line">42efe7cca897d765, started, cqzk-109, https://192.168.12.109:2380, https://192.168.12.109:2379, <span class="literal">false</span></span><br><span class="line">471323846709334f, started, cqzk-107, https://192.168.12.107:2380, https://192.168.12.107:2379, <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># etcd 节点健康信息</span></span><br><span class="line">sh-5.1<span class="comment"># etcdctl endpoint health --endpoints=https://192.168.12.107:2379 --endpoints=https://192.168.12.108:2379 --endpoints=https://192.168.12.109:2379</span></span><br><span class="line"></span><br><span class="line">https://192.168.12.107:2379 is healthy: successfully committed proposal: took = 11.930331ms</span><br><span class="line">https://192.168.12.109:2379 is healthy: successfully committed proposal: took = 11.930993ms</span><br><span class="line">https://192.168.12.108:2379 is healthy: successfully committed proposal: took = 109.515933ms</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># etcd 节点状态及空间占用信息</span></span><br><span class="line">sh-5.1<span class="comment"># etcdctl endpoint status --endpoints=https://192.168.12.107:2379  --endpoints=https://192.168.12.108:2379  --endpoints=https://192.168.12.109:2379</span></span><br><span class="line"></span><br><span class="line">https://192.168.12.107:2379, 471323846709334f, 3.5.1, 9.2 MB, <span class="literal">false</span>, <span class="literal">false</span>, 4, 71464830, 71464830,</span><br><span class="line">https://192.168.12.108:2379, 2db31a5d67ec1034, 3.5.1, 9.2 MB, <span class="literal">false</span>, <span class="literal">false</span>, 4, 71464830, 71464830,</span><br><span class="line">https://192.168.12.109:2379, 42efe7cca897d765, 3.5.1, 9.2 MB, <span class="literal">true</span>, <span class="literal">false</span>, 4, 71464830, 71464830, <span class="comment"># 此处为主</span></span><br></pre></td></tr></table></figure>
+<p>至此，手动备份etcd集群数据快照完毕!</p>
+<p><br/></p>
+<h3 id="4-在kubernetes集群中使用CronJob资源控制器进行定时备份"><a href="#4-在kubernetes集群中使用CronJob资源控制器进行定时备份" class="headerlink" title="4.在kubernetes集群中使用CronJob资源控制器进行定时备份"></a>4.在kubernetes集群中使用CronJob资源控制器进行定时备份</h3><p>首先准备一个cronJob资源清单：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; etcd-database-backup.yaml &lt;&lt;<span class="string">'EOF'</span></span><br><span class="line">apiVersion: batch/v1</span><br><span class="line">kind: CronJob </span><br><span class="line">metadata:</span><br><span class="line">  name: etcd-database-backup</span><br><span class="line">  annotations:</span><br><span class="line">    descript: <span class="string">"etcd数据库定时备份"</span></span><br><span class="line">spec:</span><br><span class="line">  schedule: <span class="string">"*/5 * * * *"</span>   <span class="comment"># 表示每5分钟运行一次</span></span><br><span class="line">  jobTemplate:</span><br><span class="line">    spec:</span><br><span class="line">      template:</span><br><span class="line">        spec:           </span><br><span class="line">          containers:    </span><br><span class="line">          - name: etcdctl</span><br><span class="line">            image: registry.cn-hangzhou.aliyuncs.com/google_containers/etcd:3.5.5-0</span><br><span class="line">            env:</span><br><span class="line">            - name: ETCDCTL_API</span><br><span class="line">              value: <span class="string">"3"</span></span><br><span class="line">            - name: ETCDCTL_CACERT</span><br><span class="line">              value: <span class="string">"/etc/kubernetes/pki/etcd/ca.crt"</span></span><br><span class="line">            - name: ETCDCTL_CERT</span><br><span class="line">              value: <span class="string">"/etc/kubernetes/pki/etcd/healthcheck-client.crt"</span></span><br><span class="line">            - name: ETCDCTL_KEY</span><br><span class="line">              value: <span class="string">"/etc/kubernetes/pki/etcd/healthcheck-client.key"</span></span><br><span class="line">            <span class="built_in">command</span>:</span><br><span class="line">            - /bin/sh </span><br><span class="line">            - -c</span><br><span class="line">            - |</span><br><span class="line">              <span class="built_in">export</span> RAND=<span class="variable">$RANDOM</span></span><br><span class="line">              etcdctl --endpoints=https://192.168.12.107:2379 snapshot save /backup/etcd-107-<span class="variable">$&#123;RAND&#125;</span>-snapshot.db</span><br><span class="line">              etcdctl --endpoints=https://192.168.12.108:2379 snapshot save /backup/etcd-108-<span class="variable">$&#123;RAND&#125;</span>-snapshot.db</span><br><span class="line">              etcdctl --endpoints=https://192.168.12.109:2379 snapshot save /backup/etcd-109-<span class="variable">$&#123;RAND&#125;</span>-snapshot.db</span><br><span class="line">            volumeMounts: </span><br><span class="line">            - name: <span class="string">"pki"</span></span><br><span class="line">              mountPath: <span class="string">"/etc/kubernetes"</span></span><br><span class="line">            - name: <span class="string">"backup"</span></span><br><span class="line">              mountPath: <span class="string">"/backup"</span></span><br><span class="line">            imagePullPolicy: IfNotPresent</span><br><span class="line">          volumes:</span><br><span class="line">          - name: <span class="string">"pki"</span></span><br><span class="line">            hostPath: </span><br><span class="line">              path: <span class="string">"/etc/kubernetes"</span></span><br><span class="line">              <span class="built_in">type</span>: <span class="string">"DirectoryOrCreate"</span></span><br><span class="line">          - name: <span class="string">"backup"</span></span><br><span class="line">            hostPath: </span><br><span class="line">              path: <span class="string">"/storage/dev/backup"</span>  <span class="comment"># 数据备份目录</span></span><br><span class="line">              <span class="built_in">type</span>: <span class="string">"DirectoryOrCreate"</span></span><br><span class="line">          nodeSelector:  <span class="comment"># 将Pod绑定在主节点之中，否则只能将相关证书放在各个节点能访问的nfs共享存储中</span></span><br><span class="line">            node-role.kubernetes.io/master: <span class="string">""</span></span><br><span class="line">          restartPolicy: Never</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure></p>
+<p>创建cronjob资源清单:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f etcd-database-backup.yaml</span><br><span class="line"><span class="comment"># cronjob.batch/etcd-database-backup created</span></span><br></pre></td></tr></table></figure></p>
+<p>查看创建的cronjob资源及其集群etcd备份:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">NAME                                 SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE</span><br><span class="line">cronjob.batch/etcd-database-backup   */5 * * * *   False     0        21s             14m</span><br><span class="line"></span><br><span class="line">NAME                                      READY   STATUS      RESTARTS   AGE</span><br><span class="line">pod/etcd-database-backup-27776740-rhzkk   0/1     Completed   0          21s</span><br></pre></td></tr></table></figure></p>
+<p>查看定时Pod日志以及备份文件:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">kubectl logs -f pod/etcd-database-backup-27776740-rhzkk</span><br><span class="line">Snapshot saved at /backup/etcd-107-25615-snapshot.db</span><br><span class="line">Snapshot saved at /backup/etcd-108-25615-snapshot.db</span><br><span class="line">Snapshot saved at /backup/etcd-109-25615-snapshot.db</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">$ ls -lt <span class="comment"># 显示最新备份的文件按照时间排序</span></span><br><span class="line">total 25M</span><br><span class="line">-rw------- 1 root root 8.6M Oct 24 21:12 etcd-107-25615-snapshot.db</span><br><span class="line">-rw------- 1 root root 7.1M Oct 24 21:12 etcd-108-25615-snapshot.db</span><br><span class="line">-rw------- 1 root root 8.8M Oct 24 21:12 etcd-109-25615-snapshot.db</span><br></pre></td></tr></table></figure></p>
+<p>至此集群中的etcd快照数据备份完毕!</p>
+<p><br/></p>
+<h2 id="0x02-恢复实践"><a href="#0x02-恢复实践" class="headerlink" title="0x02 恢复实践"></a>0x02 恢复实践</h2><h3 id="1-单master节点恢复"><a href="#1-单master节点恢复" class="headerlink" title="1.单master节点恢复"></a>1.单master节点恢复</h3><p>描述: 当单master集群节点资源清单数据丢失时，我们可采用如下方式进行快速恢复数据。</p>
+<p><strong>操作流程:</strong></p>
+<p>温馨提示: 如果是单节点的k8S集群则使用如下命令恢复</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> mv /etc/kubernetes/manifests/ /etc/kubernetes/manifests-backup/</span><br><span class="line"> mv /var/lib/etcd /var/lib/etcd.bak</span><br><span class="line"></span><br><span class="line">ETCDCTL_API=3 etcdctl snapshot restore /backup/etcd-212-32616-snapshot.db  --data-dir=/var/lib/etcd/ --endpoints=https://10.20.176.212:2379  --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key</span><br></pre></td></tr></table></figure>
+<h3 id="2-多master节点恢复"><a href="#2-多master节点恢复" class="headerlink" title="2.多master节点恢复"></a>2.多master节点恢复</h3><p>1.温馨提示，此处的集群etcd数据库是安装在Kubernetes集群之中的，并非外部独立安装部署的。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get pod -n kube-system  etcd-devtest-master-212 etcd-devtest-master-213 etcd-devtest-master-214</span><br><span class="line">NAME                      READY   STATUS    RESTARTS   AGE</span><br><span class="line">etcd-devtest-master-212   1/1     Running   3          134d</span><br><span class="line">etcd-devtest-master-213   1/1     Running   0          134d</span><br><span class="line">etcd-devtest-master-214   1/1     Running   0          134d</span><br></pre></td></tr></table></figure></p>
+<p>2.前面我们提到过，在进行恢复前需要查看 etcd 集群当前成员以及监控状态。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># etcd 集群成员列表</span></span><br><span class="line">ETCDCTL_API=3 etcdctl member list --endpoints=https://10.20.176.212:2379  --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key</span><br><span class="line">6286508b550016fe, started, devtest-master-212, https://10.20.176.212:2380, https://10.20.176.212:2379, <span class="literal">false</span></span><br><span class="line">9dd15f852caf8e05, started, devtest-master-214, https://10.20.176.214:2380, https://10.20.176.214:2379, <span class="literal">false</span></span><br><span class="line">e0f23bd90b7c7c0d, started, devtest-master-213, https://10.20.176.213:2380, https://10.20.176.213:2379, <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># etcd 集群节点状态查看主从节点</span></span><br><span class="line">ETCDCTL_API=3 etcdctl endpoint status --endpoints=https://10.20.176.212:2379 --endpoints=https://10.20.176.213:2379 --endpoints=https://10.20.176.214:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key   --write-out table</span><br><span class="line"></span><br><span class="line"><span class="comment"># etcd 集群节点健康信息筛选出不健康的节点</span></span><br><span class="line">ETCDCTL_API=3 etcdctl endpoint health --endpoints=https://10.20.176.212:2379   --endpoints=https://10.20.176.213:2379  --endpoints=https://10.20.176.214:2379  --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key</span><br><span class="line">https://10.20.176.212:2379 is healthy: successfully committed proposal: took = 14.686875ms</span><br><span class="line">https://10.20.176.214:2379 is healthy: successfully committed proposal: took = 16.201187ms</span><br><span class="line">https://10.20.176.213:2379 is healthy: successfully committed proposal: took = 18.962462ms</span><br></pre></td></tr></table></figure></p>
+<p>3.停掉所有Master机器的kube-apiserver和etcd ，然后在利用备份进行恢复该节点的etcd数据。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">mv /etc/kubernetes/manifests/ /etc/kubernetes/manifests-backup/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在该节点上删除 /var/lib/etcd</span></span><br><span class="line">mv /var/lib/etcd /var/lib/etcd.bak</span><br><span class="line"></span><br><span class="line"><span class="comment"># 利用快照进行恢复,注意etcd集群中可以用同一份snapshot恢复。</span></span><br><span class="line">ETCDCTL_API=3 etcdctl snapshot restore /backup/etcd-212-32616-snapshot.db --data-dir=/var/lib/etcd --name=devtest-master-212 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/peer.crt --key=/etc/kubernetes/pki/etcd/peer.key  --initial-cluster-token=etcd-cluster-0 --initial-cluster=devtest-master-212=https://10.20.176.212:2380,devtest-master-213=https://10.20.176.213:2380,devtest-master-214=https://10.20.176.214:2380  --initial-advertise-peer-urls=https://10.20.176.212:2380</span><br></pre></td></tr></table></figure>
+<p>温馨提示: 当节点加入控制平面 control-plane 后为 <code>API Server、Controller Manager 和 Scheduler</code> 生成静态Pod配置清单，主机上的kubelet服务会监视 <code>/etc/kubernetes/manifests</code>目录中的配置清单的创建、变动和删除等状态变动，并根据变动完成Pod创建、更新或删除操作。因此，这两个阶段创建生成的各配置清单将会启动Master组件的相关Pod</p>
+<p>4.然后启动 etcd 和 apiserver 并查看 pods是否恢复正常。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 etcd pod</span></span><br><span class="line">$ kubectl get pod -n kube-system -l component=etcd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看组件健康状态</span></span><br><span class="line">$ kubectl get componentstatuses</span><br><span class="line">Warning: v1 ComponentStatus is deprecated <span class="keyword">in</span> v1.19+</span><br><span class="line">NAME                 STATUS    MESSAGE                         ERROR</span><br><span class="line">scheduler            Healthy   ok</span><br><span class="line">controller-manager   Healthy   ok</span><br><span class="line">etcd-0               Healthy   &#123;<span class="string">"health"</span>:<span class="string">"true"</span>,<span class="string">"reason"</span>:<span class="string">""</span>&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-K8S集群中etcd数据库节点数据不一致问题解决实践"><a href="#3-K8S集群中etcd数据库节点数据不一致问题解决实践" class="headerlink" title="3.K8S集群中etcd数据库节点数据不一致问题解决实践"></a>3.K8S集群中etcd数据库节点数据不一致问题解决实践</h3><p>发现etcd数据不一致，执行kubectl get pod -n xxx获取的信息资源不一样， etcdctl 直接查询了 etcd 集群状态和集群数据，返回结果显示 3 个节点状态都正常，且 RaftIndex 一致，观察 etcd 的日志也并未发现报错信息，唯一可疑的地方是 3 个节点的 dbsize 差别较大</p>
+<p>etcd 数据不一致 ？</p>
+<p>由于从 kube-apiserver 的日志中同样无法提取出能够帮助解决问题的有用信息，起初我们只能猜测可能是 kube-apiserver 的缓存更新异常导致的。正当我们要从这个切入点去解决问题时，该同事反馈了一个更诡异的问题——自己新创建的 Pod，通过 kubectl查询 Pod 列表，突然消失了！纳尼？这是什么骚操作？经过我们多次测试查询发现，通过 kubectl 来 list pod 列表，该 pod 有时候能查到，有时候查不到。那么问题来了，K8s api 的 list 操作是没有缓存的，数据是 kube-apiserver 直接从 etcd 拉取返回给客户端的，难道是 etcd 本身出了问题？</p>
+<p>众所周知，etcd 本身是一个强一致性的 KV 存储，在写操作成功的情况下，两次读请求不应该读取到不一样的数据。怀着不信邪的态度，我们通过 etcdctl 直接查询了 etcd 集群状态和集群数据，返回结果显示 3 个节点状态都正常，且 RaftIndex 一致，观察 etcd 的日志也并未发现报错信息，唯一可疑的地方是 3 个节点的 dbsize 差别较大。接着，我们又将 client 访问的 endpoint 指定为不同节点地址来查询每个节点的 key 的数量，结果发现 3 个节点返回的 key 的数量不一致，甚至两个不同节点上 Key 的数量差最大可达到几千！而直接通过 etcdctl 查询刚才创建的 Pod，发现访问某些 endpoint 能够查询到该 pod，而访问其他 endpoint 则查不到。至此，基本可以确定 etcd 集群的节点之间确实存在数据不一致现象。</p>
+<p>ETCDCTL_API=3 etcdctl endpoint status –endpoints=<a href="https://192.168.12.108:2379" target="_blank" rel="noopener">https://192.168.12.108:2379</a> –endpoints=<a href="https://192.168.12.107:2379" target="_blank" rel="noopener">https://192.168.12.107:2379</a> –endpoints=<a href="https://192.168.12.109:2379" target="_blank" rel="noopener">https://192.168.12.109:2379</a> –cacert=/etc/kubernetes/pki/etcd/ca.crt –cert=/etc/kubernetes/pki/etcd/peer.crt –key=/etc/kubernetes/pki/etcd/peer.key </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">https://192.168.12.108:2379, 2db31a5d67ec1034, 3.5.1, 7.4 MB, <span class="literal">false</span>, <span class="literal">false</span>, 4, 72288139, 72288139,</span><br><span class="line">https://192.168.12.107:2379, 471323846709334f, 3.5.1, 9.0 MB, <span class="literal">false</span>, <span class="literal">false</span>, 4, 72288139, 72288139,</span><br><span class="line">https://192.168.12.109:2379, 42efe7cca897d765, 3.5.1, 9.2 MB, <span class="literal">true</span>, <span class="literal">false</span>, 4, 72288139, 72288139,</span><br></pre></td></tr></table></figure>
+<p>root@cqzk-107:~# ETCDCTL_API=3  etcdctl get / –prefix –keys-only –endpoints=<a href="https://192.168.12.107:2379" target="_blank" rel="noopener">https://192.168.12.107:2379</a>  –cacert=/etc/kubernetes/pki/etcd/ca.crt –cert=/etc/kubernetes/pki/etcd/peer.crt –key=/etc/kubernetes/pki/etcd/peer.key  | wc -l<br>1620</p>
+<p>root@cqzk-107:~# ETCDCTL_API=3  etcdctl get / –prefix –keys-only –endpoints=<a href="https://192.168.12.108:2379" target="_blank" rel="noopener">https://192.168.12.108:2379</a>  –cacert=/etc/kubernetes/pki/etcd/ca.crt –cert=/etc/kubernetes/pki/etcd/peer.crt –key=/etc/kubernetes/pki/etcd/peer.key  | wc -l<br>1620</p>
+<p>root@cqzk-107:~# ETCDCTL_API=3  etcdctl get / –prefix –keys-only –endpoints=<a href="https://192.168.12.109:2379" target="_blank" rel="noopener">https://192.168.12.109:2379</a>  –cacert=/etc/kubernetes/pki/etcd/ca.crt –cert=/etc/kubernetes/pki/etcd/peer.crt –key=/etc/kubernetes/pki/etcd/peer.key  | wc -l<br>1620</p>
+<p> l<br>+—————————–+——————+———+———+———–+———–+————+<br>|          ENDPOINT           |        ID        | VERSION | DB SIZE | IS LEADER | RAFT TERM | RAFT INDEX |<br>+—————————–+——————+———+———+———–+———–+————+<br>| <a href="https://192.168.12.108:2379" target="_blank" rel="noopener">https://192.168.12.108:2379</a> | 2db31a5d67ec1034 |   3.5.1 |  7.4 MB |     false |         4 |   72291872 |<br>| <a href="https://192.168.12.107:2379" target="_blank" rel="noopener">https://192.168.12.107:2379</a> | 471323846709334f |   3.5.1 |  9.0 MB |     false |         4 |   72291872 |<br>| <a href="https://192.168.12.109:2379" target="_blank" rel="noopener">https://192.168.12.109:2379</a> | 42efe7cca897d765 |   3.5.1 |  9.2 MB |      true |         4 |   72291872 |<br>+—————————–+——————+———+———+———–+———–+————+</p>
+<p> ETCDCTL_API=3 etcdctl endpoint status –endpoints=<a href="https://192.168.12.107:2379" target="_blank" rel="noopener">https://192.168.12.107:2379</a>    –endpoints=<a href="https://192.168.12.108:2379" target="_blank" rel="noopener">https://192.168.12.108:2379</a> –endpoints=<a href="https://192.168.12.109:2379" target="_blank" rel="noopener">https://192.168.12.109:2379</a>   –write-out table<br>+—————————–+——————+———+———+———–+————+———–+————+——————–+——–+<br>|          ENDPOINT           |        ID        | VERSION | DB SIZE | IS LEADER | IS LEARNER | RAFT TERM | RAFT INDEX | RAFT APPLIED INDEX | ERRORS |<br>+—————————–+——————+———+———+———–+————+———–+————+——————–+——–+<br>| <a href="https://192.168.12.107:2379" target="_blank" rel="noopener">https://192.168.12.107:2379</a> | 471323846709334f |   3.5.1 |  9.0 MB |     false |      false |         4 |   72292452 |           72292452 |        |<br>| <a href="https://192.168.12.108:2379" target="_blank" rel="noopener">https://192.168.12.108:2379</a> | 2db31a5d67ec1034 |   3.5.1 |  7.4 MB |     false |      false |         4 |   72292452 |           72292452 |        |<br>| <a href="https://192.168.12.109:2379" target="_blank" rel="noopener">https://192.168.12.109:2379</a> | 42efe7cca897d765 |   3.5.1 |  9.2 MB |      true |      false |         4 |   72292452 |           72292452 |        |<br>+—————————–+——————+———+———+———–+————+———–+————+——————–+——–+</p>
+
+        </div>
+        <!-- Google 广告 -->
+          
+
+        
+<hr/>
+<div style="text-align: center;font-weight: bold;">
+  <p> 欢迎各位志同道合的朋友一起学习交流，如文章有误请在下方留下您宝贵的经验知识，个人邮箱地址<b style="color:#ff654e"><code>【master#weiyigeek.top】</code></b>或者个人公众号<b style="color:#ff654e"><code>【WeiyiGeek】</code></b>联系我。 </p>
+  <p> 更多文章来源于<b style="color:#03a9f4">【WeiyiGeek Blog - 为了能到远方，脚下的每一步都不能少】</b>, 个人首页地址( <a style="color: #03a9f4;" href="https://weiyigeek.top" target="_blank"> https://weiyigeek.top </a> )</p>
+<!-- 
+
+  <ul style="font-weight: bolder;">
+    <li>
+      <p><span style="color: #03a9f4">echo&nbsp;&nbsp;"【点个赞】，动动你那粗壮的拇指或者芊芊玉手，亲！"</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff9201">printf("%s",&nbsp;"【投个币】，万水千山总是情，投个硬币行不行，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #02a2ff">fmt.Printf("【收个藏】，阅后即焚不吃灰，亲！")&nbsp;&nbsp;</span></p>
+    </li>
+    <li>
+      <p><span style="color:red">console.info("【转个发】，让更多的志同道合的朋友一起学习交流，亲！")</span></p>
+    </li>
+    <li>
+      <p><span style="color: #ff654e">System.out.println("【关个注】，后续浏览查看不迷路哟，亲！")</span></p>
+    </li>
+  </ul> -->
+  <div>
+    <img src="/img/share-wechat.jpg" class="img-responsive" alt="扫描Follow(关注)WeiyiGeek公众号与Visit(浏览)极客全栈修炼小程序" >
+    <p>专栏书写不易，如果您觉得这个专栏还不错的，请给这篇专栏 <b style="color: red;">【点个赞、投个币、收个藏、关个注、转个发、赞个助】</b>，这将对我的肯定，我将持续整理发布更多优质原创文章！。</p>
+    <img src="/img/weiyigeek.jpg" class="img-responsive" alt="WeiyiGeek-banner">
+  </div>
+</div>
+  <hr>
+  
+
+  <blockquote class="post-copyright">
+    <div class="content">
+      
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2022-10-30T06:03:32.645Z" itemprop="dateUpdated">2022-10-30 14:03:32</time>
+</span><br>
+
+
+        <span>文章原始路径：<a href="https://github.com/WeiyiGeek/blog/edit/master/source/_posts/虚拟云容/云容器/Kubernetes/22-kubernetes集群中进行etcd数据快照的备份恢复.md" target="_blank" rel="noopener noreferrer">_posts/虚拟云容/云容器/Kubernetes/22-kubernetes集群中进行etcd数据快照的备份恢复.md</a></span><br>
+         <span class="copy-copyright">转载注明出处，原文地址：<a href="/2022/10-15-690.html" target="_blank" rel="external">https://blog.weiyigeek.top/2022/10-15-690.html</a></span><br>本站文章内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a> 
+    </div>
+    <footer>
+      <a href="https://blog.weiyigeek.top">
+        <img src="/img/avatar.jpg" alt="WeiyiGeek">
+        WeiyiGeek
+      </a>
+    </footer>
+  </blockquote>
+
+
+        
+            <div class="page-reward">
+  <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-rectangle waves-light">☕️ 请作者喝杯咖啡!</a>
+</div>
+            
+        
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/k8s/" rel="tag">k8s</a></li></ul>
+
+            <div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/10-15-690.html&title=《22-kubernetes集群中进行etcd数据快照的备份恢复》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/10-15-690.html&title=《22-kubernetes集群中进行etcd数据快照的备份恢复》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/10-15-690.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《22-kubernetes集群中进行etcd数据快照的备份恢复》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/10-15-690.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/10-15-690.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+        </div>
+        
+          <!-- 评论组件 -->
+
+
+<div id="gitalk-container"></div>
+<script type="text/javascript" src="/js/plugins/gitalk.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/custom/gitalk.init.js?v=1.6.6"></script>
+        
+    </div>
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="next">
+      <a href="/2022/10-10-689.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">资源分享|每天白嫖两小时微软(Microsoft)学习实验虚拟机</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+    
+    
+        <aside class="post-widget">
+            <nav class="post-toc-wrap" id="post-toc">
+                <strong>目录</strong>
+                <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x00-前言简述"><span class="post-toc-number">1.</span> <span class="post-toc-text">0x00 前言简述</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x01-环境准备"><span class="post-toc-number">2.</span> <span class="post-toc-text">0x01 环境准备</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-安装的二进制-etcdctl"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">1.安装的二进制 etcdctl</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-拉取带有-etcdctl-的-Docker-镜像"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">2.拉取带有 etcdctl 的 Docker 镜像</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-Kubernetes-使用-etcdctl-镜像创建Pod"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">3.Kubernetes 使用 etcdctl 镜像创建Pod</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-备份实践"><span class="post-toc-number">3.</span> <span class="post-toc-text">0x02 备份实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-使用二进制安装-etcdctl-客户端工具"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">1.使用二进制安装 etcdctl 客户端工具</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-使用Docker镜像安装-etcdctl-客户端工具"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">2.使用Docker镜像安装 etcdctl 客户端工具</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-在kubernetes集群中快速创建pod进行手动备份"><span class="post-toc-number">3.3.</span> <span class="post-toc-text">3.在kubernetes集群中快速创建pod进行手动备份</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#4-在kubernetes集群中使用CronJob资源控制器进行定时备份"><span class="post-toc-number">3.4.</span> <span class="post-toc-text">4.在kubernetes集群中使用CronJob资源控制器进行定时备份</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#0x02-恢复实践"><span class="post-toc-number">4.</span> <span class="post-toc-text">0x02 恢复实践</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#1-单master节点恢复"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">1.单master节点恢复</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#2-多master节点恢复"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">2.多master节点恢复</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#3-K8S集群中etcd数据库节点数据不一致问题解决实践"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">3.K8S集群中etcd数据库节点数据不一致问题解决实践</span></a></li></ol></li></ol>
+            </nav>
+            <div class="toc-bar"><div>
+        </aside>
+    
+
+
+    <!-- 支付宝微信文章赞赏 -->
+    
+      <div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        如果此篇文章对您有帮助，就请作者喝杯 Coffee ☕️☕️!
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardwechat" src="/img/reward-wechat.jpg" height="250" height="250" alt="微信打赏二维码">
+            <img id="rewardalipay" src="/img/reward-alipay.png" height="250" height="250" alt="支付宝打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <!-- <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/reward-wechat.jpg" data-alipay="/img/reward-alipay.png"> -->
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+      
+
+    <!-- 微信公众号关注/文章版权复制 -->
+    
+      <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+<div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
+<span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
+<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
+<b style="color:#6190e8;">你好朋友,可以关个注吗? ❤ <br> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b> <br> 如不想关注请点击右上角的【X】<br>
+<br>Method 1.Please visit <strong><a href="https://twitter.com/WeiyiGeek" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【My Twitter】</a></strong>. There is an article verification code in the homepage.
+<br>方式2.请访问本博主的B站<strong><a href="https://space.bilibili.com/385802642" target="_blank" rel="noopener" style="color: rgb(240, 65, 52);text-decoration:underline;">【WeiyiGeek】</a></strong>首页关注UP主,<br>将自动随机获取解锁验证码。
+<br>方式3.扫一扫下方二维码，关注本站<strong>官方公众号</strong><br>
+回复：<strong style="color: rgb(240, 65, 52);">验证码</strong>
+将获取<strong style="color: rgb(240, 65, 52);">解锁(有效期7天)</strong>本站所有技术文章哟!</p>
+<img src="/img/wechat-search.png" style="width: 300px; margin-top: 10px;">
+<div id="btw-modal-input-code" style="margin-top: 20px; background: rgb(255, 255, 255);">
+  <input id="btw-modal-input" type="number" minlength="4" maxlength="4" placeholder="请输入验证码|Verification Code"
+    style="width: 165px; height: 32px; line-height: 32px; padding: 0px 10px; margin: 0px 10px; font-size: 13px; text-rendering: auto; text-transform: none; cursor: text; outline: none; box-sizing: border-box; border: 1px solid rgb(221, 221, 221); -webkit-appearance: textfield; background-color: white; -webkit-rtl-ordering: logical;"/>
+  <button id="btw-submit-btn" onclick="yzm_vertify()"
+    style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255); background: rgb(222, 104, 109); cursor: pointer;">提
+    交</button> </div>
+<p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
+</div>
+        
+</article>
+</div>
+
+    </main>
+    <footer class="footer ">
+    
+    <div class="top">
+        
+            <p>
+    <span>Links：</span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top" target="_blank">https://weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.weiyigeek.top" target="_blank">https://blog.weiyigeek.top</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weiyigeek.top/img/search-wechat.jpg" target="_blank">公众账号</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://space.bilibili.com/385802642/article" target="_blank">哔哩哔哩专栏</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://github.com/weiyigeek" target="_blank">博主Github</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://gitee.com/WeiyiGeek" target="_blank">博主Gitee</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.zhihu.com/people/weiyiSec" target="_blank">知乎</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.cnblogs.com/WeiyiGeek" target="_blank">博客园</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://my.oschina.net/weiyigeek" target="_blank">OSCHINA</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.toutiao.com/c/user/token/MS4wLjABAAAAqcPSoMqfctaEqJpGSF775eeCjWkrop4AOyLITdMx-L78F5iXzfQcSRM5sY4dq3wR" target="_blank">今日头条</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.csdn.net/u013072756?type=lately" target="_blank">CSDN</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.jianshu.com/u/5199a1104739" target="_blank">简书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cloud.tencent.com/developer/user/1389665/articles" target="_blank">腾讯云社区</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://cuttlefish.baidu.com/shop/75c5dbd8d15abe23482f4d40" target="_blank">百度文库</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://author.baidu.com/home?from=blog&app_id=1726736601523415" target="_blank">IT极客知识分享</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://blog.51cto.com/weiyigeek" target="_blank">51CTO博客</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://juejin.cn/user/122767337595934" target="_blank">掘金</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://weibo.com/a/hot/7622022703618049_1.html" target="_blank">微博文章</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.xiaohongshu.com/user/profile/627c98bb000000001000e7ba" target="_blank">小红书</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://segmentfault.com/u/weiyigeek" target="_blank">Segmentfault</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.modb.pro/u/506690" target="_blank">墨天轮</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.douyin.com/user/MS4wLjABAAAAMSBdMja6XLsdmzafb0RNbFeBemIOk38K1PaOClZeI1Q" target="_blank">抖音主页</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.kuaishou.com/profile/3xfbrsrhd2i69x9" target="_blank">快手主页</a>
+    </span>
+    
+    <span class="blogroll-item">
+        <a href="https://www.ixigua.com/home/3984243135350727" target="_blank">西瓜视频</a>
+    </span>
+    
+</p>
+
+        
+    </div>
+    
+    <div class="bottom">
+      <p>
+        <span>WeiyiGeek &copy; 2018 - 2022 <a href="https://weiyigeek.top" target="_blank" rel="noopener">weiyigeek.top</a> All rights reserved.唯一极客IT知识分享 版权所有 </span>
+        
+        <span>
+          Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/weiyigeek" target="_blank">mellow</a>
+        </span>
+        
+        <br/><a id="SiteRunTime"></a>
+        <br/>访问统计
+        <span><a href="/sitemap.xml" target="_blank" rel="Sitemaps-站点地图">Sitemaps</a> </span>
+        <span><a href="/baidusitemap.xml" target="_blank" rel="baidusitemaps-百度站点地图">站点地图</a> </span>
+        <!-- 
+  -->
+        <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
+        <br/>
+        <div id="cc-myssl-id">
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener">
+            <img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto">
+          </a>
+        </div>
+      </p>
+    </div>
+</footer>
+
+
+
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://blog.weiyigeek.top/2022/10-15-690.html&title=《22-kubernetes集群中进行etcd数据快照的备份恢复》 — WeiyiGeek Blog&pic=https://blog.weiyigeek.top/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://blog.weiyigeek.top/2022/10-15-690.html&title=《22-kubernetes集群中进行etcd数据快照的备份恢复》 — WeiyiGeek Blog&source=[TOC]" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://blog.weiyigeek.top/2022/10-15-690.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《22-kubernetes集群中进行etcd数据快照的备份恢复》 — WeiyiGeek Blog&url=https://blog.weiyigeek.top/2022/10-15-690.html&via=https://blog.weiyigeek.top" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://blog.weiyigeek.top/2022/10-15-690.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+      
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKElEQVR42u3aMW7DMAwF0Nz/0inQqUOsfJIu2khPkxEYkp4HhhL5eMTj+T2S558jeedqPH5jYGBgfCwjme7qOZlnjal+mksqBgbGAYw8yOZb74XyfF0MDAyMZIFe2rfeKAYGBsY84ObpWr7pHImBgXEyI5luvd3etnqzYWBgnMa4tzBw7/Of1TcwMDD+DeM5Hr2Eb1LafDEnBgbG1oyro2Ye3/I2ix6yEIgxMDA2ZawBNwTB+OC6XvdNwoqBgbE1o3ftlS+ZhNEe+E3wxcDA2IgxvxTLM9D1+9U08cX/BgYGxgGM5DhaPaxOyg/5cRcDA2NvRi+NmwTN3sdav4mBgbE3YxJS8/JAvvVmYoqBgXEAoxcc8waye1sxLq/bMDAwtmbk12fVRopeipm3erz538DAwNiaEZ16i/heg0WhLQwDA2NTRm+ZybV+b9NROMbAwDiGkbd2VRu5qi0X1QQUAwNjV0YeInNYtUki+f1NqoqBgbE1Iz+mJlucJ3m9ogIGBsY5jDy9m5Q2e+WHaBUMDIwDGL0L/fzTJMG619KBgYFxAqNaqqyyy0leHLKbR1kMDIyPYjyLo1BQXF705+WBKInEwMDYmnFXqpe/U10LAwMDY3LRP3l/njJGPSMYGBjbMXrBdFKwnCSal6dwDAwMjFZATC7pqh8RAwMDY731/EJtkuqVT94YGBgHMJJD6V0NZPn8GBgYGPPL+t7l2jxlbLasYWBgfB7jCwu3iYfmPB62AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+    
+    <!-- main-js -->
+<script type="text/javascript" src="/js/jquery/2.1.0-jquery.min.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/fastclick.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/plugins/ios-orientationchange-fix.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/jquery/3.5.2-jquery.fancybox.min.js?v=1.6.6"></script>
+<!--  //cdn.bootcss.com/node-waves/0.7.4/waves.min.js -->
+<script type="text/javascript" src="/js/node-waves/0.7.4-waves.min.js?v=1.6.6"></script> 
+
+<script type="text/javascript" src="/js/method.js?v=1.6.6"></script>
+<script type="text/javascript" src="/js/blog.js?v=1.6.6"></script>
+
+<!-- third-party -->
+<script type="text/javascript" src="/js/plugins/local_search.js?v=1.6.6"></script>
+<script type="text/javascript">
+	var search_path = "search.xml";
+	if (search_path.length === 0) { search_path = "search.xml";}
+	var path = "/" + search_path;
+	searchFunc(path, "local-search-input", "local-search-result");
+</script> 
+
+    
+
+
+<!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
+
+
+  
+
+
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
+
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+            processEscapes: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="https://cdn.staticfile.org/mathjax/2.7.9/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+ 
+<script>
+    (function() {
+        var OriginTitile = document.title, titleTime;
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                clearTimeout(titleTime);
+            } else {
+                document.title = '(つェ⊂)咦!又好了!';
+                titleTime = setTimeout(function() {
+                    document.title = OriginTitile;
+                },2000);
+            }
+        });
+    })();
+</script>
+ 
+
+     <script type="text/javascript" src="/js/custom/copytips.js?v=1.6.6"></script> 
+<script type="text/javascript">
+// 站点运行时间
+var BootDate = new Date("2018/01/01 00:00:00");
+function ShowRunTime(id) {
+  var NowDate = new Date();
+  var RunDateM = parseInt(NowDate - BootDate);
+  var RunDays = Math.floor(RunDateM/(24*3600*1000));
+  var RunHours = Math.floor(RunDateM%(24*3600*1000)/(3600*1000));
+  var RunMinutes = Math.floor(RunDateM%(24*3600*1000)%(3600*1000)/(60*1000));
+  var RunSeconds = Math.round(RunDateM%(24*3600*1000)%(3600*1000)%(60*1000)/1000);
+  var RunTime = RunDays + "天" + RunHours + "时" + RunMinutes + "分" + RunSeconds + "秒";
+  document.getElementById(id).innerHTML = "网站已在风雨中勉勉强强运行了【" + RunTime + "】";
+}
+setInterval("ShowRunTime('SiteRunTime')", 1000);
+</script>
+</body>
+</html>

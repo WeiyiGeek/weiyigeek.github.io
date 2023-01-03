@@ -1,5 +1,8 @@
 
 var pageid = {
+  "699.html":"https://mp.weixin.qq.com/s/4anuwyRs95GMHHNvtMIz8w",
+  "697.html":"https://mp.weixin.qq.com/s/usJbZHe2Cfaurz6snVQyuA",
+  "695.html":"https://mp.weixin.qq.com/s/0LaYhi89ujYQPHuLfwnuiA",
   "669.html":"https://mp.weixin.qq.com/s/-Gbrtno8MOfqgCdgWxKE0w",
   "667.html":"https://mp.weixin.qq.com/s/zRg9ePFbVKyLxgy-K2TJHg",
   "664.html":"https://mp.weixin.qq.com/s/v_kO8o8mWOYc38kot86g6Q",

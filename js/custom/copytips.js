@@ -50,7 +50,7 @@ function yzm_vertify(){
 }
 
 // 弹窗倒计时退出
-var waitTime = 1;
+var waitTime = 2;
 function exitTime(ele) {
   if (waitTime == 0) {
     display_wechat(false);

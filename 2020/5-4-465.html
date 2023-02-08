@@ -344,7 +344,7 @@
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># (1) Repositories</span></span><br><span class="line"><span class="variable">$ls</span> /var/lib/registry/docker/registry/v2/repositories/alpine/</span><br><span class="line">_layers  _manifests  _uploads</span><br><span class="line"><span class="comment"># - _layers/sha256 目录下的文件夹名是镜像的Layer和Config的Digest,通该目录下的link文件找到对应 blobs 目录下的 data 文件,实际上当我们 pull 一个镜像的 layer 时，是通过 link 文件找到 layer 在 registry 中实际的存储位置的。</span></span><br><span class="line"><span class="comment"># - _manifests 文件夹下的 tags 和 revisions 目录下的 link 文件则指向该镜像的 manifest 文件，保存在所有历史镜像tag的manifest文件的link。当删除一个镜像时，只会删除该镜像最新的 tag 的 link 文件。</span></span><br><span class="line">  <span class="comment"># - revisions 目录记录了镜像修订版本</span></span><br><span class="line">  <span class="variable">$ls</span> /var/lib/registry/docker/registry/v2/repositories/alpine(镜像名称)/_manifests/revisions/sha256/</span><br><span class="line">  a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65</span><br><span class="line">  <span class="comment"># - tags 目录下的文件夹名例如3.10就是镜像的Tag,在它的子目录下的 current/link 文件则记录了当前 tag 指向的 manifest 文件的位置;</span></span><br><span class="line">    <span class="comment"># 比如我们的 alpine:latest 镜像，每次 push 新的 latest 镜像时current/link 都会更新成指向最新镜像的 manifest 文件。</span></span><br><span class="line">  $ ls /var/lib/registry/docker/registry/v2/repositories/alpine(镜像名称)/_manifests/tags/3.12(镜像标记)/</span><br><span class="line">  current  index  <span class="comment"># 目前都指向 a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65 即 镜像 data manifest</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (2) Blobs</span></span><br><span class="line"><span class="variable">$ls</span> /var/lib/registry/docker/registry/v2/blobs/sha256/</span><br><span class="line">a1/ a2/ df/ </span><br><span class="line"></span><br><span class="line"><span class="variable">$find</span> /var/lib/registry/docker/registry/v2/ -name <span class="string">"data"</span> -<span class="built_in">exec</span> ls -sh &#123;&#125; \;</span><br><span class="line"><span class="comment"># image layer 文件是 gzip 格式的 tar 包，是镜像层真实内容的 tar.gzip 格式存储形式。</span></span><br><span class="line">2.7M ./blobs/sha256/df/df20fa9351a15782c64e6dddb2d4a6f50bf6d3688060a34c4014b0d9a752eb4c/data</span><br><span class="line"></span><br><span class="line"><span class="comment"># image config 文件是 json 格式的，它是在构建时候生成的根据DockerFile和宿主机的一些信息; （记录了"rootfs"."diff_ids"）</span></span><br><span class="line">4.0K ./blobs/sha256/a2/a24bb4013296f61e89ba57005a7b3e52274d8edd3ae2077d04395f806b63d83e/data</span><br><span class="line"></span><br><span class="line"><span class="comment"># image manifest 文件json 文件格式的，存放该镜像 layer 和 image config 文件的索引。(镜像拉取首先需拉取此文件)</span></span><br><span class="line">4.0K ./blobs/sha256/a1/a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65/data</span><br></pre></td></tr></table></figure>
 <figure class="image-box">
-                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821092456.png" target="_blank" title="WeiyiGeek.registry存储结构" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821092456.png" alt="WeiyiGeek.registry存储结构" title="" class=""></a>
+                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://img.weiyigeek.top/2020/1/20200821092456.png" target="_blank" title="WeiyiGeek.registry存储结构" data-fancybox="images"><img src="https://img.weiyigeek.top/2020/1/20200821092456.png" alt="WeiyiGeek.registry存储结构" title="" class=""></a>
                 <p>WeiyiGeek.registry存储结构</p>
             </figure>
 <p><br></p>
@@ -519,7 +519,7 @@
 </li>
 </ul>
 <figure class="image-box">
-                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821214936.png" target="_blank" title="WeiyiGeek.marking and sweep" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821214936.png" alt="WeiyiGeek.marking and sweep" title="" class=""></a>
+                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://img.weiyigeek.top/2020/1/20200821214936.png" target="_blank" title="WeiyiGeek.marking and sweep" data-fancybox="images"><img src="https://img.weiyigeek.top/2020/1/20200821214936.png" alt="WeiyiGeek.marking and sweep" title="" class=""></a>
                 <p>WeiyiGeek.marking and sweep</p>
             </figure>
 <p>Q:那 GC 都干了啥？</p>
@@ -544,15 +544,15 @@
 <li><p>(2) 总结以上，用下面这三张图片就能直观地理解这些过程啦</p>
 <ul>
 <li>2.1 delete 镜像之前的 registry 存储目录结构<figure class="image-box">
-                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821092456.png" target="_blank" title="WeiyiGeek.1" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821092456.png" alt="WeiyiGeek.1" title="" class=""></a>
+                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://img.weiyigeek.top/2020/1/20200821092456.png" target="_blank" title="WeiyiGeek.1" data-fancybox="images"><img src="https://img.weiyigeek.top/2020/1/20200821092456.png" alt="WeiyiGeek.1" title="" class=""></a>
                 <p>WeiyiGeek.1</p>
             </figure></li>
 <li>2.2 delete 镜像之后的 registry 存储目录结构<figure class="image-box">
-                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821222548.png" target="_blank" title="WeiyiGeek.2" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821222548.png" alt="WeiyiGeek.2" title="" class=""></a>
+                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://img.weiyigeek.top/2020/1/20200821222548.png" target="_blank" title="WeiyiGeek.2" data-fancybox="images"><img src="https://img.weiyigeek.top/2020/1/20200821222548.png" alt="WeiyiGeek.2" title="" class=""></a>
                 <p>WeiyiGeek.2</p>
             </figure></li>
 <li>2.3 GC 之后的 registry 存储目录结构<figure class="image-box">
-                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821222637.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200821222637.png" alt="WeiyiGeek." title="" class=""></a>
+                <a rel=Docker容器Registry私有镜像仓库安全配置与GC回收实践 href="https://img.weiyigeek.top/2020/1/20200821222637.png" target="_blank" title="WeiyiGeek." data-fancybox="images"><img src="https://img.weiyigeek.top/2020/1/20200821222637.png" alt="WeiyiGeek." title="" class=""></a>
                 <p>WeiyiGeek.</p>
             </figure>
 </li>
@@ -610,7 +610,7 @@
       
         
 <span class="post-time">
-    最后更新时间：<time datetime="2022-03-29T05:39:03.676Z" itemprop="dateUpdated">2022-03-29 13:39:03</time>
+    最后更新时间：<time datetime="2023-01-31T02:29:10.643Z" itemprop="dateUpdated">2023-01-31 10:29:10</time>
 </span><br>
 
 

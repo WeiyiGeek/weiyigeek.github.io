@@ -286,7 +286,7 @@
 <p>Delactive Pipeline Script:<br><figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">pipeline &#123;</span><br><span class="line">  stages &#123;</span><br><span class="line">    stage (<span class="string">'ssh-steps-plugin'</span>) &#123;</span><br><span class="line">      steps &#123;</span><br><span class="line">        script &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">              <span class="keyword">def</span> remote = [:]</span><br><span class="line">              remote.name = <span class="string">'K8s-Master'</span></span><br><span class="line">              remote.user = <span class="string">'root'</span></span><br><span class="line">              remote.host = <span class="string">'192.168.12.215'</span></span><br><span class="line">              <span class="comment">//remote.password = 'password'  // 明文不安全</span></span><br><span class="line">              remote.allowAnyHosts = <span class="literal">true</span>     <span class="comment">// 必须要运行所有主机</span></span><br><span class="line">              withCredentials([string(<span class="string">credentialsId:</span> <span class="string">'a2bc53c0-0b68-4fce-9f1f-d04815ae52c1'</span>, <span class="string">variable:</span> <span class="string">'sshpassword'</span>)]) &#123;</span><br><span class="line">                remote.password = sshpassword</span><br><span class="line">                writeFile <span class="string">file:</span> <span class="string">'abc.sh'</span>, <span class="string">text:</span> <span class="string">'ls'</span>, <span class="string">encoding:</span> <span class="string">'utf-8'</span></span><br><span class="line">                sshPut <span class="string">remote:</span> remote, <span class="string">from:</span> <span class="string">'abc.sh'</span>, <span class="string">into:</span> <span class="string">'.'</span>  <span class="comment">// 非常注意 不能为其它目录只能在当前路径之中</span></span><br><span class="line">                sshGet <span class="string">remote:</span> remote, <span class="string">from:</span> <span class="string">'abc.sh'</span>, <span class="string">into:</span> <span class="string">'bac.sh'</span>, <span class="string">override:</span> <span class="literal">true</span></span><br><span class="line">                sshScript <span class="string">remote:</span> remote, <span class="string">script:</span> <span class="string">'abc.sh'</span></span><br><span class="line">                sshRemove <span class="string">remote:</span> remote, <span class="string">path:</span> <span class="string">'abc.sh'</span></span><br><span class="line">                sshCommand <span class="string">remote:</span> remote, <span class="string">command:</span> <span class="string">' whoami &amp;&amp; for i in &#123;1..5&#125;; do echo -n \"Loop \$i \"; date ; sleep 1; done'</span></span><br><span class="line">              &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span>(Exception err) &#123;</span><br><span class="line">                echo err.toString() </span><br><span class="line">                error <span class="string">"[-Error] : ssh-steps-plugin测试失败\n [-Msg] : $&#123;err.getMessage()&#125; "</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>输出结果<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># SSH Steps: sshCommand - Execute command on remote node.7s</span></span><br><span class="line"><span class="comment"># Host key checking is off. It may be vulnerable to man-in-the-middle attacks.</span></span><br><span class="line">[jsch] Permanently added <span class="string">'192.168.12.215'</span> (RSA) to the list of known hosts.</span><br><span class="line">Connected to 192.168.12.215[192.168.12.215:22] (SSH-2.0-OpenSSH_7.4)</span><br><span class="line">Started <span class="built_in">command</span> 192.168.12.215<span class="comment">#0: whoami</span></span><br><span class="line">root</span><br><span class="line">Success <span class="built_in">command</span> 192.168.12.215<span class="comment">#0: whoami</span></span><br><span class="line">Disconnected from 192.168.12.215[192.168.12.215:22]</span><br></pre></td></tr></table></figure></p>
 <figure class="image-box">
-                <a rel=7.Jenkins插件安装使用帮助说明 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210223154712.png" target="_blank" title="WeiyiGeek.SSH-STEPS" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/1/20210223154712.png" alt="WeiyiGeek.SSH-STEPS" title="" class=""></a>
+                <a rel=7.Jenkins插件安装使用帮助说明 href="https://img.weiyigeek.top/2021/1/20210223154712.png" target="_blank" title="WeiyiGeek.SSH-STEPS" data-fancybox="images"><img src="https://img.weiyigeek.top/2021/1/20210223154712.png" alt="WeiyiGeek.SSH-STEPS" title="" class=""></a>
                 <p>WeiyiGeek.SSH-STEPS</p>
             </figure>
 <p><br></p>
@@ -384,7 +384,7 @@
       
         
 <span class="post-time">
-    最后更新时间：<time datetime="2022-10-30T03:04:35.328Z" itemprop="dateUpdated">2022-10-30 11:04:35</time>
+    最后更新时间：<time datetime="2023-01-31T02:29:10.467Z" itemprop="dateUpdated">2023-01-31 10:29:10</time>
 </span><br>
 
 
@@ -476,18 +476,18 @@
 <nav class="post-nav flex-row flex-justify-between">
   
     <div class="prev">
-      <a href="/2020/12-31-618.html" id="post-prev" class="post-nav-link">
+      <a href="/2020/12-31-534.html" id="post-prev" class="post-nav-link">
         <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">8.Jenkins进阶之工作学习所遇补充</h4>
+        <h4 class="title">6.Jenkins进阶之分布式架构综合实践</h4>
       </a>
     </div>
   
 
   
     <div class="next">
-      <a href="/2020/12-31-533.html" id="post-next" class="post-nav-link">
+      <a href="/2020/12-31-618.html" id="post-next" class="post-nav-link">
         <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">5.Jenkins进阶之分布式架构扩充知识</h4>
+        <h4 class="title">8.Jenkins进阶之工作学习所遇补充</h4>
       </a>
     </div>
   

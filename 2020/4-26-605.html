@@ -342,7 +342,7 @@
 <p>总结：通过上面的结果分析发现大部分CPU资源被17行占用，我们分析出<code>select语句中的default</code>没有内容会导致上面的<code>case v:=&lt;-c:</code>一直执行, 我们在default分支添加一行<code>time.Sleep(time.Second)</code>即可, 此时我们再次查看分析结果:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">➜ go build</span><br><span class="line">➜ ./pporftest -cpu <span class="literal">true</span></span><br><span class="line">➜ go tool pprof cpu.pprof      </span><br><span class="line">(pprof) top</span><br><span class="line">Showing nodes accounting <span class="keyword">for</span> 0, 0% of 0 total</span><br><span class="line">      flat  flat%   sum%        cum   cum%</span><br></pre></td></tr></table></figure></p>
 <p><br></p>
 <p><strong>graphviz 可视化图形工具</strong><br>项目地址: <a href="https://graphviz.gitlab.io/" target="_blank" rel="noopener">https://graphviz.gitlab.io/</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.graphviz工具安装(它会自动设置环境变量)</span></span><br><span class="line">➜ sudo apt install graphviz <span class="comment"># // Ubuntu</span></span><br><span class="line">brew install graphviz     <span class="comment"># // Mac</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.验证工具是否安装配置成功</span></span><br><span class="line">➜ dot -version</span><br><span class="line">dot - graphviz version 2.43.0 (0)</span><br><span class="line">libdir = <span class="string">"/usr/lib/x86_64-linux-gnu/graphviz"</span></span><br><span class="line">Activated plugin library: libgvplugin_dot_layout.so.6</span><br><span class="line">Using layout: dot:dot_layout</span><br><span class="line">Activated plugin library: libgvplugin_core.so.6</span><br><span class="line">Using render: dot:core</span><br><span class="line">Using device: dot:dot:core</span><br><span class="line">The plugin configuration file:</span><br><span class="line">        /usr/lib/x86_64-linux-gnu/graphviz/config6a</span><br><span class="line">                was successfully loaded.</span><br><span class="line">    render      :  cairo dot dot_json fig gd json json0 map mp pic pov ps svg tk visio vml vrml xdot xdot_json</span><br><span class="line">    layout      :  circo dot fdp neato nop nop1 nop2 osage patchwork sfdp twopi</span><br><span class="line">    textlayout  :  textlayout</span><br><span class="line">    device      :  canon cmap cmapx cmapx_np dot dot_json eps fig gd gd2 gif gv imap imap_np ismap jpe jpeg jpg json json0 mp pdf pic plain plain-ext png pov ps ps2 svg svgz tk vdx vml vmlz vrml wbmp webp x11 xdot xdot1.2 xdot1.4 xdot_json xlib</span><br><span class="line">    loadimage   :  (lib) eps gd gd2 gif jpe jpeg jpg png ps svg webp xbm</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.此时我们通过dot生成的图片查看程序的CPU占用情况。</span></span><br><span class="line">➜ go build &amp;&amp; ./pporftest -cpu <span class="literal">true</span> &amp;&amp; go tool pprof cpu.pprof</span><br><span class="line">File: pporftest</span><br><span class="line">Type: cpu</span><br><span class="line">(pprof) gif</span><br><span class="line">Generating report <span class="keyword">in</span> profile001.gif</span><br></pre></td></tr></table></figure><br><figure class="image-box">
-                <a rel=1.Go语言项目性能调优实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211127145003.png" target="_blank" title="WeiyiGeek.graphviz可视化性能占比查看" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211127145003.png" alt="WeiyiGeek.graphviz可视化性能占比查看" title="" class=""></a>
+                <a rel=1.Go语言项目性能调优实践 href="https://img.weiyigeek.top/2021/5/20211127145003.png" target="_blank" title="WeiyiGeek.graphviz可视化性能占比查看" data-fancybox="images"><img src="https://img.weiyigeek.top/2021/5/20211127145003.png" alt="WeiyiGeek.graphviz可视化性能占比查看" title="" class=""></a>
                 <p>WeiyiGeek.graphviz可视化性能占比查看</p>
             </figure></p>
 <p>补充说明: 除了分析CPU性能数据，pprof也支持分析内存性能数据.<br>比如，使用下面的命令分析http服务的heap性能数据，查看当前程序的内存占用以及热点内存对象使用的情况。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看内存占用数据</span></span><br><span class="line">go tool pprof -inuse_space http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go tool pprof -inuse_objects http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line"><span class="comment"># 查看临时内存分配数据</span></span><br><span class="line">go tool pprof -alloc_space http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go tool pprof -alloc_objects http://127.0.0.1:8080/debug/pprof/heap</span><br></pre></td></tr></table></figure></p>
@@ -358,7 +358,7 @@
 <p><br></p>
 <p><strong>工具使用实践:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 压测工具wrk</span></span><br><span class="line">https://github.com/adjust/go-wrk</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用wrk进行压测:</span></span><br><span class="line">go-wrk -n 50000 http://127.0.0.1:8080/book/list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在上面压测进行的同时，打开另一个终端执行, 然后30秒之后终端会初夏如下提示：Writing svg to torch.svg:</span></span><br><span class="line">go-torch -u http://127.0.0.1:8080 -t 30</span><br><span class="line"></span><br><span class="line"><span class="comment"># 此外还可以借助火焰图分析内存性能数据：</span></span><br><span class="line">go-torch -inuse_space http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go-torch -inuse_objects http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go-torch -alloc_space http://127.0.0.1:8080/debug/pprof/heap</span><br><span class="line">go-torch -alloc_objects http://127.0.0.1:8080/debug/pprof/heap</span><br></pre></td></tr></table></figure></p>
 <p>然后我们使用浏览器打开<code>torch.svg</code>就能看到如下火焰图了。 </p>
-<p><a rel=1.Go语言项目性能调优实践 href="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211129113617.png" target="_blank" title="WeiyiGeek.Flame Graph" data-fancybox="images"><img src="https://cdn.jsdelivr.net/gh/WeiyiGeek/blogimage/2021/5/20211129113617.png" alt="WeiyiGeek.Flame Graph"></a></p>
+<p><a rel=1.Go语言项目性能调优实践 href="https://img.weiyigeek.top/2021/5/20211129113617.png" target="_blank" title="WeiyiGeek.Flame Graph" data-fancybox="images"><img src="https://img.weiyigeek.top/2021/5/20211129113617.png" alt="WeiyiGeek.Flame Graph"></a></p>
 <p><br/></p>
 <p><strong>Q: 如分析 Flame Graph 火焰图?</strong></p>
 <blockquote>
@@ -411,7 +411,7 @@
       
         
 <span class="post-time">
-    最后更新时间：<time datetime="2022-03-29T05:39:06.304Z" itemprop="dateUpdated">2022-03-29 13:39:06</time>
+    最后更新时间：<time datetime="2023-01-31T02:29:10.673Z" itemprop="dateUpdated">2023-01-31 10:29:10</time>
 </span><br>
 
 
@@ -503,18 +503,18 @@
 <nav class="post-nav flex-row flex-justify-between">
   
     <div class="prev">
-      <a href="/2020/4-26-604.html" id="post-prev" class="post-nav-link">
+      <a href="/2020/4-27-608.html" id="post-prev" class="post-nav-link">
         <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">2.Go语言编程学习课后实践</h4>
+        <h4 class="title">3.Go语言项目操作Redis数据实践</h4>
       </a>
     </div>
   
 
   
     <div class="next">
-      <a href="/2020/4-25-469.html" id="post-next" class="post-nav-link">
+      <a href="/2020/4-26-604.html" id="post-next" class="post-nav-link">
         <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">2-Kubernetes入门之CentOS安装部署集群</h4>
+        <h4 class="title">2.Go语言编程学习课后实践</h4>
       </a>
     </div>
   

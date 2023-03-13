@@ -21,7 +21,7 @@
     <!--  -->
      <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
     <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
-        
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9134434519967436" crossorigin="anonymous"></script>    
     <script type="text/javascript">
         // Data Center
         var DC = {
@@ -167,23 +167,9 @@
             </li>
         
             <li class="">
-              <a href="https://github.com/weiyigeek" target="_blank" >
-                <i class="icon icon-lg icon-github"></i>
-                Github
-              </a>
-            </li>
-        
-            <li class="">
-              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
-                <i class="icon icon-lg icon-twitter"></i>
-                Twitter
-              </a>
-            </li>
-        
-            <li class="">
-              <a href="https://weibo.com/615643678" target="_blank" >
-                <i class="icon icon-lg icon-weibo"></i>
-                Weibo
+              <a href="/img/video-account.jpg" target="_blank" >
+                <i class="icon icon-lg icon-video-camera"></i>
+                视频号
               </a>
             </li>
         
@@ -272,10 +258,21 @@
 
             
         </div>
-        <span class="post-href" style="display: none;">|</span>
+        <span class="post-href" style="display: none;">|</span> 
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h4 id="登录痕迹"><a href="#登录痕迹" class="headerlink" title="登录痕迹"></a>登录痕迹</h4><p>(1)history和last与w命令中用户登录痕迹:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@master bash-5.0]<span class="variable">$history</span></span><br><span class="line">422  2019-08-02 17:03:43 192.168.1.88 root <span class="comment"># history</span></span><br><span class="line"></span><br><span class="line">[root@master bash-5.0]<span class="variable">$w</span></span><br><span class="line">16:01:52 up  1:11,  1 user,  load average: 0.00, 0.01, 0.05</span><br><span class="line">USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT</span><br><span class="line">root     pts/0    192.168.1.88    14:53    0.00s  0.31s  0.00s w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@master bash-5.0]<span class="variable">$last</span></span><br><span class="line">root     pts/0        192.168.1.88    Fri Aug  2 14:53   still logged <span class="keyword">in</span></span><br><span class="line">reboot   system boot  3.10.0-957.12.2. Fri Aug  2 14:51 - 16:01  (01:10)</span><br><span class="line">root     pts/1        192.168.1.88    Fri Aug  2 14:43 - down   (00:06)</span><br></pre></td></tr></table></figure></p>
+<p>(2)发现隐匿的ssh登录行为<br>如果是隐匿的ssh正在进行可以通过lsof 或者 netstat 或者ps 命令发现<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#lsof方法</span></span><br><span class="line">lsof -i:22 | grep EST</span><br><span class="line">sshd    5923 root    3u  IPv4  32629      0t0  TCP master:ssh-&gt;192.168.1.88:53505 (ESTABLISHED)</span><br><span class="line">sshd    5925 root    3u  IPv4  32692      0t0  TCP master:ssh-&gt;192.168.1.88:53506 (ESTABLISHED)</span><br><span class="line"></span><br><span class="line"><span class="comment">#ps方法</span></span><br><span class="line">ps aux | grep <span class="string">"notty"</span></span><br><span class="line">root      5925  0.0  0.3 161456  6296 ?        Ss   14:53   0:00 sshd: root@notty</span><br><span class="line"></span><br><span class="line"><span class="comment">#netstat方法</span></span><br><span class="line">netstat -atlnp | grep <span class="string">"sshd"</span></span><br><span class="line">tcp        0      0 10.10.107.222:22        192.168.1.88:53506     ESTABLISHED 5925/sshd: root@not</span><br><span class="line">tcp        0     48 10.10.107.222:22        192.168.1.88:53505     ESTABLISHED 5923/sshd: root@pts</span><br></pre></td></tr></table></figure></p>
+<p>(3)历史ssh 隐匿登录行为通过分析/var/log/secure 日志（有的系统是/var/log/auth.log）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过分析/var/log/secure 日志有的系统是/var/log/auth.log</span></span><br><span class="line">从 Accepted publickey <span class="keyword">for</span> root from 192.168.12.54 一行可以得出ssh的登录时间 <span class="comment">#Disconnect</span></span><br><span class="line">从 Disconnected from 192.168.12.54 port 43000 一行可以得出ssh的退出时间</span><br></pre></td></tr></table></figure><br>如果系统配置了/etc/bash.bashrc、~/.bashrc记录执行记录,就可以记录到bash -i的执行记录（交互式会话会读取bashrc配置并执行）</p>
+<p>(4) 主要用到strace、strings、grep利用操作系统自身的工具手工快速查找后门<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过openssh后门功能中会记录正常用户登录账号密码，因此猜测会用到open系统调用</span></span><br><span class="line">strace –o ssh –ff–p pid  <span class="comment">#用strace跟踪sshd打开的系统调用，然后过滤open，就应该能获取到记录密码的文件及路径。</span></span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
         <!-- 微信公众号关注/文章版权复制 -->
         
-          <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+        <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
 <div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
 <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
 <p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
@@ -294,20 +291,12 @@
     交</button> </div>
 <p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
 </div>
-            
-        <div class="post-content" id="post-content" itemprop="postContent">
-            
-            <p>[TOC]</p>
-<a id="more"></a>
-<h4 id="登录痕迹"><a href="#登录痕迹" class="headerlink" title="登录痕迹"></a>登录痕迹</h4><p>(1)history和last与w命令中用户登录痕迹:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@master bash-5.0]<span class="variable">$history</span></span><br><span class="line">422  2019-08-02 17:03:43 192.168.1.88 root <span class="comment"># history</span></span><br><span class="line"></span><br><span class="line">[root@master bash-5.0]<span class="variable">$w</span></span><br><span class="line">16:01:52 up  1:11,  1 user,  load average: 0.00, 0.01, 0.05</span><br><span class="line">USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT</span><br><span class="line">root     pts/0    192.168.1.88    14:53    0.00s  0.31s  0.00s w</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@master bash-5.0]<span class="variable">$last</span></span><br><span class="line">root     pts/0        192.168.1.88    Fri Aug  2 14:53   still logged <span class="keyword">in</span></span><br><span class="line">reboot   system boot  3.10.0-957.12.2. Fri Aug  2 14:51 - 16:01  (01:10)</span><br><span class="line">root     pts/1        192.168.1.88    Fri Aug  2 14:43 - down   (00:06)</span><br></pre></td></tr></table></figure></p>
-<p>(2)发现隐匿的ssh登录行为<br>如果是隐匿的ssh正在进行可以通过lsof 或者 netstat 或者ps 命令发现<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#lsof方法</span></span><br><span class="line">lsof -i:22 | grep EST</span><br><span class="line">sshd    5923 root    3u  IPv4  32629      0t0  TCP master:ssh-&gt;192.168.1.88:53505 (ESTABLISHED)</span><br><span class="line">sshd    5925 root    3u  IPv4  32692      0t0  TCP master:ssh-&gt;192.168.1.88:53506 (ESTABLISHED)</span><br><span class="line"></span><br><span class="line"><span class="comment">#ps方法</span></span><br><span class="line">ps aux | grep <span class="string">"notty"</span></span><br><span class="line">root      5925  0.0  0.3 161456  6296 ?        Ss   14:53   0:00 sshd: root@notty</span><br><span class="line"></span><br><span class="line"><span class="comment">#netstat方法</span></span><br><span class="line">netstat -atlnp | grep <span class="string">"sshd"</span></span><br><span class="line">tcp        0      0 10.10.107.222:22        192.168.1.88:53506     ESTABLISHED 5925/sshd: root@not</span><br><span class="line">tcp        0     48 10.10.107.222:22        192.168.1.88:53505     ESTABLISHED 5923/sshd: root@pts</span><br></pre></td></tr></table></figure></p>
-<p>(3)历史ssh 隐匿登录行为通过分析/var/log/secure 日志（有的系统是/var/log/auth.log）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过分析/var/log/secure 日志有的系统是/var/log/auth.log</span></span><br><span class="line">从 Accepted publickey <span class="keyword">for</span> root from 192.168.12.54 一行可以得出ssh的登录时间 <span class="comment">#Disconnect</span></span><br><span class="line">从 Disconnected from 192.168.12.54 port 43000 一行可以得出ssh的退出时间</span><br></pre></td></tr></table></figure><br>如果系统配置了/etc/bash.bashrc、~/.bashrc记录执行记录,就可以记录到bash -i的执行记录（交互式会话会读取bashrc配置并执行）</p>
-<p>(4) 主要用到strace、strings、grep利用操作系统自身的工具手工快速查找后门<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#通过openssh后门功能中会记录正常用户登录账号密码，因此猜测会用到open系统调用</span></span><br><span class="line">strace –o ssh –ff–p pid  <span class="comment">#用strace跟踪sshd打开的系统调用，然后过滤open，就应该能获取到记录密码的文件及路径。</span></span><br></pre></td></tr></table></figure></p>
+           
 
-        </div>
-        
         <!-- Google 广告 -->
-          
+        
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-9134434519967436" data-ad-slot="7905848205"></ins>
+  
 
         
 <hr/>
@@ -467,6 +456,14 @@
             <div class="toc-bar"><div>
         </aside>
     
+    <!-- 
+  <div class="post-wechat" style="position:fixed;top: 360px;bottom: 500px;right: 3%;width: 190px;text-align: center;">
+    <p><b>关注【全栈工程师修炼指南】</b></p>
+    <img src="/img/wechat-gzh.jpg" class="img-responsive" alt="weiyigeek">
+    <p><b>欢迎添加【作者】微信</b></p>
+    <img src="/img/wehat.jpg" class="img-responsive" alt="weiyigeek">
+  </div>
+ -->
 
     <!-- 支付宝微信文章赞赏 -->
     
@@ -717,7 +714,7 @@
 	searchFunc(path, "local-search-input", "local-search-result");
 </script> 
 
-    
+<script> (adsbygoogle = window.adsbygoogle || []).push({});</script>    
 
 
 <!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
@@ -785,5 +782,13 @@ function ShowRunTime(id) {
 }
 setInterval("ShowRunTime('SiteRunTime')", 1000);
 </script>
+    
+  <div class="post-wechat" style="position:fixed;top: 360px;bottom: 500px;right: 3%;width: 190px;text-align: center;">
+    <p><b>关注【全栈工程师修炼指南】</b></p>
+    <img src="/img/wechat-gzh.jpg" class="img-responsive" alt="weiyigeek">
+    <p><b>欢迎添加【作者】微信</b></p>
+    <img src="/img/wehat.jpg" class="img-responsive" alt="weiyigeek">
+  </div>
+
 </body>
 </html>

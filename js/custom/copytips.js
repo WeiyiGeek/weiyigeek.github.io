@@ -75,7 +75,7 @@ function exitTime(ele) {
 document.getElementById('btw-modal-close-btn').onclick = function(){
   // var r = confirm('确定, 不关注我了吗? \n此时, 我有点莫名的伤心 (づ╥﹏╥)づ, 一定还是这篇文章内容不够吸引您, 我会继续努力的! \n温馨提示: 支付宝2022最新活动已经开始了, 扫码领取支付宝红包, 动动小手支持一下小弟我哟!');
   // if (r == true) {  
-  document.getElementById('btw-modal').innerHTML='<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; "> <b style="color:#d44040;"> ❤ 支付宝2022年免费大红包活动再次来袭 ❤ <br> 随便一扫都是几元实体店通用红包，伙伴们赶紧冲啊！<br/>你得红包,我也可以得红包奖励,共赢哟!<br> 扫码领取支付宝红包, 动动小手支持一下小弟我哟! <br/> 这将是我持续更新文章的动力源泉，谢谢支持！(๑′ᴗ‵๑) </b><img src="/img/alipay.jpg" style="width: 300px; margin: 16px auto;"><button id="exit" style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255);background: #d44040; cursor: pointer;">点击退出</button>';
+  document.getElementById('btw-modal').innerHTML='<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; "> <b style="color:#6190e8;"> ❤ 如需一起交流沟通学习,请扫一扫下方二维码，或者关注【全栈工程师修炼指南】公众号回复【学习交流群】，<br/>如若二维码失效请添加作者【 WeiyiGeeker】微信留言, 我会及时更新二维吗, 谢谢！ ！(๑′ᴗ‵๑) </b><img src="https://weiyigeek.top/img/wxqun.jpg" style="width: 300px; margin: 16px auto;"><button id="exit" style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255);background: #d44040; cursor: pointer;">点击退出</button>';
   document.getElementById("exit").onclick = function() {exitTime(this);}
 // }
 }

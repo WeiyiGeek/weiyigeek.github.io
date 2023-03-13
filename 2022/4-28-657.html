@@ -21,7 +21,7 @@
     <!--  -->
      <script type="text/javascript" src="/js/custom/articlecost.js?v=1.6.6"></script> 
     <link rel="stylesheet" href="/css/third-party/gitalk.css?v=1.6.6"> 
-        
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9134434519967436" crossorigin="anonymous"></script>    
     <script type="text/javascript">
         // Data Center
         var DC = {
@@ -167,23 +167,9 @@
             </li>
         
             <li class="">
-              <a href="https://github.com/weiyigeek" target="_blank" >
-                <i class="icon icon-lg icon-github"></i>
-                Github
-              </a>
-            </li>
-        
-            <li class="">
-              <a href="https://twitter.com/WeiyiGeek" target="_blank" >
-                <i class="icon icon-lg icon-twitter"></i>
-                Twitter
-              </a>
-            </li>
-        
-            <li class="">
-              <a href="https://weibo.com/615643678" target="_blank" >
-                <i class="icon icon-lg icon-weibo"></i>
-                Weibo
+              <a href="/img/video-account.jpg" target="_blank" >
+                <i class="icon icon-lg icon-video-camera"></i>
+                视频号
               </a>
             </li>
         
@@ -272,10 +258,21 @@
 
             
         </div>
-        <span class="post-href" style="display: none;">|</span>
+        <span class="post-href" style="display: none;">|</span> 
+        <div class="post-content" id="post-content" itemprop="postContent">
+            
+            <p>[TOC]</p>
+<a id="more"></a>
+<h2 id="0x00-入坑出坑"><a href="#0x00-入坑出坑" class="headerlink" title="0x00 入坑出坑"></a>0x00 入坑出坑</h2><h3 id="1-Ansible-如何切换用户建立SSH并使用sudo权限执行程序。"><a href="#1-Ansible-如何切换用户建立SSH并使用sudo权限执行程序。" class="headerlink" title="1.Ansible 如何切换用户建立SSH并使用sudo权限执行程序。"></a>1.Ansible 如何切换用户建立SSH并使用sudo权限执行程序。</h3><p>描述: 在使用Ansible往往赋予其低权限用户, 假如由于项目需求，需要使用ansible在控制节点以root身份运行playbook，并在playbook中调用其他程序操作/etc下的文件，所以该程序需要使用sudo或者root权限运行，我们应该如何配置。</p>
+<p><strong>操作步骤:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.客户端-生成ssh公密钥</span></span><br><span class="line"><span class="comment"># 【注：切换到建立ssh连接的用户weiyigeek运行: su weiyigeek，因为该认证文件只适用于本用户weiyigeek与其他用户的ssh连接认证】</span></span><br><span class="line">ssh-keygen</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.拷贝ssh公钥到被控制机器节点</span></span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub weiyigeek@xx.xx.xx.xx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.客户端-在root用户的环境中运行之前建好的test.yml文件</span></span><br><span class="line">ansible-playbook test.yml --user=weiyigeek --private-key=/home/weiyigeek/.ssh/id_rsa -s </span><br><span class="line"><span class="comment"># 参数说明: </span></span><br><span class="line"><span class="comment"># --user=weiyigeek 表示使用weiyigeek与被控节点的weiyigeek建立ssh连接。</span></span><br><span class="line"><span class="comment"># --private-key表示ssh使用的认证文件。</span></span><br><span class="line"><span class="comment"># -s 表示在连接到被控制机器节点后使用weiyigeek 的sudo权限运行test.yml中的命令。</span></span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: ansible 输入 weiyigeek 用户的sudo密码有两种配置方式，一种是在命令行中添加<code>--ask-sudo-pass</code>, 另外一种则是在ansible的配置文件<code>/etc/ansible/hosts</code>中配置sudo密码。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 此处采用第二种方式</span></span><br><span class="line">[node-1]</span><br><span class="line">192.168.1.108 ansible_user=<span class="string">'WeiyiGeek'</span> ansible_sudo_pass=<span class="string">'123456'</span></span><br><span class="line"></span><br><span class="line">[node-2]</span><br><span class="line">192.168.1.107 ansible_sudo_pass=<span class="string">'123456'</span></span><br></pre></td></tr></table></figure></p>
+<p>温馨提示: 可能会遇到的问题，在拷贝玩ssh文件到被控制主机后，第一次运行会出现检查keys的对话，导致ssh连接失败，如下所示, 所以为了解决该问题我们可以在ansible的默认配置文件<code>/etc/ansible/ansible.cfg</code>中, 添加如下语句即可 <code>host_key_checking = False</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">The authenticity of host <span class="string">'192.168.0.5 (192.168.0.5)'</span> can\<span class="string">'t be established.</span></span><br><span class="line"><span class="string">ECDSA key fingerprint is 05:51:e5:c4:d4:66:9b:af:5b:c9:ba:e9:e6:a4:2b:fe.</span></span><br><span class="line"><span class="string">Are you sure you want to continue connecting (yes/no)?</span></span><br></pre></td></tr></table></figure></p>
+
+        </div>
+        
         <!-- 微信公众号关注/文章版权复制 -->
         
-          <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
+        <div id="btw-mask" style="position: fixed; top: 0px; right: 0px; bottom: 0px; left: 0px; opacity: 0.7; z-index: 999; background: rgb(0, 0, 0); display:none"></div>
 <div id="btw-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; text-align: center; font-size: 13px; background: rgb(255, 255, 255); border-radius: 10px; z-index: 9999; font-family: PingFangSC-Regular, sans-serif;display:none">
 <span id="btw-modal-close-btn" style="position: absolute; top: 5px; right: 15px; line-height: 1.8; font-size: 15px; cursor: pointer; opacity: 0.2; z-index: 9999; color: rgb(0, 0, 0); background: none; border: none; outline: none;">X</span>
 <p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; ">
@@ -294,20 +291,12 @@
     交</button> </div>
 <p id="btw-footer" style="margin: 40px 0px 20px; color: rgb(153, 153, 153);">@WeiyiGeek - 为了能到远方，脚下的每一步都不能少</p>
 </div>
-            
-        <div class="post-content" id="post-content" itemprop="postContent">
-            
-            <p>[TOC]</p>
-<a id="more"></a>
-<h2 id="0x00-入坑出坑"><a href="#0x00-入坑出坑" class="headerlink" title="0x00 入坑出坑"></a>0x00 入坑出坑</h2><h3 id="1-Ansible-如何切换用户建立SSH并使用sudo权限执行程序。"><a href="#1-Ansible-如何切换用户建立SSH并使用sudo权限执行程序。" class="headerlink" title="1.Ansible 如何切换用户建立SSH并使用sudo权限执行程序。"></a>1.Ansible 如何切换用户建立SSH并使用sudo权限执行程序。</h3><p>描述: 在使用Ansible往往赋予其低权限用户, 假如由于项目需求，需要使用ansible在控制节点以root身份运行playbook，并在playbook中调用其他程序操作/etc下的文件，所以该程序需要使用sudo或者root权限运行，我们应该如何配置。</p>
-<p><strong>操作步骤:</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1.客户端-生成ssh公密钥</span></span><br><span class="line"><span class="comment"># 【注：切换到建立ssh连接的用户weiyigeek运行: su weiyigeek，因为该认证文件只适用于本用户weiyigeek与其他用户的ssh连接认证】</span></span><br><span class="line">ssh-keygen</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.拷贝ssh公钥到被控制机器节点</span></span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub weiyigeek@xx.xx.xx.xx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.客户端-在root用户的环境中运行之前建好的test.yml文件</span></span><br><span class="line">ansible-playbook test.yml --user=weiyigeek --private-key=/home/weiyigeek/.ssh/id_rsa -s </span><br><span class="line"><span class="comment"># 参数说明: </span></span><br><span class="line"><span class="comment"># --user=weiyigeek 表示使用weiyigeek与被控节点的weiyigeek建立ssh连接。</span></span><br><span class="line"><span class="comment"># --private-key表示ssh使用的认证文件。</span></span><br><span class="line"><span class="comment"># -s 表示在连接到被控制机器节点后使用weiyigeek 的sudo权限运行test.yml中的命令。</span></span><br></pre></td></tr></table></figure></p>
-<p>温馨提示: ansible 输入 weiyigeek 用户的sudo密码有两种配置方式，一种是在命令行中添加<code>--ask-sudo-pass</code>, 另外一种则是在ansible的配置文件<code>/etc/ansible/hosts</code>中配置sudo密码。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 此处采用第二种方式</span></span><br><span class="line">[node-1]</span><br><span class="line">192.168.1.108 ansible_user=<span class="string">'WeiyiGeek'</span> ansible_sudo_pass=<span class="string">'123456'</span></span><br><span class="line"></span><br><span class="line">[node-2]</span><br><span class="line">192.168.1.107 ansible_sudo_pass=<span class="string">'123456'</span></span><br></pre></td></tr></table></figure></p>
-<p>温馨提示: 可能会遇到的问题，在拷贝玩ssh文件到被控制主机后，第一次运行会出现检查keys的对话，导致ssh连接失败，如下所示, 所以为了解决该问题我们可以在ansible的默认配置文件<code>/etc/ansible/ansible.cfg</code>中, 添加如下语句即可 <code>host_key_checking = False</code>.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">The authenticity of host <span class="string">'192.168.0.5 (192.168.0.5)'</span> can\<span class="string">'t be established.</span></span><br><span class="line"><span class="string">ECDSA key fingerprint is 05:51:e5:c4:d4:66:9b:af:5b:c9:ba:e9:e6:a4:2b:fe.</span></span><br><span class="line"><span class="string">Are you sure you want to continue connecting (yes/no)?</span></span><br></pre></td></tr></table></figure></p>
+           
 
-        </div>
-        
         <!-- Google 广告 -->
-          
+        
+<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-9134434519967436" data-ad-slot="7905848205"></ins>
+  
 
         
 <hr/>
@@ -467,6 +456,14 @@
             <div class="toc-bar"><div>
         </aside>
     
+    <!-- 
+  <div class="post-wechat" style="position:fixed;top: 360px;bottom: 500px;right: 3%;width: 190px;text-align: center;">
+    <p><b>关注【全栈工程师修炼指南】</b></p>
+    <img src="/img/wechat-gzh.jpg" class="img-responsive" alt="weiyigeek">
+    <p><b>欢迎添加【作者】微信</b></p>
+    <img src="/img/wehat.jpg" class="img-responsive" alt="weiyigeek">
+  </div>
+ -->
 
     <!-- 支付宝微信文章赞赏 -->
     
@@ -717,7 +714,7 @@
 	searchFunc(path, "local-search-input", "local-search-result");
 </script> 
 
-    
+<script> (adsbygoogle = window.adsbygoogle || []).push({});</script>    
 
 
 <!-- <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> --> 
@@ -785,5 +782,13 @@ function ShowRunTime(id) {
 }
 setInterval("ShowRunTime('SiteRunTime')", 1000);
 </script>
+    
+  <div class="post-wechat" style="position:fixed;top: 360px;bottom: 500px;right: 3%;width: 190px;text-align: center;">
+    <p><b>关注【全栈工程师修炼指南】</b></p>
+    <img src="/img/wechat-gzh.jpg" class="img-responsive" alt="weiyigeek">
+    <p><b>欢迎添加【作者】微信</b></p>
+    <img src="/img/wehat.jpg" class="img-responsive" alt="weiyigeek">
+  </div>
+
 </body>
 </html>

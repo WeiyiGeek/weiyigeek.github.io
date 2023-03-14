@@ -45,15 +45,17 @@ function articleJump(pageid,type,pagehref) {
       }
     }
   }  else if ( type == "free" && pagehref.length != 0 ) {
-    if ( getQueryVariable("role") != "free" ) {
+    // if ( getQueryVariable("role") != "free" ) {
       if (pageid != undefined ){
         var cost = confirm("温馨提示:\n此文章首发在微信公众号【全栈工程师修炼指南】, 即将跳转到该文章链接 ["+pagehref+"] 页面!\n点击【确定】即可跳转,点击【取消】则返回。")
-        if (cost) {window.location.href = pagehref;} else { window.location.href = window.location.href+"?role=free"; }
+        if (cost) {
+          window.location.href = pagehref;
+        } else { 
+          console.log("INFO: 文章权限验证通过,尽情浏览吧,少年!");
+          document.getElementsByClassName("body-wrap")[0].style.display = "";
+          // window.location.href = window.location.href+"?role=free";
+       }
       }
-    } else {
-      console.log("INFO: 文章权限验证通过,尽情浏览吧,少年!");
-      document.getElementsByClassName("body-wrap")[0].style.display = "";
-    }
   } else {
     console.log("INFO: 文章权限验证通过,尽情浏览吧,少年!");
     document.getElementsByClassName("body-wrap")[0].style.display = "";

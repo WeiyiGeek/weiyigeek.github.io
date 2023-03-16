@@ -146,8 +146,8 @@
             </li>
         
             <li class="">
-              <a href="/links"  >
-                <i class="icon icon-lg icon-link"></i>
+              <a href="/sites"  >
+                <i class="icon icon-lg icon-globe"></i>
                 站点导航
               </a>
             </li>
@@ -170,6 +170,13 @@
               <a href="/img/video-account.jpg" target="_blank" >
                 <i class="icon icon-lg icon-video-camera"></i>
                 视频号
+              </a>
+            </li>
+        
+            <li class="">
+              <a href="/links"  >
+                <i class="icon icon-lg icon-link"></i>
+                友情链接
               </a>
             </li>
         
@@ -353,7 +360,7 @@
 <li><code>!~</code>,<code>!~*</code> : 分别标识为区分大小写不匹配及不区分大小写不匹配的正则</li>
 <li><code>^~</code>: 表示URL以某个常规字符串开头,可以理解为匹配url路径即可,值得注意的是Nginx不对URL做编码,例如会将请求为/static/20%/aa被<code>^~ /static/ /aa</code>规则匹配到。</li>
 </ul>
-<p>默认情况下 location 的匹配顺序为<code>精确匹配</code> -&gt; <code>开头匹配</code>(^~) -&gt; <code>文件顺序中的正则匹配</code> -&gt; <code>通用匹配</code>(/), 当有匹配成功的URL则停止匹配。</p>
+<p>默认情况下 location 的匹配顺序为<code>精确匹配</code>(=) -&gt; <code>开头匹配</code>(^~) -&gt; <code>文件顺序中的正则匹配</code>(~*) -&gt; <code>通用匹配</code>(/), 当有匹配成功的URL则停止匹配。</p>
 <p>例如，有如下匹配规则:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">location = / &#123;</span><br><span class="line">  <span class="comment">#规则A.精确匹配 / URL 下的操作。</span></span><br><span class="line">&#125;</span><br><span class="line">location = /login &#123;</span><br><span class="line">  <span class="comment">#规则B.精确匹配 /login URL 下的操作。</span></span><br><span class="line">&#125;</span><br><span class="line">location ^~ /static/ &#123;</span><br><span class="line">  <span class="comment">#规则C.正则匹配 /static/ URL 下的操作。</span></span><br><span class="line">&#125;</span><br><span class="line">location ~ \.(gif|jpg|png|svg|js|css)$ &#123;</span><br><span class="line">  <span class="comment">#规则D，注意：是根据括号内的大小写进行匹配，括号内全是小写只匹配小写。</span></span><br><span class="line">&#125;</span><br><span class="line">location ~* \.(gif|jpg|png|svg|js|css)$ &#123;</span><br><span class="line">  <span class="comment">#规则D，注意：忽略大写来匹配静态资源后缀。</span></span><br><span class="line">&#125;</span><br><span class="line">location ~* \.png$ &#123;</span><br><span class="line">  <span class="comment">#规则E.匹配以.png或者.PNG结尾的静态资源。</span></span><br><span class="line">&#125;</span><br><span class="line">location !~ \.xhtml$ &#123;</span><br><span class="line">  <span class="comment">#规则F.不匹配.xhtml为后缀的资源。</span></span><br><span class="line">&#125;</span><br><span class="line">location !~* \.xhtml$ &#123;</span><br><span class="line">  <span class="comment">#规则G.不匹配.xhtml或者.XHTML为后缀的资源。</span></span><br><span class="line">&#125;</span><br><span class="line">location / &#123;</span><br><span class="line">  <span class="comment">#规则H.通用匹配，当上述匹配都不能匹配时，使用该规则。</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p><br/></p>
 <p>在实践过程中常见, 有如下几种匹配规则：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 第一个必选规则是直接匹配网站根，通过域名访问网站首页比较频繁，使用这个会加速处理，</span></span><br><span class="line"><span class="comment"># 这里可以是直接转发给后端应用服务器了，也可以是一个静态首页。</span></span><br><span class="line">location = / &#123;</span><br><span class="line">  root /usr/<span class="built_in">local</span>/nginx/html</span><br><span class="line">  proxy_pass http://tomcat:8080/index</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment"># 第二个必选规则是处理静态文件请求，这是nginx作为http服务器的强项</span></span><br><span class="line"><span class="comment"># 有两种配置模式，目录匹配或后缀匹配,任选其一或搭配使用</span></span><br><span class="line">location ^~ /static/ &#123;                             <span class="comment"># // 以xx开头</span></span><br><span class="line">  root /webroot/static/;   <span class="comment"># 注意,需要指定跟目录.</span></span><br><span class="line">&#125;</span><br><span class="line">location ~* \.(gif|jpg|jpeg|png|css|js|ico)$ &#123;     <span class="comment"># // 以xx结尾</span></span><br><span class="line">  root /webroot/res/;  </span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">#第三个规则就是通用规则，用来转发动态请求到后端应用服务器</span></span><br><span class="line"><span class="comment">#非静态文件请求就默认是动态请求，自己根据实际把握</span></span><br><span class="line">location / &#123;</span><br><span class="line">  proxy_pass http://tomcat:8080/</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
@@ -556,7 +563,7 @@
       
         
 <span class="post-time">
-    最后更新时间：<time datetime="2023-01-31T02:29:10.469Z" itemprop="dateUpdated">2023-01-31 10:29:10</time>
+    最后更新时间：<time datetime="2023-03-15T09:34:15.898Z" itemprop="dateUpdated">2023-03-15 17:34:15</time>
 </span><br>
 
 
@@ -649,9 +656,9 @@
 <nav class="post-nav flex-row flex-justify-between">
   
     <div class="prev">
-      <a href="/2019/9-2-128.html" id="post-prev" class="post-nav-link">
+      <a href="/2019/9-2-129.html" id="post-prev" class="post-nav-link">
         <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">Tomcat安全加固与性能优化</h4>
+        <h4 class="title">Tomcat常见问题合集记录</h4>
       </a>
     </div>
   
@@ -678,7 +685,7 @@
         </aside>
     
     <!-- 
-  <div class="post-wechat" style="position:fixed;top: 360px;bottom: 500px;right: 3%;width: 190px;text-align: center;">
+  <div id="post-wechat" class="post-wechat" style="position:fixed;top: 360px;bottom: 500px;right: 3%;width: 190px;text-align: center; z-index: 9999">
     <p><b>关注【全栈工程师修炼指南】</b></p>
     <img src="/img/wechat-gzh.jpg" class="img-responsive" alt="weiyigeek">
     <p><b>欢迎添加【作者】微信</b></p>
@@ -842,8 +849,14 @@
   -->
         <br/>ICP备案号<span><a href="https://beian.miit.gov.cn" target="_blank">渝ICP备2022003447号</a></span>
         <br/>
-        <div id="cc-myssl-id">
-          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank" rel="noopener">
+        <div>
+        <div id="blog-wormhole-id" >
+          <a href="https://www.foreverblog.cn/go.html" target="_blank"> 
+            <img src="https://img.foreverblog.cn/wormhole_2_tp.gif" alt="十年之约虫洞" style="height:32px;max-height:50px;display:block;margin:0 auto;" title="穿梭虫洞-随机访问十年之约友链博客">
+          </a>
+        </div>
+        <div id="cc-myssl-id" >
+          <a href="https://myssl.com/blog.weiyigeek.top?from=mysslid" target="_blank">
             <img src="https://static.myssl.com/res/images/myssl-id1.png" alt="MySSL安全认证" style="max-height:50px;display:block;margin:0 auto">
           </a>
         </div>
@@ -945,7 +958,17 @@
   
 
 
-
+<script>
+  var _hmt = _hmt || [];
+  (function() {
+    // 百度统计
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?53923c4b5560739bc0ed61e183be6acf";
+    var s = document.getElementsByTagName("script")[0]; 
+    s.parentNode.insertBefore(hm, s);
+  })();
+</script>
+ 
 
 
 <!-- mathjax config similar to math.stackexchange -->
@@ -975,7 +998,7 @@
         var OriginTitile = document.title, titleTime;
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                document.title = 'WeiyiGeek Blog-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
+                document.title = 'WeiyiGeek Blog-唯一极客-关注于网络安全_物联网安全开发_网络安全运维-学习心得分享';
                 clearTimeout(titleTime);
             } else {
                 document.title = '(つェ⊂)咦!又好了!';
@@ -999,13 +1022,13 @@ function ShowRunTime(id) {
   var RunHours = Math.floor(RunDateM%(24*3600*1000)/(3600*1000));
   var RunMinutes = Math.floor(RunDateM%(24*3600*1000)%(3600*1000)/(60*1000));
   var RunSeconds = Math.round(RunDateM%(24*3600*1000)%(3600*1000)%(60*1000)/1000);
-  var RunTime = RunDays + "天" + RunHours + "时" + RunMinutes + "分" + RunSeconds + "秒";
-  document.getElementById(id).innerHTML = "网站已在风雨中勉勉强强运行了【" + RunTime + "】";
+  var RunTime = RunDays + " 天 " + RunHours + " 时 " + RunMinutes + " 分 " + RunSeconds + " 秒";
+  document.getElementById(id).innerHTML = "网站已在风雨中勉勉强强运行了【 " + RunTime + " 】";
 }
 setInterval("ShowRunTime('SiteRunTime')", 1000);
 </script>
     
-  <div class="post-wechat" style="position:fixed;top: 360px;bottom: 500px;right: 3%;width: 190px;text-align: center;">
+  <div id="post-wechat" class="post-wechat" style="position:fixed;top: 360px;bottom: 500px;right: 3%;width: 190px;text-align: center; z-index: 9999">
     <p><b>关注【全栈工程师修炼指南】</b></p>
     <img src="/img/wechat-gzh.jpg" class="img-responsive" alt="weiyigeek">
     <p><b>欢迎添加【作者】微信</b></p>

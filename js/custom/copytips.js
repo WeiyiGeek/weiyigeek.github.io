@@ -158,7 +158,7 @@ window.onscroll = function() {
     //   waitTime = 3;
     //   document.getElementById("exit").onclick = function() {exitTime(this);}
     // } else 
-    if ( percent >= 0.9 && percent < 1 && visitreward ) {
+    if ( percent >= 0.95 && percent < 1 && visitreward ) {
       visitreward = false;
       var rewardBtnNew = document.getElementById('rewardBtn');
       rewardBtnNew.click(function () {

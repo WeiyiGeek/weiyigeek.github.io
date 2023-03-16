@@ -14,6 +14,7 @@
 //   "533.html":"https://mp.weixin.qq.com/s/FWmQNinsYZwyeL3c-6x6tw",
 // }
 
+
 // 获取请求的变量
 function getQueryVariable(variable) {
   var query = window.location.search.substring(1);

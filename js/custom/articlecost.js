@@ -62,3 +62,4 @@ function articleJump(pageid,type,pagehref) {
     document.getElementsByClassName("body-wrap")[0].style.display = "";
   }
 }
+

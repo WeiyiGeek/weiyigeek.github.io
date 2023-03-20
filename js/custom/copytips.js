@@ -141,7 +141,6 @@ document.addEventListener('copy', function (event) {
   }
 });
 
-
 // 浏览文章中途时触发支付宝红包和打赏界面
 var visitalipay = true;
 var visitreward = true;
@@ -151,17 +150,14 @@ window.onscroll = function() {
     var windowHeight = document.documentElement.clientHeight || document.body.clientHeight;
     var scrollHeight = document.documentElement.scrollHeight||document.body.scrollHeight;
     var percent = (scrollTop + windowHeight) / scrollHeight;
-    // if (percent >= 0.55 && percent <= 0.66 && visitalipay && display_tips == 0){
-    //   visitalipay = false;
-    //   document.getElementById('btw-modal').innerHTML='<p id="btw-modal-header" style="margin-top: 40px; line-height: 1.8; font-size: 13px; "> <b style="color:#d44040;"> ❤ 文章已阅读一半, 如果感觉此篇文章挺不错的话. ❤ <br> (๑′ᴗ‵๑) 请动动小手支持一下小弟我哟! (๑′ᴗ‵๑) <br> 【 支付宝2022年免费大红包活动再次来袭 】<br> 支付宝扫码即可领取红包, 随便一扫都是几元实体店通用红包，伙伴们赶紧冲啊！<br> 这将是我持续更新文章的动力源泉，谢谢支持！ </b><img src="/img/alipay.jpg" style="width: 300px; margin: 16px auto;"><button id="exit" style="padding: 0px 20px; height: 32px; font-size: 14px; outline: none; border: none; color: rgb(255, 255, 255);background: #d44040; cursor: pointer;">点击退出</button>';
-    //   display_wechat(1);
-    //   waitTime = 3;
-    //   document.getElementById("exit").onclick = function() {exitTime(this);}
-    // } else 
-    if ( percent >= 0.95 && percent < 1 && visitreward ) {
-      visitreward = false;
-      var rewardBtnNew = document.getElementById('rewardBtn');
-      rewardBtnNew.click(function () {
+    if (percent < 0.95) {
+      document.getElementById('post-wechat').style.display="";
+    } else if ( percent >= 0.95 && percent < 1 ) {
+      document.getElementById('post-wechat').style.display="None";
+      if (visitreward ) {
+        visitreward = false;
+        var rewardBtnNew = document.getElementById('rewardBtn');
+        rewardBtnNew.click(function () {
         if (reward.hasClass('in')) {
           mask.removeClass('in');
           reward.removeClass('in');
@@ -178,6 +174,7 @@ window.onscroll = function() {
           $.hideOnMask.push($(this), reward.find('.close'));
         }
       });
+      }
     }
   }
 }
